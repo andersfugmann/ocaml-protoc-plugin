@@ -66,7 +66,7 @@ let make_tests (type v) (module Protoc: Protoc_impl) (module Plugin: Plugin_impl
     Test.make_grouped ~name:"Encode"
       [
         Test.make ~name:"Plugin" (Staged.stage @@ fun () -> Plugin.M.to_proto' Ocaml_protoc_plugin.Writer.(init ()) v_plugin);
-        Test.make ~name:"Protoc" (Staged.stage @@ fun () -> let encoder = Pbrt.Encoder.create () in Protoc.encode_pb_m v_protoc encoder; Pbrt.Encoder.to_string encoder)
+        Test.make ~name:"Protoc" (Staged.stage @@ fun () -> Protoc.encode_pb_m v_protoc (Pbrt.Encoder.create ()))
       ]
   in
   let test_decode =
@@ -81,8 +81,12 @@ let make_tests (type v) (module Protoc: Protoc_impl) (module Plugin: Plugin_impl
 let make_int_tests vl =
   let open Ocaml_protoc_plugin in
   let open Bechamel in
-  let make_test id group name ?(reset=(fun _ -> ())) f v =
-    Test.make ~name:(Printf.sprintf "%s(0x%08Lx)/%s" group id name) (Staged.stage @@ (fun () -> reset v; f v |> Sys.opaque_identity))
+  let make_test id group name ?reset f v =
+    let f = match reset with
+      | None -> (fun () -> f v)
+      | Some reset -> (fun () -> f (reset v))
+    in
+    Test.make ~name:(Printf.sprintf "%s(0x%08Lx)/%s" group id name) (Staged.stage @@ f)
   in
   let v = Int64.to_int_exn vl in
   let buffer = Bytes.create 10 in
@@ -91,11 +95,22 @@ let make_int_tests vl =
     Writer.write_varint_value vl writer;
     Reader.create (Writer.contents writer)
   in
+  let pbrt_buf = Pbrt.Encoder.create ~size:10 () in
+  let make_pbrt_reader =
+    let encoder = Pbrt.Encoder.create () in
+    Pbrt.Encoder.int64_as_varint vl encoder;
+    let buffer = Pbrt.Encoder.to_string encoder in
+    fun _ -> Pbrt.Decoder.of_string buffer
+  in
   [
-      make_test vl "Read" "boxed" ~reset:(fun r -> Reader.reset r 0) Reader.read_varint reader;
-      make_test vl "Read" "unboxed" ~reset:(fun r -> Reader.reset r 0) Reader.read_varint_unboxed reader;
+      make_test vl "Read" "boxed" ~reset:(fun reader -> Reader.reset reader 0; reader) Reader.read_varint reader;
+      make_test vl "Read" "unboxed" ~reset:(fun reader -> Reader.reset reader 0; reader) Reader.read_varint_unboxed reader;
+      make_test vl "Read_pbrt" "boxed" ~reset:make_pbrt_reader (Pbrt.Decoder.int64_as_varint) (Pbrt.Decoder.of_string "") ;
+      make_test vl "Read_pbrt" "unboxed" ~reset:make_pbrt_reader (Pbrt.Decoder.int_as_varint) (Pbrt.Decoder.of_string "") ;
       make_test vl "Write" "boxed" (Writer.write_varint buffer ~offset:0) vl;
       make_test vl "Write" "unboxed" (Writer.write_varint_unboxed buffer ~offset:0) v;
+      make_test vl "Write_pbrt" "boxed" ~reset:(fun writer -> Pbrt.Encoder.reset writer; writer) (Pbrt.Encoder.int64_as_varint vl) pbrt_buf;
+      make_test vl "Write_pbrt" "unboxed" ~reset:(fun writer -> Pbrt.Encoder.reset writer; writer) (Pbrt.Encoder.int_as_varint v) pbrt_buf;
   ]
 
 let _ =
