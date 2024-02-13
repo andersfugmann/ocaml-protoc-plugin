@@ -1,11 +1,21 @@
 ## 5.0.0: Unreleased
-- [ ] Merge messages when receiving multiple messages for the same
-      field (#57)
-- [ ] Optimize serialization and deserialization (#55)
+- [x] Create detatched fork for active development of
+      ocaml-protoc-plugin. Thanks to @issuu for supporting initial
+      development!
+- [x] Merge messages when receiving multiple messages for the same
+      (single) field per protobuf spec.
+- [x] Add multiple buffer allocation strategies when serializing data
+- [x] Sort fields in output as recommended in protobuf spec and
+      implement fast deserialization when all fields are sorted.
+- [x] Optimize serialization and deserialization resulting in ~5x
+      speed improvments and is now on par with ocaml-protoc.
+- [x] Improve handling of extensions and remove unused extensions
+      argument for messages that do not carry extensions (Breaking change)
+- [x] Add benchmarks based on bechamel for optimization and comparing
+      performance against ocaml-protoc
 - [x] Fix upper case handling in name mangling and apply name mangling
-      for serivce records (#54) (thanks @crackcomm)
-- [x] Fix bug in name resolution leading to uncompilable code (#53)
-
+      for serivce records (thanks @crackcomm)
+- [x] Fix bug in name resolution leading to uncompilable code
 
 ## 4.5.0: 2023-06-16
 - [x] Add more fields in generated service structs to make it easier
