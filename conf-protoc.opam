@@ -1,5 +1,5 @@
 opam-version: "2.0"
-maintainer: "Issuu"
+maintainer: "Anders Fugmann"
 authors: "Google"
 license: "BSD-3-Clause"
 homepage: "https://developers.google.com/protocol-buffers/"

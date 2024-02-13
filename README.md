@@ -1,5 +1,5 @@
 # Ocaml protoc plugin
-[![Main workflow](https://github.com/issuu/ocaml-protoc-plugin/actions/workflows/workflow.yml/badge.svg)](https://github.com/issuu/ocaml-protoc-plugin/actions/workflows/workflow.yml)
+[![Main workflow](https://github.com/andersfugmann/ocaml-protoc-plugin/actions/workflows/workflow.yml/badge.svg)](https://github.com/andersfugmann/ocaml-protoc-plugin/actions/workflows/workflow.yml)
 
 The goal of Ocaml protoc plugin is to create an up to date plugin for
 the google protobuf compiler (`protoc`) to generate Ocaml types and
@@ -290,9 +290,9 @@ The distributed google types are compiled using default parameters,
 i.e. without any ppx annotations.
 
 If you want to change this, or add type annotations, you can copy the
-[dune](https://github.com/issuu/ocaml-protoc-plugin/tree/master/src/google_types/dune)
+[dune](https://github.com/andersfugmann/ocaml-protoc-plugin/tree/main/src/google_types/dune)
 from the distribution to your own project, and make alterations
-there. See the [echo\_deriving](https://github.com/issuu/ocaml-protoc-plugin/tree/master/examples/echo_deriving)
+there. See the [echo\_deriving](https://github.com/andersfugmann/ocaml-protoc-plugin/tree/main/examples/echo_deriving)
 example on how to do this.
 
 # Example
@@ -381,4 +381,19 @@ let read_person binary_message =
 ```
 
 More examples can be found under
-[examples](https://github.com/issuu/ocaml-protoc-plugin/tree/master/examples)
+[examples](https://github.com/andersfugmann/ocaml-protoc-plugin/tree/main/examples)
+
+# Acknowledgements
+Thanks to [Issuu](https://issuu.com) who initially developed this library/plugin.
+
+Thanks to all contributers:
+* Anders Fugmann <anders@fugmann.net>
+* Andreas Dahl <andreas@hrdahl.dk>
+* Dario Teixeira <dte@issuu.com>
+* Kate <kit.ty.kate@disroot.org>
+* Martin Slota <msl@issuu.com>
+* Nymphium <s1311350@gmail.com>
+* Rauan Mayemir <rauan@mayemir.io>
+* Tim McGilchrist <timmcgil@gmail.com>
+* Virgile Prevosto <virgile.prevosto@m4x.org>
+* Wojtek Czekalski <me@wczekalski.com>
