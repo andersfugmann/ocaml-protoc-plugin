@@ -58,5 +58,11 @@ message Test6 {
     int64 a2 = 21;
   };
   int64 j = 20;
-  oneof b { int64 f = 30; };
+  oneof b {
+    int64 f = 30;
+    int64 ff = 31;
+  };
+  oneof c {
+    Test6 g = 40;
+  };
 }
