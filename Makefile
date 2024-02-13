@@ -9,9 +9,16 @@ clean: ## Clean
 	@dune clean
 
 .PHONY: test
-test: build
 test: ## Run tests
-	@dune runtest --force
+	@dune runtest
+
+.PHONY: bisect
+bisect: ## Run tests in bisect mode
+	@rm -fr _coverage
+	@find . -name '*.coverage' | xargs -r rm -f
+	@dune runtest --instrument-with bisect_ppx --force
+	bisect-ppx-report html
+	open _coverage/index.html
 
 .PHONY: install
 install: build ## Install
@@ -71,7 +78,7 @@ gh-pages: doc ## Publish documentation
 
 .PHONY: bench
 bench: ## Run benchmark to compare with ocaml-protoc
-	dune exec bench/bench.exe
+	dune exec bench/bench.exe --profile=bench
 
 .PHONY: force
 force:
