@@ -9,7 +9,7 @@ type substring = { mutable offset: int; buffer: Bytes.t }
 type mode = Balanced | Speed | Space
 type t = { mutable data: substring list; mode: mode; block_size:int }
 
-let init ?(mode = Space) ?(block_size = 256) () =
+let init ?(mode = Space) ?(block_size = 120) () =
   { data = []; mode; block_size }
 
 let size t =
@@ -20,11 +20,11 @@ let size t =
   inner 0 t.data
 
 let unused_space t =
-  let rec inner = function
-    | { offset; buffer } :: xs -> (Bytes.length buffer) - offset + inner xs
-    | [] -> 0
+  let rec inner acc = function
+    | { offset; buffer } :: xs -> inner ((Bytes.length buffer) - offset + acc) xs
+    | [] -> acc
   in
-  inner t.data
+  inner 0 t.data
 
 let write_varint buffer ~offset v =
   let rec inner ~offset v =
@@ -59,11 +59,11 @@ let write_delimited_field_length_fixed_size buffer ~offset v =
 
 let ensure_capacity ~size t =
   match t.data with
-    | { offset; buffer } as elem :: _ when Bytes.length buffer - offset >= size -> elem
-    | tl ->
-      let elem = { offset = 0; buffer = Bytes.create (size + t.block_size) } in
-      t.data <- elem :: tl;
-      elem
+  | { offset; buffer } as elem :: _ when Bytes.length buffer - offset >= size -> elem
+  | tl ->
+    let elem = { offset = 0; buffer = Bytes.create (max size t.block_size) } in
+    t.data <- elem :: tl;
+    elem
 
 (** Direct functions *)
 let write_const_value data t =
@@ -120,10 +120,10 @@ let write_field : t -> int -> Field.t -> unit = fun t index field ->
   writer t
 
 
-let write_length_delimited_value' ~write v t =
+let write_length_delimited_f ~write_f v t =
   let rec size_data_added sentinel acc = function
     | [] -> failwith "End of list reached. This is impossible"
-    | x :: _ when x == sentinel -> acc
+    | x :: _ when x == sentinel -> acc (* Physical equality intended *)
     | { offset; _ } :: xs -> size_data_added sentinel (offset + acc) xs
   in
   let write_balanced v t =
@@ -139,7 +139,7 @@ let write_length_delimited_value' ~write v t =
     let offset = sentinel.offset in
     (* Ensure no writes to the sentinel *)
     sentinel.offset <- Int.max_int;
-    let _ = write t v in
+    let (_ : t) = write_f t v in
     let size = size_data_added sentinel 0 t.data in
     let offset = write_varint_unboxed sentinel.buffer ~offset size in
     sentinel.offset <- offset;
@@ -149,7 +149,7 @@ let write_length_delimited_value' ~write v t =
     let sentinel = ensure_capacity ~size:length_delimited_size_field_length t in
     let offset = sentinel.offset in
     sentinel.offset <- sentinel.offset + length_delimited_size_field_length;
-    let _ = write t v in
+    let (_ : t) = write_f t v in
     let size = size_data_added sentinel (sentinel.offset - (offset + length_delimited_size_field_length)) t.data in
     let _ = write_delimited_field_length_fixed_size sentinel.buffer ~offset size in
     ()
@@ -158,7 +158,7 @@ let write_length_delimited_value' ~write v t =
     let sentinel = ensure_capacity ~size:length_delimited_size_field_length t in
     let offset = sentinel.offset in
     sentinel.offset <- sentinel.offset + length_delimited_size_field_length;
-    let _ = write t v in
+    let (_ : t) = write_f t v in
     let size = size_data_added sentinel (sentinel.offset - (offset + length_delimited_size_field_length)) t.data in
     let offset' = write_varint_unboxed sentinel.buffer ~offset size in
     (* Move data to avoid holes *)

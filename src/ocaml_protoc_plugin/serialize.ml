@@ -75,7 +75,7 @@ let write_value : type a. a spec -> a -> Writer.t -> unit = function
   | Bytes -> write_length_delimited_string ~f:Bytes.unsafe_to_string
   | Enum f -> write_varint_unboxed ~f
   | Message to_proto ->
-    Writer.write_length_delimited_value' ~write:to_proto
+    Writer.write_length_delimited_f ~write_f:to_proto
 
 (** Optimized when the value is given in advance, and the continuation is expected to be called multiple times *)
 let write_value_const : type a. a spec -> a -> Writer.t -> unit = fun spec v ->
@@ -90,50 +90,44 @@ let write_field_header: 'a spec -> int -> Writer.t -> unit = fun spec index ->
   let header = (index lsl 3) + field_type in
   write_value_const Int64_int header
 
-let write_field: type a. a spec -> int -> a -> Writer.t -> unit = fun spec index ->
+let write_field: type a. a spec -> int -> Writer.t -> a -> unit = fun spec index ->
   let write_field_header = write_field_header spec index in
   let write_value = write_value spec in
-  fun v writer ->
+  fun writer v->
     write_field_header writer;
     write_value v writer
 
 let rec write: type a. a compound -> Writer.t -> a -> unit = function
   | Repeated (index, spec, Packed) -> begin
       let write_value = write_value spec in
-      let write writer vs = List.iter ~f:(fun v -> write_value v writer) vs in
+      let write_f writer vs = List.iter ~f:(fun v -> write_value v writer) vs; writer in
       let write_header = write_field_header String index in
       fun writer vs ->
         match vs with
         | [] -> ()
         | vs ->
           write_header writer;
-          Writer.write_length_delimited_value' ~write vs writer
+          Writer.write_length_delimited_f ~write_f vs writer
     end
   | Repeated (index, spec, Not_packed) ->
     let write = write_field spec index in
     fun writer vs ->
-      List.iter ~f:(fun v -> write v writer) vs
-
-  (* For required fields the default is none, and the field must always be written!
-     Consider a Basic_req (index, spec) instead. Then default is not an option type,
-     and the code is simpler to read
-  *)
+      List.iter ~f:(fun v -> write writer v) vs
   | Basic (index, spec, default) -> begin
       let write = write_field spec index in
       let writer writer = function
         | v when v = default -> ()
-        | v -> write v writer
+        | v -> write writer v
       in
       writer
     end
   | Basic_req (index, spec) ->
-      let write = write_field spec index in
-      fun writer v -> write v writer
+      write_field spec index
   | Basic_opt (index, spec) -> begin
       let write = write_field spec index in
       fun writer v ->
         match v with
-        | Some v -> write v writer
+        | Some v -> write writer v
         | None -> ()
   end
   | Oneof f -> begin
@@ -141,10 +135,8 @@ let rec write: type a. a compound -> Writer.t -> a -> unit = function
         match v with
         | `not_set -> ()
         | v ->
-          (* Wonder if we could get the specs before calling v. Wonder what f is? *)
-          (* We could prob. return a list of all possible values + f v -> v. *)
-            let Oneof_elem (index, spec, v) = f v in
-            write (Basic_req (index, spec)) writer v
+          let Oneof_elem (index, spec, v) = f v in
+          write (Basic_req (index, spec)) writer v
     end
 
 let in_extension_ranges extension_ranges index =
