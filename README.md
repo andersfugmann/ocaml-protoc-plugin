@@ -266,9 +266,9 @@ No special handling of any type is supported, as Ocaml does not allow
 for runtime types, so any type must be handled manually by
 serializing and deserializing the embedded message.
 
-## Proto3 Any type
+## Proto3 Optional fields
 Proto3 optional fields are handled in the same way as proto2 optional
-fields; The type is an option type, and if set, the value is always
+fields; The type is an option type, and if set the value is always
 transmitted.
 
 ## Imported protofiles
