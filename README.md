@@ -384,6 +384,8 @@ More examples can be found under
 [examples](https://github.com/andersfugmann/ocaml-protoc-plugin/tree/main/examples)
 
 # Acknowledgements
+This work is based on
+[issuu/ocaml-protoc-plugin](https://github.com/issuu/ocaml-protoc-plugin).
 Thanks to [Issuu](https://issuu.com) who initially developed this library/plugin.
 
 Thanks to all contributers:
