@@ -33,7 +33,7 @@ let dump_protoc ?(protoc_args=[]) name data =
   Printf.printf "%!";
   let res = Sys.command
       (Printf.sprintf
-         "protoc %s --decode=%s %s < %s"
+         "protoc %s --decode=%s %s < %s 2>/dev/null"
          (String.concat ~sep:" " protoc_args)
          type_name
          protobuf_file
