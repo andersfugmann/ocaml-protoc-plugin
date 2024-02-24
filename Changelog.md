@@ -1,4 +1,5 @@
-## 5.0.0: Unreleased
+## 5.0.0: 2024-02-24
+- [x] Fix service signature to be backward compatible
 - [x] Create detatched fork for active development of
       ocaml-protoc-plugin. Thanks to @issuu for supporting initial
       development!
