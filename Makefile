@@ -80,6 +80,10 @@ gh-pages: doc ## Publish documentation
 bench: ## Run benchmark to compare with ocaml-protoc
 	dune exec bench/bench.exe --profile=bench
 
+.PHONY: publish
+publish: ## Publish a new package.
+	dune-release -p ocaml-protoc-plugin
+
 .PHONY: force
 force:
 
