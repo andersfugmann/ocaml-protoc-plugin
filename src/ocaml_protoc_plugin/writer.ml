@@ -42,16 +42,17 @@ let write_varint buffer ~offset v =
 
 let write_varint_unboxed buffer ~offset v = write_varint buffer ~offset (Int64.of_int v)
 
-(* Write a field delimited length.
-   A delimited field length can be no larger than 2^31.
-   This function always write 5 bytes (7*5bits = 35bits > 31bits).
-   This allows the field length to be statically allocated and written later.
-   The spec does not forbid this encoding, but there might be implementation
-   that disallow '0' as the ending varint value.
+(** Write a field delimited length.
+    A delimited field length can be no larger than 2^31.
+    This function always write 5 bytes (7*5bits = 35bits > 31bits).
+    This allows the field length to be statically allocated and written later.
+    The spec does not forbid this encoding, but there might be implementation
+    that disallow '0' as the ending varint value.
 *)
 let write_delimited_field_length_fixed_size buffer ~offset v =
   (* Set the 34'th bit to make sure all bytes are written. Then clear it again *)
-  let offset = write_varint_unboxed buffer ~offset (v lor 0x400000000) in
+  let vl = Int64.of_int v in
+  let offset = write_varint buffer ~offset Int64.(logor vl 0x400000000L) in
   let v = Bytes.get_uint8 buffer (offset - 1) in
   Bytes.set_uint8 buffer (offset-1) (v land 0b0011_1111);
   offset

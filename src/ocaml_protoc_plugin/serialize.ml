@@ -159,12 +159,12 @@ let rec serialize : type a. (a, Writer.t) compound_list -> Writer.t -> a = funct
       cont writer
 
 let%expect_test "zigzag encoding" =
-  let test v =
-    let vl = Int64.of_int v in
+  let test vl =
+    let v = Int64.to_int vl in
     Printf.printf "zigzag_encoding(%LdL) = %LdL\n" vl (zigzag_encoding vl);
     Printf.printf "zigzag_encoding_unboxed(%d) = %d\n" v (zigzag_encoding_unboxed v);
   in
-  List.iter ~f:test [0; -1; 1; -2; 2; 2147483647; -2147483648; Int.max_int; Int.min_int; ];
+  List.iter ~f:test [0L; -1L; 1L; -2L; 2L; 2147483647L; -2147483648L; Int64.max_int; Int64.min_int; ];
   [%expect {|
     zigzag_encoding(0L) = 0L
     zigzag_encoding_unboxed(0) = 0
@@ -180,7 +180,7 @@ let%expect_test "zigzag encoding" =
     zigzag_encoding_unboxed(2147483647) = 4294967294
     zigzag_encoding(-2147483648L) = 4294967295L
     zigzag_encoding_unboxed(-2147483648) = 4294967295
-    zigzag_encoding(4611686018427387903L) = 9223372036854775806L
-    zigzag_encoding_unboxed(4611686018427387903) = -2
-    zigzag_encoding(-4611686018427387904L) = 9223372036854775807L
-    zigzag_encoding_unboxed(-4611686018427387904) = -1 |}]
+    zigzag_encoding(9223372036854775807L) = -2L
+    zigzag_encoding_unboxed(-1) = 1
+    zigzag_encoding(-9223372036854775808L) = -1L
+    zigzag_encoding_unboxed(0) = 0 |}]

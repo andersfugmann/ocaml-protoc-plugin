@@ -41,13 +41,15 @@ let decode_zigzag_unboxed v =
   | true -> v / 2
   | false -> (v / 2 * -1) - 1
 
-let int_of_uint32 v =
-  let v = Int32.to_int v in
+let int_of_uint32 =
+  let open Int32 in
   match Sys.word_size with
-  | 32 -> v
-  | 64 when v < 0 -> v + 0x1_0000_0000
-  | 64 -> v
-  | _ -> assert false
+  | 32 -> Int32.to_int
+  | 64 ->
+      let mask = 0xFFFF lsl 16 lor 0xFFFF in
+      fun n -> (to_int n land mask)
+  | _ ->
+    assert false
 
 
 let read_of_spec: type a. a spec -> Field.field_type * (Reader.t -> a) = function
