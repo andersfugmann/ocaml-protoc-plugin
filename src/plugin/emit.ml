@@ -79,8 +79,7 @@ let emit_service_type ~options scope ServiceDescriptorProto.{ name; method' = me
     let input_t = Scope.get_scoped_name scope ~postfix:"t" input_type in
     let output = Scope.get_scoped_name scope output_type in
     let output_t = Scope.get_scoped_name scope ~postfix:"t" output_type in
-    let sig_t = sprintf "Runtime'.Service.Rpc with type Request.t = %s and type Response.t = %s" input_t output_t in
-    Code.emit implementation `Begin "module %s : %s = struct" capitalized_name sig_t;
+    Code.emit implementation `Begin "module %s = struct" capitalized_name;
     Code.emit implementation `None "let package_name = %s" (Option.value_map ~default:"None" ~f:(fun n -> sprintf "Some \"%s\"" n) package_name_opt);
     Code.emit implementation `None "let service_name = \"%s\"" service_name;
     Code.emit implementation `None "let method_name = \"%s\"" name;
@@ -100,7 +99,11 @@ let emit_service_type ~options scope ServiceDescriptorProto.{ name; method' = me
       output_t;
     Code.emit implementation `End "";
 
-    Code.emit signature `None "module %s : %s" capitalized_name sig_t;
+    Code.emit signature `Begin "module %s : sig" capitalized_name;
+    Code.emit signature `None "include Runtime'.Service.Rpc with type Request.t = %s and type Response.t = %s" input_t output_t;
+    Code.emit signature `None "module Request : module type of %s with type t = %s" input input_t;
+    Code.emit signature `None "module Response : module type of %s with type t = %s" output output_t;
+    Code.emit signature `End "end";
     Code.emit signature `None "val %s : %s" uncapitalized_name sig_t';
     ()
   in
