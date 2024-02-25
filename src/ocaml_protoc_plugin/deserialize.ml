@@ -108,21 +108,21 @@ let read_field ~read:(expect, read_f) ~map v reader field_type =
     error_wrong_field "Deserialize" field
 
 let value: type a. a compound -> a value = function
-  | Basic_req (index, spec) ->
+  | Basic_req ((index, _, _), spec) ->
     let read = read_field ~read:(read_of_spec spec) ~map:keep_last_opt in
     let getter = function Some v -> v | None -> error_required_field_missing index spec in
     Value ([(index, read)], None, getter)
-  | Basic (index, spec, default) ->
+  | Basic ((index, _, _), spec, default) ->
     let read = read_field ~read:(read_of_spec spec) ~map:keep_last in
     Value ([(index, read)], default, id)
-  | Basic_opt (index, spec) ->
+  | Basic_opt ((index, _, _), spec) ->
     let map = match spec with
       | Message (_, merge) -> merge_opt merge
       | _ -> keep_last_opt
     in
     let read = read_field ~read:(read_of_spec spec) ~map in
     Value ([(index, read)], None, id)
-  | Repeated (index, spec, Packed) ->
+  | Repeated ((index, _, _), spec, Packed) ->
     let field_type, read_f = read_of_spec spec in
     let rec read_packed_values read_f acc reader =
       match Reader.has_more reader with
@@ -141,11 +141,11 @@ let value: type a. a compound -> a value = function
         error_wrong_field "Deserialize" field
     in
     Value ([(index, read)], [], List.rev)
-  | Repeated (index, spec, Not_packed) ->
+  | Repeated ((index, _, _), spec, Not_packed) ->
     let read = read_field ~read:(read_of_spec spec) ~map:(fun vs v -> v :: vs) in
     Value ([(index, read)], [], List.rev)
   | Oneof oneofs ->
-    let make_reader: a oneof -> a field_spec = fun (Oneof_elem (index, spec, constr)) ->
+    let make_reader: a oneof -> a field_spec = fun (Oneof_elem ((index, _, _), spec, constr)) ->
       let read = read_field ~read:(read_of_spec spec) ~map:(fun _ -> constr) in
       (index, read)
     in

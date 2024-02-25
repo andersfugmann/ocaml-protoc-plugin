@@ -98,7 +98,7 @@ let write_field: type a. a spec -> int -> Writer.t -> a -> unit = fun spec index
     write_value v writer
 
 let rec write: type a. a compound -> Writer.t -> a -> unit = function
-  | Repeated (index, spec, Packed) -> begin
+  | Repeated ((index, _, _), spec, Packed) -> begin
       let write_value = write_value spec in
       let write_f writer vs = List.iter ~f:(fun v -> write_value v writer) vs; writer in
       let write_header = write_field_header String index in
@@ -109,11 +109,11 @@ let rec write: type a. a compound -> Writer.t -> a -> unit = function
           write_header writer;
           Writer.write_length_delimited_f ~write_f vs writer
     end
-  | Repeated (index, spec, Not_packed) ->
+  | Repeated ((index, _, _), spec, Not_packed) ->
     let write = write_field spec index in
     fun writer vs ->
       List.iter ~f:(fun v -> write writer v) vs
-  | Basic (index, spec, default) -> begin
+  | Basic ((index, _, _), spec, default) -> begin
       let write = write_field spec index in
       let writer writer = function
         | v when v = default -> ()
@@ -121,9 +121,9 @@ let rec write: type a. a compound -> Writer.t -> a -> unit = function
       in
       writer
     end
-  | Basic_req (index, spec) ->
+  | Basic_req ((index, _, _), spec) ->
       write_field spec index
-  | Basic_opt (index, spec) -> begin
+  | Basic_opt ((index, _, _), spec) -> begin
       let write = write_field spec index in
       fun writer v ->
         match v with

@@ -298,10 +298,14 @@ let spec_of_type ~params ~scope type_name default =
   | TYPE_MESSAGE  -> Espec (spec_of_message ~scope type_name)
   | TYPE_ENUM     -> Espec (Enum (spec_of_enum ~scope type_name default))
 
+let string_of_index (index, name, json_name) =
+  sprintf "(%d, \"%s\", \"%s\")" index name json_name
+
 let string_of_oneof_elem dir (Oneof_elem (index, spec, (_, deser, ser, _, _))) =
   let spec_string = string_of_spec dir spec in
+  let index_string = string_of_index index in
   let s = match dir with `Deserialize -> deser | `Serialize -> ser in
-  sprintf "oneof_elem (%d, %s, %s)" index spec_string s
+  sprintf "oneof_elem (%s, %s, %s)" index_string spec_string s
 
 let string_of_proto_type: type a. a spec -> a -> string = fun spec default ->
   sprintf "(%s)" (string_of_default spec default)
@@ -317,8 +321,9 @@ let string_of_type = function
 
 let c_of_compound: type a. string -> a compound -> c = fun name -> function
   | Basic (index, spec, default) ->
-    let deserialize_spec = sprintf "basic (%d, %s, %s)" index (string_of_spec `Deserialize spec) (string_of_proto_type spec default) in
-    let serialize_spec = sprintf "basic (%d, %s, %s)" index (string_of_spec `Serialize spec) (string_of_proto_type spec default) in
+    let index_string = string_of_index index in
+    let deserialize_spec = sprintf "basic (%s, %s, %s)" index_string (string_of_spec `Deserialize spec) (string_of_proto_type spec default) in
+    let serialize_spec = sprintf "basic (%s, %s, %s)" index_string (string_of_spec `Serialize spec) (string_of_proto_type spec default) in
     let modifier =
       match spec with
       | Message _ -> Optional
@@ -327,18 +332,21 @@ let c_of_compound: type a. string -> a compound -> c = fun name -> function
     let type' = { name = type_of_spec spec; modifier } in
     { name; type'; deserialize_spec; serialize_spec }
   | Basic_req (index, spec) ->
-    let deserialize_spec = sprintf "basic_req (%d, %s)" index (string_of_spec `Deserialize spec) in
-    let serialize_spec = sprintf "basic_req (%d, %s)" index (string_of_spec `Serialize spec) in
+    let index_string = string_of_index index in
+    let deserialize_spec = sprintf "basic_req (%s, %s)" index_string (string_of_spec `Deserialize spec) in
+    let serialize_spec = sprintf "basic_req (%s, %s)" index_string (string_of_spec `Serialize spec) in
     let type' = { name = type_of_spec spec; modifier = Required } in
     { name; type'; deserialize_spec; serialize_spec }
   | Basic_opt (index, spec) ->
-    let deserialize_spec = sprintf "basic_opt (%d, %s)" index (string_of_spec `Deserialize spec) in
-    let serialize_spec = sprintf "basic_opt (%d, %s)" index (string_of_spec `Serialize spec) in
+    let index_string = string_of_index index in
+    let deserialize_spec = sprintf "basic_opt (%s, %s)" index_string (string_of_spec `Deserialize spec) in
+    let serialize_spec = sprintf "basic_opt (%s, %s)" index_string (string_of_spec `Serialize spec) in
     let type' = { name = type_of_spec spec; modifier = Optional } in
     { name; type'; deserialize_spec; serialize_spec }
   | Repeated (index, spec, packed) ->
-    let deserialize_spec = sprintf "repeated (%d, %s, %s)" index (string_of_spec `Deserialize spec) (string_of_packed packed) in
-    let serialize_spec = sprintf "repeated (%d, %s, %s)" index (string_of_spec `Serialize spec) (string_of_packed packed) in
+    let index_string = string_of_index index in
+    let deserialize_spec = sprintf "repeated (%s, %s, %s)" index_string (string_of_spec `Deserialize spec) (string_of_packed packed) in
+    let serialize_spec = sprintf "repeated (%s, %s, %s)" index_string (string_of_spec `Serialize spec) (string_of_packed packed) in
     let type' = { name = type_of_spec spec; modifier = List } in
     { name; type'; deserialize_spec; serialize_spec; }
   | Oneof (type', deserialize_spec, serialize_spec, _, fields) ->
@@ -353,6 +361,9 @@ let c_of_field ~params ~syntax ~scope field =
   let open FieldDescriptorProto.Type in
   let number = Option.value_exn field.number in
   let name = Option.value_exn field.name in
+  let json_name = Option.value_exn field.json_name in
+  let index = (number, name, json_name) in
+
   match syntax, field with
   (* This function cannot handle oneof types *)
   | _, { oneof_index = Some _; proto3_optional = Some false | None; _ } -> failwith "Cannot handle oneofs"
@@ -369,70 +380,70 @@ let c_of_field ~params ~syntax ~scope field =
   (* Optional message *)
   | _, { label = Some Label.LABEL_OPTIONAL; type' = Some TYPE_MESSAGE; type_name; _ } ->
     let spec = spec_of_message ~scope type_name in
-    Basic_opt (number, spec)
+    Basic_opt (index, spec)
     |> c_of_compound name
 
   (* Required message *)
   | `Proto2, { label = Some Label.LABEL_REQUIRED; type' = Some TYPE_MESSAGE; type_name; _ } ->
     let spec = spec_of_message ~scope type_name in
-    Basic_req (number, spec)
+    Basic_req (index, spec)
     |> c_of_compound name
 
   (* Enum under proto2 with a default value *)
   | `Proto2, { label = Some Label.LABEL_OPTIONAL; type' = Some TYPE_ENUM; type_name; default_value = Some default; _ } ->
     let spec = spec_of_enum ~scope type_name (Some default) in
-    Basic (number, Enum spec, default)
+    Basic (index, Enum spec, default)
     |> c_of_compound name
 
   (* Enum under proto2 with no default value *)
   | `Proto2, { label = Some Label.LABEL_OPTIONAL; type' = Some TYPE_ENUM; type_name; default_value = None; _ } ->
     let spec = spec_of_enum ~scope type_name None in
-    Basic_opt (number, Enum spec)
+    Basic_opt (index, Enum spec)
     |> c_of_compound name
 
   (* Required Enum under proto2 *)
   | `Proto2, { label = Some Label.LABEL_REQUIRED; type' = Some TYPE_ENUM; type_name; _ } ->
     let spec = spec_of_enum ~scope type_name None in
-    Basic_req (number, Enum spec)
+    Basic_req (index, Enum spec)
     |> c_of_compound name
 
   (* Required fields under proto2 *)
   | `Proto2, { label = Some Label.LABEL_REQUIRED; type' = Some type'; type_name; _ } ->
     let Espec spec = spec_of_type ~params ~scope type_name None type' in
-    Basic_req (number, spec)
+    Basic_req (index, spec)
     |> c_of_compound name
 
   (* Proto2 optional fields with a default *)
   | `Proto2, { label = Some Label.LABEL_OPTIONAL; type' = Some type'; type_name; default_value = Some default; _ } ->
     let Espec spec = spec_of_type ~params ~scope type_name (Some default) type' in
     let default = make_default spec default in
-    Basic (number, spec, default)
+    Basic (index, spec, default)
     |> c_of_compound name
 
   (* Proto2 optional fields - no default *)
   | `Proto2, { label = Some Label.LABEL_OPTIONAL; type' = Some type'; type_name; default_value = None; _ } ->
     let Espec spec = spec_of_type ~params ~scope type_name None type' in
-    Basic_opt (number, spec)
+    Basic_opt (index, spec)
     |> c_of_compound name
 
   (* Proto3 explicitly optional field are mapped as proto2 optional fields *)
   | _, { label = Some Label.LABEL_OPTIONAL; type' = Some type'; type_name; proto3_optional = Some true; _ } ->
     let Espec spec = spec_of_type ~params ~scope type_name None type' in
-    Basic_opt (number, spec)
+    Basic_opt (index, spec)
     |> c_of_compound name
 
   (* Proto3 enum implicitly optional field *)
   | `Proto3, { label = Some Label.LABEL_OPTIONAL; type' = Some TYPE_ENUM; type_name; _} ->
     let spec = spec_of_enum ~scope type_name None in
     let (_, _, _, default, _) = spec in
-    Basic (number, Enum spec, default)
+    Basic (index, Enum spec, default)
     |> c_of_compound name
 
   (* Proto3 implicitly optional field *)
   | `Proto3, { label = Some Label.LABEL_OPTIONAL; type' = Some type'; type_name; _} ->
     let Espec spec = spec_of_type ~params ~scope type_name None type' in
     let default = default_of_spec spec in
-    Basic (number, spec, default)
+    Basic (index, spec, default)
     |> c_of_compound name
 
   (* Repeated fields cannot have a default *)
@@ -441,13 +452,13 @@ let c_of_field ~params ~syntax ~scope field =
   (* Repeated message *)
   | _, { label = Some Label.LABEL_REPEATED; type' = Some Type.TYPE_MESSAGE; type_name; _ } ->
     let spec = spec_of_message ~scope type_name in
-    Repeated (number, spec, Not_packed)
+    Repeated (index, spec, Not_packed)
     |> c_of_compound name
 
   (* Repeated bytes and strings are not packed *)
   | _, { label = Some Label.LABEL_REPEATED; type' = Some (TYPE_STRING | TYPE_BYTES as type'); type_name; _ } ->
     let Espec spec = spec_of_type ~params ~scope type_name None type' in
-    Repeated (number, spec, Not_packed)
+    Repeated (index, spec, Not_packed)
     |> c_of_compound name
 
   (* Repeated enum *)
@@ -459,7 +470,7 @@ let c_of_field ~params ~syntax ~scope field =
       | `Proto2, _ -> Not_packed
       | `Proto3, _ -> Packed
     in
-    Repeated (number, Enum spec, packed)
+    Repeated (index, Enum spec, packed)
     |> c_of_compound name
 
   (* Repeated basic type *)
@@ -471,7 +482,7 @@ let c_of_field ~params ~syntax ~scope field =
       | `Proto2, _ -> Not_packed
       | `Proto3, _ -> Packed
     in
-    Repeated (number, spec, packed)
+    Repeated (index, spec, packed)
     |> c_of_compound name
   | _, { label = None; _ } -> failwith "Label not set on field struct"
   | _, { type' = None; _ } -> failwith "Type must be set"
@@ -490,11 +501,12 @@ let c_of_oneof ~params ~syntax:_ ~scope OneofDescriptorProto.{ name; _ } fields 
   (* Construct the type. *)
   let field_infos =
     List.map ~f:(function
-        | { number = Some number; name; type' = Some type'; type_name; _ } ->
-          let Espec spec = spec_of_type ~params ~scope type_name None type' in
-          (number, name, type_of_spec spec, Espec spec)
-        | _ -> failwith "No index or type"
-      ) fields
+      | { number = Some number; name = Some name; type' = Some type'; type_name; json_name = Some json_name; _} ->
+        let index = (number, name, json_name) in
+        let Espec spec = spec_of_type ~params ~scope type_name None type' in
+        (index, Some name, type_of_spec spec, Espec spec)
+      | _ -> failwith "No index or type"
+    ) fields
   in
   let oneof =
     let oneof_elems =
@@ -730,7 +742,7 @@ let make ~params ~syntax ~is_cyclic ~is_map_entry ~extension_ranges ~scope ~fiel
           let name = Scope.get_name scope name in
           sprintf "match ((t1%s%s), (t2%s%s)) with"sep name sep name ::
           List.map ~f:(fun (ctr, type') ->
-            let spec = sprintf "basic_req (0, %s)" type' in (* Oneof messages are marked as required, as one must be set. *)
+            let spec = sprintf "basic_req ((0, \"\", \"\"), %s)" type' in (* Oneof messages are marked as required, as one must be set. *)
             sprintf "  | (%s v1, %s v2) -> %s (Runtime'.Merge.merge Runtime'.Deserialize.C.( %s ) v1 v2)" ctr ctr ctr spec
           ) ctrs
           |> append "  | (v1, `not_set)  -> v1"

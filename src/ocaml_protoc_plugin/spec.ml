@@ -9,6 +9,8 @@ module Make(T : T) = struct
   type extensions = (int * Field.t) list
   type 'a merge = 'a -> 'a -> 'a
 
+  type field = (int * string * string)
+
   type _ spec =
     | Double : float spec
     | Float : float spec
@@ -47,20 +49,20 @@ module Make(T : T) = struct
   type espec = Espec: _ spec -> espec [@@unboxed]
 
   type _ oneof =
-    | Oneof_elem : int * 'b spec * ('a, ('b -> 'a), 'b) T.dir -> 'a oneof
+    | Oneof_elem : field * 'b spec * ('a, ('b -> 'a), 'b) T.dir -> 'a oneof
 
   type _ compound =
     (* A field, where the default value is know (and set). This cannot be used for message types *)
-    | Basic : int * 'a spec * 'a -> 'a compound
+    | Basic : field * 'a spec * 'a -> 'a compound
 
     (* Proto2/proto3 optional fields. *)
-    | Basic_opt : int * 'a spec -> 'a option compound
+    | Basic_opt : field * 'a spec -> 'a option compound
 
     (* Proto2 required fields (and oneof fields) *)
-    | Basic_req : int * 'a spec -> 'a compound
+    | Basic_req : field * 'a spec -> 'a compound
 
     (* Repeated fields *)
-    | Repeated : int * 'a spec * packed -> 'a list compound
+    | Repeated : field * 'a spec * packed -> 'a list compound
     | Oneof : ('a, 'a oneof list, 'a -> unit oneof) T.dir -> ([> `not_set ] as 'a) compound
 
   type (_, _) compound_list =
