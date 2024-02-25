@@ -1,7 +1,4 @@
-
-module S = Spec.Serialize
-module C = S.C
-open S
+open Spec
 
 (** Serialize to json as per https://protobuf.dev/programming-guides/proto3/#json-options *)
 

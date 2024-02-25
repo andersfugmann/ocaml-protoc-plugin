@@ -4,8 +4,7 @@ type t = {
   type' : string;
   constructor: string;
   apply: string;
-  deserialize_spec: string;
-  serialize_spec: string;
+  spec_str: string;
   default_constructor_sig: string;
   default_constructor_impl: string;
   merge_impl: string;
@@ -13,8 +12,7 @@ type t = {
 
 type field_spec = {
   typestr : string;
-  serialize_spec: string;
-  deserialize_spec: string;
+  spec_str: string;
 }
 
 val spec_of_field:

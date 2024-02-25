@@ -140,10 +140,10 @@ let emit_extension ~scope ~params field =
   Code.emit signature `None "val set: %s -> %s -> %s" extendee_type c.typestr extendee_type;
 
   Code.emit implementation `None "type t = %s %s" c.typestr params.annot;
-  Code.emit implementation `None "let get_exn extendee = Runtime'.Extensions.get Runtime'.Deserialize.C.(%s) (extendee.%s)" c.deserialize_spec extendee_field ;
+  Code.emit implementation `None "let get_exn extendee = Runtime'.Extensions.get Runtime'.Spec.(%s) (extendee.%s)" c.spec_str extendee_field ;
   Code.emit implementation `None "let get extendee = Runtime'.Result.catch (fun () -> get_exn extendee)";
   Code.emit implementation `Begin "let set extendee t =";
-  Code.emit implementation `None "let extensions' = Runtime'.Extensions.set Runtime'.Serialize.C.(%s) (extendee.%s) t in" c.serialize_spec extendee_field;
+  Code.emit implementation `None "let extensions' = Runtime'.Extensions.set Runtime'.Spec.(%s) (extendee.%s) t in" c.spec_str extendee_field;
   Code.emit implementation `None "{ extendee with %s = extensions' } [@@warning \"-23\"]" extendee_field;
   Code.emit implementation `End "";
   { module_name; signature; implementation }
@@ -214,7 +214,7 @@ let rec emit_message ~params ~syntax scope
     | Some _name ->
       let is_map_entry = is_map_entry options in
       let is_cyclic = Scope.is_cyclic scope in
-      let Types.{ type'; constructor; apply; deserialize_spec; serialize_spec;
+      let Types.{ type'; constructor; apply; spec_str;
                   default_constructor_sig; default_constructor_impl; merge_impl } =
         Types.make ~params ~syntax ~is_cyclic ~is_map_entry ~extension_ranges ~scope ~fields oneof_decls
       in
@@ -235,7 +235,7 @@ let rec emit_message ~params ~syntax scope
       Code.emit implementation `None "let merge = (%s)" merge_impl;
 
       Code.emit implementation `Begin "let to_proto' =";
-      Code.emit implementation `None "let spec = %s in" serialize_spec;
+      Code.emit implementation `None "let spec = %s in" spec_str;
       Code.emit implementation `None "let serialize = Runtime'.Serialize.serialize spec in";
       Code.emit implementation `None "%s" apply;
       Code.emit implementation `End "";
@@ -244,7 +244,7 @@ let rec emit_message ~params ~syntax scope
 
       Code.emit implementation `Begin "let from_proto_exn =";
       Code.emit implementation `None "let constructor = %s in" constructor;
-      Code.emit implementation `None "let spec = %s in" deserialize_spec;
+      Code.emit implementation `None "let spec = %s in" spec_str;
       Code.emit implementation `None "Runtime'.Deserialize.deserialize spec constructor";
       Code.emit implementation `End "let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)";
     | None -> ()

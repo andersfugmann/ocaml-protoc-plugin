@@ -1,8 +1,6 @@
 open StdLabels
 
-module S = Spec.Serialize
-module C = S.C
-open S
+open Spec
 
 let field_type: type a. a spec -> int = function
   | Int64 | UInt64 | SInt64 | Int32 | UInt32 | SInt32

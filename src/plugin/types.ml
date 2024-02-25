@@ -8,7 +8,7 @@ open StdLabels
 *)
 module Dir = struct
   type t = { type': string; module_name: string; deserialize_spec: string; serialize_spec: string; default: string option; fields: (string * string) list }
-  type (_, _, _) dir = t
+  type _ dir = t
 end
 
 module T = Ocaml_protoc_plugin.Spec.Make(Dir)
@@ -30,22 +30,19 @@ type type' =
 type c = {
   name : string;
   type' : type';
-  serialize_spec: string;
-  deserialize_spec: string;
+  spec_str: string;
 }
 
 type field_spec = {
   typestr : string;
-  serialize_spec: string;
-  deserialize_spec: string;
+  spec_str: string;
 }
 
 type t = {
   type' : string;
   constructor: string;
   apply: string;
-  deserialize_spec: string;
-  serialize_spec: string;
+  spec_str: string;
   default_constructor_sig: string;
   default_constructor_impl: string;
   merge_impl: string;
@@ -310,40 +307,34 @@ let string_of_type = function
 let c_of_compound: type a. string -> a compound -> c = fun name -> function
   | Basic (index, spec, default) ->
     let index_string = string_of_index index in
-    let deserialize_spec = sprintf "basic (%s, %s, %s)" index_string (string_of_spec spec) (string_of_proto_type spec default) in
-    let serialize_spec   = sprintf "basic (%s, %s, %s)" index_string (string_of_spec spec) (string_of_proto_type spec default) in
+    let spec_str = sprintf "basic (%s, %s, %s)" index_string (string_of_spec spec) (string_of_proto_type spec default) in
     let modifier =
       match spec with
       | Message _ -> Optional
       | _ -> No_modifier (string_of_default spec default)
     in
     let type' = { name = type_of_spec spec; modifier } in
-    { name; type'; deserialize_spec; serialize_spec }
+    { name; type'; spec_str }
   | Basic_req (index, spec) ->
     let index_string = string_of_index index in
-    let deserialize_spec = sprintf "basic_req (%s, %s)" index_string (string_of_spec spec) in
-    let serialize_spec   = sprintf "basic_req (%s, %s)" index_string (string_of_spec spec) in
+    let spec_str = sprintf "basic_req (%s, %s)" index_string (string_of_spec spec) in
     let type' = { name = type_of_spec spec; modifier = Required } in
-    { name; type'; deserialize_spec; serialize_spec }
+    { name; type'; spec_str }
   | Basic_opt (index, spec) ->
     let index_string = string_of_index index in
-    let deserialize_spec = sprintf "basic_opt (%s, %s)" index_string (string_of_spec spec) in
-    let serialize_spec   = sprintf "basic_opt (%s, %s)" index_string (string_of_spec spec) in
+    let spec_str = sprintf "basic_opt (%s, %s)" index_string (string_of_spec spec) in
     let type' = { name = type_of_spec spec; modifier = Optional } in
-    { name; type'; deserialize_spec; serialize_spec }
+    { name; type'; spec_str }
   | Repeated (index, spec, packed) ->
     let index_string = string_of_index index in
-    let deserialize_spec = sprintf "repeated (%s, %s, %s)" index_string (string_of_spec spec) (string_of_packed packed) in
-    let serialize_spec   = sprintf "repeated (%s, %s, %s)" index_string (string_of_spec spec) (string_of_packed packed) in
+    let spec_str = sprintf "repeated (%s, %s, %s)" index_string (string_of_spec spec) (string_of_packed packed) in
     let type' = { name = type_of_spec spec; modifier = List } in
-    { name; type'; deserialize_spec; serialize_spec; }
-  | Oneof { type'; deserialize_spec; serialize_spec; fields; _ } ->
+    { name; type'; spec_str; }
+  | Oneof { type'; deserialize_spec; fields; _ } ->
     (* Should oneofs also be modelled as a module - And can we name the module? *)
-    let deserialize_spec = sprintf "oneof (%s)" deserialize_spec in
-    let serialize_spec   = sprintf "oneof (%s)" serialize_spec in
-
+    let spec_str = sprintf "oneof (%s)" deserialize_spec in
     let type' = { name = type'; modifier = Oneof_type ({|`not_set|}, fields) } in
-    { name; type'; deserialize_spec; serialize_spec }
+    { name; type'; spec_str }
 
 let c_of_field ~params ~syntax ~scope field =
   let open FieldDescriptorProto in
@@ -485,8 +476,7 @@ let spec_of_field ~params ~syntax ~scope field : field_spec =
   let c = c_of_field ~params ~syntax ~scope field in
   {
     typestr = string_of_type c.type';
-    serialize_spec = c.serialize_spec;
-    deserialize_spec = c.deserialize_spec;
+    spec_str = c.spec_str;
   }
 
 let c_of_oneof ~params ~syntax:_ ~scope OneofDescriptorProto.{ name; _ } fields =
@@ -698,16 +688,10 @@ let make ~params ~syntax ~is_cyclic ~is_map_entry ~extension_ranges ~scope ~fiel
     | false -> "nil"
   in
   (* Create the deserialize spec *)
-  let deserialize_spec =
-    let spec = List.map ~f:(fun (c : c) -> c.deserialize_spec) ts in
+  let spec_str =
+    let spec = List.map ~f:(fun (c : c) -> c.spec_str) ts in
     String.concat ~sep:" ^:: " (spec @ [nil])
-    |> sprintf "Runtime'.Deserialize.C.( %s )"
-  in
-
-  let serialize_spec =
-    let spec = List.map ~f:(fun (c : c) -> c.serialize_spec) ts in
-    String.concat ~sep:" ^:: " (spec @ [nil])
-    |> sprintf "Runtime'.Serialize.C.( %s )"
+    |> sprintf "Runtime'.Spec.( %s )"
   in
 
   let merge_impl =
@@ -726,7 +710,7 @@ let make ~params ~syntax ~is_cyclic ~is_map_entry ~extension_ranges ~scope ~fiel
     let sep = match as_tuple with true -> "_" | false -> "." in
     let merge_values =
       List.map ts ~f:(function
-        | { name; deserialize_spec = _; type' = { modifier = Oneof_type (_, ctrs); _ }; _ } ->
+        | { name; type' = { modifier = Oneof_type (_, ctrs); _ }; _ } ->
           (* Default values for oneof fields makes absolutely no sense!.
              Consider a oneof type with two fields with a default value.
              Its undecidable if any should be marked as set if none of the fields
@@ -738,17 +722,17 @@ let make ~params ~syntax ~is_cyclic ~is_map_entry ~extension_ranges ~scope ~fiel
           sprintf "match ((t1%s%s), (t2%s%s)) with"sep name sep name ::
           List.map ~f:(fun (ctr, type') ->
             let spec = sprintf "basic_req ((0, \"\", \"\"), %s)" type' in (* Oneof messages are marked as required, as one must be set. *)
-            sprintf "  | (%s v1, %s v2) -> %s (Runtime'.Merge.merge Runtime'.Deserialize.C.( %s ) v1 v2)" ctr ctr ctr spec
+            sprintf "  | (%s v1, %s v2) -> %s (Runtime'.Merge.merge Runtime'.Spec.( %s ) v1 v2)" ctr ctr ctr spec
           ) ctrs
           |> append "  | (v1, `not_set)  -> v1"
           |> append "  | (_, v2) -> v2"
           |> String.concat ~sep:"\n"
           |> fun value -> name, value
 
-        | { name; deserialize_spec; _ } ->
+        | { name; spec_str; _ } ->
           let name = Scope.get_name scope name in
-          name, sprintf "Runtime'.Merge.merge Runtime'.Deserialize.C.( %s ) t1%s%s t2%s%s"
-            deserialize_spec sep name sep name
+          name, sprintf "Runtime'.Merge.merge Runtime'.Spec.( %s ) t1%s%s t2%s%s"
+            spec_str sep name sep name
       )
       |> append ~cond:has_extensions ("extensions'", sprintf "List.append t1%sextensions' t2%sextensions'" sep sep)
     in
@@ -769,4 +753,4 @@ let make ~params ~syntax ~is_cyclic ~is_map_entry ~extension_ranges ~scope ~fiel
   in
 
   (* The type contains optional elements. We should not have those *)
-  { type'; constructor; apply; deserialize_spec; serialize_spec; default_constructor_sig; default_constructor_impl; merge_impl }
+  { type'; constructor; apply; spec_str; default_constructor_sig; default_constructor_impl; merge_impl }

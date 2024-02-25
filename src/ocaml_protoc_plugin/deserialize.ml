@@ -1,9 +1,6 @@
 (** Module for deserializing values *)
 open StdLabels
-
-module S = Spec.Deserialize
-module C = S.C
-open S
+open Spec
 
 (** Exception indicating that fast deserialization did not succeed and revert to full deserialization *)
 exception Restart_full
@@ -28,7 +25,7 @@ type (_, _) sentinel_list =
   | NCons : (sentinel_field_spec list  * 'a sentinel_getter) * ('b, 'c) sentinel_list -> ('a -> 'b, 'c) sentinel_list
 
 let error_wrong_field str field = Result.raise (`Wrong_field_type (str, field))
-let error_required_field_missing index spec = Result.raise (`Required_field_missing (index, Spec.Deserialize.C.show spec))
+let error_required_field_missing index spec = Result.raise (`Required_field_missing (index, Spec.show spec))
 
 let decode_zigzag v =
   let open Infix.Int64 in
