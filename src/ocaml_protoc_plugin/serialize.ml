@@ -130,13 +130,20 @@ let rec write: type a. a compound -> Writer.t -> a -> unit = function
         | Some v -> write writer v
         | None -> ()
   end
-  | Oneof f -> begin
-      fun writer v ->
-        match v with
+  | Oneof (oneofs, index_f) -> begin
+      let create_writer: type a. a oneof -> (Writer.t -> a -> unit) = function
+        | Oneof_elem (field, spec, (_constr, destructor)) ->
+          let write = write (Basic_req (field, spec)) in
+          fun writer v ->
+            write writer (destructor v)
+      in
+      let field_writers = List.map ~f:create_writer oneofs |> Array.of_list in
+      fun writer -> function
         | `not_set -> ()
         | v ->
-          let Oneof_elem (index, spec, v) = f v in
-          write (Basic_req (index, spec)) writer v
+          let index = index_f v in
+          let write = Array.unsafe_get field_writers index in
+          write writer v
     end
 
 let in_extension_ranges extension_ranges index =

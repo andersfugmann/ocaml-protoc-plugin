@@ -65,7 +65,7 @@ module Make(T : T) = struct
   type espec = Espec: _ spec -> espec [@@unboxed]
 
   type _ oneof =
-    | Oneof_elem : field * 'b spec * ('a, ('b -> 'a), 'b) T.dir -> 'a oneof
+    | Oneof_elem : field * 'b spec * ('a, ('b -> 'a) * ('a -> 'b) as 'c, 'c) T.dir -> 'a oneof
 
   type _ compound =
     (* A field, where the default value is know (and set). This cannot be used for message types *)
@@ -79,7 +79,9 @@ module Make(T : T) = struct
 
     (* Repeated fields *)
     | Repeated : field * 'a spec * packed -> 'a list compound
-    | Oneof : ('a, 'a oneof list, 'a -> unit oneof) T.dir -> ([> `not_set ] as 'a) compound
+
+    (* Oneofs. A list of fields + function to index the field *)
+    | Oneof : ('a, ('a oneof list) * ('a -> int) as 'b, 'b) T.dir -> ([> `not_set ] as 'a) compound
 
   type (_, _) compound_list =
     (* End of list *)

@@ -1,10 +1,4 @@
 open StdLabels
-(* Extend scope to have a map over default enum values. enum type string -> enum default value string *)
-(* That should be in the type db, and possibly a different map. *)
-(* We have the full type name (I assume), so we can take the first in the list, and strip the last . off to get the name. *)
-(* We should also have proto name -> proto default name. Then we can lookup, as we already do *)
-
-
 (* This module is a bit elaborate.
    The idea is to construct the actual types needed
    in the spec module.
@@ -126,7 +120,6 @@ let string_of_default: type a. a spec -> a -> string = function
   | Bytes -> fun bytes -> sprintf "(Bytes.of_string {|%s|})" (Bytes.to_string bytes)
   | Enum { default = Some default; _ } -> fun _ -> default
   | Enum { type'; default = None; _ } -> fun _ -> sprintf "(%s 0)" type'
-  (* Is this the ocaml name???. Maybe we need the protoc name  *)
   | Message _ -> failwith "Messages defaults are not relevant"
 
 let default_of_spec: type a. a spec -> a = fun spec -> match spec with
@@ -295,11 +288,12 @@ let spec_of_type ~params ~scope type_name default =
 let string_of_index (index, name, json_name) =
   sprintf "(%d, \"%s\", \"%s\")" index name json_name
 
-let string_of_oneof_elem dir (Oneof_elem (index, spec, { serialize_spec; deserialize_spec; _ } ) ) =
+let string_of_oneof_elem (Oneof_elem (index, spec, { module_name = adt_name; _ } ) ) =
   let spec_string = string_of_spec spec in
   let index_string = string_of_index index in
-  let s = match dir with `Deserialize -> deserialize_spec | `Serialize -> serialize_spec in
-  sprintf "oneof_elem (%s, %s, %s)" index_string spec_string s
+  let constr = sprintf "fun v -> %s v" adt_name in
+  let destr = sprintf "function %s v -> v | _ -> raise (Invalid_argument \"Cannot destruct given oneof\")" adt_name in
+  sprintf "oneof_elem (%s, %s, ((%s), (%s)))" index_string spec_string constr destr
 
 let string_of_proto_type: type a. a spec -> a -> string = fun spec default ->
   sprintf "(%s)" (string_of_default spec default)
@@ -524,17 +518,17 @@ let c_of_oneof ~params ~syntax:_ ~scope OneofDescriptorProto.{ name; _ } fields 
       |> String.concat ~sep:" | "
       |> sprintf "[ `not_set | %s ]"
     in
-    let deserialize_spec =
+    let oneofs =
       oneof_elems
       |> List.map ~f:snd
-      |> List.map ~f:(string_of_oneof_elem `Deserialize)
+      |> List.map ~f:string_of_oneof_elem
       |> String.concat ~sep:"; "
       |> sprintf "[ %s ]"
     in
-    let serialize_spec =
-      "| `not_set -> failwith \"This case should never _ever_ happen\"" ::
-      List.map oneof_elems ~f:(fun (name, oneof_elem) ->
-        sprintf "%s v -> %s" name (string_of_oneof_elem `Serialize oneof_elem)
+    let index_f =
+      "| `not_set -> failwith \"Impossible case\"" ::
+      List.mapi oneof_elems ~f:(fun index (adt_name, _) ->
+        sprintf "%s _ -> %d" adt_name index
       )
       |> String.concat ~sep:" | "
       |> sprintf "(function %s)"
@@ -544,11 +538,11 @@ let c_of_oneof ~params ~syntax:_ ~scope OneofDescriptorProto.{ name; _ } fields 
         name, string_of_spec spec
       )
     in
-    Oneof { type'; module_name = ""; deserialize_spec; serialize_spec; default=None; fields }
+    let spec = sprintf "(%s, %s)" oneofs index_f in
+    Oneof { type'; module_name = ""; deserialize_spec = spec; serialize_spec = spec; default=None; fields }
   in
 
   c_of_compound (Option.value_exn name) oneof
-
 
 (** Return a list of plain fields + a list of fields per oneof_decl *)
 let split_oneof_decl fields oneof_decls =
