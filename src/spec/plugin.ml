@@ -220,18 +220,18 @@ end = struct
         let merge = (fun t1 t2 -> {
           file_to_generate = (Runtime'.Merge.merge Runtime'.Deserialize.C.( repeated ((1, "file_to_generate", "fileToGenerate"), string, not_packed) ) t1.file_to_generate t2.file_to_generate);
           parameter = (Runtime'.Merge.merge Runtime'.Deserialize.C.( basic_opt ((2, "parameter", "parameter"), string) ) t1.parameter t2.parameter);
-          compiler_version = (Runtime'.Merge.merge Runtime'.Deserialize.C.( basic_opt ((3, "compiler_version", "compilerVersion"), (message ((fun writer -> Version.from_proto_exn writer), Version.merge))) ) t1.compiler_version t2.compiler_version);
-          proto_file = (Runtime'.Merge.merge Runtime'.Deserialize.C.( repeated ((15, "proto_file", "protoFile"), (message ((fun writer -> Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.from_proto_exn writer), Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.merge)), not_packed) ) t1.proto_file t2.proto_file);
+          compiler_version = (Runtime'.Merge.merge Runtime'.Deserialize.C.( basic_opt ((3, "compiler_version", "compilerVersion"), (message (module Version))) ) t1.compiler_version t2.compiler_version);
+          proto_file = (Runtime'.Merge.merge Runtime'.Deserialize.C.( repeated ((15, "proto_file", "protoFile"), (message (module Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto)), not_packed) ) t1.proto_file t2.proto_file);
            })
         let to_proto' =
-          let spec = Runtime'.Serialize.C.( repeated ((1, "file_to_generate", "fileToGenerate"), string, not_packed) ^:: basic_opt ((2, "parameter", "parameter"), string) ^:: basic_opt ((3, "compiler_version", "compilerVersion"), (message Version.to_proto')) ^:: repeated ((15, "proto_file", "protoFile"), (message Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.to_proto'), not_packed) ^:: nil ) in
+          let spec = Runtime'.Serialize.C.( repeated ((1, "file_to_generate", "fileToGenerate"), string, not_packed) ^:: basic_opt ((2, "parameter", "parameter"), string) ^:: basic_opt ((3, "compiler_version", "compilerVersion"), (message (module Version))) ^:: repeated ((15, "proto_file", "protoFile"), (message (module Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto)), not_packed) ^:: nil ) in
           let serialize = Runtime'.Serialize.serialize spec in
           fun writer { file_to_generate; parameter; compiler_version; proto_file } -> serialize writer file_to_generate parameter compiler_version proto_file
 
         let to_proto t = to_proto' (Runtime'.Writer.init ()) t
         let from_proto_exn =
           let constructor = fun file_to_generate parameter compiler_version proto_file -> { file_to_generate; parameter; compiler_version; proto_file } in
-          let spec = Runtime'.Deserialize.C.( repeated ((1, "file_to_generate", "fileToGenerate"), string, not_packed) ^:: basic_opt ((2, "parameter", "parameter"), string) ^:: basic_opt ((3, "compiler_version", "compilerVersion"), (message ((fun writer -> Version.from_proto_exn writer), Version.merge))) ^:: repeated ((15, "proto_file", "protoFile"), (message ((fun writer -> Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.from_proto_exn writer), Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.merge)), not_packed) ^:: nil ) in
+          let spec = Runtime'.Deserialize.C.( repeated ((1, "file_to_generate", "fileToGenerate"), string, not_packed) ^:: basic_opt ((2, "parameter", "parameter"), string) ^:: basic_opt ((3, "compiler_version", "compilerVersion"), (message (module Version))) ^:: repeated ((15, "proto_file", "protoFile"), (message (module Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto)), not_packed) ^:: nil ) in
           Runtime'.Deserialize.deserialize spec constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       end
@@ -296,17 +296,17 @@ end = struct
             name = (Runtime'.Merge.merge Runtime'.Deserialize.C.( basic_opt ((1, "name", "name"), string) ) t1.name t2.name);
             insertion_point = (Runtime'.Merge.merge Runtime'.Deserialize.C.( basic_opt ((2, "insertion_point", "insertionPoint"), string) ) t1.insertion_point t2.insertion_point);
             content = (Runtime'.Merge.merge Runtime'.Deserialize.C.( basic_opt ((15, "content", "content"), string) ) t1.content t2.content);
-            generated_code_info = (Runtime'.Merge.merge Runtime'.Deserialize.C.( basic_opt ((16, "generated_code_info", "generatedCodeInfo"), (message ((fun writer -> Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.from_proto_exn writer), Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.merge))) ) t1.generated_code_info t2.generated_code_info);
+            generated_code_info = (Runtime'.Merge.merge Runtime'.Deserialize.C.( basic_opt ((16, "generated_code_info", "generatedCodeInfo"), (message (module Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo))) ) t1.generated_code_info t2.generated_code_info);
              })
           let to_proto' =
-            let spec = Runtime'.Serialize.C.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "insertion_point", "insertionPoint"), string) ^:: basic_opt ((15, "content", "content"), string) ^:: basic_opt ((16, "generated_code_info", "generatedCodeInfo"), (message Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.to_proto')) ^:: nil ) in
+            let spec = Runtime'.Serialize.C.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "insertion_point", "insertionPoint"), string) ^:: basic_opt ((15, "content", "content"), string) ^:: basic_opt ((16, "generated_code_info", "generatedCodeInfo"), (message (module Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo))) ^:: nil ) in
             let serialize = Runtime'.Serialize.serialize spec in
             fun writer { name; insertion_point; content; generated_code_info } -> serialize writer name insertion_point content generated_code_info
 
           let to_proto t = to_proto' (Runtime'.Writer.init ()) t
           let from_proto_exn =
             let constructor = fun name insertion_point content generated_code_info -> { name; insertion_point; content; generated_code_info } in
-            let spec = Runtime'.Deserialize.C.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "insertion_point", "insertionPoint"), string) ^:: basic_opt ((15, "content", "content"), string) ^:: basic_opt ((16, "generated_code_info", "generatedCodeInfo"), (message ((fun writer -> Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.from_proto_exn writer), Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.merge))) ^:: nil ) in
+            let spec = Runtime'.Deserialize.C.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "insertion_point", "insertionPoint"), string) ^:: basic_opt ((15, "content", "content"), string) ^:: basic_opt ((16, "generated_code_info", "generatedCodeInfo"), (message (module Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo))) ^:: nil ) in
             Runtime'.Deserialize.deserialize spec constructor
           let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         end
@@ -316,17 +316,17 @@ end = struct
         let merge = (fun t1 t2 -> {
           error = (Runtime'.Merge.merge Runtime'.Deserialize.C.( basic_opt ((1, "error", "error"), string) ) t1.error t2.error);
           supported_features = (Runtime'.Merge.merge Runtime'.Deserialize.C.( basic_opt ((2, "supported_features", "supportedFeatures"), uint64_int) ) t1.supported_features t2.supported_features);
-          file = (Runtime'.Merge.merge Runtime'.Deserialize.C.( repeated ((15, "file", "file"), (message ((fun writer -> File.from_proto_exn writer), File.merge)), not_packed) ) t1.file t2.file);
+          file = (Runtime'.Merge.merge Runtime'.Deserialize.C.( repeated ((15, "file", "file"), (message (module File)), not_packed) ) t1.file t2.file);
            })
         let to_proto' =
-          let spec = Runtime'.Serialize.C.( basic_opt ((1, "error", "error"), string) ^:: basic_opt ((2, "supported_features", "supportedFeatures"), uint64_int) ^:: repeated ((15, "file", "file"), (message File.to_proto'), not_packed) ^:: nil ) in
+          let spec = Runtime'.Serialize.C.( basic_opt ((1, "error", "error"), string) ^:: basic_opt ((2, "supported_features", "supportedFeatures"), uint64_int) ^:: repeated ((15, "file", "file"), (message (module File)), not_packed) ^:: nil ) in
           let serialize = Runtime'.Serialize.serialize spec in
           fun writer { error; supported_features; file } -> serialize writer error supported_features file
 
         let to_proto t = to_proto' (Runtime'.Writer.init ()) t
         let from_proto_exn =
           let constructor = fun error supported_features file -> { error; supported_features; file } in
-          let spec = Runtime'.Deserialize.C.( basic_opt ((1, "error", "error"), string) ^:: basic_opt ((2, "supported_features", "supportedFeatures"), uint64_int) ^:: repeated ((15, "file", "file"), (message ((fun writer -> File.from_proto_exn writer), File.merge)), not_packed) ^:: nil ) in
+          let spec = Runtime'.Deserialize.C.( basic_opt ((1, "error", "error"), string) ^:: basic_opt ((2, "supported_features", "supportedFeatures"), uint64_int) ^:: repeated ((15, "file", "file"), (message (module File)), not_packed) ^:: nil ) in
           Runtime'.Deserialize.deserialize spec constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       end

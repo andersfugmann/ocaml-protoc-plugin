@@ -15,6 +15,7 @@ module type Message = sig
   val from_proto_exn: Reader.t -> t
   val to_proto: t -> Writer.t
   val to_proto': Writer.t -> t -> Writer.t
+  val merge: t -> t -> t
 end
 
 module Make(T : T) = struct
@@ -57,8 +58,8 @@ module Make(T : T) = struct
     | Bool : bool spec
     | String : string spec
     | Bytes : bytes spec
-    | Enum :  ('a, int -> 'a, 'a -> int) T.dir -> 'a spec
-    | Message : ('a, ((Reader.t -> 'a) * 'a merge), Writer.t -> 'a -> Writer.t) T.dir -> 'a spec
+    | Enum :  ('a, (module Enum with type t = 'a) as 'b, 'b) T.dir  -> 'a spec
+    | Message : ('a, (module Message with type t = 'a) as 'b, 'b) T.dir -> 'a spec
 
   (* Existential types *)
   type espec = Espec: _ spec -> espec [@@unboxed]

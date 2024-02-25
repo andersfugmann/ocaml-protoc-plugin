@@ -64,7 +64,7 @@ let rec json_of_spec: type a. a spec -> a -> Yojson.Basic.t = function
   | Fixed64_int -> int64_int_value
   | SFixed64_int -> int64_int_value
 
-  | Enum f -> enum_value ~f
+  | Enum (module Enum) -> enum_value ~f:Enum.to_int
   | Message _ -> failwith "Unsupported. We don't have the spec!"
 
 and write: type a. enum_names:bool -> json_names:bool -> omit_default_values:bool -> a compound -> a -> field option =

@@ -79,7 +79,7 @@ let read_of_spec: type a. a spec -> Field.field_type * (Reader.t -> a) = functio
   | SFixed64_int -> Fixed64, fun reader -> Reader.read_fixed64 reader |> Int64.to_int
 
   | Bool -> Varint, fun reader -> Reader.read_varint_unboxed reader != 0
-  | Enum of_int -> Varint, fun reader -> Reader.read_varint_unboxed reader |> of_int
+  | Enum (module Enum) -> Varint, fun reader -> Reader.read_varint_unboxed reader |> Enum.from_int_exn
   | String -> Length_delimited, fun reader ->
     let Field.{ offset; length; data } = Reader.read_length_delimited reader in
     String.sub ~pos:offset ~len:length data
@@ -88,9 +88,9 @@ let read_of_spec: type a. a spec -> Field.field_type * (Reader.t -> a) = functio
     let v = Bytes.create length in
     Bytes.blit_string ~src:data ~src_pos:offset ~dst:v ~dst_pos:0 ~len:length;
     v
-  | Message (from_proto, _merge) -> Length_delimited, fun reader ->
+  | Message (module Message) -> Length_delimited, fun reader ->
     let Field.{ offset; length; data } = Reader.read_length_delimited reader in
-    from_proto (Reader.create ~offset ~length data)
+    Message.from_proto_exn (Reader.create ~offset ~length data)
 
 let id x = x
 let keep_last _ v = v
@@ -117,7 +117,7 @@ let value: type a. a compound -> a value = function
     Value ([(index, read)], default, id)
   | Basic_opt ((index, _, _), spec) ->
     let map = match spec with
-      | Message (_, merge) -> merge_opt merge
+      | Message (module Message) -> merge_opt Message.merge
       | _ -> keep_last_opt
     in
     let read = read_field ~read:(read_of_spec spec) ~map in

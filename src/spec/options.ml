@@ -56,10 +56,10 @@ and Ocaml_options : sig
   val set: Imported'modules.Descriptor.Google.Protobuf.FileOptions.t -> Options.t option -> Imported'modules.Descriptor.Google.Protobuf.FileOptions.t
 end = struct
   type t = Options.t option
-  let get_exn extendee = Runtime'.Extensions.get Runtime'.Deserialize.C.(basic_opt ((1074, "ocaml_options", "ocamlOptions"), (message ((fun writer -> Options.from_proto_exn writer), Options.merge)))) (extendee.Imported'modules.Descriptor.Google.Protobuf.FileOptions.extensions')
+  let get_exn extendee = Runtime'.Extensions.get Runtime'.Deserialize.C.(basic_opt ((1074, "ocaml_options", "ocamlOptions"), (message (module Options)))) (extendee.Imported'modules.Descriptor.Google.Protobuf.FileOptions.extensions')
   let get extendee = Runtime'.Result.catch (fun () -> get_exn extendee)
   let set extendee t =
-    let extensions' = Runtime'.Extensions.set Runtime'.Serialize.C.(basic_opt ((1074, "ocaml_options", "ocamlOptions"), (message Options.to_proto'))) (extendee.Imported'modules.Descriptor.Google.Protobuf.FileOptions.extensions') t in
+    let extensions' = Runtime'.Extensions.set Runtime'.Serialize.C.(basic_opt ((1074, "ocaml_options", "ocamlOptions"), (message (module Options)))) (extendee.Imported'modules.Descriptor.Google.Protobuf.FileOptions.extensions') t in
     { extendee with Imported'modules.Descriptor.Google.Protobuf.FileOptions.extensions' = extensions' } [@@warning "-23"]
 
 end

@@ -73,9 +73,9 @@ let write_value : type a. a spec -> a -> Writer.t -> unit = function
   | Bool -> write_varint_unboxed ~f:(function true -> 1 | false -> 0)
   | String -> write_length_delimited_string ~f:id
   | Bytes -> write_length_delimited_string ~f:Bytes.unsafe_to_string
-  | Enum f -> write_varint_unboxed ~f
-  | Message to_proto ->
-    Writer.write_length_delimited_f ~write_f:to_proto
+  | Enum (module Enum) -> write_varint_unboxed ~f:Enum.to_int
+  | Message (module Message) ->
+    Writer.write_length_delimited_f ~write_f:Message.to_proto'
 
 (** Optimized when the value is given in advance, and the continuation is expected to be called multiple times *)
 let write_value_const : type a. a spec -> a -> Writer.t -> unit = fun spec v ->
