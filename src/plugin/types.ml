@@ -6,9 +6,13 @@ open StdLabels
    This will ensure that the plugin will only construct valid types,
    so that changes to the spec will require changes here also.
 *)
+
+(* Create module to hold textual representations for compound types. *)
 module T = struct
-  type data = { type': string; module_name: string; deserialize_spec: string; serialize_spec: string; default: string option; fields: (string * string) list }
-  type _ t = data
+  type _ message = { type': string; module_name: string }
+  type _ enum = { type': string; module_name: string; default: string }
+  type _ oneof = { type': string; spec: string; fields: (string * string) list }
+  type _ oneof_elem = { adt_name: string }
 end
 
 open Ocaml_protoc_plugin.Spec.Make(T)
@@ -80,7 +84,9 @@ let make_default: type a. a spec -> string -> a = function
   | Bool -> bool_of_string
   | String -> fun x -> x
   | Bytes -> Bytes.of_string
-  | Enum _ -> fun x -> failwith (sprintf "Defaults for enums cannot be handled here: %s" x) (* Scope.get_scoped_name ~postfix:x scope type_name*)
+  | Enum _ -> fun _ ->
+    (* Enum is 'a typed, so a default cannot be returned here as a string *)
+    failwith (sprintf "Defaults for enums cannot be handled here")
   | Message _ -> failwith "Messages do not have defaults"
 
 let string_of_default: type a. a spec -> a -> string = function
@@ -114,8 +120,7 @@ let string_of_default: type a. a spec -> a -> string = function
   | Bool -> string_of_bool
   | String -> sprintf "{|%s|}"
   | Bytes -> fun bytes -> sprintf "(Bytes.of_string {|%s|})" (Bytes.to_string bytes)
-  | Enum { default = Some default; _ } -> fun _ -> default
-  | Enum { type'; default = None; _ } -> fun _ -> sprintf "(%s 0)" type'
+  | Enum { default; _ } -> fun _ -> default
   | Message _ -> failwith "Messages defaults are not relevant"
 
 let default_of_spec: type a. a spec -> a = fun spec -> match spec with
@@ -223,7 +228,7 @@ let type_of_spec: type a. a spec -> string = function
 let spec_of_message ~scope type_name =
   let type' = Scope.get_scoped_name ~postfix:"t" scope type_name in
   let module_name = Scope.get_scoped_name scope type_name in
-  Message { type'; serialize_spec = ""; deserialize_spec = ""; module_name; fields = []; default = None }
+  Message { type'; module_name }
 
 let spec_of_enum ~scope type_name default =
   let type' = Scope.get_scoped_name ~postfix:"t" scope type_name in
@@ -238,7 +243,7 @@ let spec_of_enum ~scope type_name default =
     | None ->
       Scope.get_scoped_enum_name scope type_name
   in
-  Enum { type'; serialize_spec = ""; deserialize_spec = ""; module_name; fields = []; default = Some default }
+  Enum { type'; module_name; default }
 
 open Parameters
 let spec_of_type ~params ~scope type_name default =
@@ -284,7 +289,7 @@ let spec_of_type ~params ~scope type_name default =
 let string_of_index (index, name, json_name) =
   sprintf "(%d, \"%s\", \"%s\")" index name json_name
 
-let string_of_oneof_elem (Oneof_elem (index, spec, { module_name = adt_name; _ } ) ) =
+let string_of_oneof_elem (Oneof_elem (index, spec, { adt_name; _ } ) ) =
   let spec_string = string_of_spec spec in
   let index_string = string_of_index index in
   let constr = sprintf "fun v -> %s v" adt_name in
@@ -329,9 +334,9 @@ let c_of_compound: type a. string -> a compound -> c = fun name -> function
     let spec_str = sprintf "repeated (%s, %s, %s)" index_string (string_of_spec spec) (string_of_packed packed) in
     let type' = { name = type_of_spec spec; modifier = List } in
     { name; type'; spec_str; }
-  | Oneof { type'; deserialize_spec; fields; _ } ->
+  | Oneof { type'; spec; fields; _ } ->
     (* Should oneofs also be modelled as a module - And can we name the module? *)
-    let spec_str = sprintf "oneof (%s)" deserialize_spec in
+    let spec_str = sprintf "oneof (%s)" spec in
     let type' = { name = type'; modifier = Oneof_type ({|`not_set|}, fields) } in
     { name; type'; spec_str }
 
@@ -494,10 +499,9 @@ let c_of_oneof ~params ~syntax:_ ~scope OneofDescriptorProto.{ name; _ } fields 
     let oneof_elems =
       field_infos
       |>
-      List.map ~f:(fun (index, name, type', Espec spec) ->
+      List.map ~f:(fun (index, name, _type', Espec spec) ->
         let adt_name = Scope.get_name_exn scope name in
-        (* { type'; module_name: string; deserialize_spec: string; serialize_spec: string; default: string option; fields: (string * string) list } *)
-        let arg = { T.type'; module_name = adt_name; deserialize_spec = (sprintf "fun v -> %s v" adt_name); serialize_spec = "v"; default = None; fields = [] } in
+        let arg : _ T.oneof_elem = { adt_name; } in
         adt_name, Oneof_elem (index, spec, arg)
       )
     in
@@ -528,7 +532,7 @@ let c_of_oneof ~params ~syntax:_ ~scope OneofDescriptorProto.{ name; _ } fields 
       )
     in
     let spec = sprintf "(%s, %s)" oneofs index_f in
-    Oneof { type'; module_name = ""; deserialize_spec = spec; serialize_spec = spec; default=None; fields }
+    Oneof { type'; spec = spec; fields }
   in
 
   c_of_compound (Option.value_exn name) oneof

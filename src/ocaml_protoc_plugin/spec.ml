@@ -1,5 +1,8 @@
 module type T = sig
-  type 'a t
+  type 'a message
+  type 'a enum
+  type 'a oneof
+  type 'a oneof_elem
 end
 
 module type Enum = sig
@@ -19,7 +22,6 @@ module type Message = sig
 end
 
 module Make(T : T) = struct
-
   type packed = Packed | Not_packed
   type extension_ranges = (int * int) list
   type extensions = (int * Field.t) list
@@ -58,14 +60,14 @@ module Make(T : T) = struct
     | Bool : bool spec
     | String : string spec
     | Bytes : bytes spec
-    | Enum :  (module Enum with type t = 'a) T.t  -> 'a spec
-    | Message : (module Message with type t = 'a) T.t -> 'a spec
+    | Enum :  (module Enum with type t = 'a) T.enum -> 'a spec
+    | Message : (module Message with type t = 'a) T.message -> 'a spec
 
   (* Existential types *)
   type espec = Espec: _ spec -> espec [@@unboxed]
 
   type _ oneof =
-    | Oneof_elem : field * 'b spec * (('b -> 'a) * ('a -> 'b)) T.t -> 'a oneof
+    | Oneof_elem : field * 'b spec * (('b -> 'a) * ('a -> 'b)) T.oneof_elem -> 'a oneof
 
   type _ compound =
     (* A field, where the default value is know (and set). This cannot be used for message types *)
@@ -81,7 +83,7 @@ module Make(T : T) = struct
     | Repeated : field * 'a spec * packed -> 'a list compound
 
     (* Oneofs. A list of fields + function to index the field *)
-    | Oneof : (('a oneof list) * ('a -> int)) T.t -> ([> `not_set ] as 'a) compound
+    | Oneof : (('a oneof list) * ('a -> int)) T.oneof -> ([> `not_set ] as 'a) compound
 
   type (_, _) compound_list =
     (* End of list *)
@@ -177,5 +179,8 @@ module Make(T : T) = struct
 end
 
 include Make(struct
-    type 'a t = 'a
+    type 'a message = 'a
+    type 'a enum = 'a
+    type 'a oneof = 'a
+    type 'a oneof_elem = 'a
   end)
