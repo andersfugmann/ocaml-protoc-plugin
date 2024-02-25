@@ -650,16 +650,15 @@ end = struct
       type t = (FileDescriptorProto.t list)
       let make ?(file = []) () = (file)
       let merge = (fun (t1_file) (t2_file) -> (Runtime'.Merge.merge Runtime'.Spec.( repeated ((1, "file", "file"), (message (module FileDescriptorProto)), not_packed) ) t1_file t2_file))
+      let spec () = Runtime'.Spec.( repeated ((1, "file", "file"), (message (module FileDescriptorProto)), not_packed) ^:: nil )
       let to_proto' =
-        let spec = Runtime'.Spec.( repeated ((1, "file", "file"), (message (module FileDescriptorProto)), not_packed) ^:: nil ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         serialize
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun file -> (file) in
-        let spec = Runtime'.Spec.( repeated ((1, "file", "file"), (message (module FileDescriptorProto)), not_packed) ^:: nil ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and FileDescriptorProto : sig
@@ -689,16 +688,15 @@ end = struct
         weak_dependency = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((11, "weak_dependency", "weakDependency"), int32_int, not_packed) ) t1.weak_dependency t2.weak_dependency);
         syntax = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((12, "syntax", "syntax"), string) ) t1.syntax t2.syntax);
          })
+      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "package", "package"), string) ^:: repeated ((3, "dependency", "dependency"), string, not_packed) ^:: repeated ((4, "message_type", "messageType"), (message (module DescriptorProto)), not_packed) ^:: repeated ((5, "enum_type", "enumType"), (message (module EnumDescriptorProto)), not_packed) ^:: repeated ((6, "service", "service"), (message (module ServiceDescriptorProto)), not_packed) ^:: repeated ((7, "extension", "extension"), (message (module FieldDescriptorProto)), not_packed) ^:: basic_opt ((8, "options", "options"), (message (module FileOptions))) ^:: basic_opt ((9, "source_code_info", "sourceCodeInfo"), (message (module SourceCodeInfo))) ^:: repeated ((10, "public_dependency", "publicDependency"), int32_int, not_packed) ^:: repeated ((11, "weak_dependency", "weakDependency"), int32_int, not_packed) ^:: basic_opt ((12, "syntax", "syntax"), string) ^:: nil )
       let to_proto' =
-        let spec = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "package", "package"), string) ^:: repeated ((3, "dependency", "dependency"), string, not_packed) ^:: repeated ((4, "message_type", "messageType"), (message (module DescriptorProto)), not_packed) ^:: repeated ((5, "enum_type", "enumType"), (message (module EnumDescriptorProto)), not_packed) ^:: repeated ((6, "service", "service"), (message (module ServiceDescriptorProto)), not_packed) ^:: repeated ((7, "extension", "extension"), (message (module FieldDescriptorProto)), not_packed) ^:: basic_opt ((8, "options", "options"), (message (module FileOptions))) ^:: basic_opt ((9, "source_code_info", "sourceCodeInfo"), (message (module SourceCodeInfo))) ^:: repeated ((10, "public_dependency", "publicDependency"), int32_int, not_packed) ^:: repeated ((11, "weak_dependency", "weakDependency"), int32_int, not_packed) ^:: basic_opt ((12, "syntax", "syntax"), string) ^:: nil ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } -> serialize writer name package dependency message_type enum_type service extension options source_code_info public_dependency weak_dependency syntax
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun name package dependency message_type enum_type service extension options source_code_info public_dependency weak_dependency syntax -> { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } in
-        let spec = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "package", "package"), string) ^:: repeated ((3, "dependency", "dependency"), string, not_packed) ^:: repeated ((4, "message_type", "messageType"), (message (module DescriptorProto)), not_packed) ^:: repeated ((5, "enum_type", "enumType"), (message (module EnumDescriptorProto)), not_packed) ^:: repeated ((6, "service", "service"), (message (module ServiceDescriptorProto)), not_packed) ^:: repeated ((7, "extension", "extension"), (message (module FieldDescriptorProto)), not_packed) ^:: basic_opt ((8, "options", "options"), (message (module FileOptions))) ^:: basic_opt ((9, "source_code_info", "sourceCodeInfo"), (message (module SourceCodeInfo))) ^:: repeated ((10, "public_dependency", "publicDependency"), int32_int, not_packed) ^:: repeated ((11, "weak_dependency", "weakDependency"), int32_int, not_packed) ^:: basic_opt ((12, "syntax", "syntax"), string) ^:: nil ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and DescriptorProto : sig
@@ -749,16 +747,15 @@ end = struct
           end' = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "end", "end"), int32_int) ) t1.end' t2.end');
           options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "options", "options"), (message (module ExtensionRangeOptions))) ) t1.options t2.options);
            })
+        let spec () = Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ^:: basic_opt ((2, "end", "end"), int32_int) ^:: basic_opt ((3, "options", "options"), (message (module ExtensionRangeOptions))) ^:: nil )
         let to_proto' =
-          let spec = Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ^:: basic_opt ((2, "end", "end"), int32_int) ^:: basic_opt ((3, "options", "options"), (message (module ExtensionRangeOptions))) ^:: nil ) in
-          let serialize = Runtime'.Serialize.serialize spec in
+          let serialize = Runtime'.Serialize.serialize (spec ()) in
           fun writer { start; end'; options } -> serialize writer start end' options
 
         let to_proto t = to_proto' (Runtime'.Writer.init ()) t
         let from_proto_exn =
           let constructor = fun start end' options -> { start; end'; options } in
-          let spec = Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ^:: basic_opt ((2, "end", "end"), int32_int) ^:: basic_opt ((3, "options", "options"), (message (module ExtensionRangeOptions))) ^:: nil ) in
-          Runtime'.Deserialize.deserialize spec constructor
+          Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       end
       and ReservedRange : sig
@@ -778,16 +775,15 @@ end = struct
           start = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ) t1.start t2.start);
           end' = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "end", "end"), int32_int) ) t1.end' t2.end');
            })
+        let spec () = Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ^:: basic_opt ((2, "end", "end"), int32_int) ^:: nil )
         let to_proto' =
-          let spec = Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ^:: basic_opt ((2, "end", "end"), int32_int) ^:: nil ) in
-          let serialize = Runtime'.Serialize.serialize spec in
+          let serialize = Runtime'.Serialize.serialize (spec ()) in
           fun writer { start; end' } -> serialize writer start end'
 
         let to_proto t = to_proto' (Runtime'.Writer.init ()) t
         let from_proto_exn =
           let constructor = fun start end' -> { start; end' } in
-          let spec = Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ^:: basic_opt ((2, "end", "end"), int32_int) ^:: nil ) in
-          Runtime'.Deserialize.deserialize spec constructor
+          Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       end
       let name' () = "descriptor.google.protobuf.DescriptorProto"
@@ -805,16 +801,15 @@ end = struct
         reserved_range = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((9, "reserved_range", "reservedRange"), (message (module ReservedRange)), not_packed) ) t1.reserved_range t2.reserved_range);
         reserved_name = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((10, "reserved_name", "reservedName"), string, not_packed) ) t1.reserved_name t2.reserved_name);
          })
+      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "field", "field"), (message (module FieldDescriptorProto)), not_packed) ^:: repeated ((3, "nested_type", "nestedType"), (message (module DescriptorProto)), not_packed) ^:: repeated ((4, "enum_type", "enumType"), (message (module EnumDescriptorProto)), not_packed) ^:: repeated ((5, "extension_range", "extensionRange"), (message (module ExtensionRange)), not_packed) ^:: repeated ((6, "extension", "extension"), (message (module FieldDescriptorProto)), not_packed) ^:: basic_opt ((7, "options", "options"), (message (module MessageOptions))) ^:: repeated ((8, "oneof_decl", "oneofDecl"), (message (module OneofDescriptorProto)), not_packed) ^:: repeated ((9, "reserved_range", "reservedRange"), (message (module ReservedRange)), not_packed) ^:: repeated ((10, "reserved_name", "reservedName"), string, not_packed) ^:: nil )
       let to_proto' =
-        let spec = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "field", "field"), (message (module FieldDescriptorProto)), not_packed) ^:: repeated ((3, "nested_type", "nestedType"), (message (module DescriptorProto)), not_packed) ^:: repeated ((4, "enum_type", "enumType"), (message (module EnumDescriptorProto)), not_packed) ^:: repeated ((5, "extension_range", "extensionRange"), (message (module ExtensionRange)), not_packed) ^:: repeated ((6, "extension", "extension"), (message (module FieldDescriptorProto)), not_packed) ^:: basic_opt ((7, "options", "options"), (message (module MessageOptions))) ^:: repeated ((8, "oneof_decl", "oneofDecl"), (message (module OneofDescriptorProto)), not_packed) ^:: repeated ((9, "reserved_range", "reservedRange"), (message (module ReservedRange)), not_packed) ^:: repeated ((10, "reserved_name", "reservedName"), string, not_packed) ^:: nil ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } -> serialize writer name field nested_type enum_type extension_range extension options oneof_decl reserved_range reserved_name
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun name field nested_type enum_type extension_range extension options oneof_decl reserved_range reserved_name -> { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } in
-        let spec = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "field", "field"), (message (module FieldDescriptorProto)), not_packed) ^:: repeated ((3, "nested_type", "nestedType"), (message (module DescriptorProto)), not_packed) ^:: repeated ((4, "enum_type", "enumType"), (message (module EnumDescriptorProto)), not_packed) ^:: repeated ((5, "extension_range", "extensionRange"), (message (module ExtensionRange)), not_packed) ^:: repeated ((6, "extension", "extension"), (message (module FieldDescriptorProto)), not_packed) ^:: basic_opt ((7, "options", "options"), (message (module MessageOptions))) ^:: repeated ((8, "oneof_decl", "oneofDecl"), (message (module OneofDescriptorProto)), not_packed) ^:: repeated ((9, "reserved_range", "reservedRange"), (message (module ReservedRange)), not_packed) ^:: repeated ((10, "reserved_name", "reservedName"), string, not_packed) ^:: nil ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and ExtensionRangeOptions : sig
@@ -834,16 +829,15 @@ end = struct
         uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
         extensions' = (List.append t1.extensions' t2.extensions');
          })
+      let spec () = Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
-        let spec = Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { uninterpreted_option; extensions' } -> serialize writer uninterpreted_option extensions'
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun uninterpreted_option extensions' -> { uninterpreted_option; extensions' } in
-        let spec = Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and FieldDescriptorProto : sig
@@ -954,16 +948,15 @@ end = struct
         json_name = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((10, "json_name", "jsonName"), string) ) t1.json_name t2.json_name);
         proto3_optional = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((17, "proto3_optional", "proto3Optional"), bool) ) t1.proto3_optional t2.proto3_optional);
          })
+      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "extendee", "extendee"), string) ^:: basic_opt ((3, "number", "number"), int32_int) ^:: basic_opt ((4, "label", "label"), (enum (module Label))) ^:: basic_opt ((5, "type", "type"), (enum (module Type))) ^:: basic_opt ((6, "type_name", "typeName"), string) ^:: basic_opt ((7, "default_value", "defaultValue"), string) ^:: basic_opt ((8, "options", "options"), (message (module FieldOptions))) ^:: basic_opt ((9, "oneof_index", "oneofIndex"), int32_int) ^:: basic_opt ((10, "json_name", "jsonName"), string) ^:: basic_opt ((17, "proto3_optional", "proto3Optional"), bool) ^:: nil )
       let to_proto' =
-        let spec = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "extendee", "extendee"), string) ^:: basic_opt ((3, "number", "number"), int32_int) ^:: basic_opt ((4, "label", "label"), (enum (module Label))) ^:: basic_opt ((5, "type", "type"), (enum (module Type))) ^:: basic_opt ((6, "type_name", "typeName"), string) ^:: basic_opt ((7, "default_value", "defaultValue"), string) ^:: basic_opt ((8, "options", "options"), (message (module FieldOptions))) ^:: basic_opt ((9, "oneof_index", "oneofIndex"), int32_int) ^:: basic_opt ((10, "json_name", "jsonName"), string) ^:: basic_opt ((17, "proto3_optional", "proto3Optional"), bool) ^:: nil ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } -> serialize writer name extendee number label type' type_name default_value options oneof_index json_name proto3_optional
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun name extendee number label type' type_name default_value options oneof_index json_name proto3_optional -> { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } in
-        let spec = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "extendee", "extendee"), string) ^:: basic_opt ((3, "number", "number"), int32_int) ^:: basic_opt ((4, "label", "label"), (enum (module Label))) ^:: basic_opt ((5, "type", "type"), (enum (module Type))) ^:: basic_opt ((6, "type_name", "typeName"), string) ^:: basic_opt ((7, "default_value", "defaultValue"), string) ^:: basic_opt ((8, "options", "options"), (message (module FieldOptions))) ^:: basic_opt ((9, "oneof_index", "oneofIndex"), int32_int) ^:: basic_opt ((10, "json_name", "jsonName"), string) ^:: basic_opt ((17, "proto3_optional", "proto3Optional"), bool) ^:: nil ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and OneofDescriptorProto : sig
@@ -983,16 +976,15 @@ end = struct
         name = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ) t1.name t2.name);
         options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "options", "options"), (message (module OneofOptions))) ) t1.options t2.options);
          })
+      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "options", "options"), (message (module OneofOptions))) ^:: nil )
       let to_proto' =
-        let spec = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "options", "options"), (message (module OneofOptions))) ^:: nil ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; options } -> serialize writer name options
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun name options -> { name; options } in
-        let spec = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "options", "options"), (message (module OneofOptions))) ^:: nil ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and EnumDescriptorProto : sig
@@ -1032,16 +1024,15 @@ end = struct
           start = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ) t1.start t2.start);
           end' = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "end", "end"), int32_int) ) t1.end' t2.end');
            })
+        let spec () = Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ^:: basic_opt ((2, "end", "end"), int32_int) ^:: nil )
         let to_proto' =
-          let spec = Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ^:: basic_opt ((2, "end", "end"), int32_int) ^:: nil ) in
-          let serialize = Runtime'.Serialize.serialize spec in
+          let serialize = Runtime'.Serialize.serialize (spec ()) in
           fun writer { start; end' } -> serialize writer start end'
 
         let to_proto t = to_proto' (Runtime'.Writer.init ()) t
         let from_proto_exn =
           let constructor = fun start end' -> { start; end' } in
-          let spec = Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ^:: basic_opt ((2, "end", "end"), int32_int) ^:: nil ) in
-          Runtime'.Deserialize.deserialize spec constructor
+          Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       end
       let name' () = "descriptor.google.protobuf.EnumDescriptorProto"
@@ -1054,16 +1045,15 @@ end = struct
         reserved_range = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((4, "reserved_range", "reservedRange"), (message (module EnumReservedRange)), not_packed) ) t1.reserved_range t2.reserved_range);
         reserved_name = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((5, "reserved_name", "reservedName"), string, not_packed) ) t1.reserved_name t2.reserved_name);
          })
+      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "value", "value"), (message (module EnumValueDescriptorProto)), not_packed) ^:: basic_opt ((3, "options", "options"), (message (module EnumOptions))) ^:: repeated ((4, "reserved_range", "reservedRange"), (message (module EnumReservedRange)), not_packed) ^:: repeated ((5, "reserved_name", "reservedName"), string, not_packed) ^:: nil )
       let to_proto' =
-        let spec = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "value", "value"), (message (module EnumValueDescriptorProto)), not_packed) ^:: basic_opt ((3, "options", "options"), (message (module EnumOptions))) ^:: repeated ((4, "reserved_range", "reservedRange"), (message (module EnumReservedRange)), not_packed) ^:: repeated ((5, "reserved_name", "reservedName"), string, not_packed) ^:: nil ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; value; options; reserved_range; reserved_name } -> serialize writer name value options reserved_range reserved_name
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun name value options reserved_range reserved_name -> { name; value; options; reserved_range; reserved_name } in
-        let spec = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "value", "value"), (message (module EnumValueDescriptorProto)), not_packed) ^:: basic_opt ((3, "options", "options"), (message (module EnumOptions))) ^:: repeated ((4, "reserved_range", "reservedRange"), (message (module EnumReservedRange)), not_packed) ^:: repeated ((5, "reserved_name", "reservedName"), string, not_packed) ^:: nil ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and EnumValueDescriptorProto : sig
@@ -1084,16 +1074,15 @@ end = struct
         number = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "number", "number"), int32_int) ) t1.number t2.number);
         options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "options", "options"), (message (module EnumValueOptions))) ) t1.options t2.options);
          })
+      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "number", "number"), int32_int) ^:: basic_opt ((3, "options", "options"), (message (module EnumValueOptions))) ^:: nil )
       let to_proto' =
-        let spec = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "number", "number"), int32_int) ^:: basic_opt ((3, "options", "options"), (message (module EnumValueOptions))) ^:: nil ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; number; options } -> serialize writer name number options
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun name number options -> { name; number; options } in
-        let spec = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "number", "number"), int32_int) ^:: basic_opt ((3, "options", "options"), (message (module EnumValueOptions))) ^:: nil ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and ServiceDescriptorProto : sig
@@ -1114,16 +1103,15 @@ end = struct
         method' = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((2, "method", "method"), (message (module MethodDescriptorProto)), not_packed) ) t1.method' t2.method');
         options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "options", "options"), (message (module ServiceOptions))) ) t1.options t2.options);
          })
+      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "method", "method"), (message (module MethodDescriptorProto)), not_packed) ^:: basic_opt ((3, "options", "options"), (message (module ServiceOptions))) ^:: nil )
       let to_proto' =
-        let spec = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "method", "method"), (message (module MethodDescriptorProto)), not_packed) ^:: basic_opt ((3, "options", "options"), (message (module ServiceOptions))) ^:: nil ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; method'; options } -> serialize writer name method' options
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun name method' options -> { name; method'; options } in
-        let spec = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "method", "method"), (message (module MethodDescriptorProto)), not_packed) ^:: basic_opt ((3, "options", "options"), (message (module ServiceOptions))) ^:: nil ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and MethodDescriptorProto : sig
@@ -1147,16 +1135,15 @@ end = struct
         client_streaming = (Runtime'.Merge.merge Runtime'.Spec.( basic ((5, "client_streaming", "clientStreaming"), bool, (false)) ) t1.client_streaming t2.client_streaming);
         server_streaming = (Runtime'.Merge.merge Runtime'.Spec.( basic ((6, "server_streaming", "serverStreaming"), bool, (false)) ) t1.server_streaming t2.server_streaming);
          })
+      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "input_type", "inputType"), string) ^:: basic_opt ((3, "output_type", "outputType"), string) ^:: basic_opt ((4, "options", "options"), (message (module MethodOptions))) ^:: basic ((5, "client_streaming", "clientStreaming"), bool, (false)) ^:: basic ((6, "server_streaming", "serverStreaming"), bool, (false)) ^:: nil )
       let to_proto' =
-        let spec = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "input_type", "inputType"), string) ^:: basic_opt ((3, "output_type", "outputType"), string) ^:: basic_opt ((4, "options", "options"), (message (module MethodOptions))) ^:: basic ((5, "client_streaming", "clientStreaming"), bool, (false)) ^:: basic ((6, "server_streaming", "serverStreaming"), bool, (false)) ^:: nil ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; input_type; output_type; options; client_streaming; server_streaming } -> serialize writer name input_type output_type options client_streaming server_streaming
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun name input_type output_type options client_streaming server_streaming -> { name; input_type; output_type; options; client_streaming; server_streaming } in
-        let spec = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "input_type", "inputType"), string) ^:: basic_opt ((3, "output_type", "outputType"), string) ^:: basic_opt ((4, "options", "options"), (message (module MethodOptions))) ^:: basic ((5, "client_streaming", "clientStreaming"), bool, (false)) ^:: basic ((6, "server_streaming", "serverStreaming"), bool, (false)) ^:: nil ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and FileOptions : sig
@@ -1222,16 +1209,15 @@ end = struct
         uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
         extensions' = (List.append t1.extensions' t2.extensions');
          })
+      let spec () = Runtime'.Spec.( basic_opt ((1, "java_package", "javaPackage"), string) ^:: basic_opt ((8, "java_outer_classname", "javaOuterClassname"), string) ^:: basic ((9, "optimize_for", "optimizeFor"), (enum (module OptimizeMode)), (OptimizeMode.SPEED)) ^:: basic ((10, "java_multiple_files", "javaMultipleFiles"), bool, (false)) ^:: basic_opt ((11, "go_package", "goPackage"), string) ^:: basic ((16, "cc_generic_services", "ccGenericServices"), bool, (false)) ^:: basic ((17, "java_generic_services", "javaGenericServices"), bool, (false)) ^:: basic ((18, "py_generic_services", "pyGenericServices"), bool, (false)) ^:: basic_opt ((20, "java_generate_equals_and_hash", "javaGenerateEqualsAndHash"), bool) ^:: basic ((23, "deprecated", "deprecated"), bool, (false)) ^:: basic ((27, "java_string_check_utf8", "javaStringCheckUtf8"), bool, (false)) ^:: basic ((31, "cc_enable_arenas", "ccEnableArenas"), bool, (true)) ^:: basic_opt ((36, "objc_class_prefix", "objcClassPrefix"), string) ^:: basic_opt ((37, "csharp_namespace", "csharpNamespace"), string) ^:: basic_opt ((39, "swift_prefix", "swiftPrefix"), string) ^:: basic_opt ((40, "php_class_prefix", "phpClassPrefix"), string) ^:: basic_opt ((41, "php_namespace", "phpNamespace"), string) ^:: basic ((42, "php_generic_services", "phpGenericServices"), bool, (false)) ^:: basic_opt ((44, "php_metadata_namespace", "phpMetadataNamespace"), string) ^:: basic_opt ((45, "ruby_package", "rubyPackage"), string) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
-        let spec = Runtime'.Spec.( basic_opt ((1, "java_package", "javaPackage"), string) ^:: basic_opt ((8, "java_outer_classname", "javaOuterClassname"), string) ^:: basic ((9, "optimize_for", "optimizeFor"), (enum (module OptimizeMode)), (OptimizeMode.SPEED)) ^:: basic ((10, "java_multiple_files", "javaMultipleFiles"), bool, (false)) ^:: basic_opt ((11, "go_package", "goPackage"), string) ^:: basic ((16, "cc_generic_services", "ccGenericServices"), bool, (false)) ^:: basic ((17, "java_generic_services", "javaGenericServices"), bool, (false)) ^:: basic ((18, "py_generic_services", "pyGenericServices"), bool, (false)) ^:: basic_opt ((20, "java_generate_equals_and_hash", "javaGenerateEqualsAndHash"), bool) ^:: basic ((23, "deprecated", "deprecated"), bool, (false)) ^:: basic ((27, "java_string_check_utf8", "javaStringCheckUtf8"), bool, (false)) ^:: basic ((31, "cc_enable_arenas", "ccEnableArenas"), bool, (true)) ^:: basic_opt ((36, "objc_class_prefix", "objcClassPrefix"), string) ^:: basic_opt ((37, "csharp_namespace", "csharpNamespace"), string) ^:: basic_opt ((39, "swift_prefix", "swiftPrefix"), string) ^:: basic_opt ((40, "php_class_prefix", "phpClassPrefix"), string) ^:: basic_opt ((41, "php_namespace", "phpNamespace"), string) ^:: basic ((42, "php_generic_services", "phpGenericServices"), bool, (false)) ^:: basic_opt ((44, "php_metadata_namespace", "phpMetadataNamespace"), string) ^:: basic_opt ((45, "ruby_package", "rubyPackage"), string) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } -> serialize writer java_package java_outer_classname optimize_for java_multiple_files go_package cc_generic_services java_generic_services py_generic_services java_generate_equals_and_hash deprecated java_string_check_utf8 cc_enable_arenas objc_class_prefix csharp_namespace swift_prefix php_class_prefix php_namespace php_generic_services php_metadata_namespace ruby_package uninterpreted_option extensions'
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun java_package java_outer_classname optimize_for java_multiple_files go_package cc_generic_services java_generic_services py_generic_services java_generate_equals_and_hash deprecated java_string_check_utf8 cc_enable_arenas objc_class_prefix csharp_namespace swift_prefix php_class_prefix php_namespace php_generic_services php_metadata_namespace ruby_package uninterpreted_option extensions' -> { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } in
-        let spec = Runtime'.Spec.( basic_opt ((1, "java_package", "javaPackage"), string) ^:: basic_opt ((8, "java_outer_classname", "javaOuterClassname"), string) ^:: basic ((9, "optimize_for", "optimizeFor"), (enum (module OptimizeMode)), (OptimizeMode.SPEED)) ^:: basic ((10, "java_multiple_files", "javaMultipleFiles"), bool, (false)) ^:: basic_opt ((11, "go_package", "goPackage"), string) ^:: basic ((16, "cc_generic_services", "ccGenericServices"), bool, (false)) ^:: basic ((17, "java_generic_services", "javaGenericServices"), bool, (false)) ^:: basic ((18, "py_generic_services", "pyGenericServices"), bool, (false)) ^:: basic_opt ((20, "java_generate_equals_and_hash", "javaGenerateEqualsAndHash"), bool) ^:: basic ((23, "deprecated", "deprecated"), bool, (false)) ^:: basic ((27, "java_string_check_utf8", "javaStringCheckUtf8"), bool, (false)) ^:: basic ((31, "cc_enable_arenas", "ccEnableArenas"), bool, (true)) ^:: basic_opt ((36, "objc_class_prefix", "objcClassPrefix"), string) ^:: basic_opt ((37, "csharp_namespace", "csharpNamespace"), string) ^:: basic_opt ((39, "swift_prefix", "swiftPrefix"), string) ^:: basic_opt ((40, "php_class_prefix", "phpClassPrefix"), string) ^:: basic_opt ((41, "php_namespace", "phpNamespace"), string) ^:: basic ((42, "php_generic_services", "phpGenericServices"), bool, (false)) ^:: basic_opt ((44, "php_metadata_namespace", "phpMetadataNamespace"), string) ^:: basic_opt ((45, "ruby_package", "rubyPackage"), string) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and MessageOptions : sig
@@ -1255,16 +1241,15 @@ end = struct
         uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
         extensions' = (List.append t1.extensions' t2.extensions');
          })
+      let spec () = Runtime'.Spec.( basic ((1, "message_set_wire_format", "messageSetWireFormat"), bool, (false)) ^:: basic ((2, "no_standard_descriptor_accessor", "noStandardDescriptorAccessor"), bool, (false)) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: basic_opt ((7, "map_entry", "mapEntry"), bool) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
-        let spec = Runtime'.Spec.( basic ((1, "message_set_wire_format", "messageSetWireFormat"), bool, (false)) ^:: basic ((2, "no_standard_descriptor_accessor", "noStandardDescriptorAccessor"), bool, (false)) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: basic_opt ((7, "map_entry", "mapEntry"), bool) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } -> serialize writer message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option extensions'
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option extensions' -> { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } in
-        let spec = Runtime'.Spec.( basic ((1, "message_set_wire_format", "messageSetWireFormat"), bool, (false)) ^:: basic ((2, "no_standard_descriptor_accessor", "noStandardDescriptorAccessor"), bool, (false)) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: basic_opt ((7, "map_entry", "mapEntry"), bool) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and FieldOptions : sig
@@ -1343,16 +1328,15 @@ end = struct
         uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
         extensions' = (List.append t1.extensions' t2.extensions');
          })
+      let spec () = Runtime'.Spec.( basic ((1, "ctype", "ctype"), (enum (module CType)), (CType.STRING)) ^:: basic_opt ((2, "packed", "packed"), bool) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: basic ((5, "lazy", "lazy"), bool, (false)) ^:: basic ((6, "jstype", "jstype"), (enum (module JSType)), (JSType.JS_NORMAL)) ^:: basic ((10, "weak", "weak"), bool, (false)) ^:: basic ((15, "unverified_lazy", "unverifiedLazy"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
-        let spec = Runtime'.Spec.( basic ((1, "ctype", "ctype"), (enum (module CType)), (CType.STRING)) ^:: basic_opt ((2, "packed", "packed"), bool) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: basic ((5, "lazy", "lazy"), bool, (false)) ^:: basic ((6, "jstype", "jstype"), (enum (module JSType)), (JSType.JS_NORMAL)) ^:: basic ((10, "weak", "weak"), bool, (false)) ^:: basic ((15, "unverified_lazy", "unverifiedLazy"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } -> serialize writer ctype packed deprecated lazy' jstype weak unverified_lazy uninterpreted_option extensions'
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun ctype packed deprecated lazy' jstype weak unverified_lazy uninterpreted_option extensions' -> { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } in
-        let spec = Runtime'.Spec.( basic ((1, "ctype", "ctype"), (enum (module CType)), (CType.STRING)) ^:: basic_opt ((2, "packed", "packed"), bool) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: basic ((5, "lazy", "lazy"), bool, (false)) ^:: basic ((6, "jstype", "jstype"), (enum (module JSType)), (JSType.JS_NORMAL)) ^:: basic ((10, "weak", "weak"), bool, (false)) ^:: basic ((15, "unverified_lazy", "unverifiedLazy"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and OneofOptions : sig
@@ -1372,16 +1356,15 @@ end = struct
         uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
         extensions' = (List.append t1.extensions' t2.extensions');
          })
+      let spec () = Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
-        let spec = Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { uninterpreted_option; extensions' } -> serialize writer uninterpreted_option extensions'
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun uninterpreted_option extensions' -> { uninterpreted_option; extensions' } in
-        let spec = Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and EnumOptions : sig
@@ -1403,16 +1386,15 @@ end = struct
         uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
         extensions' = (List.append t1.extensions' t2.extensions');
          })
+      let spec () = Runtime'.Spec.( basic_opt ((2, "allow_alias", "allowAlias"), bool) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
-        let spec = Runtime'.Spec.( basic_opt ((2, "allow_alias", "allowAlias"), bool) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { allow_alias; deprecated; uninterpreted_option; extensions' } -> serialize writer allow_alias deprecated uninterpreted_option extensions'
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun allow_alias deprecated uninterpreted_option extensions' -> { allow_alias; deprecated; uninterpreted_option; extensions' } in
-        let spec = Runtime'.Spec.( basic_opt ((2, "allow_alias", "allowAlias"), bool) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and EnumValueOptions : sig
@@ -1433,16 +1415,15 @@ end = struct
         uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
         extensions' = (List.append t1.extensions' t2.extensions');
          })
+      let spec () = Runtime'.Spec.( basic ((1, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
-        let spec = Runtime'.Spec.( basic ((1, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { deprecated; uninterpreted_option; extensions' } -> serialize writer deprecated uninterpreted_option extensions'
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun deprecated uninterpreted_option extensions' -> { deprecated; uninterpreted_option; extensions' } in
-        let spec = Runtime'.Spec.( basic ((1, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and ServiceOptions : sig
@@ -1463,16 +1444,15 @@ end = struct
         uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
         extensions' = (List.append t1.extensions' t2.extensions');
          })
+      let spec () = Runtime'.Spec.( basic ((33, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
-        let spec = Runtime'.Spec.( basic ((33, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { deprecated; uninterpreted_option; extensions' } -> serialize writer deprecated uninterpreted_option extensions'
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun deprecated uninterpreted_option extensions' -> { deprecated; uninterpreted_option; extensions' } in
-        let spec = Runtime'.Spec.( basic ((33, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and MethodOptions : sig
@@ -1520,16 +1500,15 @@ end = struct
         uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
         extensions' = (List.append t1.extensions' t2.extensions');
          })
+      let spec () = Runtime'.Spec.( basic ((33, "deprecated", "deprecated"), bool, (false)) ^:: basic ((34, "idempotency_level", "idempotencyLevel"), (enum (module IdempotencyLevel)), (IdempotencyLevel.IDEMPOTENCY_UNKNOWN)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
-        let spec = Runtime'.Spec.( basic ((33, "deprecated", "deprecated"), bool, (false)) ^:: basic ((34, "idempotency_level", "idempotencyLevel"), (enum (module IdempotencyLevel)), (IdempotencyLevel.IDEMPOTENCY_UNKNOWN)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { deprecated; idempotency_level; uninterpreted_option; extensions' } -> serialize writer deprecated idempotency_level uninterpreted_option extensions'
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun deprecated idempotency_level uninterpreted_option extensions' -> { deprecated; idempotency_level; uninterpreted_option; extensions' } in
-        let spec = Runtime'.Spec.( basic ((33, "deprecated", "deprecated"), bool, (false)) ^:: basic ((34, "idempotency_level", "idempotencyLevel"), (enum (module IdempotencyLevel)), (IdempotencyLevel.IDEMPOTENCY_UNKNOWN)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and UninterpretedOption : sig
@@ -1569,16 +1548,15 @@ end = struct
           name_part = (Runtime'.Merge.merge Runtime'.Spec.( basic_req ((1, "name_part", "namePart"), string) ) t1.name_part t2.name_part);
           is_extension = (Runtime'.Merge.merge Runtime'.Spec.( basic_req ((2, "is_extension", "isExtension"), bool) ) t1.is_extension t2.is_extension);
            })
+        let spec () = Runtime'.Spec.( basic_req ((1, "name_part", "namePart"), string) ^:: basic_req ((2, "is_extension", "isExtension"), bool) ^:: nil )
         let to_proto' =
-          let spec = Runtime'.Spec.( basic_req ((1, "name_part", "namePart"), string) ^:: basic_req ((2, "is_extension", "isExtension"), bool) ^:: nil ) in
-          let serialize = Runtime'.Serialize.serialize spec in
+          let serialize = Runtime'.Serialize.serialize (spec ()) in
           fun writer { name_part; is_extension } -> serialize writer name_part is_extension
 
         let to_proto t = to_proto' (Runtime'.Writer.init ()) t
         let from_proto_exn =
           let constructor = fun name_part is_extension -> { name_part; is_extension } in
-          let spec = Runtime'.Spec.( basic_req ((1, "name_part", "namePart"), string) ^:: basic_req ((2, "is_extension", "isExtension"), bool) ^:: nil ) in
-          Runtime'.Deserialize.deserialize spec constructor
+          Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       end
       let name' () = "descriptor.google.protobuf.UninterpretedOption"
@@ -1593,16 +1571,15 @@ end = struct
         string_value = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((7, "string_value", "stringValue"), bytes) ) t1.string_value t2.string_value);
         aggregate_value = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((8, "aggregate_value", "aggregateValue"), string) ) t1.aggregate_value t2.aggregate_value);
          })
+      let spec () = Runtime'.Spec.( repeated ((2, "name", "name"), (message (module NamePart)), not_packed) ^:: basic_opt ((3, "identifier_value", "identifierValue"), string) ^:: basic_opt ((4, "positive_int_value", "positiveIntValue"), uint64_int) ^:: basic_opt ((5, "negative_int_value", "negativeIntValue"), int64_int) ^:: basic_opt ((6, "double_value", "doubleValue"), double) ^:: basic_opt ((7, "string_value", "stringValue"), bytes) ^:: basic_opt ((8, "aggregate_value", "aggregateValue"), string) ^:: nil )
       let to_proto' =
-        let spec = Runtime'.Spec.( repeated ((2, "name", "name"), (message (module NamePart)), not_packed) ^:: basic_opt ((3, "identifier_value", "identifierValue"), string) ^:: basic_opt ((4, "positive_int_value", "positiveIntValue"), uint64_int) ^:: basic_opt ((5, "negative_int_value", "negativeIntValue"), int64_int) ^:: basic_opt ((6, "double_value", "doubleValue"), double) ^:: basic_opt ((7, "string_value", "stringValue"), bytes) ^:: basic_opt ((8, "aggregate_value", "aggregateValue"), string) ^:: nil ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } -> serialize writer name identifier_value positive_int_value negative_int_value double_value string_value aggregate_value
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun name identifier_value positive_int_value negative_int_value double_value string_value aggregate_value -> { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } in
-        let spec = Runtime'.Spec.( repeated ((2, "name", "name"), (message (module NamePart)), not_packed) ^:: basic_opt ((3, "identifier_value", "identifierValue"), string) ^:: basic_opt ((4, "positive_int_value", "positiveIntValue"), uint64_int) ^:: basic_opt ((5, "negative_int_value", "negativeIntValue"), int64_int) ^:: basic_opt ((6, "double_value", "doubleValue"), double) ^:: basic_opt ((7, "string_value", "stringValue"), bytes) ^:: basic_opt ((8, "aggregate_value", "aggregateValue"), string) ^:: nil ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and SourceCodeInfo : sig
@@ -1645,32 +1622,30 @@ end = struct
           trailing_comments = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((4, "trailing_comments", "trailingComments"), string) ) t1.trailing_comments t2.trailing_comments);
           leading_detached_comments = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((6, "leading_detached_comments", "leadingDetachedComments"), string, not_packed) ) t1.leading_detached_comments t2.leading_detached_comments);
            })
+        let spec () = Runtime'.Spec.( repeated ((1, "path", "path"), int32_int, packed) ^:: repeated ((2, "span", "span"), int32_int, packed) ^:: basic_opt ((3, "leading_comments", "leadingComments"), string) ^:: basic_opt ((4, "trailing_comments", "trailingComments"), string) ^:: repeated ((6, "leading_detached_comments", "leadingDetachedComments"), string, not_packed) ^:: nil )
         let to_proto' =
-          let spec = Runtime'.Spec.( repeated ((1, "path", "path"), int32_int, packed) ^:: repeated ((2, "span", "span"), int32_int, packed) ^:: basic_opt ((3, "leading_comments", "leadingComments"), string) ^:: basic_opt ((4, "trailing_comments", "trailingComments"), string) ^:: repeated ((6, "leading_detached_comments", "leadingDetachedComments"), string, not_packed) ^:: nil ) in
-          let serialize = Runtime'.Serialize.serialize spec in
+          let serialize = Runtime'.Serialize.serialize (spec ()) in
           fun writer { path; span; leading_comments; trailing_comments; leading_detached_comments } -> serialize writer path span leading_comments trailing_comments leading_detached_comments
 
         let to_proto t = to_proto' (Runtime'.Writer.init ()) t
         let from_proto_exn =
           let constructor = fun path span leading_comments trailing_comments leading_detached_comments -> { path; span; leading_comments; trailing_comments; leading_detached_comments } in
-          let spec = Runtime'.Spec.( repeated ((1, "path", "path"), int32_int, packed) ^:: repeated ((2, "span", "span"), int32_int, packed) ^:: basic_opt ((3, "leading_comments", "leadingComments"), string) ^:: basic_opt ((4, "trailing_comments", "trailingComments"), string) ^:: repeated ((6, "leading_detached_comments", "leadingDetachedComments"), string, not_packed) ^:: nil ) in
-          Runtime'.Deserialize.deserialize spec constructor
+          Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       end
       let name' () = "descriptor.google.protobuf.SourceCodeInfo"
       type t = (Location.t list)
       let make ?(location = []) () = (location)
       let merge = (fun (t1_location) (t2_location) -> (Runtime'.Merge.merge Runtime'.Spec.( repeated ((1, "location", "location"), (message (module Location)), not_packed) ) t1_location t2_location))
+      let spec () = Runtime'.Spec.( repeated ((1, "location", "location"), (message (module Location)), not_packed) ^:: nil )
       let to_proto' =
-        let spec = Runtime'.Spec.( repeated ((1, "location", "location"), (message (module Location)), not_packed) ^:: nil ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         serialize
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun location -> (location) in
-        let spec = Runtime'.Spec.( repeated ((1, "location", "location"), (message (module Location)), not_packed) ^:: nil ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
     and GeneratedCodeInfo : sig
@@ -1712,32 +1687,30 @@ end = struct
           begin' = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "begin", "begin"), int32_int) ) t1.begin' t2.begin');
           end' = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((4, "end", "end"), int32_int) ) t1.end' t2.end');
            })
+        let spec () = Runtime'.Spec.( repeated ((1, "path", "path"), int32_int, packed) ^:: basic_opt ((2, "source_file", "sourceFile"), string) ^:: basic_opt ((3, "begin", "begin"), int32_int) ^:: basic_opt ((4, "end", "end"), int32_int) ^:: nil )
         let to_proto' =
-          let spec = Runtime'.Spec.( repeated ((1, "path", "path"), int32_int, packed) ^:: basic_opt ((2, "source_file", "sourceFile"), string) ^:: basic_opt ((3, "begin", "begin"), int32_int) ^:: basic_opt ((4, "end", "end"), int32_int) ^:: nil ) in
-          let serialize = Runtime'.Serialize.serialize spec in
+          let serialize = Runtime'.Serialize.serialize (spec ()) in
           fun writer { path; source_file; begin'; end' } -> serialize writer path source_file begin' end'
 
         let to_proto t = to_proto' (Runtime'.Writer.init ()) t
         let from_proto_exn =
           let constructor = fun path source_file begin' end' -> { path; source_file; begin'; end' } in
-          let spec = Runtime'.Spec.( repeated ((1, "path", "path"), int32_int, packed) ^:: basic_opt ((2, "source_file", "sourceFile"), string) ^:: basic_opt ((3, "begin", "begin"), int32_int) ^:: basic_opt ((4, "end", "end"), int32_int) ^:: nil ) in
-          Runtime'.Deserialize.deserialize spec constructor
+          Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       end
       let name' () = "descriptor.google.protobuf.GeneratedCodeInfo"
       type t = (Annotation.t list)
       let make ?(annotation = []) () = (annotation)
       let merge = (fun (t1_annotation) (t2_annotation) -> (Runtime'.Merge.merge Runtime'.Spec.( repeated ((1, "annotation", "annotation"), (message (module Annotation)), not_packed) ) t1_annotation t2_annotation))
+      let spec () = Runtime'.Spec.( repeated ((1, "annotation", "annotation"), (message (module Annotation)), not_packed) ^:: nil )
       let to_proto' =
-        let spec = Runtime'.Spec.( repeated ((1, "annotation", "annotation"), (message (module Annotation)), not_packed) ^:: nil ) in
-        let serialize = Runtime'.Serialize.serialize spec in
+        let serialize = Runtime'.Serialize.serialize (spec ()) in
         serialize
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
         let constructor = fun annotation -> (annotation) in
-        let spec = Runtime'.Spec.( repeated ((1, "annotation", "annotation"), (message (module Annotation)), not_packed) ^:: nil ) in
-        Runtime'.Deserialize.deserialize spec constructor
+        Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
     end
   end

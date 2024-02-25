@@ -233,10 +233,10 @@ let rec emit_message ~params ~syntax scope
       Code.emit implementation `None "type t = %s%s" type' params.annot;
       Code.emit implementation `None "let make %s" default_constructor_impl;
       Code.emit implementation `None "let merge = (%s)" merge_impl;
+      Code.emit implementation `None "let spec () = %s" spec_str;
 
       Code.emit implementation `Begin "let to_proto' =";
-      Code.emit implementation `None "let spec = %s in" spec_str;
-      Code.emit implementation `None "let serialize = Runtime'.Serialize.serialize spec in";
+      Code.emit implementation `None "let serialize = Runtime'.Serialize.serialize (spec ()) in";
       Code.emit implementation `None "%s" apply;
       Code.emit implementation `End "";
 
@@ -244,8 +244,7 @@ let rec emit_message ~params ~syntax scope
 
       Code.emit implementation `Begin "let from_proto_exn =";
       Code.emit implementation `None "let constructor = %s in" constructor;
-      Code.emit implementation `None "let spec = %s in" spec_str;
-      Code.emit implementation `None "Runtime'.Deserialize.deserialize spec constructor";
+      Code.emit implementation `None "Runtime'.Deserialize.deserialize (spec ()) constructor";
       Code.emit implementation `End "let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)";
     | None -> ()
   in

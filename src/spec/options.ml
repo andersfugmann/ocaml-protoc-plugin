@@ -37,16 +37,15 @@ end = struct
   type t = (bool)
   let make ?(mangle_names = false) () = (mangle_names)
   let merge = (fun (t1_mangle_names) (t2_mangle_names) -> (Runtime'.Merge.merge Runtime'.Spec.( basic ((1, "mangle_names", "mangleNames"), bool, (false)) ) t1_mangle_names t2_mangle_names))
+  let spec () = Runtime'.Spec.( basic ((1, "mangle_names", "mangleNames"), bool, (false)) ^:: nil )
   let to_proto' =
-    let spec = Runtime'.Spec.( basic ((1, "mangle_names", "mangleNames"), bool, (false)) ^:: nil ) in
-    let serialize = Runtime'.Serialize.serialize spec in
+    let serialize = Runtime'.Serialize.serialize (spec ()) in
     serialize
 
   let to_proto t = to_proto' (Runtime'.Writer.init ()) t
   let from_proto_exn =
     let constructor = fun mangle_names -> (mangle_names) in
-    let spec = Runtime'.Spec.( basic ((1, "mangle_names", "mangleNames"), bool, (false)) ^:: nil ) in
-    Runtime'.Deserialize.deserialize spec constructor
+    Runtime'.Deserialize.deserialize (spec ()) constructor
   let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
 end
 and Ocaml_options : sig
