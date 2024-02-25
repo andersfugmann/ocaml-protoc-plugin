@@ -2,6 +2,21 @@ module type T = sig
   type ('a, 'deser, 'ser) dir
 end
 
+module type Enum = sig
+  type t
+  val to_int: t -> int
+  val from_int: int -> t Result.t
+  val from_int_exn: int -> t
+end
+
+module type Message = sig
+  type t
+  val from_proto: Reader.t -> t Result.t
+  val from_proto_exn: Reader.t -> t
+  val to_proto: t -> Writer.t
+  val to_proto': Writer.t -> t -> Writer.t
+end
+
 module Make(T : T) = struct
 
   type packed = Packed | Not_packed
