@@ -1,5 +1,5 @@
 module type T = sig
-  type 'a dir
+  type 'a t
 end
 
 module type Enum = sig
@@ -58,14 +58,14 @@ module Make(T : T) = struct
     | Bool : bool spec
     | String : string spec
     | Bytes : bytes spec
-    | Enum :  (module Enum with type t = 'a) T.dir  -> 'a spec
-    | Message : (module Message with type t = 'a) T.dir -> 'a spec
+    | Enum :  (module Enum with type t = 'a) T.t  -> 'a spec
+    | Message : (module Message with type t = 'a) T.t -> 'a spec
 
   (* Existential types *)
   type espec = Espec: _ spec -> espec [@@unboxed]
 
   type _ oneof =
-    | Oneof_elem : field * 'b spec * (('b -> 'a) * ('a -> 'b)) T.dir -> 'a oneof
+    | Oneof_elem : field * 'b spec * (('b -> 'a) * ('a -> 'b)) T.t -> 'a oneof
 
   type _ compound =
     (* A field, where the default value is know (and set). This cannot be used for message types *)
@@ -81,7 +81,7 @@ module Make(T : T) = struct
     | Repeated : field * 'a spec * packed -> 'a list compound
 
     (* Oneofs. A list of fields + function to index the field *)
-    | Oneof : (('a oneof list) * ('a -> int)) T.dir -> ([> `not_set ] as 'a) compound
+    | Oneof : (('a oneof list) * ('a -> int)) T.t -> ([> `not_set ] as 'a) compound
 
   type (_, _) compound_list =
     (* End of list *)
@@ -177,5 +177,5 @@ module Make(T : T) = struct
 end
 
 include Make(struct
-    type 'a dir = 'a
+    type 'a t = 'a
   end)

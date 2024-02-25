@@ -6,13 +6,12 @@ open StdLabels
    This will ensure that the plugin will only construct valid types,
    so that changes to the spec will require changes here also.
 *)
-module Dir = struct
-  type t = { type': string; module_name: string; deserialize_spec: string; serialize_spec: string; default: string option; fields: (string * string) list }
-  type _ dir = t
+module T = struct
+  type data = { type': string; module_name: string; deserialize_spec: string; serialize_spec: string; default: string option; fields: (string * string) list }
+  type _ t = data
 end
 
-module T = Ocaml_protoc_plugin.Spec.Make(Dir)
-open T
+open Ocaml_protoc_plugin.Spec.Make(T)
 
 open Spec.Descriptor.Google.Protobuf
 
@@ -498,8 +497,8 @@ let c_of_oneof ~params ~syntax:_ ~scope OneofDescriptorProto.{ name; _ } fields 
       List.map ~f:(fun (index, name, type', Espec spec) ->
         let adt_name = Scope.get_name_exn scope name in
         (* { type'; module_name: string; deserialize_spec: string; serialize_spec: string; default: string option; fields: (string * string) list } *)
-        let arg : Dir.t = { type'; module_name = adt_name; deserialize_spec = (sprintf "fun v -> %s v" adt_name); serialize_spec = "v"; default = None; fields = [] } in
-        adt_name, Oneof_elem (index, spec, arg )
+        let arg = { T.type'; module_name = adt_name; deserialize_spec = (sprintf "fun v -> %s v" adt_name); serialize_spec = "v"; default = None; fields = [] } in
+        adt_name, Oneof_elem (index, spec, arg)
       )
     in
     let type' =
