@@ -10,6 +10,8 @@ module type Enum = sig
   val to_int: t -> int
   val from_int: int -> t Result.t
   val from_int_exn: int -> t
+  val to_string: t -> string
+  val from_string_exn: string -> t
 end
 
 module type Message = sig

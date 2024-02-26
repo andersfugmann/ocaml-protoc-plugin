@@ -52,6 +52,8 @@ module rec Google : sig
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
+          val to_string: t -> string
+          val from_string_exn: string -> t
         end
         and File : sig
           val name': unit -> string
@@ -103,6 +105,8 @@ end = struct
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
+          val to_string: t -> string
+          val from_string_exn: string -> t
         end
         and File : sig
           val name': unit -> string
@@ -152,6 +156,8 @@ end = struct
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
+          val to_string: t -> string
+          val from_string_exn: string -> t
         end
         and File : sig
           val name': unit -> string
@@ -239,6 +245,8 @@ end = struct
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
+          val to_string: t -> string
+          val from_string_exn: string -> t
         end
         and File : sig
           val name': unit -> string
@@ -264,18 +272,26 @@ end = struct
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
+          val to_string: t -> string
+          val from_string_exn: string -> t
         end = struct
           type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
           let to_int = function
             | FEATURE_NONE -> 0
             | FEATURE_PROTO3_OPTIONAL -> 1
-
           let from_int_exn = function
             | 0 -> FEATURE_NONE
             | 1 -> FEATURE_PROTO3_OPTIONAL
             | n -> Runtime'.Result.raise (`Unknown_enum_value n)
-
           let from_int e = Runtime'.Result.catch (fun () -> from_int_exn e)
+          let to_string = function
+            | FEATURE_NONE -> "FEATURE_NONE"
+            | FEATURE_PROTO3_OPTIONAL -> "FEATURE_PROTO3_OPTIONAL"
+          let from_string_exn = function
+            | "FEATURE_NONE" -> FEATURE_NONE
+            | "FEATURE_PROTO3_OPTIONAL" -> FEATURE_PROTO3_OPTIONAL
+            | s -> failwith ("Unknown enum name" ^ s)
+
         end
         and File : sig
           val name': unit -> string

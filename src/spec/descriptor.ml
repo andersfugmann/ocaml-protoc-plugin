@@ -86,12 +86,16 @@ module rec Google : sig
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end
       and Label : sig
         type t = LABEL_OPTIONAL | LABEL_REQUIRED | LABEL_REPEATED
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end
       val name': unit -> string
       type t = { name: string option; extendee: string option; number: int option; label: Label.t option; type': Type.t option; type_name: string option; default_value: string option; options: FieldOptions.t option; oneof_index: int option; json_name: string option; proto3_optional: bool option }
@@ -168,6 +172,8 @@ module rec Google : sig
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end
       val name': unit -> string
       type t = { java_package: string option; java_outer_classname: string option; optimize_for: OptimizeMode.t; java_multiple_files: bool; go_package: string option; cc_generic_services: bool; java_generic_services: bool; py_generic_services: bool; java_generate_equals_and_hash: bool option; deprecated: bool; java_string_check_utf8: bool; cc_enable_arenas: bool; objc_class_prefix: string option; csharp_namespace: string option; swift_prefix: string option; php_class_prefix: string option; php_namespace: string option; php_generic_services: bool; php_metadata_namespace: string option; ruby_package: string option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
@@ -194,12 +200,16 @@ module rec Google : sig
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end
       and JSType : sig
         type t = JS_NORMAL | JS_STRING | JS_NUMBER
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end
       val name': unit -> string
       type t = { ctype: CType.t; packed: bool option; deprecated: bool; lazy': bool; jstype: JSType.t; weak: bool; unverified_lazy: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
@@ -256,6 +266,8 @@ module rec Google : sig
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end
       val name': unit -> string
       type t = { deprecated: bool; idempotency_level: IdempotencyLevel.t; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
@@ -395,12 +407,16 @@ end = struct
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end
       and Label : sig
         type t = LABEL_OPTIONAL | LABEL_REQUIRED | LABEL_REPEATED
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end
       val name': unit -> string
       type t = { name: string option; extendee: string option; number: int option; label: Label.t option; type': Type.t option; type_name: string option; default_value: string option; options: FieldOptions.t option; oneof_index: int option; json_name: string option; proto3_optional: bool option }
@@ -477,6 +493,8 @@ end = struct
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end
       val name': unit -> string
       type t = { java_package: string option; java_outer_classname: string option; optimize_for: OptimizeMode.t; java_multiple_files: bool; go_package: string option; cc_generic_services: bool; java_generic_services: bool; py_generic_services: bool; java_generate_equals_and_hash: bool option; deprecated: bool; java_string_check_utf8: bool; cc_enable_arenas: bool; objc_class_prefix: string option; csharp_namespace: string option; swift_prefix: string option; php_class_prefix: string option; php_namespace: string option; php_generic_services: bool; php_metadata_namespace: string option; ruby_package: string option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
@@ -503,12 +521,16 @@ end = struct
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end
       and JSType : sig
         type t = JS_NORMAL | JS_STRING | JS_NUMBER
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end
       val name': unit -> string
       type t = { ctype: CType.t; packed: bool option; deprecated: bool; lazy': bool; jstype: JSType.t; weak: bool; unverified_lazy: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
@@ -565,6 +587,8 @@ end = struct
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end
       val name': unit -> string
       type t = { deprecated: bool; idempotency_level: IdempotencyLevel.t; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
@@ -846,12 +870,16 @@ end = struct
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end
       and Label : sig
         type t = LABEL_OPTIONAL | LABEL_REQUIRED | LABEL_REPEATED
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end
       val name': unit -> string
       type t = { name: string option; extendee: string option; number: int option; label: Label.t option; type': Type.t option; type_name: string option; default_value: string option; options: FieldOptions.t option; oneof_index: int option; json_name: string option; proto3_optional: bool option }
@@ -867,6 +895,8 @@ end = struct
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end = struct
         type t = TYPE_DOUBLE | TYPE_FLOAT | TYPE_INT64 | TYPE_UINT64 | TYPE_INT32 | TYPE_FIXED64 | TYPE_FIXED32 | TYPE_BOOL | TYPE_STRING | TYPE_GROUP | TYPE_MESSAGE | TYPE_BYTES | TYPE_UINT32 | TYPE_ENUM | TYPE_SFIXED32 | TYPE_SFIXED64 | TYPE_SINT32 | TYPE_SINT64
         let to_int = function
@@ -888,7 +918,6 @@ end = struct
           | TYPE_SFIXED64 -> 16
           | TYPE_SINT32 -> 17
           | TYPE_SINT64 -> 18
-
         let from_int_exn = function
           | 1 -> TYPE_DOUBLE
           | 2 -> TYPE_FLOAT
@@ -909,28 +938,77 @@ end = struct
           | 17 -> TYPE_SINT32
           | 18 -> TYPE_SINT64
           | n -> Runtime'.Result.raise (`Unknown_enum_value n)
-
         let from_int e = Runtime'.Result.catch (fun () -> from_int_exn e)
+        let to_string = function
+          | TYPE_DOUBLE -> "TYPE_DOUBLE"
+          | TYPE_FLOAT -> "TYPE_FLOAT"
+          | TYPE_INT64 -> "TYPE_INT64"
+          | TYPE_UINT64 -> "TYPE_UINT64"
+          | TYPE_INT32 -> "TYPE_INT32"
+          | TYPE_FIXED64 -> "TYPE_FIXED64"
+          | TYPE_FIXED32 -> "TYPE_FIXED32"
+          | TYPE_BOOL -> "TYPE_BOOL"
+          | TYPE_STRING -> "TYPE_STRING"
+          | TYPE_GROUP -> "TYPE_GROUP"
+          | TYPE_MESSAGE -> "TYPE_MESSAGE"
+          | TYPE_BYTES -> "TYPE_BYTES"
+          | TYPE_UINT32 -> "TYPE_UINT32"
+          | TYPE_ENUM -> "TYPE_ENUM"
+          | TYPE_SFIXED32 -> "TYPE_SFIXED32"
+          | TYPE_SFIXED64 -> "TYPE_SFIXED64"
+          | TYPE_SINT32 -> "TYPE_SINT32"
+          | TYPE_SINT64 -> "TYPE_SINT64"
+        let from_string_exn = function
+          | "TYPE_DOUBLE" -> TYPE_DOUBLE
+          | "TYPE_FLOAT" -> TYPE_FLOAT
+          | "TYPE_INT64" -> TYPE_INT64
+          | "TYPE_UINT64" -> TYPE_UINT64
+          | "TYPE_INT32" -> TYPE_INT32
+          | "TYPE_FIXED64" -> TYPE_FIXED64
+          | "TYPE_FIXED32" -> TYPE_FIXED32
+          | "TYPE_BOOL" -> TYPE_BOOL
+          | "TYPE_STRING" -> TYPE_STRING
+          | "TYPE_GROUP" -> TYPE_GROUP
+          | "TYPE_MESSAGE" -> TYPE_MESSAGE
+          | "TYPE_BYTES" -> TYPE_BYTES
+          | "TYPE_UINT32" -> TYPE_UINT32
+          | "TYPE_ENUM" -> TYPE_ENUM
+          | "TYPE_SFIXED32" -> TYPE_SFIXED32
+          | "TYPE_SFIXED64" -> TYPE_SFIXED64
+          | "TYPE_SINT32" -> TYPE_SINT32
+          | "TYPE_SINT64" -> TYPE_SINT64
+          | s -> failwith ("Unknown enum name" ^ s)
+
       end
       and Label : sig
         type t = LABEL_OPTIONAL | LABEL_REQUIRED | LABEL_REPEATED
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end = struct
         type t = LABEL_OPTIONAL | LABEL_REQUIRED | LABEL_REPEATED
         let to_int = function
           | LABEL_OPTIONAL -> 1
           | LABEL_REQUIRED -> 2
           | LABEL_REPEATED -> 3
-
         let from_int_exn = function
           | 1 -> LABEL_OPTIONAL
           | 2 -> LABEL_REQUIRED
           | 3 -> LABEL_REPEATED
           | n -> Runtime'.Result.raise (`Unknown_enum_value n)
-
         let from_int e = Runtime'.Result.catch (fun () -> from_int_exn e)
+        let to_string = function
+          | LABEL_OPTIONAL -> "LABEL_OPTIONAL"
+          | LABEL_REQUIRED -> "LABEL_REQUIRED"
+          | LABEL_REPEATED -> "LABEL_REPEATED"
+        let from_string_exn = function
+          | "LABEL_OPTIONAL" -> LABEL_OPTIONAL
+          | "LABEL_REQUIRED" -> LABEL_REQUIRED
+          | "LABEL_REPEATED" -> LABEL_REPEATED
+          | s -> failwith ("Unknown enum name" ^ s)
+
       end
       let name' () = "descriptor.google.protobuf.FieldDescriptorProto"
       type t = { name: string option; extendee: string option; number: int option; label: Label.t option; type': Type.t option; type_name: string option; default_value: string option; options: FieldOptions.t option; oneof_index: int option; json_name: string option; proto3_optional: bool option }
@@ -1152,6 +1230,8 @@ end = struct
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end
       val name': unit -> string
       type t = { java_package: string option; java_outer_classname: string option; optimize_for: OptimizeMode.t; java_multiple_files: bool; go_package: string option; cc_generic_services: bool; java_generic_services: bool; py_generic_services: bool; java_generate_equals_and_hash: bool option; deprecated: bool; java_string_check_utf8: bool; cc_enable_arenas: bool; objc_class_prefix: string option; csharp_namespace: string option; swift_prefix: string option; php_class_prefix: string option; php_namespace: string option; php_generic_services: bool; php_metadata_namespace: string option; ruby_package: string option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
@@ -1167,20 +1247,30 @@ end = struct
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end = struct
         type t = SPEED | CODE_SIZE | LITE_RUNTIME
         let to_int = function
           | SPEED -> 1
           | CODE_SIZE -> 2
           | LITE_RUNTIME -> 3
-
         let from_int_exn = function
           | 1 -> SPEED
           | 2 -> CODE_SIZE
           | 3 -> LITE_RUNTIME
           | n -> Runtime'.Result.raise (`Unknown_enum_value n)
-
         let from_int e = Runtime'.Result.catch (fun () -> from_int_exn e)
+        let to_string = function
+          | SPEED -> "SPEED"
+          | CODE_SIZE -> "CODE_SIZE"
+          | LITE_RUNTIME -> "LITE_RUNTIME"
+        let from_string_exn = function
+          | "SPEED" -> SPEED
+          | "CODE_SIZE" -> CODE_SIZE
+          | "LITE_RUNTIME" -> LITE_RUNTIME
+          | s -> failwith ("Unknown enum name" ^ s)
+
       end
       let name' () = "descriptor.google.protobuf.FileOptions"
       type t = { java_package: string option; java_outer_classname: string option; optimize_for: OptimizeMode.t; java_multiple_files: bool; go_package: string option; cc_generic_services: bool; java_generic_services: bool; py_generic_services: bool; java_generate_equals_and_hash: bool option; deprecated: bool; java_string_check_utf8: bool; cc_enable_arenas: bool; objc_class_prefix: string option; csharp_namespace: string option; swift_prefix: string option; php_class_prefix: string option; php_namespace: string option; php_generic_services: bool; php_metadata_namespace: string option; ruby_package: string option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
@@ -1258,12 +1348,16 @@ end = struct
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end
       and JSType : sig
         type t = JS_NORMAL | JS_STRING | JS_NUMBER
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end
       val name': unit -> string
       type t = { ctype: CType.t; packed: bool option; deprecated: bool; lazy': bool; jstype: JSType.t; weak: bool; unverified_lazy: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
@@ -1279,40 +1373,60 @@ end = struct
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end = struct
         type t = STRING | CORD | STRING_PIECE
         let to_int = function
           | STRING -> 0
           | CORD -> 1
           | STRING_PIECE -> 2
-
         let from_int_exn = function
           | 0 -> STRING
           | 1 -> CORD
           | 2 -> STRING_PIECE
           | n -> Runtime'.Result.raise (`Unknown_enum_value n)
-
         let from_int e = Runtime'.Result.catch (fun () -> from_int_exn e)
+        let to_string = function
+          | STRING -> "STRING"
+          | CORD -> "CORD"
+          | STRING_PIECE -> "STRING_PIECE"
+        let from_string_exn = function
+          | "STRING" -> STRING
+          | "CORD" -> CORD
+          | "STRING_PIECE" -> STRING_PIECE
+          | s -> failwith ("Unknown enum name" ^ s)
+
       end
       and JSType : sig
         type t = JS_NORMAL | JS_STRING | JS_NUMBER
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end = struct
         type t = JS_NORMAL | JS_STRING | JS_NUMBER
         let to_int = function
           | JS_NORMAL -> 0
           | JS_STRING -> 1
           | JS_NUMBER -> 2
-
         let from_int_exn = function
           | 0 -> JS_NORMAL
           | 1 -> JS_STRING
           | 2 -> JS_NUMBER
           | n -> Runtime'.Result.raise (`Unknown_enum_value n)
-
         let from_int e = Runtime'.Result.catch (fun () -> from_int_exn e)
+        let to_string = function
+          | JS_NORMAL -> "JS_NORMAL"
+          | JS_STRING -> "JS_STRING"
+          | JS_NUMBER -> "JS_NUMBER"
+        let from_string_exn = function
+          | "JS_NORMAL" -> JS_NORMAL
+          | "JS_STRING" -> JS_STRING
+          | "JS_NUMBER" -> JS_NUMBER
+          | s -> failwith ("Unknown enum name" ^ s)
+
       end
       let name' () = "descriptor.google.protobuf.FieldOptions"
       type t = { ctype: CType.t; packed: bool option; deprecated: bool; lazy': bool; jstype: JSType.t; weak: bool; unverified_lazy: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
@@ -1461,6 +1575,8 @@ end = struct
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end
       val name': unit -> string
       type t = { deprecated: bool; idempotency_level: IdempotencyLevel.t; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
@@ -1476,20 +1592,30 @@ end = struct
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
+        val to_string: t -> string
+        val from_string_exn: string -> t
       end = struct
         type t = IDEMPOTENCY_UNKNOWN | NO_SIDE_EFFECTS | IDEMPOTENT
         let to_int = function
           | IDEMPOTENCY_UNKNOWN -> 0
           | NO_SIDE_EFFECTS -> 1
           | IDEMPOTENT -> 2
-
         let from_int_exn = function
           | 0 -> IDEMPOTENCY_UNKNOWN
           | 1 -> NO_SIDE_EFFECTS
           | 2 -> IDEMPOTENT
           | n -> Runtime'.Result.raise (`Unknown_enum_value n)
-
         let from_int e = Runtime'.Result.catch (fun () -> from_int_exn e)
+        let to_string = function
+          | IDEMPOTENCY_UNKNOWN -> "IDEMPOTENCY_UNKNOWN"
+          | NO_SIDE_EFFECTS -> "NO_SIDE_EFFECTS"
+          | IDEMPOTENT -> "IDEMPOTENT"
+        let from_string_exn = function
+          | "IDEMPOTENCY_UNKNOWN" -> IDEMPOTENCY_UNKNOWN
+          | "NO_SIDE_EFFECTS" -> NO_SIDE_EFFECTS
+          | "IDEMPOTENT" -> IDEMPOTENT
+          | s -> failwith ("Unknown enum name" ^ s)
+
       end
       let name' () = "descriptor.google.protobuf.MethodOptions"
       type t = { deprecated: bool; idempotency_level: IdempotencyLevel.t; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }

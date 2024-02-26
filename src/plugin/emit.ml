@@ -33,13 +33,14 @@ let emit_enum_type ~scope ~params
   Code.emit signature `None "val to_int: t -> int";
   Code.emit signature `None "val from_int: int -> t Runtime'.Result.t";
   Code.emit signature `None "val from_int_exn: int -> t";
+  Code.emit signature `None "val to_string: t -> string";
+  Code.emit signature `None "val from_string_exn: string -> t";
 
   Code.emit implementation `Begin "let to_int = function";
   List.iter ~f:(fun EnumValueDescriptorProto.{name; number; _} ->
     Code.emit implementation `None "| %s -> %d" (Scope.get_name_exn scope name) (Option.value_exn number)
   ) values;
-  Code.emit implementation `End "";
-  Code.emit implementation `Begin "let from_int_exn = function";
+  Code.emit implementation `EndBegin "let from_int_exn = function";
   let _ =
     List.fold_left ~init:IntSet.empty ~f:(fun seen EnumValueDescriptorProto.{name; number; _} ->
         let idx = (Option.value_exn ~message:"All enum descriptions must have a value" number) in
@@ -51,8 +52,17 @@ let emit_enum_type ~scope ~params
       ) values
   in
   Code.emit implementation `None "| n -> Runtime'.Result.raise (`Unknown_enum_value n)";
+  Code.emit implementation `End "let from_int e = Runtime'.Result.catch (fun () -> from_int_exn e)";
+  Code.emit implementation `Begin "let to_string = function";
+  List.iter ~f:(fun EnumValueDescriptorProto.{name; _} ->
+    Code.emit implementation `None "| %s -> \"%s\"" (Scope.get_name_exn scope name) (Option.value_exn name)
+  ) values;
+  Code.emit implementation `EndBegin "let from_string_exn = function";
+  List.iter ~f:(fun EnumValueDescriptorProto.{name; _} ->
+    Code.emit implementation `None "| \"%s\" -> %s" (Option.value_exn name) (Scope.get_name_exn scope name)
+  ) values;
+  Code.emit implementation `None "| s -> failwith (\"Unknown enum name\" ^ s)";
   Code.emit implementation `End "";
-  Code.emit implementation `Begin "let from_int e = Runtime'.Result.catch (fun () -> from_int_exn e)";
 
   {module_name; signature; implementation}
 
