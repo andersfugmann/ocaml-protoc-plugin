@@ -1,9 +1,11 @@
 # Ocaml protoc plugin
 [![Main workflow](https://github.com/andersfugmann/ocaml-protoc-plugin/actions/workflows/workflow.yml/badge.svg)](https://github.com/andersfugmann/ocaml-protoc-plugin/actions/workflows/workflow.yml)
 
-The goal of Ocaml protoc plugin is to create an up to date plugin for
+The goal of Ocaml protoc plugin is to create plugin for
 the google protobuf compiler (`protoc`) to generate Ocaml types and
-serialization and de-serialization function from a `.proto` file.
+serialization and de-serialization functions from a `.proto`
+file. Ocaml-protoc-plugin aims to be a fully compliant implementation
+of the google protobuffer standard and guidelines.
 
 The main features include:
 * Messages are mapped to idiomatic OCaml types, using modules
@@ -15,17 +17,17 @@ The main features include:
 * Builtin support for google well known types
 * Configurable annotations for all generated types
 
-
 ## Comparison with other OCaml protobuf handlers.
 
-| Feature           | ocaml-protoc | ocaml-pb            | ocaml-protoc-plugin |
-| -------           | ------------ | ---------------     | ------------------- |
-| Ocaml types       | Supported    | Defined runtime[^1] | Supported           |
-| Service endpoints | Supported    | N/A                 | Supported           |
-| proto3            | Supported[^3]| Supported           | Supported           |
-| proto2            | Supported[^3]| Supported           | Supported           |
-| proto2 extends    | Ignored      | Supported           | Supported           |
-| proto2 groups     | Ignored      | ?                   | Not supported[^2]   |
+| Feature           | ocaml-protoc-plugin | ocaml-protoc  | ocaml-pb            |
+| -------           | ------------------- | ------------  | ---------------     |
+| Ocaml types       | Supported           | Supported     | Defined runtime[^1] |
+| Service endpoints | Supported           | Supported     | N/A                 |
+| proto3            | Supported           | Supported[^3] | Supported           |
+| proto2            | Supported           | Supported[^3] | Supported           |
+| proto2 extends    | Supported           | Ignored       | Supported           |
+| proto2 groups     | Not supported[^2]   | Ignored       | ?                   |
+| json mappings     | Not supported[^4]   | Supported     | ?                   |
 
 [^1] Ocaml-bp has a sister project `Ocaml-bp-plugin` which emit
 Ocaml-pb definitions from a `.proto`. The plugin parses files are proto2
@@ -38,6 +40,7 @@ fields are not packed by default.
 marked optional, and does not *strictly* comply to the protobuf
 specification.
 
+[^4] Planned for release 5.1. See [#4](https://github.com/andersfugmann/ocaml-protoc-plugin/issues/4)
 
 ## Types
 Basic types are mapped trivially to Ocaml types:
@@ -46,18 +49,18 @@ Primitive types:
 
 | Protobuf Type                                | Ocaml type       |
 | -------------                                | ----------       |
-| int32, int64, uint32, uint64, sint32, sint64 | int[^3]          |
-| fixed64, sfixed64, fixed32, sfixed32         | int32, int64[^3] |
+| int32, int64, uint32, uint64, sint32, sint64 | int[^5]          |
+| fixed64, sfixed64, fixed32, sfixed32         | int32, int64[^5] |
 | bool                                         | bool             |
 | float, double                                | float            |
 | string                                       | string           |
 | bytes                                        | bytes            |
 
-[^3] The plugin supports changing the type for scalar types to
+[^5] The plugin supports changing the type for scalar types to
 int/int64/int32. See options section below.
 
 A message <name> declaration is compiled to a module <Name> with a record type
-`t`. However, messages without any fields are mapped to unit.
+`t`. Single field messages are mapped not wrapped in a record and messages without any fields are mapped to unit.
 
 Packages are trivially mapped to modules.
 Included proto files (`<name>.proto`) are assumed to have been compiled
@@ -72,7 +75,7 @@ Compound types are mapped like:
 | repeated 'a   | 'a list                                                                 |
 | message       | message option                                                          |
 | enum          | Abstract data types: `` Enum1, Enum2, Enum3 ``                          |
-| map<'a, 'b>   | ('a * 'b) list                                                          |
+| map<'a, 'b>   | Associative list: ('a * 'b) list                                        |
 
 
 ## Proto2 type support
@@ -268,8 +271,7 @@ serializing and deserializing the embedded message.
 
 ## Proto3 Optional fields
 Proto3 optional fields are handled in the same way as proto2 optional
-fields; The type is an option type, and if set the value is always
-transmitted.
+fields; The type is an option type, and always transmissted when set.
 
 ## Imported protofiles
 The generated code assumes that imported modules (generated from proto
