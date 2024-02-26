@@ -8,7 +8,7 @@ type mode = Balanced | Speed | Space
     [Speed]:: Applies optimization which is exploiting the protobuf wire format (but not violating it). Its believed to be safe, but may confuse other protobuf deserializers. The optimization mainly speeds up serialization of large recursive message types. Resulting protobuf serialization is slightly larger than needed, but is comparable to [Space] mode in terms of extra memory used while serialization.
     [Space]:: Limits space overhead (space waste) caused when allocated datablocks cannot be fully filled. The mode causes multiple data copies while serializing to avoid space overhead. This is the default.
 
-    [block_size] controls the minimum size of block allocation. Setting this to zero will significantly slow down serialization but reduce space overhead. Setting a high value may cause more space overhead, esp. for recursive message structures. The default is to allocate block of size 256.
+    [block_size] controls the minimum size of block allocation. Setting this to zero will significantly slow down serialization but reduce space overhead. Setting a high value may cause more space overhead, esp. for recursive message structures. The default is to allocate block of size 120. This size is choosen to avoid heap allocation ([malloc]) for Ocaml 5.0.
 *)
 val init: ?mode:mode -> ?block_size:int -> unit -> t
 
