@@ -385,6 +385,39 @@ let read_person binary_message =
 More examples can be found under
 [examples](https://github.com/andersfugmann/ocaml-protoc-plugin/tree/main/examples)
 
+# Benchmarks
+
+ocaml-protoc-plugin has been optimized for speec, and is comparable [ocaml-protoc](https://github.com/mransan/ocaml-protoc)
+
+Numbers below shows relation to `protoc`. A value above one means that Ocaml-protoc-plugin is slower and below means faster.
+The benchmark is run with flambda settings: `-O3 -unbox-closures
+-remove-unused-arguments -rounds 3 -inline 100.00 -inline-max-depth 3
+-inline-max-unroll 3`. Benchmarks are made on a Intel i5, i5-5257U CPU
+@ 2.70GHz.
+
+Running without flamba shows performance within a factor of 2 to
+protoc.
+
+| name | protoc | plugin | ratio |
+|  --  |   --   |   --   |  --   |
+| string_list.M/Decode | 45673.3403 ns/run | 53547.6444 ns/run | 1.172 |
+| string_list.M/Encode | 77058.1932 ns/run | 46928.1161 ns/run | .608 |
+| float_list.M/Decode | 11195.2996 ns/run | 14448.8059 ns/run | 1.290 |
+| float_list.M/Encode | 19415.1014 ns/run | 8767.3420 ns/run | .451 |
+| int64_list.M/Decode | 16906.9672 ns/run | 14329.7493 ns/run | .847 |
+| int64_list.M/Encode | 13556.7060 ns/run | 11329.0867 ns/run | .835 |
+| enum.M/Decode | 31.9749 ns/run | 72.6818 ns/run | 2.273 |
+| enum.M/Encode | 68.3581 ns/run | 59.7913 ns/run | .874 |
+| string.M/Decode | 50.1519 ns/run | 91.4369 ns/run | 1.823 |
+| string.M/Encode | 77.2197 ns/run | 86.7556 ns/run | 1.123 |
+| float.M/Decode | 28.6674 ns/run | 72.1196 ns/run | 2.515 |
+| float.M/Encode | 66.3969 ns/run | 62.3008 ns/run | .938 |
+| int64.M/Decode | 30.8383 ns/run | 72.8756 ns/run | 2.363 |
+| int64.M/Encode | 66.0895 ns/run | 58.9611 ns/run | .892 |
+| bench.M/Decode | 157661.3070 ns/run | 151011.1603 ns/run | .957 |
+| bench.M/Encode | 217168.8299 ns/run | 123210.2917 ns/run | .567 |
+
+
 # Acknowledgements
 This work is based on
 [issuu/ocaml-protoc-plugin](https://github.com/issuu/ocaml-protoc-plugin).
