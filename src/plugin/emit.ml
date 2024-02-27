@@ -61,7 +61,7 @@ let emit_enum_type ~scope ~params
   List.iter ~f:(fun EnumValueDescriptorProto.{name; _} ->
     Code.emit implementation `None "| \"%s\" -> %s" (Option.value_exn name) (Scope.get_name_exn scope name)
   ) values;
-  Code.emit implementation `None "| s -> failwith (\"Unknown enum name\" ^ s)";
+  Code.emit implementation `None "| s -> Runtime'.Result.raise (`Unknown_enum_name s)";
   Code.emit implementation `End "";
 
   {module_name; signature; implementation}
@@ -228,8 +228,6 @@ let rec emit_message ~params ~syntax scope
                   default_constructor_sig; default_constructor_impl; merge_impl } =
         Types.make ~params ~syntax ~is_cyclic ~is_map_entry ~extension_ranges ~scope ~fields oneof_decls
       in
-      ignore (merge_impl);
-
       Code.emit signature `None "val name': unit -> string";
       Code.emit signature `None "type t = %s %s" type' params.annot;
       Code.emit signature `None "val make: %s" default_constructor_sig;
@@ -238,6 +236,9 @@ let rec emit_message ~params ~syntax scope
       Code.emit signature `None "val to_proto: t -> Runtime'.Writer.t";
       Code.emit signature `None "val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result";
       Code.emit signature `None "val from_proto_exn: Runtime'.Reader.t -> t";
+      Code.emit signature `None "val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t";
+      Code.emit signature `None "val from_json_exn: Yojson.Basic.t -> t";
+      Code.emit signature `None "val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result";
 
       Code.emit implementation `None "let name' () = \"%s\"" (Scope.get_current_scope scope);
       Code.emit implementation `None "type t = %s%s" type' params.annot;
@@ -247,7 +248,12 @@ let rec emit_message ~params ~syntax scope
 
       Code.emit implementation `Begin "let to_proto' =";
       Code.emit implementation `None "let serialize = Runtime'.Serialize.serialize (spec ()) in";
-      Code.emit implementation `None "%s" apply;
+      begin match apply with
+      | None ->
+        Code.emit implementation `None "serialize"
+      | Some (params, args) ->
+        Code.emit implementation `None "fun writer %s -> serialize writer %s" params args
+      end;
       Code.emit implementation `End "";
 
       Code.emit implementation `None "let to_proto t = to_proto' (Runtime'.Writer.init ()) t";
@@ -256,6 +262,18 @@ let rec emit_message ~params ~syntax scope
       Code.emit implementation `None "let constructor = %s in" constructor;
       Code.emit implementation `None "Runtime'.Deserialize.deserialize (spec ()) constructor";
       Code.emit implementation `End "let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)";
+      Code.emit implementation `Begin "let to_json ?enum_names ?json_names ?omit_default_values = ";
+      Code.emit implementation `None "let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in";
+      begin match apply with
+      | None ->
+        Code.emit implementation `None "serialize"
+      | Some (params, args) ->
+        Code.emit implementation `None "fun %s -> serialize %s" params args
+      end;
+      Code.emit implementation `EndBegin "let from_json_exn =";
+      Code.emit implementation `None "let constructor = %s in" constructor;
+      Code.emit implementation `None "Runtime'.Deserialize_json.deserialize (spec ()) constructor";
+      Code.emit implementation `End "let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)";
     | None -> ()
   in
   {module_name; signature; implementation}

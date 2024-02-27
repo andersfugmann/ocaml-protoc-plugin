@@ -1,10 +1,10 @@
 type error =
   [ `Premature_end_of_input
   | `Unknown_field_type of int
-  | `Wrong_field_type of string * Field.t
+  | `Wrong_field_type of string * string
   | `Illegal_value of string * Field.t
   | `Unknown_enum_value of int
-  | `Oneof_missing
+  | `Unknown_enum_name of string
   | `Required_field_missing of int * string ]
 
 exception Error of error

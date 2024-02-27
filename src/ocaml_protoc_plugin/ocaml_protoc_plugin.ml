@@ -1,6 +1,8 @@
 (**/**)
 module Serialize = Serialize
 module Deserialize = Deserialize
+module Serialize_json = Serialize_json
+module Deserialize_json = Deserialize_json
 module Spec = Spec
 module Runtime = Runtime
 module Field = Field

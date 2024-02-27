@@ -3,7 +3,7 @@ open Spec.Descriptor.Google.Protobuf
 type t = {
   type' : string;
   constructor: string;
-  apply: string;
+  apply: (string * string) option;
   spec_str: string;
   default_constructor_sig: string;
   default_constructor_impl: string;

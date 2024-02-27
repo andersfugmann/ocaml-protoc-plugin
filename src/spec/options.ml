@@ -32,6 +32,9 @@ module rec Options : sig
   val to_proto: t -> Runtime'.Writer.t
   val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
   val from_proto_exn: Runtime'.Reader.t -> t
+  val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+  val from_json_exn: Yojson.Basic.t -> t
+  val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
 end = struct
   let name' () = "options.Options"
   type t = (bool)
@@ -47,6 +50,13 @@ end = struct
     let constructor = fun mangle_names -> (mangle_names) in
     Runtime'.Deserialize.deserialize (spec ()) constructor
   let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
+  let to_json ?enum_names ?json_names ?omit_default_values =
+    let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
+    serialize
+  let from_json_exn =
+    let constructor = fun mangle_names -> (mangle_names) in
+    Runtime'.Deserialize_json.deserialize (spec ()) constructor
+  let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
 end
 and Ocaml_options : sig
   type t = Options.t option

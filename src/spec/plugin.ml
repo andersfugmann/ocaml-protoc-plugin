@@ -35,6 +35,9 @@ module rec Google : sig
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
+        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val from_json_exn: Yojson.Basic.t -> t
+        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
       and CodeGeneratorRequest : sig
         val name': unit -> string
@@ -45,6 +48,9 @@ module rec Google : sig
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
+        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val from_json_exn: Yojson.Basic.t -> t
+        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
       and CodeGeneratorResponse : sig
         module rec Feature : sig
@@ -64,6 +70,9 @@ module rec Google : sig
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
+          val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+          val from_json_exn: Yojson.Basic.t -> t
+          val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
         end
         val name': unit -> string
         type t = { error: string option; supported_features: int option; file: File.t list }
@@ -73,6 +82,9 @@ module rec Google : sig
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
+        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val from_json_exn: Yojson.Basic.t -> t
+        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
     end
   end
@@ -88,6 +100,9 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
+        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val from_json_exn: Yojson.Basic.t -> t
+        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
       and CodeGeneratorRequest : sig
         val name': unit -> string
@@ -98,6 +113,9 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
+        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val from_json_exn: Yojson.Basic.t -> t
+        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
       and CodeGeneratorResponse : sig
         module rec Feature : sig
@@ -117,6 +135,9 @@ end = struct
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
+          val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+          val from_json_exn: Yojson.Basic.t -> t
+          val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
         end
         val name': unit -> string
         type t = { error: string option; supported_features: int option; file: File.t list }
@@ -126,6 +147,9 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
+        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val from_json_exn: Yojson.Basic.t -> t
+        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
     end
   end = struct
@@ -139,6 +163,9 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
+        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val from_json_exn: Yojson.Basic.t -> t
+        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
       and CodeGeneratorRequest : sig
         val name': unit -> string
@@ -149,6 +176,9 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
+        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val from_json_exn: Yojson.Basic.t -> t
+        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
       and CodeGeneratorResponse : sig
         module rec Feature : sig
@@ -168,6 +198,9 @@ end = struct
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
+          val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+          val from_json_exn: Yojson.Basic.t -> t
+          val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
         end
         val name': unit -> string
         type t = { error: string option; supported_features: int option; file: File.t list }
@@ -177,6 +210,9 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
+        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val from_json_exn: Yojson.Basic.t -> t
+        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
     end = struct
       module rec Version : sig
@@ -188,6 +224,9 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
+        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val from_json_exn: Yojson.Basic.t -> t
+        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end = struct
         let name' () = "plugin.google.protobuf.compiler.Version"
         type t = { major: int option; minor: int option; patch: int option; suffix: string option }
@@ -208,6 +247,13 @@ end = struct
           let constructor = fun major minor patch suffix -> { major; minor; patch; suffix } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
+        let to_json ?enum_names ?json_names ?omit_default_values =
+          let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
+          fun { major; minor; patch; suffix } -> serialize major minor patch suffix
+        let from_json_exn =
+          let constructor = fun major minor patch suffix -> { major; minor; patch; suffix } in
+          Runtime'.Deserialize_json.deserialize (spec ()) constructor
+        let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       and CodeGeneratorRequest : sig
         val name': unit -> string
@@ -218,6 +264,9 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
+        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val from_json_exn: Yojson.Basic.t -> t
+        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end = struct
         let name' () = "plugin.google.protobuf.compiler.CodeGeneratorRequest"
         type t = { file_to_generate: string list; parameter: string option; compiler_version: Version.t option; proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list }
@@ -238,6 +287,13 @@ end = struct
           let constructor = fun file_to_generate parameter compiler_version proto_file -> { file_to_generate; parameter; compiler_version; proto_file } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
+        let to_json ?enum_names ?json_names ?omit_default_values =
+          let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
+          fun { file_to_generate; parameter; compiler_version; proto_file } -> serialize file_to_generate parameter compiler_version proto_file
+        let from_json_exn =
+          let constructor = fun file_to_generate parameter compiler_version proto_file -> { file_to_generate; parameter; compiler_version; proto_file } in
+          Runtime'.Deserialize_json.deserialize (spec ()) constructor
+        let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       and CodeGeneratorResponse : sig
         module rec Feature : sig
@@ -257,6 +313,9 @@ end = struct
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
+          val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+          val from_json_exn: Yojson.Basic.t -> t
+          val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
         end
         val name': unit -> string
         type t = { error: string option; supported_features: int option; file: File.t list }
@@ -266,6 +325,9 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
+        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val from_json_exn: Yojson.Basic.t -> t
+        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end = struct
         module rec Feature : sig
           type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
@@ -290,7 +352,7 @@ end = struct
           let from_string_exn = function
             | "FEATURE_NONE" -> FEATURE_NONE
             | "FEATURE_PROTO3_OPTIONAL" -> FEATURE_PROTO3_OPTIONAL
-            | s -> failwith ("Unknown enum name" ^ s)
+            | s -> Runtime'.Result.raise (`Unknown_enum_name s)
 
         end
         and File : sig
@@ -302,6 +364,9 @@ end = struct
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
+          val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+          val from_json_exn: Yojson.Basic.t -> t
+          val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
         end = struct
           let name' () = "plugin.google.protobuf.compiler.CodeGeneratorResponse.File"
           type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }
@@ -322,6 +387,13 @@ end = struct
             let constructor = fun name insertion_point content generated_code_info -> { name; insertion_point; content; generated_code_info } in
             Runtime'.Deserialize.deserialize (spec ()) constructor
           let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
+          let to_json ?enum_names ?json_names ?omit_default_values =
+            let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
+            fun { name; insertion_point; content; generated_code_info } -> serialize name insertion_point content generated_code_info
+          let from_json_exn =
+            let constructor = fun name insertion_point content generated_code_info -> { name; insertion_point; content; generated_code_info } in
+            Runtime'.Deserialize_json.deserialize (spec ()) constructor
+          let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
         end
         let name' () = "plugin.google.protobuf.compiler.CodeGeneratorResponse"
         type t = { error: string option; supported_features: int option; file: File.t list }
@@ -341,6 +413,13 @@ end = struct
           let constructor = fun error supported_features file -> { error; supported_features; file } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
+        let to_json ?enum_names ?json_names ?omit_default_values =
+          let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
+          fun { error; supported_features; file } -> serialize error supported_features file
+        let from_json_exn =
+          let constructor = fun error supported_features file -> { error; supported_features; file } in
+          Runtime'.Deserialize_json.deserialize (spec ()) constructor
+        let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
     end
   end

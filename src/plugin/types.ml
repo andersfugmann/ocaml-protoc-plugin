@@ -44,7 +44,7 @@ type field_spec = {
 type t = {
   type' : string;
   constructor: string;
-  apply: string;
+  apply: (string * string) option;
   spec_str: string;
   default_constructor_sig: string;
   default_constructor_impl: string;
@@ -650,10 +650,8 @@ let make ~params ~syntax ~is_cyclic ~is_map_entry ~extension_ranges ~scope ~fiel
         args (type_destr field_names)
   in
   let apply = match t_as_tuple && not is_map_entry with
-    | true -> "serialize"
-    | false ->
-      sprintf "fun writer %s -> serialize writer %s"
-      (type_destr field_names) args
+    | true -> None
+    | false -> Some ((type_destr field_names), args)
   in
 
   let default_constructor_sig =

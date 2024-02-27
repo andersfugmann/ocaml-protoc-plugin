@@ -1,10 +1,10 @@
 type error =
   [ `Premature_end_of_input
   | `Unknown_field_type of int
-  | `Wrong_field_type of string * Field.t
+  | `Wrong_field_type of string * string
   | `Illegal_value of string * Field.t
   | `Unknown_enum_value of int
-  | `Oneof_missing
+  | `Unknown_enum_name of string
   | `Required_field_missing of int * string ]
 
 exception Error of error
@@ -38,7 +38,7 @@ let pp_error : Format.formatter -> [> error] -> unit = fun fmt -> function
          Format.fprintf fmt "(@[";
          ((Format.fprintf fmt "%S") a0;
           Format.fprintf fmt ",@ ";
-          (Field.pp fmt) a1);
+          (Format.fprintf fmt "%S") a1);
          Format.fprintf fmt "@])")) x;
      Format.fprintf fmt "@])")
   | `Illegal_value x ->
@@ -55,6 +55,11 @@ let pp_error : Format.formatter -> [> error] -> unit = fun fmt -> function
     (Format.fprintf fmt
        "`Unknown_enum_value (@[<hov>";
      (Format.fprintf fmt "%d") x;
+     Format.fprintf fmt "@])")
+  | `Unknown_enum_name x ->
+    (Format.fprintf fmt
+       "`Unknown_enum_name (@[<hov>";
+     (Format.fprintf fmt "%s") x;
      Format.fprintf fmt "@])")
   | `Oneof_missing ->
     Format.pp_print_string fmt "`Oneof_missing"
