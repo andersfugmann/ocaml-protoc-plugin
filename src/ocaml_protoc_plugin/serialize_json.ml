@@ -62,56 +62,67 @@ let rec json_of_spec: type a. enum_names:bool -> json_names:bool -> omit_default
   | Message (module Message) ->
     Message.to_json ~enum_names ~json_names ~omit_default_values
 
-and write: type a. enum_names:bool -> json_names:bool -> omit_default_values:bool -> a compound -> a -> field option =
-  fun ~enum_names ~json_names ~omit_default_values -> ignore enum_names; function
+and write: type a. enum_names:bool -> json_names:bool -> omit_default_values:bool -> a compound -> a -> field list =
+  fun ~enum_names ~json_names ~omit_default_values -> function
     | Basic (index, spec, default) ->
       begin
         function
-        | v when omit_default_values && v == default ->
-          None
+        | v when omit_default_values && v == default -> []
         | v ->
           let value = json_of_spec ~enum_names ~json_names ~omit_default_values spec v in
-          Some (key ~json_names index, value)
+          [key ~json_names index, value]
       end
     | Basic_opt (index, spec) ->
       begin
         function
         | Some v ->
           let value = json_of_spec ~enum_names ~json_names ~omit_default_values spec v in
-          Some (key ~json_names index, value)
-        | None -> None
+          [key ~json_names index, value]
+        | None when not omit_default_values -> [key ~json_names index, `Null]
+        | None -> []
       end
   | Basic_req (index, spec) -> fun v ->
     let value = json_of_spec ~enum_names ~json_names ~omit_default_values spec v in
-    Some (key ~json_names index, value)
+    [key ~json_names index, value]
   | Repeated (index, spec, _packed) -> fun v ->
     let to_json = json_of_spec ~enum_names ~json_names ~omit_default_values spec in
     let value = List.map ~f:to_json v |> list_value in
-    Some (key ~json_names index, value)
+    [key ~json_names index, value]
+  | Oneof (oneofs, index_f) when not omit_default_values -> begin
+      function
+      | `not_set -> []
+      | v ->
+        let idx = index_f v in
+        List.mapi ~f:(fun i (Oneof_elem (index, spec, (_, destr))) ->
+          let value = match i = idx with
+            | true -> json_of_spec ~enum_names ~json_names ~omit_default_values spec (destr v)
+            | false -> `Null
+          in
+          (key ~json_names index, value)
+        ) oneofs
+    end
   | Oneof (oneofs, index_f) -> begin
       function
-      | `not_set -> None
+      | `not_set -> []
       | v ->
         let index = index_f v in
         let Oneof_elem (index, spec, (_, destr)) = List.nth oneofs index in
         let value = json_of_spec ~enum_names ~json_names ~omit_default_values spec (destr v) in
-        Some (key ~json_names index, value)
+        [key ~json_names index, value]
     end
+
 
 let rec serialize: type a. enum_names:bool -> json_names:bool -> omit_default_values:bool -> (a, Yojson.Basic.t) compound_list -> field list -> a =
   fun ~enum_names ~json_names ~omit_default_values -> function
-  | Nil -> (fun json -> `Assoc json)
+  | Nil -> (fun json -> `Assoc (List.rev json))
   | Nil_ext _extension_ranges ->
     (fun json _extensions -> `Assoc json)
   | Cons (compound, rest) ->
     let cont = serialize rest in
     let write = write ~enum_names ~json_names ~omit_default_values compound in
     fun acc v ->
-      let acc = match write v with
-        | Some v -> v :: acc
-        | None -> acc
-      in
-      cont ~enum_names ~json_names ~omit_default_values acc
+     let v = write v in
+     cont ~enum_names ~json_names ~omit_default_values (List.rev_append v acc)
 
 let serialize: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> ('a, Yojson.Basic.t) compound_list -> 'a =
   fun ?(enum_names=true) ?(json_names=true) ?(omit_default_values=true) spec ->
