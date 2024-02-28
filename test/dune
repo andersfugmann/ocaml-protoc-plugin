@@ -21,7 +21,7 @@
 (library
  (name test)
  (enabled_if (and (<> %{architecture} x86_32) (<> %{architecture} arm32)))
- (libraries ocaml_protoc_plugin google_types)
+ (libraries ocaml_protoc_plugin google_types yojson)
  (inline_tests)
  (modules :standard \ proto3_optional_test_opt)
  (preprocess

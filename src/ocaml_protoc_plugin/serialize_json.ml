@@ -102,7 +102,7 @@ let rec serialize: type a. enum_names:bool -> json_names:bool -> omit_default_va
   fun ~enum_names ~json_names ~omit_default_values -> function
   | Nil -> (fun json -> `Assoc json)
   | Nil_ext _extension_ranges ->
-    failwith "Extensions not handled by json decoder"
+    (fun json _extensions -> `Assoc json)
   | Cons (compound, rest) ->
     let cont = serialize rest in
     let write = write ~enum_names ~json_names ~omit_default_values compound in

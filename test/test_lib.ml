@@ -8,6 +8,9 @@ module type T = sig
   val from_proto : Reader.t -> t Result.t
   val name' : unit -> string
   val merge: t -> t -> t
+  val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+  val from_json_exn: Yojson.Basic.t -> t
+  val from_json: Yojson.Basic.t -> t Result.t
 end
 
 let hexlify data =
@@ -64,6 +67,17 @@ let test_merge (type t) (module M : T with type t = t) (t: t) =
   in
   ()
 
+let test_json (type t) (module M : T with type t = t) (t: t) =
+  let json = M.to_json t in
+  let json_str = Yojson.Basic.pretty_to_string ~std:true json in
+  let t' = M.from_json_exn json in
+  match (t = t') with
+  | true -> ()
+  | false ->
+    Printf.printf "Serialize -> Deserialize identity function: %b\n%s\n" (t = t') json_str
+
+
+
 let test_decode (type t) (module M : T with type t = t) strategy expect data =
   let reader = Reader.create data in
   Test_runtime.set_stragegy strategy;
@@ -111,4 +125,5 @@ let test_encode (type t) ?dump ?(protoc=true) ?protoc_args (module M : T with ty
   test_decode (module M) Test_runtime.Fast expect data;
   test_decode (module M) Test_runtime.Full expect data;
   test_merge (module M) expect;
+  test_json (module M) expect;
   ()
