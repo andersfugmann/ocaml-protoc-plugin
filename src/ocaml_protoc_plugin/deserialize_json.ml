@@ -125,6 +125,8 @@ let rec deserialize: type constr a. (constr, a) compound_list -> constr -> field
 let deserialize: type constr a. (constr, a) compound_list -> constr -> Yojson.Basic.t -> a =
   fun spec constr -> function
   | `Assoc fields ->
-    let fields = FieldMap.of_list fields in
-    deserialize spec constr fields
+    fields
+    |> List.filter ~f:(function (_, `Null) -> false | _ -> true)
+    |> FieldMap.of_list
+    |> deserialize spec constr
   | json -> value_error "message" json

@@ -68,15 +68,23 @@ let test_merge (type t) (module M : T with type t = t) (t: t) =
   ()
 
 let test_json (type t) (module M : T with type t = t) (t: t) =
-  let json = M.to_json t in
-  let json_str = Yojson.Basic.pretty_to_string ~std:true json in
-  let t' = M.from_json_exn json in
-  match (t = t') with
-  | true -> ()
-  | false ->
-    Printf.printf "Serialize -> Deserialize identity function: %b\n%s\n" (t = t') json_str
-
-
+  let test_json ?enum_names ?json_names ?omit_default_values t =
+    let json = M.to_json ?enum_names ?json_names ?omit_default_values t in
+    let json_str = Yojson.Basic.pretty_to_string ~std:true json in
+    let t' = M.from_json_exn json in
+    match (t = t') with
+    | true -> t
+    | false ->
+      Printf.printf "Json encode/decode failed: %s\n" json_str;
+      t'
+  in
+  t
+  |> test_json
+  |> test_json ~enum_names:false
+  |> test_json ~json_names:false
+  |> test_json ~omit_default_values:false
+  |> test_json ~enum_names:false ~json_names:false ~omit_default_values:false
+  |> ignore
 
 let test_decode (type t) (module M : T with type t = t) strategy expect data =
   let reader = Reader.create data in
@@ -97,7 +105,7 @@ let test_decode (type t) (module M : T with type t = t) strategy expect data =
     Printf.printf "\n%s:Data: %s\n" (Test_runtime.show_strategy strategy) (List.map ~f:fst fields |> List.map ~f:string_of_int |> String.concat ~sep:", ")
 
 (** Create a common function for testing. *)
-let test_encode (type t) ?dump ?(protoc=true) ?protoc_args (module M : T with type t = t) ?(validate : t option) ?(expect : t option) (t : t) =
+let test_encode (type t) ?dump ?(protoc=true) ?protoc_args (module M : T with type t = t) ?(skip_json=false) ?(validate : t option) ?(expect : t option) (t : t) =
   let expect = Option.value ~default:t expect in
   let () = match validate with
     | Some v when v <> expect -> Printf.printf "Validate match failed\n"
@@ -125,5 +133,5 @@ let test_encode (type t) ?dump ?(protoc=true) ?protoc_args (module M : T with ty
   test_decode (module M) Test_runtime.Fast expect data;
   test_decode (module M) Test_runtime.Full expect data;
   test_merge (module M) expect;
-  test_json (module M) expect;
+  if (not skip_json) then test_json (module M) expect;
   ()
