@@ -1,6 +1,16 @@
 open StdLabels
 open Ocaml_protoc_plugin
 
+
+module Reference = struct
+  open Ctypes
+  open Foreign
+  (* extern "C" char* protobuf2json(const char *google_include_dir, const char *proto, const char* type, const char* in_data)  *)
+  let protobuf2json = foreign "protobuf2json" (string @-> string @-> string @-> string @-> int @-> returning string)
+  let to_json ~google_include ~proto_file ~message_type data =
+    protobuf2json google_include proto_file message_type data (String.length data)
+end
+
 module type T = sig
   type t [@@deriving show, eq]
   val to_proto' : Writer.t -> t -> Writer.t
@@ -68,16 +78,37 @@ let test_merge (type t) (module M : T with type t = t) (t: t) =
   ()
 
 let test_json (type t) (module M : T with type t = t) (t: t) =
-  let test_json ?enum_names ?json_names ?omit_default_values t =
-    let json = M.to_json ?enum_names ?json_names ?omit_default_values t in
-    let json_str = Yojson.Basic.pretty_to_string ~std:true json in
-    let t' = M.from_json_exn json in
-    match (t = t') with
-    | true -> t
-    | false ->
-      Printf.printf "Json encode/decode failed: %s\n" json_str;
-      t'
+  let json_ref t =
+    let proto_file, message_type =
+      match M.name' () |> String.split_on_char ~sep:'.' with
+      | hd :: tl ->
+        let proto_file = hd ^ ".proto" in
+        let message_type = String.concat ~sep:"." tl in
+        proto_file, message_type
+      | _ -> failwith "Illegal name"
+    in
+    let proto = M.to_proto t |> Writer.contents in
+    let json = Reference.to_json ~google_include:"/usr/include/google" ~proto_file ~message_type proto in
+    Yojson.Basic.from_string json
   in
+
+  let test_json ?enum_names ?json_names ?omit_default_values t =
+    let compare ~message t json =
+      let t' = M.from_json_exn json in
+      match (t = t') with
+      | true -> ()
+      | false ->
+        Printf.printf "Json encode/decode failed for %s: %s\n" message (Yojson.Basic.to_string json)
+    in
+    let json = M.to_json ?enum_names ?json_names ?omit_default_values t in
+    compare ~message:"Ocaml proto plugin" t json;
+    (* compare ~message:"Protobuf reference implementation" t (to_json_ref t); *)
+    t
+  in
+  Printf.printf "Json: %s\nRef:  %s\n"
+    (Yojson.Basic.pretty_to_string (M.to_json ~omit_default_values:false t))
+    (Yojson.Basic.pretty_to_string (json_ref t));
+
   t
   |> test_json
   |> test_json ~enum_names:false
