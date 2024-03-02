@@ -13,6 +13,7 @@ let index_of_spec: type a. a Spec.compound -> int = function
   | Basic_opt ((index, _, _), _) -> index
   | Basic_req ((index, _, _), _) -> index
   | Repeated ((index, _, _), _, _) -> index
+  | Map ((index, _, _), _) -> index
   | Oneof _ -> failwith "Oneof fields not allowed in extensions"
 
 let get: type a. a Spec.compound -> t -> a = fun spec t ->

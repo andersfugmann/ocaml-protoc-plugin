@@ -3,6 +3,7 @@ module type T = sig
   type 'a enum
   type 'a oneof
   type 'a oneof_elem
+  type 'a map
 end
 
 module type Enum = sig
@@ -87,6 +88,9 @@ module Make(T : T) = struct
     (* Repeated fields *)
     | Repeated : field * 'a spec * packed -> 'a list compound
 
+    (* Map types *)
+    | Map : field * (module Message with type t = ('a * 'b)) T.map -> ('a * 'b) list compound
+
     (* Oneofs. A list of fields + function to index the field *)
     | Oneof : (('a oneof list) * ('a -> int)) T.oneof -> ([> `not_set ] as 'a) compound
 
@@ -135,6 +139,7 @@ module Make(T : T) = struct
   let default_bytes v = (Some (Bytes.of_string v))
 
   let repeated (i, s, p) = Repeated (i, s, p)
+  let map (i, s) = Map (i, s)
   let basic (i, s, d) = Basic (i, s, d)
   let basic_req (i, s) = Basic_req (i, s)
   let basic_opt (i, s) = Basic_opt (i, s)
@@ -188,4 +193,5 @@ include Make(struct
     type 'a enum = 'a
     type 'a oneof = 'a
     type 'a oneof_elem = 'a
+    type 'a map = 'a
   end)

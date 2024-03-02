@@ -18,7 +18,9 @@ type field_spec = {
 val spec_of_field:
   params:Parameters.t ->
   syntax:[ `Proto2 | `Proto3 ] ->
-  scope:Scope.t -> FieldDescriptorProto.t -> field_spec
+  scope:Scope.t ->
+  is_map_type:bool ->
+  FieldDescriptorProto.t -> field_spec
 
 val make:
   params:Parameters.t ->
@@ -27,4 +29,4 @@ val make:
   is_map_entry: bool ->
   extension_ranges: (int*int) list ->
   scope:Scope.t ->
-  fields:FieldDescriptorProto.t list -> OneofDescriptorProto.t list -> t
+  fields:(FieldDescriptorProto.t * bool) list -> OneofDescriptorProto.t list -> t

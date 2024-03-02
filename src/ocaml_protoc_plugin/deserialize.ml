@@ -141,6 +141,9 @@ let value: type a. a compound -> a value = function
   | Repeated ((index, _, _), spec, Not_packed) ->
     let read = read_field ~read:(read_of_spec spec) ~map:(fun vs v -> v :: vs) in
     Value ([(index, read)], [], List.rev)
+  | Map ((index, _, _), spec) ->
+    let read = read_field ~read:(read_of_spec (Message spec)) ~map:(fun vs v -> v :: vs) in
+    Value ([(index, read)], [], List.rev)
   | Oneof (oneofs, _index_f) ->
     let make_reader: a oneof -> a field_spec = fun (Oneof_elem ((index, _, _), spec, (constr, _destr))) ->
       let read = read_field ~read:(read_of_spec spec) ~map:(fun _ -> constr) in

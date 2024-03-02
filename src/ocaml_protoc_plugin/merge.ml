@@ -25,5 +25,6 @@ let merge: type t. t Spec.compound -> t -> t -> t = fun spec t t' -> match spec 
       | None -> t
     end
   | Spec.Repeated (_field, _, _) -> t @ t'
+  | Spec.Map (_field, _) -> t @ t'
   (* | Spec.Oneof _ when t' = `not_set -> t *)
   | Spec.Oneof _ -> failwith "Implementation is part of generated code"

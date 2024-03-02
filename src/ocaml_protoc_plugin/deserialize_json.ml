@@ -28,16 +28,28 @@ let to_enum: type a. (module Spec.Enum with type t = a) -> Yojson.Basic.t -> a =
 
 let to_float = function
   | `Float f -> f
+  | `Int i -> Float.of_int i
   | `String s -> Float.of_string s
   | json -> value_error "float" json
 
 let to_bool = function
   | `Bool b -> b
+  | `String "true" -> true
+  | `String "false" -> false
   | json -> value_error "bool" json
 
 let to_list = function
   | `List l -> l
   | json -> value_error "list" json
+
+let to_map = function
+  | `Assoc l -> l
+  | json -> value_error "map" json
+
+let read_map_field: type a b. (module Message with type t = (a * b)) -> (string * Yojson.Basic.t) -> (a * b) =
+  fun (module Message) (key, value) ->
+  let json = `Assoc [ ("key", `String key); "value", value ] in
+  Message.from_json_exn json
 
 let read_value: type a. a spec -> Yojson.Basic.t -> a = function
    | Double -> to_float
@@ -100,6 +112,15 @@ let rec read: type a. fields -> a Spec.compound -> a = fun fields -> function
         to_list field |> List.map ~f:read
       | None -> []
     end
+  | Map (index, mmodule) ->
+    begin
+      match find_field index fields with
+      | Some field ->
+        let read = read_map_field mmodule in
+        to_map field |> List.map ~f:read
+      | None -> []
+    end
+
   | Oneof (oneofs, _) ->
     let rec inner = function
       | Oneof_elem (index, spec, (constr, _)) :: rest ->
