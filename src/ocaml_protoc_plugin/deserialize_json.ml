@@ -148,6 +148,6 @@ let deserialize: type constr a. (constr, a) compound_list -> constr -> Yojson.Ba
   | `Assoc fields ->
     fields
     |> List.filter ~f:(function (_, `Null) -> false | _ -> true)
-    |> FieldMap.of_list
+    |> List.fold_left ~f:(fun map (key, value) -> FieldMap.add key value map) ~init:FieldMap.empty
     |> deserialize spec constr
   | json -> value_error "message" json
