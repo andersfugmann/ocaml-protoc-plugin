@@ -16,10 +16,9 @@
 #include <string.h>
 using namespace google::protobuf;
 
-extern "C" char* protobuf2json(const char *google_include_dir, const char *proto, const char* type, const void* in_data, int data_length) {
+extern "C" char* protobuf2json(const char *proto, const char* type, const void* in_data, int data_length) {
     std::string url = std::string("type.googleapis.com/") + std::string(type);
     compiler::DiskSourceTree source_tree;
-    source_tree.MapPath("", google_include_dir);
     source_tree.MapPath("", ".");
     source_tree.MapPath("/", "/");
 
@@ -36,8 +35,14 @@ extern "C" char* protobuf2json(const char *google_include_dir, const char *proto
 
     util::JsonPrintOptions options;
     options.add_whitespace = true;
-    options.always_print_primitive_fields = true;
+    //options.always_print_primitive_fields = true;
     auto status = BinaryToJsonStream(
         resolver, url, &input, &output, options);
-    return strdup(output_str.c_str());
+
+    if (status.ok()) {
+        return strdup(output_str.c_str());
+    } else {
+        std::string s = status.ToString();
+        return strdup(s.c_str());
+    }
 }

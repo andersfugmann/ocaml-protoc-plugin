@@ -6,9 +6,9 @@ module Reference = struct
   open Ctypes
   open Foreign
   (* extern "C" char* protobuf2json(const char *google_include_dir, const char *proto, const char* type, const char* in_data)  *)
-  let protobuf2json = foreign "protobuf2json" (string @-> string @-> string @-> string @-> int @-> returning string)
-  let to_json ~google_include ~proto_file ~message_type data =
-    protobuf2json google_include proto_file message_type data (String.length data)
+  let protobuf2json = foreign "protobuf2json" (string @-> string @-> string @-> int @-> returning string)
+  let to_json ~proto_file ~message_type data =
+    protobuf2json proto_file message_type data (String.length data)
 end
 
 module type T = sig
@@ -88,7 +88,7 @@ let test_json (type t) (module M : T with type t = t) (t: t) =
       | _ -> failwith "Illegal name"
     in
     let proto = M.to_proto t |> Writer.contents in
-    let json = Reference.to_json ~google_include:"/usr/include/google" ~proto_file ~message_type proto in
+    let json = Reference.to_json ~proto_file ~message_type proto in
     Yojson.Basic.from_string json
   in
 
@@ -105,10 +105,17 @@ let test_json (type t) (module M : T with type t = t) (t: t) =
     (* compare ~message:"Protobuf reference implementation" t (to_json_ref t); *)
     t
   in
-  Printf.printf "Json: %s\nRef:  %s\n"
-    (Yojson.Basic.pretty_to_string (M.to_json ~omit_default_values:false t))
-    (Yojson.Basic.pretty_to_string (json_ref t));
-
+  (* Compare reference json *)
+  let json' = json_ref t in
+  let t' = M.from_json_exn json' in
+  let () = match t = t' with
+    | true -> ()
+    | false ->
+      Printf.printf "Cannot deserialize reference json.";
+      Printf.printf "Json: %s\nRef:  %s\n"
+    (Yojson.Basic.pretty_to_string (M.to_json t))
+    (Yojson.Basic.pretty_to_string json');
+  in
   t
   |> test_json
   |> test_json ~enum_names:false

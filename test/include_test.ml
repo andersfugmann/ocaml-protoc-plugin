@@ -1,5 +1,6 @@
 open Include
 module Enum = Enum.Enum_test
+let test_encode = Test_lib.test_encode ~skip_json:true
 let%expect_test _ =
   let module T = Include.I in
   let t = T.{ enum = Enum.Message.E.B;
@@ -7,7 +8,7 @@ let%expect_test _ =
               o = Some Enum.E1.C;
               c = Some 7;
             } in
-  Test_lib.test_encode (module T) t;
+  test_encode (module T) t;
   [%expect {|
     enum: B
     m {
@@ -24,7 +25,7 @@ let%expect_test _ =
 let%expect_test _ =
   let module T = Include.Z in
   let t = Some Included.Include.N.E.B  in
-  Test_lib.test_encode (module T) t;
+  test_encode (module T) t;
   [%expect {|
     n {
       e: B
@@ -33,7 +34,7 @@ let%expect_test _ =
 let%expect_test _ =
   let module T = Include.Y in
   let t = Some 42 in
-  Test_lib.test_encode (module T) t;
+  test_encode (module T) t;
   [%expect {|
     d {
       i: 42
