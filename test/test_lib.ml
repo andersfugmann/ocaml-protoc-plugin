@@ -111,7 +111,7 @@ let test_json (type t) (module M : T with type t = t) (t: t) =
   let () = match t = t' with
     | true -> ()
     | false ->
-      Printf.printf "Cannot deserialize reference json.";
+      Printf.printf "Cannot deserialize reference json.\n";
       Printf.printf "Json: %s\nRef:  %s\n"
     (Yojson.Basic.pretty_to_string (M.to_json t))
     (Yojson.Basic.pretty_to_string json');
