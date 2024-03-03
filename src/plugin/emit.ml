@@ -144,7 +144,7 @@ let emit_extension ~scope ~params field =
   let implementation = Code.init () in
   Code.append implementation signature;
 
-  Code.emit signature `None "type t = %s %s" c.typestr params.annot;
+  Code.emit signature `None "type t = %s %s" (Code.append_deprecaton_if ~deprecated:c.deprecated c.typestr) params.annot;
   Code.emit signature `None "val get_exn: %s -> %s" extendee_type c.typestr;
   Code.emit signature `None "val get: %s -> (%s, [> Runtime'.Result.error]) result" extendee_type c.typestr;
   Code.emit signature `None "val set: %s -> %s -> %s" extendee_type c.typestr extendee_type;
@@ -341,6 +341,7 @@ let emit_header implementation ~name ~syntax ~params =
   Code.emit implementation `None "    fixed_as_int=%b" params.fixed_as_int;
   Code.emit implementation `None "    singleton_record=%b" params.singleton_record;
   Code.emit implementation `None "*)";
+  Code.emit implementation `None "[@@@warning \"-3\"] (* Disable deprecation warnings in general *)";
   Code.emit implementation `None "";
   ()
 

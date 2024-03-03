@@ -18,7 +18,7 @@ type type_modifier =
   | Oneof_type of string * (string * string) list
 
 type type' =
-  { name: string; modifier: type_modifier }
+  { name: string; modifier: type_modifier; deprecated: bool }
 
 type c = {
   name : string;
@@ -29,6 +29,7 @@ type c = {
 type field_spec = {
   typestr : string;
   spec_str: string;
+  deprecated: bool;
 }
 
 type t = {
@@ -227,6 +228,10 @@ let type_of_spec: type a. a spec -> string = function
   | Enum { type'; _ } -> type'
   | Message { type'; _ } -> type'
 
+let is_deprecated = function
+  | FieldDescriptorProto.{ options = Some { deprecated; _ }; _ } -> deprecated
+  | FieldDescriptorProto.{ options = None; _ } -> false
+
 let spec_of_message ~scope type_name =
   let type' = Scope.get_scoped_name ~postfix:"t" scope type_name in
   let module_name = Scope.get_scoped_name scope type_name in
@@ -305,12 +310,21 @@ let string_of_packed = function
   | Packed -> "packed"
   | Not_packed -> "not_packed"
 
-let string_of_type = function
-  | { name; modifier = (No_modifier _ | Required | Oneof_type _); _ } -> name
-  | { name; modifier = List; _ } -> sprintf "%s list" name
-  | { name; modifier = Optional; _ } -> sprintf "%s option" name
+let string_of_type ~add_deprecation type' =
+  let type_str = match type' with
+    | { name; modifier = (No_modifier _ | Required | Oneof_type _); _ } -> name
+    | { name; modifier = List; _ } -> sprintf "%s list" name
+    | { name; modifier = Optional; _ } -> sprintf "%s option" name
+  in
+  Code.append_deprecaton_if ~deprecated:(add_deprecation && type'.deprecated) type_str
 
-let c_of_compound: type a. string -> a compound -> c = fun name -> function
+let append_deprecaton_if ~deprecated str =
+  match deprecated  with
+  | true -> sprintf "%s[@ocaml.deprecated \"Field deprecated in proto file\"]" str
+  | false -> str
+
+
+let c_of_compound: type a. deprecated:bool -> string -> a compound -> c = fun ~deprecated name -> function
   | Basic (index, spec, default) ->
     let index_string = string_of_index index in
     let spec_str = sprintf "basic (%s, %s, %s)" index_string (string_of_spec spec) (string_of_proto_type spec default) in
@@ -319,32 +333,32 @@ let c_of_compound: type a. string -> a compound -> c = fun name -> function
       | Message _ -> Optional
       | _ -> No_modifier (string_of_default spec default)
     in
-    let type' = { name = type_of_spec spec; modifier } in
+    let type' = { name = type_of_spec spec; modifier; deprecated } in
     { name; type'; spec_str }
   | Basic_req (index, spec) ->
     let index_string = string_of_index index in
     let spec_str = sprintf "basic_req (%s, %s)" index_string (string_of_spec spec) in
-    let type' = { name = type_of_spec spec; modifier = Required } in
+    let type' = { name = type_of_spec spec; modifier = Required; deprecated } in
     { name; type'; spec_str }
   | Basic_opt (index, spec) ->
     let index_string = string_of_index index in
     let spec_str = sprintf "basic_opt (%s, %s)" index_string (string_of_spec spec) in
-    let type' = { name = type_of_spec spec; modifier = Optional } in
+    let type' = { name = type_of_spec spec; modifier = Optional; deprecated } in
     { name; type'; spec_str }
   | Repeated (index, spec, packed) ->
     let index_string = string_of_index index in
     let spec_str = sprintf "repeated (%s, %s, %s)" index_string (string_of_spec spec) (string_of_packed packed) in
-    let type' = { name = type_of_spec spec; modifier = List } in
+    let type' = { name = type_of_spec spec; modifier = List; deprecated } in
     { name; type'; spec_str; }
   | Map (index, { key_type; value_type } ) ->
     let index_string = string_of_index index in
     let spec_str = sprintf "map (%s, (%s, %s))" index_string key_type.spec_str value_type.spec_str in
-    let type_name = sprintf "(%s * %s)" (string_of_type key_type.type') (string_of_type value_type.type') in
-    let type' = { name = type_name; modifier = List } in
+    let type_name = sprintf "(%s * %s)" (string_of_type ~add_deprecation:false key_type.type') (string_of_type value_type.type' ~add_deprecation:false) in
+    let type' = { name = type_name; modifier = List; deprecated } in
     { name; type'; spec_str; }
   | Oneof { type'; spec; fields; _ } ->
     let spec_str = sprintf "oneof (%s)" spec in
-    let type' = { name = type'; modifier = Oneof_type ({|`not_set|}, fields) } in
+    let type' = { name = type'; modifier = Oneof_type ({|`not_set|}, fields); deprecated } in
     { name; type'; spec_str }
 
 let rec c_of_field ~params ~syntax ~scope ~map_type field =
@@ -354,6 +368,7 @@ let rec c_of_field ~params ~syntax ~scope ~map_type field =
   let name = Option.value_exn field.name in
   let json_name = Option.value_exn field.json_name in
   let index = (number, name, json_name) in
+  let deprecated = is_deprecated field in
 
   match syntax, field with
   (* This function cannot handle oneof types *)
@@ -372,56 +387,56 @@ let rec c_of_field ~params ~syntax ~scope ~map_type field =
   | _, { label = Some Label.LABEL_OPTIONAL; type' = Some TYPE_MESSAGE; type_name; _ } ->
     let spec = spec_of_message ~scope type_name in
     Basic_opt (index, spec)
-    |> c_of_compound name
+    |> c_of_compound ~deprecated name
 
   (* Required message *)
   | `Proto2, { label = Some Label.LABEL_REQUIRED; type' = Some TYPE_MESSAGE; type_name; _ } ->
     let spec = spec_of_message ~scope type_name in
     Basic_req (index, spec)
-    |> c_of_compound name
+    |> c_of_compound ~deprecated name
 
   (* Enum under proto2 with a default value *)
   | `Proto2, { label = Some Label.LABEL_OPTIONAL; type' = Some TYPE_ENUM; type_name; default_value = Some default; _ } ->
     let spec = spec_of_enum ~scope type_name (Some default) in
     Basic (index, spec, default)
-    |> c_of_compound name
+    |> c_of_compound ~deprecated name
 
   (* Enum under proto2 with no default value *)
   | `Proto2, { label = Some Label.LABEL_OPTIONAL; type' = Some TYPE_ENUM; type_name; default_value = None; _ } ->
     let spec = spec_of_enum ~scope type_name None in
     Basic_opt (index, spec)
-    |> c_of_compound name
+    |> c_of_compound ~deprecated name
 
   (* Required Enum under proto2 *)
   | `Proto2, { label = Some Label.LABEL_REQUIRED; type' = Some TYPE_ENUM; type_name; _ } ->
     let spec = spec_of_enum ~scope type_name None in
     Basic_req (index, spec)
-    |> c_of_compound name
+    |> c_of_compound ~deprecated name
 
   (* Required fields under proto2 *)
   | `Proto2, { label = Some Label.LABEL_REQUIRED; type' = Some type'; type_name; _ } ->
     let Espec spec = spec_of_type ~params ~scope type_name None type' in
     Basic_req (index, spec)
-    |> c_of_compound name
+    |> c_of_compound ~deprecated name
 
   (* Proto2 optional fields with a default *)
   | `Proto2, { label = Some Label.LABEL_OPTIONAL; type' = Some type'; type_name; default_value = Some default; _ } ->
     let Espec spec = spec_of_type ~params ~scope type_name (Some default) type' in
     let default = make_default spec default in
     Basic (index, spec, default)
-    |> c_of_compound name
+    |> c_of_compound ~deprecated name
 
   (* Proto2 optional fields - no default *)
   | `Proto2, { label = Some Label.LABEL_OPTIONAL; type' = Some type'; type_name; default_value = None; _ } ->
     let Espec spec = spec_of_type ~params ~scope type_name None type' in
     Basic_opt (index, spec)
-    |> c_of_compound name
+    |> c_of_compound ~deprecated name
 
   (* Proto3 explicitly optional field are mapped as proto2 optional fields *)
   | _, { label = Some Label.LABEL_OPTIONAL; type' = Some type'; type_name; proto3_optional = Some true; _ } ->
     let Espec spec = spec_of_type ~params ~scope type_name None type' in
     Basic_opt (index, spec)
-    |> c_of_compound name
+    |> c_of_compound ~deprecated name
 
   (* Proto3 enum implicitly optional field *)
   | `Proto3, { label = Some Label.LABEL_OPTIONAL; type' = Some TYPE_ENUM; type_name; _} ->
@@ -432,14 +447,14 @@ let rec c_of_field ~params ~syntax ~scope ~map_type field =
       | _ -> failwith "Must be an enum spec"
     in
     Basic (index, spec, default)
-    |> c_of_compound name
+    |> c_of_compound ~deprecated name
 
   (* Proto3 implicitly optional field *)
   | `Proto3, { label = Some Label.LABEL_OPTIONAL; type' = Some type'; type_name; _} ->
     let Espec spec = spec_of_type ~params ~scope type_name None type' in
     let default = default_of_spec spec in
     Basic (index, spec, default)
-    |> c_of_compound name
+    |> c_of_compound ~deprecated name
 
   (* Repeated fields cannot have a default *)
   | _, { label = Some Label.LABEL_REPEATED; default_value = Some _; _ } -> failwith "Repeated fields does not support default values"
@@ -460,19 +475,19 @@ let rec c_of_field ~params ~syntax ~scope ~map_type field =
       |> c_of_field ~params ~syntax ~scope ~map_type:None
     in
     Map (index, { key_type; value_type }) (* The spec is not the same here *)
-    |> c_of_compound name
+    |> c_of_compound ~deprecated name
 
   (* Repeated message *)
   | _, { label = Some Label.LABEL_REPEATED; type' = Some Type.TYPE_MESSAGE; type_name; _ } ->
     let spec = spec_of_message ~scope type_name in
     Repeated (index, spec, Not_packed)
-    |> c_of_compound name
+    |> c_of_compound ~deprecated name
 
   (* Repeated bytes and strings are not packed *)
   | _, { label = Some Label.LABEL_REPEATED; type' = Some (TYPE_STRING | TYPE_BYTES as type'); type_name; _ } ->
     let Espec spec = spec_of_type ~params ~scope type_name None type' in
     Repeated (index, spec, Not_packed)
-    |> c_of_compound name
+    |> c_of_compound ~deprecated name
 
   (* Repeated enum *)
   | _, { label = Some Label.LABEL_REPEATED; type' = Some Type.TYPE_ENUM; type_name; options; _} ->
@@ -484,7 +499,7 @@ let rec c_of_field ~params ~syntax ~scope ~map_type field =
       | `Proto3, _ -> Packed
     in
     Repeated (index, spec, packed)
-    |> c_of_compound name
+    |> c_of_compound ~deprecated name
 
   (* Repeated basic type *)
   | _, { label = Some Label.LABEL_REPEATED; type' = Some type'; type_name; options; _} ->
@@ -496,7 +511,7 @@ let rec c_of_field ~params ~syntax ~scope ~map_type field =
       | `Proto3, _ -> Packed
     in
     Repeated (index, spec, packed)
-    |> c_of_compound name
+    |> c_of_compound ~deprecated name
   | _, { label = None; _ } -> failwith "Label not set on field struct"
   | _, { type' = None; _ } -> failwith "Type must be set"
 
@@ -504,8 +519,9 @@ let rec c_of_field ~params ~syntax ~scope ~map_type field =
 let spec_of_field ~params ~syntax ~scope ~map_type field : field_spec =
   let c = c_of_field ~params ~syntax ~scope ~map_type field in
   {
-    typestr = string_of_type c.type';
+    typestr = string_of_type ~add_deprecation:false c.type';
     spec_str = c.spec_str;
+    deprecated = is_deprecated field;
   }
 
 let c_of_oneof ~params ~syntax:_ ~scope OneofDescriptorProto.{ name; _ } fields =
@@ -513,10 +529,10 @@ let c_of_oneof ~params ~syntax:_ ~scope OneofDescriptorProto.{ name; _ } fields 
   (* Construct the type. *)
   let field_infos =
     List.map ~f:(function
-      | { number = Some number; name = Some name; type' = Some type'; type_name; json_name = Some json_name; _}, _map_type ->
+      | { number = Some number; name = Some name; type' = Some type'; type_name; json_name = Some json_name; _ } as field, _map_type ->
         let index = (number, name, json_name) in
         let Espec spec = spec_of_type ~params ~scope type_name None type' in
-        (index, Some name, type_of_spec spec, Espec spec)
+        (index, Some name, type_of_spec spec, Espec spec, is_deprecated field)
       | _ -> failwith "No index or type"
     ) fields
   in
@@ -524,7 +540,7 @@ let c_of_oneof ~params ~syntax:_ ~scope OneofDescriptorProto.{ name; _ } fields 
     let oneof_elems =
       field_infos
       |>
-      List.map ~f:(fun (index, name, _type', Espec spec) ->
+      List.map ~f:(fun (index, name, _type', Espec spec, _deprecated) ->
         let adt_name = Scope.get_name_exn scope name in
         let arg : _ T.oneof_elem = { adt_name; } in
         adt_name, Oneof_elem (index, spec, arg)
@@ -532,7 +548,10 @@ let c_of_oneof ~params ~syntax:_ ~scope OneofDescriptorProto.{ name; _ } fields 
     in
     let type' =
       field_infos
-      |> List.map ~f:(fun (_, name, type', _) -> sprintf "%s of %s" (Scope.get_name_exn scope name) type')
+      |> List.map ~f:(fun (_, name, type', _, deprecated) ->
+        sprintf "%s of %s" (Scope.get_name_exn scope name) type'
+        |> append_deprecaton_if ~deprecated
+      )
       |> String.concat ~sep:" | "
       |> sprintf "[ `not_set | %s ]"
     in
@@ -560,7 +579,7 @@ let c_of_oneof ~params ~syntax:_ ~scope OneofDescriptorProto.{ name; _ } fields 
     Oneof { type'; spec = spec; fields }
   in
 
-  c_of_compound (Option.value_exn name) oneof
+  c_of_compound ~deprecated:false (Option.value_exn name) oneof
 
 (** Return a list of plain fields + a list of fields per oneof_decl *)
 let split_oneof_decl fields oneof_decls =
@@ -589,8 +608,6 @@ let sort_fields fields =
   in
   List.sort ~cmp:(fun v v' -> Int.compare (number v) (number v')) fields
 
-
-(* We will drop maps entirely, so is map entry will dissapear *)
 let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls =
   let fields = sort_fields fields in
   let ts =
@@ -606,11 +623,11 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
   let has_extensions = match extension_ranges with [] -> false | _ -> true in
 
   let constructor_sig_arg = function
-    | { name; type' = { name = type_name; modifier = Required }; _ } ->
+    | { name; type' = { name = type_name; modifier = Required; deprecated = _ }; _ } ->
       sprintf "%s:%s" (Scope.get_name scope name) type_name
-    | { name; type' = { name = type_name; modifier = List }; _} ->
+    | { name; type' = { name = type_name; modifier = List; deprecated = _  }; _} ->
       sprintf "?%s:%s list" (Scope.get_name scope name) type_name
-    | { name; type' = { name = type_name; modifier = (Optional | No_modifier _ | Oneof_type _) }; _} ->
+    | { name; type' = { name = type_name; modifier = (Optional | No_modifier _ | Oneof_type _); deprecated = _  }; _} ->
       sprintf "?%s:%s" (Scope.get_name scope name) type_name
   in
   let constructor_arg c =
@@ -634,12 +651,6 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
                    params.singleton_record = false &&
                    not has_extensions &&
                    not is_cyclic
-  in
-
-  let _append_deprecation ~deprecated str =
-    match deprecated with
-    | true -> sprintf "%s[@ocaml.deprecated]" str
-    | false -> str
   in
 
   let type_constr field_infos = match t_as_tuple, field_infos with
@@ -666,13 +677,8 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
       |> sprintf "{ %s }"
   in
 
-  let _is_deprecated_field = function
-    | FieldDescriptorProto.{ options = Some { deprecated; _ }; _ } -> deprecated
-    | FieldDescriptorProto.{ options = None; _ } -> false
-  in
-
   let field_info =
-    List.rev_map ~f:(fun { name; type'; _} -> (Scope.get_name scope name, string_of_type type') ) ts
+    List.rev_map ~f:(fun { name; type'; _} -> (Scope.get_name scope name, string_of_type ~add_deprecation:true type') ) ts
     |> prepend ~cond:has_extensions ("extensions'", "Runtime'.Extensions.t")
     |> List.rev
   in
