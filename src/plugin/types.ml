@@ -7,19 +7,8 @@ open StdLabels
    so that changes to the spec will require changes here also.
 *)
 
-(* Create module to hold textual representations for compound types. *)
-module T = struct
-  type _ message = { type': string; module_name: string }
-  type _ enum = { type': string; module_name: string; default: string }
-  type _ oneof = { type': string; spec: string; fields: (string * string) list }
-  type _ oneof_elem = { adt_name: string }
-  type _ map = { type': string; module_name: string }
-end
-
-open Ocaml_protoc_plugin.Spec.Make(T)
 
 open Spec.Descriptor.Google.Protobuf
-
 
 type type_modifier =
   | No_modifier of string (* The default value *)
@@ -51,6 +40,18 @@ type t = {
   default_constructor_impl: string;
   merge_impl: string;
 }
+
+(* Create module to hold textual representations for compound types. *)
+module T = struct
+  type _ message = { type': string; module_name: string }
+  type _ enum = { type': string; module_name: string; default: string }
+  type _ oneof = { type': string; spec: string; fields: (string * string) list }
+  type _ oneof_elem = { adt_name: string }
+  type _ map = { key_type: c; value_type: c }
+end
+
+open Ocaml_protoc_plugin.Spec.Make(T)
+
 
 let sprintf = Printf.sprintf
 
@@ -226,7 +227,6 @@ let type_of_spec: type a. a spec -> string = function
   | Enum { type'; _ } -> type'
   | Message { type'; _ } -> type'
 
-
 let spec_of_message ~scope type_name =
   let type' = Scope.get_scoped_name ~postfix:"t" scope type_name in
   let module_name = Scope.get_scoped_name scope type_name in
@@ -336,17 +336,18 @@ let c_of_compound: type a. string -> a compound -> c = fun name -> function
     let spec_str = sprintf "repeated (%s, %s, %s)" index_string (string_of_spec spec) (string_of_packed packed) in
     let type' = { name = type_of_spec spec; modifier = List } in
     { name; type'; spec_str; }
-  | Map (index, { type'; module_name } ) ->
+  | Map (index, { key_type; value_type } ) ->
     let index_string = string_of_index index in
-    let spec_str = sprintf "map (%s, (module %s))" index_string module_name in
-    let type' = { name = type'; modifier = List } in
+    let spec_str = sprintf "map (%s, (%s, %s))" index_string key_type.spec_str value_type.spec_str in
+    let type_name = sprintf "(%s * %s)" (string_of_type key_type.type') (string_of_type value_type.type') in
+    let type' = { name = type_name; modifier = List } in
     { name; type'; spec_str; }
   | Oneof { type'; spec; fields; _ } ->
     let spec_str = sprintf "oneof (%s)" spec in
     let type' = { name = type'; modifier = Oneof_type ({|`not_set|}, fields) } in
     { name; type'; spec_str }
 
-let c_of_field ~params ~syntax ~scope ~is_map_type field =
+let rec c_of_field ~params ~syntax ~scope ~map_type field =
   let open FieldDescriptorProto in
   let open FieldDescriptorProto.Type in
   let number = Option.value_exn field.number in
@@ -444,10 +445,21 @@ let c_of_field ~params ~syntax ~scope ~is_map_type field =
   | _, { label = Some Label.LABEL_REPEATED; default_value = Some _; _ } -> failwith "Repeated fields does not support default values"
 
   (* Repeated message - map type *)
-  | _, { label = Some Label.LABEL_REPEATED; type' = Some Type.TYPE_MESSAGE; type_name; _ } when is_map_type ->
-    let type' = Scope.get_scoped_name ~postfix:"t" scope type_name in
-    let module_name = Scope.get_scoped_name scope type_name in
-    Map (index, { type'; module_name }) (* The spec is not the same here *)
+  | _, { label = Some Label.LABEL_REPEATED; type' = Some Type.TYPE_MESSAGE; _ } when map_type != None ->
+    let lookup n = function
+      | Some DescriptorProto.{ field = fields; _ } -> List.find_opt ~f:(function { name = Some name; _ } -> String.equal name n | _ -> false) fields
+      | None -> None
+    in
+    (* A Map type cannot be recursibe. And we actually have the type. So lets create the spec *)
+    let key_type =
+      lookup "key" map_type |> Option.value_exn ~message:"Maps must contain a key field"
+      |> c_of_field ~params ~syntax ~scope ~map_type:None
+    in
+    let value_type =
+      lookup "value" map_type |> Option.value_exn ~message:"Maps must contain a value field"
+      |> c_of_field ~params ~syntax ~scope ~map_type:None
+    in
+    Map (index, { key_type; value_type }) (* The spec is not the same here *)
     |> c_of_compound name
 
   (* Repeated message *)
@@ -489,8 +501,8 @@ let c_of_field ~params ~syntax ~scope ~is_map_type field =
   | _, { type' = None; _ } -> failwith "Type must be set"
 
 
-let spec_of_field ~params ~syntax ~scope ~is_map_type field : field_spec =
-  let c = c_of_field ~params ~syntax ~scope ~is_map_type field in
+let spec_of_field ~params ~syntax ~scope ~map_type field : field_spec =
+  let c = c_of_field ~params ~syntax ~scope ~map_type field in
   {
     typestr = string_of_type c.type';
     spec_str = c.spec_str;
@@ -501,7 +513,7 @@ let c_of_oneof ~params ~syntax:_ ~scope OneofDescriptorProto.{ name; _ } fields 
   (* Construct the type. *)
   let field_infos =
     List.map ~f:(function
-      | { number = Some number; name = Some name; type' = Some type'; type_name; json_name = Some json_name; _}, _is_map_type ->
+      | { number = Some number; name = Some name; type' = Some type'; type_name; json_name = Some json_name; _}, _map_type ->
         let index = (number, name, json_name) in
         let Espec spec = spec_of_type ~params ~scope type_name None type' in
         (index, Some name, type_of_spec spec, Espec spec)
@@ -577,14 +589,16 @@ let sort_fields fields =
   in
   List.sort ~cmp:(fun v v' -> Int.compare (number v) (number v')) fields
 
-let make ~params ~syntax ~is_cyclic ~is_map_entry ~extension_ranges ~scope ~fields oneof_decls =
+
+(* We will drop maps entirely, so is map entry will dissapear *)
+let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls =
   let fields = sort_fields fields in
   let ts =
     split_oneof_decl fields oneof_decls
     |> List.map ~f:(function
       (* proto3 Oneof fields with only one field is mapped as regular field *)
-      | `Oneof (_, [ (FieldDescriptorProto.{ proto3_optional = Some true; _ } as field, is_map_type) ] )
-      | `Field (field, is_map_type) -> c_of_field ~params ~syntax ~scope ~is_map_type field
+      | `Oneof (_, [ (FieldDescriptorProto.{ proto3_optional = Some true; _ } as field, map_type) ] )
+      | `Field (field, map_type) -> c_of_field ~params ~syntax ~scope ~map_type field
       | `Oneof (decl, fields) -> c_of_oneof ~params ~syntax ~scope decl fields
     )
   in
@@ -615,12 +629,12 @@ let make ~params ~syntax ~is_cyclic ~is_map_entry ~extension_ranges ~scope ~fiel
     | false -> l
   in
 
-  let t_as_tuple = is_map_entry ||
-                   (List.length ts = 1 &&
-                    params.singleton_record = false &&
-                    not has_extensions &&
-                    not is_cyclic)
+  let t_as_tuple = List.length ts = 1 &&
+                   params.singleton_record = false &&
+                   not has_extensions &&
+                   not is_cyclic
   in
+
   let type_constr fields = match fields, t_as_tuple with
     | [], _ -> "unit"
     | fields, true ->
@@ -662,7 +676,7 @@ let make ~params ~syntax ~is_cyclic ~is_map_entry ~extension_ranges ~scope ~fiel
       sprintf "fun %s -> %s"
         args (type_destr field_names)
   in
-  let apply = match t_as_tuple && not is_map_entry with
+  let apply = match t_as_tuple with
     | true -> None
     | false -> Some ((type_destr field_names), args)
   in
@@ -766,5 +780,4 @@ let make ~params ~syntax ~is_cyclic ~is_map_entry ~extension_ranges ~scope ~fiel
     sprintf "fun %s -> %s" args constr
   in
 
-  (* The type contains optional elements. We should not have those *)
   { type'; constructor; apply; spec_str; default_constructor_sig; default_constructor_impl; merge_impl }

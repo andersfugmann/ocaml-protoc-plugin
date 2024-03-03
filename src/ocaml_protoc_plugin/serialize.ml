@@ -111,10 +111,21 @@ let rec write: type a. a compound -> Writer.t -> a -> unit = function
     let write = write_field spec index in
     fun writer vs ->
       List.iter ~f:(fun v -> write writer v) vs
-  | Map ((index, _, _), spec) ->
-    let write = write_field (Message spec) index in
+  | Map ((index, _, _), (key_spec, value_spec)) ->
+    let write_header = write_field_header String index in
+    let write_key = write key_spec in
+    let write_value = write value_spec in
+    let write_entry writer (key, value) =
+      write_key writer key;
+      write_value writer value;
+      writer
+    in
+    let write = Writer.write_length_delimited_f ~write_f:write_entry in
     fun writer vs ->
-      List.iter ~f:(fun v -> write writer v) vs
+      List.iter ~f:(fun v ->
+        write_header writer;
+        write v writer
+      ) vs
   | Basic ((index, _, _), spec, default) -> begin
       let write = write_field spec index in
       let writer writer = function

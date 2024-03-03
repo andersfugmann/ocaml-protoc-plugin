@@ -138,7 +138,7 @@ let emit_extension ~scope ~params field =
   (* Get spec and type *)
   let c =
     let params = Parameters.{params with singleton_record = false} in
-    Types.spec_of_field ~params ~syntax:`Proto2 ~scope ~is_map_type:false field
+    Types.spec_of_field ~params ~syntax:`Proto2 ~scope ~map_type:None field
   in
   let signature = Code.init () in
   let implementation = Code.init () in
@@ -157,10 +157,6 @@ let emit_extension ~scope ~params field =
   Code.emit implementation `None "{ extendee with %s = extensions' } [@@warning \"-23\"]" extendee_field;
   Code.emit implementation `End "";
   { module_name; signature; implementation }
-
-let is_map_entry = function
-  | Some MessageOptions.{ map_entry = Some true; _ } -> true
-  | _ -> false
 
 (** Emit the nested types. *)
 let emit_sub dest ~is_implementation ~is_first {module_name; signature; implementation} =
@@ -189,16 +185,16 @@ let rec emit_nested_types ~syntax ~signature ~implementation ?(is_first = true) 
     emit_nested_types ~syntax ~signature ~implementation ~is_first:false subs
 
 (** Test if the field referenced is a map type *)
-let is_map_type ~scope field nested_types =
+let find_map_type ~scope field nested_types =
   match field with
   | FieldDescriptorProto.{ type' = Some TYPE_MESSAGE; label = Some Label.LABEL_REPEATED; type_name = Some type_name; _} ->
     let current_path = Scope.get_proto_path scope ^ "." in
-    List.exists ~f:(function
+    List.find_opt ~f:(function
       | DescriptorProto.{ name = Some name; options = Some { map_entry = Some true; _ }; _ } ->
         String.equal (current_path ^ name) type_name
       | _ -> false
     ) nested_types
-  | _ -> false
+  | _ -> None
 
 (* Emit a message plus all its subtypes.
    Why is this not being called recursively, but rather calling sub functions which never returns
@@ -206,8 +202,8 @@ let is_map_type ~scope field nested_types =
 let rec emit_message ~params ~syntax scope
     DescriptorProto.{ name; field = fields; extension = extensions;
                       nested_type = nested_types; enum_type = enum_types;
-                      extension_range = extension_ranges; oneof_decl = oneof_decls; options;
-                      reserved_range = _; reserved_name = _ } : module' =
+                      extension_range = extension_ranges; oneof_decl = oneof_decls;
+                      reserved_range = _; reserved_name = _; options = _ } : module' =
 
   let signature = Code.init () in
   let implementation = Code.init () in
@@ -227,39 +223,24 @@ let rec emit_message ~params ~syntax scope
       let module_name = Scope.get_name scope name in
       module_name, Scope.push scope name
   in
+  (* Filter map types *)
+  let nested_types_no_map = List.filter ~f:(function DescriptorProto.{ options = Some { map_entry = Some true; _ }; _ } -> false | _ -> true) nested_types in
   List.map ~f:(emit_enum_type ~scope ~params) enum_types
-  @ List.map ~f:(emit_message ~params ~syntax scope) nested_types
+  @ List.map ~f:(emit_message ~params ~syntax scope) nested_types_no_map
   @ List.map ~f:(emit_extension ~scope ~params) extensions
   |> emit_nested_types ~syntax ~signature ~implementation;
-
-  (* Create a list of all fields that is a map type *)
-  let map_fields =
-    List.filter_map ~f:(function
-      | FieldDescriptorProto.{ name = Some name; _} as field when is_map_type ~scope field nested_types -> Some name
-      | FieldDescriptorProto.{ name = Some type_name; _} -> Some (sprintf "No: %s: %s" type_name (Scope.get_current_scope scope))
-      | _ -> None
-    ) fields
-    |> String.concat ~sep: "; "
-  in
-
-  let nested_maps =
-    List.filter_map ~f:(function DescriptorProto.{name = Some name; options = Some { map_entry = Some true; _ }; _ } -> Some name
-                               | _ -> None) nested_types
-    |> String.concat ~sep: "; "
-  in
 
   let () =
     match name with
     | Some _name ->
-      let is_map_entry = is_map_entry options in
       let is_cyclic = Scope.is_cyclic scope in
       (* Map fields to denote if they are map types *)
-      let fields = List.map ~f:(fun field -> field, is_map_type ~scope field nested_types) fields in
+      let fields = List.map ~f:(fun field -> field, find_map_type ~scope field nested_types) fields in
       let Types.{ type'; constructor; apply; spec_str;
                   default_constructor_sig; default_constructor_impl; merge_impl } =
-        Types.make ~params ~syntax ~is_cyclic ~is_map_entry ~extension_ranges ~scope ~fields oneof_decls
+        Types.make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
       in
-      Code.emit signature `None "val name': unit -> string (* map_fields: '%s'. nested_types: %s *)" map_fields nested_maps;
+      Code.emit signature `None "val name': unit -> string";
       Code.emit signature `None "type t = %s %s" type' params.annot;
       Code.emit signature `None "val make: %s" default_constructor_sig;
       Code.emit signature `None "val merge: t -> t -> t";

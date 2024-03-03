@@ -42,14 +42,16 @@ let to_list = function
   | `List l -> l
   | json -> value_error "list" json
 
-let to_map = function
-  | `Assoc l -> l
-  | json -> value_error "map" json
+let read_map: type a b. read_key:(string -> a) -> read_value:(Yojson.Basic.t -> b) -> Yojson.Basic.t -> (a * b) list =
+  fun ~read_key ~read_value -> function
+    | `Assoc entries ->
+      List.map ~f:( fun (key, value) ->
+        let key = read_key key in
+        let value = read_value value in
+        (key, value)
+      ) entries
+    | json -> value_error "map_entry" json
 
-let read_map_field: type a b. (module Message with type t = (a * b)) -> (string * Yojson.Basic.t) -> (a * b) =
-  fun (module Message) (key, value) ->
-  let json = `Assoc [ ("key", `String key); "value", value ] in
-  Message.from_json_exn json
 
 let read_value: type a. a spec -> Yojson.Basic.t -> a = function
    | Double -> to_float
@@ -112,15 +114,30 @@ let rec read: type a. fields -> a Spec.compound -> a = fun fields -> function
         to_list field |> List.map ~f:read
       | None -> []
     end
-  | Map (index, mmodule) ->
-    begin
-      match find_field index fields with
-      | Some field ->
-        let read = read_map_field mmodule in
-        to_map field |> List.map ~f:read
-      | None -> []
+  | Map (index, (Basic (_, key_spec, _), Basic (_, value_spec, _))) ->
+    let read_key = read_value key_spec in
+    let read_key v = read_key (`String v) in
+    let read_value = read_value value_spec in
+    begin match find_field index fields with
+    | Some field ->
+      read_map ~read_key ~read_value field
+    | None -> []
     end
-
+  | Map (index, (Basic (_, key_spec, _), Basic_opt (_, value_spec))) ->
+    let read_key = read_value key_spec in
+    let read_key v = read_key (`String v) in
+    let read_value = read_value value_spec in
+    let read_value = function
+      | `Null -> None
+      | json -> Some (read_value json)
+    in
+    begin match find_field index fields with
+    | Some field ->
+      read_map ~read_key ~read_value field
+    | None -> []
+    end
+  | Map _ ->
+    failwith "Illegal type for maps"
   | Oneof (oneofs, _) ->
     let rec inner = function
       | Oneof_elem (index, spec, (constr, _)) :: rest ->

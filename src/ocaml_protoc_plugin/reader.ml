@@ -20,24 +20,21 @@ let create ?(offset = 0) ?length data =
 let reset t offset = t.offset <- offset
 let offset { offset; _ } = offset
 
-let validate_capacity t count =
+let[@inline] validate_capacity t count =
   match t.offset + count <= t.end_offset with
   | true -> ()
   | false ->
     Result.raise `Premature_end_of_input
-[@@inline]
 
-let has_more t = t.offset < t.end_offset
-[@@inline]
+let[@inline] has_more t = t.offset < t.end_offset
 
-let read_byte t =
+let[@inline] read_byte t =
   match t.offset < t.end_offset with
   | true ->
     let v = String.unsafe_get t.data t.offset |> Char.code in
     t.offset <- t.offset + 1;
     v
   | false -> Result.raise `Premature_end_of_input
-[@@inline]
 
 let read_varint t =
   let open Infix.Int64 in

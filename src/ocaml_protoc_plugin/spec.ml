@@ -89,7 +89,7 @@ module Make(T : T) = struct
     | Repeated : field * 'a spec * packed -> 'a list compound
 
     (* Map types *)
-    | Map : field * (module Message with type t = ('a * 'b)) T.map -> ('a * 'b) list compound
+    | Map : field * ('a compound * 'b compound) T.map -> ('a * 'b) list compound
 
     (* Oneofs. A list of fields + function to index the field *)
     | Oneof : (('a oneof list) * ('a -> int)) T.oneof -> ([> `not_set ] as 'a) compound

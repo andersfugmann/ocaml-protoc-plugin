@@ -104,7 +104,30 @@ let read_field ~read:(expect, read_f) ~map v reader field_type =
     let field = Reader.read_field_content field_type reader in
     error_wrong_field "Deserialize" field
 
-let value: type a. a compound -> a value = function
+let read_map_entry: type a b. read_key:a value -> read_value:b value -> Reader.t -> (a * b) = fun ~read_key ~read_value ->
+  let Value (key_field_specs, default_key, get_key) = read_key in
+  let Value (value_field_specs, default_value, get_value) = read_value in
+  let (key_index, read_key_f) = List.hd key_field_specs in
+  let (value_index, read_value_f) = List.hd value_field_specs in
+  let rec read (key, value) reader =
+    match Reader.has_more reader with
+    | true -> begin
+        match Reader.read_field_header reader with
+        | field_type, index when index = key_index ->
+          let key = read_key_f key reader field_type in
+          read (key, value) reader
+        | field_type, index when index = value_index ->
+          let value = read_value_f value reader field_type in
+          read (key, value) reader
+        | field_type, _ ->
+          Reader.read_field_content field_type reader |> ignore;
+          read (key, value) reader (* We should drop the value *)
+      end
+    | false -> (get_key key, get_value value)
+  in
+  read (default_key, default_value)
+
+let rec value: type a. a compound -> a value = function
   | Basic_req ((index, _, _), spec) ->
     let read = read_field ~read:(read_of_spec spec) ~map:keep_last_opt in
     let getter = function Some v -> v | None -> error_required_field_missing index spec in
@@ -141,8 +164,16 @@ let value: type a. a compound -> a value = function
   | Repeated ((index, _, _), spec, Not_packed) ->
     let read = read_field ~read:(read_of_spec spec) ~map:(fun vs v -> v :: vs) in
     Value ([(index, read)], [], List.rev)
-  | Map ((index, _, _), spec) ->
-    let read = read_field ~read:(read_of_spec (Message spec)) ~map:(fun vs v -> v :: vs) in
+  | Map ((index, _, _), (key_spec, value_spec)) ->
+    let read_key = value key_spec in
+    let read_value = value value_spec in
+    let read_entry = read_map_entry ~read_key ~read_value in
+
+    let read_entry_message reader =
+      let Field.{ offset; length; data } = Reader.read_length_delimited reader in
+      read_entry (Reader.create ~offset ~length data)
+    in
+    let read = read_field ~read:(Field.Length_delimited, read_entry_message) ~map:(fun vs v -> v :: vs) in
     Value ([(index, read)], [], List.rev)
   | Oneof (oneofs, _index_f) ->
     let make_reader: a oneof -> a field_spec = fun (Oneof_elem ((index, _, _), spec, (constr, _destr))) ->
