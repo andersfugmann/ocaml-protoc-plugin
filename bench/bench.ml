@@ -57,7 +57,7 @@ let make_tests (type v) (module Protoc: Protoc_impl) (module Plugin: Plugin_impl
        eprintf "New: %s\n" (Plugin.M.show v_plugin');
        failwith "Data not the same"
   in
-  printf "%-16s: %5d+%-5d(B) / %5d+%-5d(S) / %5d+%-5d(Sp) - %5d\n%!" (Plugin.M.name' ())
+  printf "%-17s: %7d+%-7d(B) / %7d+%-7d(S) / %7d+%-7d(Sp) - %7d\n%!" (Plugin.M.name' ())
     size_normal unused_normal size_speed unused_speed size_space unused_space (String.length data_protoc);
 
 
@@ -197,7 +197,6 @@ let print_bench_results results =
     | None -> { Bechamel_notty.w= 80; h= 1; } in
   img (window, results) |> eol |> output_image
 
-
 let _ =
   let v_plugin = create_test_data ~depth:4 () in
   let v_plugin = Option.value_exn v_plugin in
@@ -212,6 +211,8 @@ let _ =
     List.init 1000 ~f:(fun i -> i) |> make_tests (module Protoc.Int64_list) (module Plugin.Int64_list);
     List.init 1000 ~f:(fun i -> Float.of_int i) |> make_tests (module Protoc.Float_list) (module Plugin.Float_list);
     List.init 1000 ~f:(fun _ -> random_string ~len:20 ()) |> make_tests (module Protoc.String_list) (module Plugin.String_list);
+    List.init 1000 ~f:(fun i -> i+1, i * i+1) |> make_tests (module Protoc.Map) (module Plugin.Map);
+
     (* random_list ~len:100 ~f:(fun () -> Plugin.Enum_list.Enum.ED) () |> make_tests (module Protoc.Enum_list) (module Plugin.Enum_list); *)
        (Bechamel.Test.make_grouped ~name:"Varint" @@ (make_int_tests (0xFFFF_FFFFL)))
   ]

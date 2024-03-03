@@ -1,13 +1,39 @@
 module type T = sig
-  type ('a, 'deser, 'ser) dir
+  type 'a message
+  type 'a enum
+  type 'a oneof
+  type 'a oneof_elem
+  type 'a map
+end
+
+module type Enum = sig
+  type t
+  val to_int: t -> int
+  val from_int: int -> t Result.t
+  val from_int_exn: int -> t
+  val to_string: t -> string
+  val from_string_exn: string -> t
+end
+
+module type Message = sig
+  type t
+  val from_proto: Reader.t -> t Result.t
+  val from_proto_exn: Reader.t -> t
+  val to_proto: t -> Writer.t
+  val to_proto': Writer.t -> t -> Writer.t
+  val merge: t -> t -> t
+  val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+  val from_json_exn: Yojson.Basic.t -> t
+  val from_json: Yojson.Basic.t -> t Result.t
 end
 
 module Make(T : T) = struct
-
   type packed = Packed | Not_packed
   type extension_ranges = (int * int) list
   type extensions = (int * Field.t) list
   type 'a merge = 'a -> 'a -> 'a
+
+  type field = (int * string * string)
 
   type _ spec =
     | Double : float spec
@@ -40,28 +66,33 @@ module Make(T : T) = struct
     | Bool : bool spec
     | String : string spec
     | Bytes : bytes spec
-    | Enum :  ('a, int -> 'a, 'a -> int) T.dir -> 'a spec
-    | Message : ('a, ((Reader.t -> 'a) * 'a merge), Writer.t -> 'a -> Writer.t) T.dir -> 'a spec
+    | Enum :  (module Enum with type t = 'a) T.enum -> 'a spec
+    | Message : (module Message with type t = 'a) T.message -> 'a spec
 
   (* Existential types *)
   type espec = Espec: _ spec -> espec [@@unboxed]
 
   type _ oneof =
-    | Oneof_elem : int * 'b spec * ('a, ('b -> 'a), 'b) T.dir -> 'a oneof
+    | Oneof_elem : field * 'b spec * (('b -> 'a) * ('a -> 'b)) T.oneof_elem -> 'a oneof
 
   type _ compound =
     (* A field, where the default value is know (and set). This cannot be used for message types *)
-    | Basic : int * 'a spec * 'a -> 'a compound
+    | Basic : field * 'a spec * 'a -> 'a compound
 
     (* Proto2/proto3 optional fields. *)
-    | Basic_opt : int * 'a spec -> 'a option compound
+    | Basic_opt : field * 'a spec -> 'a option compound
 
     (* Proto2 required fields (and oneof fields) *)
-    | Basic_req : int * 'a spec -> 'a compound
+    | Basic_req : field * 'a spec -> 'a compound
 
     (* Repeated fields *)
-    | Repeated : int * 'a spec * packed -> 'a list compound
-    | Oneof : ('a, 'a oneof list, 'a -> unit oneof) T.dir -> ([> `not_set ] as 'a) compound
+    | Repeated : field * 'a spec * packed -> 'a list compound
+
+    (* Map types *)
+    | Map : field * ('a compound * 'b compound) T.map -> ('a * 'b) list compound
+
+    (* Oneofs. A list of fields + function to index the field *)
+    | Oneof : (('a oneof list) * ('a -> int)) T.oneof -> ([> `not_set ] as 'a) compound
 
   type (_, _) compound_list =
     (* End of list *)
@@ -73,95 +104,94 @@ module Make(T : T) = struct
     (* List element *)
     | Cons : ('a compound) * ('b, 'c) compound_list -> ('a -> 'b, 'c) compound_list
 
-  module C = struct
-    let double = Double
-    let float = Float
-    let int32 = Int32
-    let int64 = Int64
-    let uint32 = UInt32
-    let uint64 = UInt64
-    let sint32 = SInt32
-    let sint64 = SInt64
-    let fixed32 = Fixed32
-    let fixed64 = Fixed64
-    let sfixed32 = SFixed32
-    let sfixed64 = SFixed64
+  let double = Double
+  let float = Float
+  let int32 = Int32
+  let int64 = Int64
+  let uint32 = UInt32
+  let uint64 = UInt64
+  let sint32 = SInt32
+  let sint64 = SInt64
+  let fixed32 = Fixed32
+  let fixed64 = Fixed64
+  let sfixed32 = SFixed32
+  let sfixed64 = SFixed64
 
-    let int32_int = Int32_int
-    let int64_int = Int64_int
-    let uint32_int = UInt32_int
-    let uint64_int = UInt64_int
-    let sint32_int = SInt32_int
-    let sint64_int = SInt64_int
-    let fixed32_int = Fixed32_int
-    let fixed64_int = Fixed64_int
-    let sfixed32_int = SFixed32_int
-    let sfixed64_int = SFixed64_int
+  let int32_int = Int32_int
+  let int64_int = Int64_int
+  let uint32_int = UInt32_int
+  let uint64_int = UInt64_int
+  let sint32_int = SInt32_int
+  let sint64_int = SInt64_int
+  let fixed32_int = Fixed32_int
+  let fixed64_int = Fixed64_int
+  let sfixed32_int = SFixed32_int
+  let sfixed64_int = SFixed64_int
 
-    let bool = Bool
-    let string = String
-    let bytes = Bytes
-    let enum f = Enum f
-    let message f = Message f
+  let bool = Bool
+  let string = String
+  let bytes = Bytes
+  let enum f = Enum f
+  let message f = Message f
 
-    let some v = Some v
-    let none = None
-    let default_bytes v = (Some (Bytes.of_string v))
+  let some v = Some v
+  let none = None
+  let default_bytes v = (Some (Bytes.of_string v))
 
-    let repeated (i, s, p) = Repeated (i, s, p)
-    let basic (i, s, d) = Basic (i, s, d)
-    let basic_req (i, s) = Basic_req (i, s)
-    let basic_opt (i, s) = Basic_opt (i, s)
-    let oneof s = Oneof s
-    let oneof_elem (a, b, c) = Oneof_elem (a, b, c)
+  let repeated (i, s, p) = Repeated (i, s, p)
+  let map (i, s) = Map (i, s)
+  let basic (i, s, d) = Basic (i, s, d)
+  let basic_req (i, s) = Basic_req (i, s)
+  let basic_opt (i, s) = Basic_opt (i, s)
+  let oneof s = Oneof s
+  let oneof_elem (a, b, c) = Oneof_elem (a, b, c)
 
-    let packed = Packed
-    let not_packed = Not_packed
+  let packed = Packed
+  let not_packed = Not_packed
 
-    let ( ^:: ) a b = Cons (a, b)
-    let nil = Nil
-    let nil_ext extension_ranges = Nil_ext extension_ranges
+  let ( ^:: ) a b = Cons (a, b)
+  let nil = Nil
+  let nil_ext extension_ranges = Nil_ext extension_ranges
 
-    let show: type a. a spec -> string = function
-      | Double -> "Double"
-      | Float -> "Float"
+  let show: type a. a spec -> string = function
+    | Double -> "Double"
+    | Float -> "Float"
 
-      | Int32 -> "Int32"
-      | UInt32 -> "UInt32"
-      | SInt32 -> "SInt32"
-      | Fixed32 -> "Fixed32"
-      | SFixed32 -> "SFixed32"
+    | Int32 -> "Int32"
+    | UInt32 -> "UInt32"
+    | SInt32 -> "SInt32"
+    | Fixed32 -> "Fixed32"
+    | SFixed32 -> "SFixed32"
 
-      | Int32_int -> "Int32_int"
-      | UInt32_int -> "UInt32_int"
-      | SInt32_int -> "SInt32_int"
-      | Fixed32_int -> "Fixed32_int"
-      | SFixed32_int -> "SFixed32_int"
+    | Int32_int -> "Int32_int"
+    | UInt32_int -> "UInt32_int"
+    | SInt32_int -> "SInt32_int"
+    | Fixed32_int -> "Fixed32_int"
+    | SFixed32_int -> "SFixed32_int"
 
-      | UInt64 -> "UInt64"
-      | Int64 -> "Int64"
-      | SInt64 -> "SInt64"
-      | Fixed64 -> "Fixed64"
-      | SFixed64 -> "SFixed64"
+    | UInt64 -> "UInt64"
+    | Int64 -> "Int64"
+    | SInt64 -> "SInt64"
+    | Fixed64 -> "Fixed64"
+    | SFixed64 -> "SFixed64"
 
-      | UInt64_int -> "UInt64_int"
-      | Int64_int -> "Int64_int"
-      | SInt64_int -> "SInt64_int"
-      | Fixed64_int -> "Fixed64_int"
-      | SFixed64_int -> "SFixed64_int"
+    | UInt64_int -> "UInt64_int"
+    | Int64_int -> "Int64_int"
+    | SInt64_int -> "SInt64_int"
+    | Fixed64_int -> "Fixed64_int"
+    | SFixed64_int -> "SFixed64_int"
 
-      | Bool -> "Bool"
-      | String -> "String"
-      | Bytes -> "Bytes"
-      | Enum _ -> "Enum"
-      | Message _ -> "Message"
-  end
+    | Bool -> "Bool"
+    | String -> "String"
+    | Bytes -> "Bytes"
+    | Enum _ -> "Enum"
+    | Message _ -> "Message"
 end
 
-module Deserialize = Make(struct
-    type ('a, 'deser, 'ser) dir = 'deser
-  end)
-
-module Serialize = Make(struct
-    type ('a, 'deser, 'ser) dir = 'ser
+include Make(struct
+    type 'a message = 'a
+    type 'a enum = 'a
+    type 'a oneof = 'a
+    type 'a oneof_elem = 'a
+    type 'a map = 'a
   end)

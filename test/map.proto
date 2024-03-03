@@ -6,6 +6,10 @@ message Test {
   map<uint64, string> m = 1;
 }
 
+message Bool_map {
+  map<bool, string> m = 1;
+}
+
 message Two {
   map<uint64, string> m = 1;
   map<sint32, float> n = 20;

@@ -33,13 +33,14 @@ let emit_enum_type ~scope ~params
   Code.emit signature `None "val to_int: t -> int";
   Code.emit signature `None "val from_int: int -> t Runtime'.Result.t";
   Code.emit signature `None "val from_int_exn: int -> t";
+  Code.emit signature `None "val to_string: t -> string";
+  Code.emit signature `None "val from_string_exn: string -> t";
 
   Code.emit implementation `Begin "let to_int = function";
   List.iter ~f:(fun EnumValueDescriptorProto.{name; number; _} ->
     Code.emit implementation `None "| %s -> %d" (Scope.get_name_exn scope name) (Option.value_exn number)
   ) values;
-  Code.emit implementation `End "";
-  Code.emit implementation `Begin "let from_int_exn = function";
+  Code.emit implementation `EndBegin "let from_int_exn = function";
   let _ =
     List.fold_left ~init:IntSet.empty ~f:(fun seen EnumValueDescriptorProto.{name; number; _} ->
         let idx = (Option.value_exn ~message:"All enum descriptions must have a value" number) in
@@ -51,8 +52,17 @@ let emit_enum_type ~scope ~params
       ) values
   in
   Code.emit implementation `None "| n -> Runtime'.Result.raise (`Unknown_enum_value n)";
+  Code.emit implementation `End "let from_int e = Runtime'.Result.catch (fun () -> from_int_exn e)";
+  Code.emit implementation `Begin "let to_string = function";
+  List.iter ~f:(fun EnumValueDescriptorProto.{name; _} ->
+    Code.emit implementation `None "| %s -> \"%s\"" (Scope.get_name_exn scope name) (Option.value_exn name)
+  ) values;
+  Code.emit implementation `EndBegin "let from_string_exn = function";
+  List.iter ~f:(fun EnumValueDescriptorProto.{name; _} ->
+    Code.emit implementation `None "| \"%s\" -> %s" (Option.value_exn name) (Scope.get_name_exn scope name)
+  ) values;
+  Code.emit implementation `None "| s -> Runtime'.Result.raise (`Unknown_enum_name s)";
   Code.emit implementation `End "";
-  Code.emit implementation `Begin "let from_int e = Runtime'.Result.catch (fun () -> from_int_exn e)";
 
   {module_name; signature; implementation}
 
@@ -128,7 +138,7 @@ let emit_extension ~scope ~params field =
   (* Get spec and type *)
   let c =
     let params = Parameters.{params with singleton_record = false} in
-    Types.spec_of_field ~params ~syntax:`Proto2 ~scope field
+    Types.spec_of_field ~params ~syntax:`Proto2 ~scope ~map_type:None field
   in
   let signature = Code.init () in
   let implementation = Code.init () in
@@ -140,17 +150,13 @@ let emit_extension ~scope ~params field =
   Code.emit signature `None "val set: %s -> %s -> %s" extendee_type c.typestr extendee_type;
 
   Code.emit implementation `None "type t = %s %s" c.typestr params.annot;
-  Code.emit implementation `None "let get_exn extendee = Runtime'.Extensions.get Runtime'.Deserialize.C.(%s) (extendee.%s)" c.deserialize_spec extendee_field ;
+  Code.emit implementation `None "let get_exn extendee = Runtime'.Extensions.get Runtime'.Spec.(%s) (extendee.%s)" c.spec_str extendee_field ;
   Code.emit implementation `None "let get extendee = Runtime'.Result.catch (fun () -> get_exn extendee)";
   Code.emit implementation `Begin "let set extendee t =";
-  Code.emit implementation `None "let extensions' = Runtime'.Extensions.set Runtime'.Serialize.C.(%s) (extendee.%s) t in" c.serialize_spec extendee_field;
+  Code.emit implementation `None "let extensions' = Runtime'.Extensions.set Runtime'.Spec.(%s) (extendee.%s) t in" c.spec_str extendee_field;
   Code.emit implementation `None "{ extendee with %s = extensions' } [@@warning \"-23\"]" extendee_field;
   Code.emit implementation `End "";
   { module_name; signature; implementation }
-
-let is_map_entry = function
-  | Some MessageOptions.{ map_entry = Some true; _ } -> true
-  | _ -> false
 
 (** Emit the nested types. *)
 let emit_sub dest ~is_implementation ~is_first {module_name; signature; implementation} =
@@ -178,17 +184,30 @@ let rec emit_nested_types ~syntax ~signature ~implementation ?(is_first = true) 
     emit_sub ~is_implementation:true implementation ~is_first sub;
     emit_nested_types ~syntax ~signature ~implementation ~is_first:false subs
 
+(** Test if the field referenced is a map type *)
+let find_map_type ~scope field nested_types =
+  match field with
+  | FieldDescriptorProto.{ type' = Some TYPE_MESSAGE; label = Some Label.LABEL_REPEATED; type_name = Some type_name; _} ->
+    let current_path = Scope.get_proto_path scope ^ "." in
+    List.find_opt ~f:(function
+      | DescriptorProto.{ name = Some name; options = Some { map_entry = Some true; _ }; _ } ->
+        String.equal (current_path ^ name) type_name
+      | _ -> false
+    ) nested_types
+  | _ -> None
+
 (* Emit a message plus all its subtypes.
    Why is this not being called recursively, but rather calling sub functions which never returns
 *)
 let rec emit_message ~params ~syntax scope
     DescriptorProto.{ name; field = fields; extension = extensions;
                       nested_type = nested_types; enum_type = enum_types;
-                      extension_range = extension_ranges; oneof_decl = oneof_decls; options;
-                      reserved_range = _; reserved_name = _ } : module' =
+                      extension_range = extension_ranges; oneof_decl = oneof_decls;
+                      reserved_range = _; reserved_name = _; options = _ } : module' =
 
   let signature = Code.init () in
   let implementation = Code.init () in
+
 
   let extension_ranges =
     List.map ~f:(function
@@ -204,22 +223,23 @@ let rec emit_message ~params ~syntax scope
       let module_name = Scope.get_name scope name in
       module_name, Scope.push scope name
   in
+  (* Filter map types *)
+  let nested_types_no_map = List.filter ~f:(function DescriptorProto.{ options = Some { map_entry = Some true; _ }; _ } -> false | _ -> true) nested_types in
   List.map ~f:(emit_enum_type ~scope ~params) enum_types
-  @ List.map ~f:(emit_message ~params ~syntax scope) nested_types
+  @ List.map ~f:(emit_message ~params ~syntax scope) nested_types_no_map
   @ List.map ~f:(emit_extension ~scope ~params) extensions
   |> emit_nested_types ~syntax ~signature ~implementation;
 
   let () =
     match name with
     | Some _name ->
-      let is_map_entry = is_map_entry options in
       let is_cyclic = Scope.is_cyclic scope in
-      let Types.{ type'; constructor; apply; deserialize_spec; serialize_spec;
+      (* Map fields to denote if they are map types *)
+      let fields = List.map ~f:(fun field -> field, find_map_type ~scope field nested_types) fields in
+      let Types.{ type'; constructor; apply; spec_str;
                   default_constructor_sig; default_constructor_impl; merge_impl } =
-        Types.make ~params ~syntax ~is_cyclic ~is_map_entry ~extension_ranges ~scope ~fields oneof_decls
+        Types.make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
       in
-      ignore (merge_impl);
-
       Code.emit signature `None "val name': unit -> string";
       Code.emit signature `None "type t = %s %s" type' params.annot;
       Code.emit signature `None "val make: %s" default_constructor_sig;
@@ -228,25 +248,44 @@ let rec emit_message ~params ~syntax scope
       Code.emit signature `None "val to_proto: t -> Runtime'.Writer.t";
       Code.emit signature `None "val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result";
       Code.emit signature `None "val from_proto_exn: Runtime'.Reader.t -> t";
+      Code.emit signature `None "val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t";
+      Code.emit signature `None "val from_json_exn: Yojson.Basic.t -> t";
+      Code.emit signature `None "val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result";
 
       Code.emit implementation `None "let name' () = \"%s\"" (Scope.get_current_scope scope);
       Code.emit implementation `None "type t = %s%s" type' params.annot;
       Code.emit implementation `None "let make %s" default_constructor_impl;
       Code.emit implementation `None "let merge = (%s)" merge_impl;
+      Code.emit implementation `None "let spec () = %s" spec_str;
 
       Code.emit implementation `Begin "let to_proto' =";
-      Code.emit implementation `None "let spec = %s in" serialize_spec;
-      Code.emit implementation `None "let serialize = Runtime'.Serialize.serialize spec in";
-      Code.emit implementation `None "%s" apply;
+      Code.emit implementation `None "let serialize = Runtime'.Serialize.serialize (spec ()) in";
+      begin match apply with
+      | None ->
+        Code.emit implementation `None "serialize"
+      | Some (params, args) ->
+        Code.emit implementation `None "fun writer %s -> serialize writer %s" params args
+      end;
       Code.emit implementation `End "";
 
       Code.emit implementation `None "let to_proto t = to_proto' (Runtime'.Writer.init ()) t";
 
       Code.emit implementation `Begin "let from_proto_exn =";
       Code.emit implementation `None "let constructor = %s in" constructor;
-      Code.emit implementation `None "let spec = %s in" deserialize_spec;
-      Code.emit implementation `None "Runtime'.Deserialize.deserialize spec constructor";
+      Code.emit implementation `None "Runtime'.Deserialize.deserialize (spec ()) constructor";
       Code.emit implementation `End "let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)";
+      Code.emit implementation `Begin "let to_json ?enum_names ?json_names ?omit_default_values = ";
+      Code.emit implementation `None "let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in";
+      begin match apply with
+      | None ->
+        Code.emit implementation `None "serialize"
+      | Some (params, args) ->
+        Code.emit implementation `None "fun %s -> serialize %s" params args
+      end;
+      Code.emit implementation `EndBegin "let from_json_exn =";
+      Code.emit implementation `None "let constructor = %s in" constructor;
+      Code.emit implementation `None "Runtime'.Deserialize_json.deserialize (spec ()) constructor";
+      Code.emit implementation `End "let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)";
     | None -> ()
   in
   {module_name; signature; implementation}

@@ -1,6 +1,16 @@
 open StdLabels
 open Ocaml_protoc_plugin
 
+
+module Reference = struct
+  open Ctypes
+  open Foreign
+  (* extern "C" char* protobuf2json(const char *google_include_dir, const char *proto, const char* type, const char* in_data)  *)
+  let protobuf2json = foreign "protobuf2json" (string @-> string @-> string @-> int @-> returning string)
+  let to_json ~proto_file ~message_type data =
+    protobuf2json proto_file message_type data (String.length data)
+end
+
 module type T = sig
   type t [@@deriving show, eq]
   val to_proto' : Writer.t -> t -> Writer.t
@@ -8,6 +18,9 @@ module type T = sig
   val from_proto : Reader.t -> t Result.t
   val name' : unit -> string
   val merge: t -> t -> t
+  val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+  val from_json_exn: Yojson.Basic.t -> t
+  val from_json: Yojson.Basic.t -> t Result.t
 end
 
 let hexlify data =
@@ -64,6 +77,53 @@ let test_merge (type t) (module M : T with type t = t) (t: t) =
   in
   ()
 
+let test_json (type t) (module M : T with type t = t) (t: t) =
+  let json_ref t =
+    let proto_file, message_type =
+      match M.name' () |> String.split_on_char ~sep:'.' with
+      | hd :: tl ->
+        let proto_file = hd ^ ".proto" in
+        let message_type = String.concat ~sep:"." tl in
+        proto_file, message_type
+      | _ -> failwith "Illegal name"
+    in
+    let proto = M.to_proto t |> Writer.contents in
+    let json = Reference.to_json ~proto_file ~message_type proto in
+    Yojson.Basic.from_string json
+  in
+
+  let test_json ?enum_names ?json_names ?omit_default_values t =
+    let compare ~message t json =
+      let t' = M.from_json_exn json in
+      match (t = t') with
+      | true -> ()
+      | false ->
+        Printf.printf "Json encode/decode failed for %s: %s\n" message (Yojson.Basic.to_string json)
+    in
+    let json = M.to_json ?enum_names ?json_names ?omit_default_values t in
+    compare ~message:"Ocaml proto plugin" t json;
+    (* compare ~message:"Protobuf reference implementation" t (to_json_ref t); *)
+    t
+  in
+  (* Compare reference json *)
+  let json' = json_ref t in
+  let t' = M.from_json_exn json' in
+  let () = match t = t' with
+    | true -> ()
+    | false ->
+      Printf.printf "Cannot deserialize reference json.\n";
+      Printf.printf "Json: %s\nRef:  %s\n"
+    (Yojson.Basic.pretty_to_string (M.to_json t))
+    (Yojson.Basic.pretty_to_string json');
+  in
+  t
+  |> test_json
+  |> test_json ~enum_names:false
+  |> test_json ~json_names:false
+  |> test_json ~omit_default_values:false
+  |> test_json ~enum_names:false ~json_names:false ~omit_default_values:false
+  |> ignore
+
 let test_decode (type t) (module M : T with type t = t) strategy expect data =
   let reader = Reader.create data in
   Test_runtime.set_stragegy strategy;
@@ -83,7 +143,7 @@ let test_decode (type t) (module M : T with type t = t) strategy expect data =
     Printf.printf "\n%s:Data: %s\n" (Test_runtime.show_strategy strategy) (List.map ~f:fst fields |> List.map ~f:string_of_int |> String.concat ~sep:", ")
 
 (** Create a common function for testing. *)
-let test_encode (type t) ?dump ?(protoc=true) ?protoc_args (module M : T with type t = t) ?(validate : t option) ?(expect : t option) (t : t) =
+let test_encode (type t) ?dump ?(protoc=true) ?protoc_args (module M : T with type t = t) ?(skip_json=false) ?(validate : t option) ?(expect : t option) (t : t) =
   let expect = Option.value ~default:t expect in
   let () = match validate with
     | Some v when v <> expect -> Printf.printf "Validate match failed\n"
@@ -111,4 +171,5 @@ let test_encode (type t) ?dump ?(protoc=true) ?protoc_args (module M : T with ty
   test_decode (module M) Test_runtime.Fast expect data;
   test_decode (module M) Test_runtime.Full expect data;
   test_merge (module M) expect;
+  if (not skip_json) then test_json (module M) expect;
   ()

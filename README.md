@@ -27,7 +27,7 @@ The main features include:
 | proto2            | Supported           | Supported[^3] | Supported           |
 | proto2 extends    | Supported           | Ignored       | Supported           |
 | proto2 groups     | Not supported[^2]   | Ignored       | ?                   |
-| json mappings     | Not supported[^4]   | Supported     | ?                   |
+| json mappings     | Supported           | Supported     | ?                   |
 
 [^1] Ocaml-bp has a sister project `Ocaml-bp-plugin` which emit
 Ocaml-pb definitions from a `.proto`. The plugin parses files are proto2
@@ -40,7 +40,7 @@ fields are not packed by default.
 marked optional, and does not *strictly* comply to the protobuf
 specification.
 
-[^4] Planned for release 5.1. See [#4](https://github.com/andersfugmann/ocaml-protoc-plugin/issues/4)
+
 
 ## Types
 Basic types are mapped trivially to Ocaml types:
@@ -125,6 +125,27 @@ specify the exact path to the plugin:
 ```
 protoc --plugin=protoc-gen-ocaml=../plugin/ocaml-protocol-plugin.exe --ocaml_out=. <file>.proto
 ```
+
+### Json serialization and deserialization
+Ocaml-proto-plugin can serialize and deserialize to/from json, using
+`Yojson.Basic.t` type. Using the function `to_json`, `from_json` and
+`from_json_exn` simmilar to regular protobuffer serialization and
+deserialization.
+
+Json serialization can be controlled using optional arguments:
+
+```ocaml
+val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+```
+
+| argument  | comment  | default  |
+|---|---|---|
+| `enum_names`  | By default enum names are used when serializing to json. Setting to false will use enum values instead | true  |
+| `json_names`  | By default Json will use camelCase names for fields. Setting to false will use the names as defined in the proto definition file | true  |
+| `omit_default_values` | By default json will not serialize default values to reduce size. Setting to false will for all values to be emitted to the json file. | true |
+
+Json deserialization will accept json constructed with any combination
+of the values.
 
 ### Older versions of protoc
 It seems that the `--ocaml_opt` flag may not be supported by older
@@ -389,34 +410,32 @@ More examples can be found under
 
 ocaml-protoc-plugin has been optimized for speec, and is comparable [ocaml-protoc](https://github.com/mransan/ocaml-protoc)
 
-Numbers below shows relation to `protoc`. A value above one means that Ocaml-protoc-plugin is slower and below means faster.
-The benchmark is run with flambda settings: `-O3 -unbox-closures
+Numbers below shows benchmark comparing encoding and decoding speed to
+`ocaml-protoc`. The benchmark is run with flambda settings: `-O3 -unbox-closures
 -remove-unused-arguments -rounds 3 -inline 100.00 -inline-max-depth 3
 -inline-max-unroll 3`. Benchmarks are made on a Intel i5, i5-5257U CPU
-@ 2.70GHz.
+@ 2.70GHz, using ocaml switch `5.1.1+flambda`
 
-Running without flamba shows performance within a factor of 2 to
-protoc.
-
-| name | protoc | plugin | ratio |
-|  --  |   --   |   --   |  --   |
-| string_list.M/Decode | 45673.3403 ns/run | 53547.6444 ns/run | 1.172 |
-| string_list.M/Encode | 77058.1932 ns/run | 46928.1161 ns/run | .608 |
-| float_list.M/Decode | 11195.2996 ns/run | 14448.8059 ns/run | 1.290 |
-| float_list.M/Encode | 19415.1014 ns/run | 8767.3420 ns/run | .451 |
-| int64_list.M/Decode | 16906.9672 ns/run | 14329.7493 ns/run | .847 |
-| int64_list.M/Encode | 13556.7060 ns/run | 11329.0867 ns/run | .835 |
-| enum.M/Decode | 31.9749 ns/run | 72.6818 ns/run | 2.273 |
-| enum.M/Encode | 68.3581 ns/run | 59.7913 ns/run | .874 |
-| string.M/Decode | 50.1519 ns/run | 91.4369 ns/run | 1.823 |
-| string.M/Encode | 77.2197 ns/run | 86.7556 ns/run | 1.123 |
-| float.M/Decode | 28.6674 ns/run | 72.1196 ns/run | 2.515 |
-| float.M/Encode | 66.3969 ns/run | 62.3008 ns/run | .938 |
-| int64.M/Decode | 30.8383 ns/run | 72.8756 ns/run | 2.363 |
-| int64.M/Encode | 66.0895 ns/run | 58.9611 ns/run | .892 |
-| bench.M/Decode | 157661.3070 ns/run | 151011.1603 ns/run | .957 |
-| bench.M/Encode | 217168.8299 ns/run | 123210.2917 ns/run | .567 |
-
+| name | ocaml-protoc-plugin | ocaml-protoc | ratio |
+|  --  |          --         |       --     |  --   |
+| bench.M/Decode | 146619.1443 ns/run | 143509.5405 ns/run | 1.021 |
+| bench.M/Encode | 119456.6236 ns/run | 161231.8065 ns/run | .740 |
+| int64.M/Decode | 25.8114 ns/run | 26.1589 ns/run | .986 |
+| int64.M/Encode | 57.3628 ns/run | 36.3365 ns/run | 1.578 |
+| float.M/Decode | 27.1202 ns/run | 25.8015 ns/run | 1.051 |
+| float.M/Encode | 58.9275 ns/run | 35.1229 ns/run | 1.677 |
+| string.M/Decode | 46.2468 ns/run | 41.0179 ns/run | 1.127 |
+| string.M/Encode | 80.5362 ns/run | 49.1781 ns/run | 1.637 |
+| enum.M/Decode | 28.3250 ns/run | 28.4345 ns/run | .996 |
+| enum.M/Encode | 61.7117 ns/run | 38.5143 ns/run | 1.602 |
+| empty.M/Decode | 11.0939 ns/run | 9.1665 ns/run | 1.210 |
+| empty.M/Encode | 8.4814 ns/run | 24.2034 ns/run | .350 |
+| int64_list.M/Decode | 15025.3175 ns/run | 15060.5859 ns/run | .997 |
+| int64_list.M/Encode | 10457.3438 ns/run | 11916.0341 ns/run | .877 |
+| float_list.M/Decode | 13918.2012 ns/run | 12857.0192 ns/run | 1.082 |
+| float_list.M/Encode | 8757.9816 ns/run | 12542.1849 ns/run | .698 |
+| string_list.M/Decode | 47648.7843 ns/run | 38610.4188 ns/run | 1.234 |
+| string_list.M/Encode | 40314.6457 ns/run | 34202.1095 ns/run | 1.178 |
 
 # Acknowledgements
 This work is based on

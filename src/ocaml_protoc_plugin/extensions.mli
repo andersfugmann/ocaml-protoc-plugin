@@ -5,5 +5,5 @@ val show : t -> string
 val equal : t -> t -> bool
 val compare : t -> t -> int
 
-val get: 'a Spec.Deserialize.compound -> t -> 'a
-val set: 'a Spec.Serialize.compound -> t -> 'a -> t
+val get: 'a Spec.compound -> t -> 'a
+val set: 'a Spec.compound -> t -> 'a -> t

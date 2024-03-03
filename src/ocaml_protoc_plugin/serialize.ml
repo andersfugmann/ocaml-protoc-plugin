@@ -1,8 +1,6 @@
 open StdLabels
 
-module S = Spec.Serialize
-module C = S.C
-open S
+open Spec
 
 let field_type: type a. a spec -> int = function
   | Int64 | UInt64 | SInt64 | Int32 | UInt32 | SInt32
@@ -73,9 +71,9 @@ let write_value : type a. a spec -> a -> Writer.t -> unit = function
   | Bool -> write_varint_unboxed ~f:(function true -> 1 | false -> 0)
   | String -> write_length_delimited_string ~f:id
   | Bytes -> write_length_delimited_string ~f:Bytes.unsafe_to_string
-  | Enum f -> write_varint_unboxed ~f
-  | Message to_proto ->
-    Writer.write_length_delimited_f ~write_f:to_proto
+  | Enum (module Enum) -> write_varint_unboxed ~f:Enum.to_int
+  | Message (module Message) ->
+    Writer.write_length_delimited_f ~write_f:Message.to_proto'
 
 (** Optimized when the value is given in advance, and the continuation is expected to be called multiple times *)
 let write_value_const : type a. a spec -> a -> Writer.t -> unit = fun spec v ->
@@ -98,7 +96,7 @@ let write_field: type a. a spec -> int -> Writer.t -> a -> unit = fun spec index
     write_value v writer
 
 let rec write: type a. a compound -> Writer.t -> a -> unit = function
-  | Repeated (index, spec, Packed) -> begin
+  | Repeated ((index, _, _), spec, Packed) -> begin
       let write_value = write_value spec in
       let write_f writer vs = List.iter ~f:(fun v -> write_value v writer) vs; writer in
       let write_header = write_field_header String index in
@@ -109,11 +107,26 @@ let rec write: type a. a compound -> Writer.t -> a -> unit = function
           write_header writer;
           Writer.write_length_delimited_f ~write_f vs writer
     end
-  | Repeated (index, spec, Not_packed) ->
+  | Repeated ((index, _, _), spec, Not_packed) ->
     let write = write_field spec index in
     fun writer vs ->
       List.iter ~f:(fun v -> write writer v) vs
-  | Basic (index, spec, default) -> begin
+  | Map ((index, _, _), (key_spec, value_spec)) ->
+    let write_header = write_field_header String index in
+    let write_key = write key_spec in
+    let write_value = write value_spec in
+    let write_entry writer (key, value) =
+      write_key writer key;
+      write_value writer value;
+      writer
+    in
+    let write = Writer.write_length_delimited_f ~write_f:write_entry in
+    fun writer vs ->
+      List.iter ~f:(fun v ->
+        write_header writer;
+        write v writer
+      ) vs
+  | Basic ((index, _, _), spec, default) -> begin
       let write = write_field spec index in
       let writer writer = function
         | v when v = default -> ()
@@ -121,22 +134,29 @@ let rec write: type a. a compound -> Writer.t -> a -> unit = function
       in
       writer
     end
-  | Basic_req (index, spec) ->
+  | Basic_req ((index, _, _), spec) ->
       write_field spec index
-  | Basic_opt (index, spec) -> begin
+  | Basic_opt ((index, _, _), spec) -> begin
       let write = write_field spec index in
       fun writer v ->
         match v with
         | Some v -> write writer v
         | None -> ()
   end
-  | Oneof f -> begin
-      fun writer v ->
-        match v with
+  | Oneof (oneofs, index_f) -> begin
+      let create_writer: type a. a oneof -> (Writer.t -> a -> unit) = function
+        | Oneof_elem (field, spec, (_constr, destructor)) ->
+          let write = write (Basic_req (field, spec)) in
+          fun writer v ->
+            write writer (destructor v)
+      in
+      let field_writers = List.map ~f:create_writer oneofs |> Array.of_list in
+      fun writer -> function
         | `not_set -> ()
         | v ->
-          let Oneof_elem (index, spec, v) = f v in
-          write (Basic_req (index, spec)) writer v
+          let index = index_f v in
+          let write = Array.unsafe_get field_writers index in
+          write writer v
     end
 
 let in_extension_ranges extension_ranges index =

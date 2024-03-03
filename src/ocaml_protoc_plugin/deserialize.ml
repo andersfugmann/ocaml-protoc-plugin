@@ -1,9 +1,6 @@
 (** Module for deserializing values *)
 open StdLabels
-
-module S = Spec.Deserialize
-module C = S.C
-open S
+open Spec
 
 (** Exception indicating that fast deserialization did not succeed and revert to full deserialization *)
 exception Restart_full
@@ -27,8 +24,8 @@ type (_, _) sentinel_list =
   | NNil_ext: (extensions -> 'a, 'a) sentinel_list
   | NCons : (sentinel_field_spec list  * 'a sentinel_getter) * ('b, 'c) sentinel_list -> ('a -> 'b, 'c) sentinel_list
 
-let error_wrong_field str field = Result.raise (`Wrong_field_type (str, field))
-let error_required_field_missing index spec = Result.raise (`Required_field_missing (index, Spec.Deserialize.C.show spec))
+let error_wrong_field str field = Result.raise (`Wrong_field_type (str, Field.show field))
+let error_required_field_missing index spec = Result.raise (`Required_field_missing (index, Spec.show spec))
 
 let decode_zigzag v =
   let open Infix.Int64 in
@@ -79,7 +76,7 @@ let read_of_spec: type a. a spec -> Field.field_type * (Reader.t -> a) = functio
   | SFixed64_int -> Fixed64, fun reader -> Reader.read_fixed64 reader |> Int64.to_int
 
   | Bool -> Varint, fun reader -> Reader.read_varint_unboxed reader != 0
-  | Enum of_int -> Varint, fun reader -> Reader.read_varint_unboxed reader |> of_int
+  | Enum (module Enum) -> Varint, fun reader -> Reader.read_varint_unboxed reader |> Enum.from_int_exn
   | String -> Length_delimited, fun reader ->
     let Field.{ offset; length; data } = Reader.read_length_delimited reader in
     String.sub ~pos:offset ~len:length data
@@ -88,9 +85,9 @@ let read_of_spec: type a. a spec -> Field.field_type * (Reader.t -> a) = functio
     let v = Bytes.create length in
     Bytes.blit_string ~src:data ~src_pos:offset ~dst:v ~dst_pos:0 ~len:length;
     v
-  | Message (from_proto, _merge) -> Length_delimited, fun reader ->
+  | Message (module Message) -> Length_delimited, fun reader ->
     let Field.{ offset; length; data } = Reader.read_length_delimited reader in
-    from_proto (Reader.create ~offset ~length data)
+    Message.from_proto_exn (Reader.create ~offset ~length data)
 
 let id x = x
 let keep_last _ v = v
@@ -107,22 +104,45 @@ let read_field ~read:(expect, read_f) ~map v reader field_type =
     let field = Reader.read_field_content field_type reader in
     error_wrong_field "Deserialize" field
 
-let value: type a. a compound -> a value = function
-  | Basic_req (index, spec) ->
+let read_map_entry: type a b. read_key:a value -> read_value:b value -> Reader.t -> (a * b) = fun ~read_key ~read_value ->
+  let Value (key_field_specs, default_key, get_key) = read_key in
+  let Value (value_field_specs, default_value, get_value) = read_value in
+  let (key_index, read_key_f) = List.hd key_field_specs in
+  let (value_index, read_value_f) = List.hd value_field_specs in
+  let rec read (key, value) reader =
+    match Reader.has_more reader with
+    | true -> begin
+        match Reader.read_field_header reader with
+        | field_type, index when index = key_index ->
+          let key = read_key_f key reader field_type in
+          read (key, value) reader
+        | field_type, index when index = value_index ->
+          let value = read_value_f value reader field_type in
+          read (key, value) reader
+        | field_type, _ ->
+          Reader.read_field_content field_type reader |> ignore;
+          read (key, value) reader (* We should drop the value *)
+      end
+    | false -> (get_key key, get_value value)
+  in
+  read (default_key, default_value)
+
+let rec value: type a. a compound -> a value = function
+  | Basic_req ((index, _, _), spec) ->
     let read = read_field ~read:(read_of_spec spec) ~map:keep_last_opt in
     let getter = function Some v -> v | None -> error_required_field_missing index spec in
     Value ([(index, read)], None, getter)
-  | Basic (index, spec, default) ->
+  | Basic ((index, _, _), spec, default) ->
     let read = read_field ~read:(read_of_spec spec) ~map:keep_last in
     Value ([(index, read)], default, id)
-  | Basic_opt (index, spec) ->
+  | Basic_opt ((index, _, _), spec) ->
     let map = match spec with
-      | Message (_, merge) -> merge_opt merge
+      | Message (module Message) -> merge_opt Message.merge
       | _ -> keep_last_opt
     in
     let read = read_field ~read:(read_of_spec spec) ~map in
     Value ([(index, read)], None, id)
-  | Repeated (index, spec, Packed) ->
+  | Repeated ((index, _, _), spec, Packed) ->
     let field_type, read_f = read_of_spec spec in
     let rec read_packed_values read_f acc reader =
       match Reader.has_more reader with
@@ -141,11 +161,22 @@ let value: type a. a compound -> a value = function
         error_wrong_field "Deserialize" field
     in
     Value ([(index, read)], [], List.rev)
-  | Repeated (index, spec, Not_packed) ->
+  | Repeated ((index, _, _), spec, Not_packed) ->
     let read = read_field ~read:(read_of_spec spec) ~map:(fun vs v -> v :: vs) in
     Value ([(index, read)], [], List.rev)
-  | Oneof oneofs ->
-    let make_reader: a oneof -> a field_spec = fun (Oneof_elem (index, spec, constr)) ->
+  | Map ((index, _, _), (key_spec, value_spec)) ->
+    let read_key = value key_spec in
+    let read_value = value value_spec in
+    let read_entry = read_map_entry ~read_key ~read_value in
+
+    let read_entry_message reader =
+      let Field.{ offset; length; data } = Reader.read_length_delimited reader in
+      read_entry (Reader.create ~offset ~length data)
+    in
+    let read = read_field ~read:(Field.Length_delimited, read_entry_message) ~map:(fun vs v -> v :: vs) in
+    Value ([(index, read)], [], List.rev)
+  | Oneof (oneofs, _index_f) ->
+    let make_reader: a oneof -> a field_spec = fun (Oneof_elem ((index, _, _), spec, (constr, _destr))) ->
       let read = read_field ~read:(read_of_spec spec) ~map:(fun _ -> constr) in
       (index, read)
     in
