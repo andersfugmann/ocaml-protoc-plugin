@@ -602,6 +602,7 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
       | `Oneof (decl, fields) -> c_of_oneof ~params ~syntax ~scope decl fields
     )
   in
+
   let has_extensions = match extension_ranges with [] -> false | _ -> true in
 
   let constructor_sig_arg = function
@@ -635,50 +636,62 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
                    not is_cyclic
   in
 
-  let type_constr fields = match fields, t_as_tuple with
-    | [], _ -> "unit"
-    | fields, true ->
-      String.concat ~sep:" * " fields
-      |> sprintf "(%s)"
-    | fields, false ->
-      String.concat ~sep:"; " fields
-      |> sprintf "{ %s }"
+  let _append_deprecation ~deprecated str =
+    match deprecated with
+    | true -> sprintf "%s[@ocaml.deprecated]" str
+    | false -> str
   in
-  let type_destr fields = match fields, t_as_tuple with
-    | [], _ -> "()"
-    | fields, true ->
-      String.concat ~sep:", " fields
+
+  let type_constr field_infos = match t_as_tuple, field_infos with
+    | _, [] -> "unit"
+    | true, fields ->
+      List.map ~f:snd fields
+      |> String.concat ~sep:" * "
       |> sprintf "(%s)"
-    | fields, false ->
-      String.concat ~sep:"; " fields
+    | false, fields ->
+      List.map ~f:(fun (name, type') -> sprintf "%s: %s" name type') fields
+      |> String.concat ~sep:"; "
       |> sprintf "{ %s }"
   in
 
-  let type' =
-    List.rev_map ~f:(fun { name; type'; _} -> ((Scope.get_name scope name), (string_of_type type'))) ts
+  let type_destr field_infos = match t_as_tuple, field_infos with
+    | _, [] -> "()"
+    | true, fields ->
+      List.map ~f:fst fields
+      |> String.concat ~sep:", "
+      |> sprintf "(%s)"
+    | false, fields ->
+      List.map ~f:fst fields
+      |> String.concat ~sep:"; "
+      |> sprintf "{ %s }"
+  in
+
+  let _is_deprecated_field = function
+    | FieldDescriptorProto.{ options = Some { deprecated; _ }; _ } -> deprecated
+    | FieldDescriptorProto.{ options = None; _ } -> false
+  in
+
+  let field_info =
+    List.rev_map ~f:(fun { name; type'; _} -> (Scope.get_name scope name, string_of_type type') ) ts
     |> prepend ~cond:has_extensions ("extensions'", "Runtime'.Extensions.t")
-    |> List.rev_map ~f:(function
-      | (_, type') when t_as_tuple -> type'
-      | (name, type') -> sprintf "%s: %s" name type'
-    )
-    |> type_constr
+    |> List.rev
   in
-  let field_names =
-    List.map ~f:(fun { name; _} -> Scope.get_name scope name) ts
-    |> append ~cond:has_extensions "extensions'"
+  let type' = type_constr field_info in
+
+  let args =
+    List.map ~f:fst field_info
+    |> String.concat ~sep:" "
   in
 
-  let args = String.concat ~sep:" " field_names in
   let constructor =
-    match field_names with
-    | [] -> (type_destr field_names)
-    | _ ->
-      sprintf "fun %s -> %s"
-        args (type_destr field_names)
+    let destr = type_destr field_info in
+    match field_info with
+    | [] -> destr
+    | _ -> sprintf "fun %s -> %s" args destr
   in
   let apply = match t_as_tuple with
     | true -> None
-    | false -> Some ((type_destr field_names), args)
+    | false -> Some ((type_destr field_info), args)
   in
 
   let default_constructor_sig =
@@ -698,12 +711,7 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
       |> String.concat ~sep: " "
     in
 
-    let constructor =
-      List.rev_map ~f:(fun {name; _} -> sprintf "%s" (Scope.get_name scope name)) ts
-      |> prepend ~cond:has_extensions "extensions'"
-      |> List.rev
-      |> type_destr
-    in
+    let constructor = type_destr field_info in
     sprintf "%s = %s" args constructor
   in
   let nil =
