@@ -2,7 +2,8 @@
 - [x] Unify serialization and deserialization spec and optimize oneof
       handling
 - [x] Simplify types used in code generation to improve readaility
-- [x] Implement json serialization and deserialization
+- [x] Implement json serialization and deserialization (#5)
+- [ ] Add deprecation annotations for deprecated fields, services etc (#8)
 
 ## 5.0.0: 2024-02-24
 - [x] Fix service signature to be backward compatible
