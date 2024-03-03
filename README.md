@@ -27,7 +27,7 @@ The main features include:
 | proto2            | Supported           | Supported[^3] | Supported           |
 | proto2 extends    | Supported           | Ignored       | Supported           |
 | proto2 groups     | Not supported[^2]   | Ignored       | ?                   |
-| json mappings     | Not supported[^4]   | Supported     | ?                   |
+| json mappings     | Supported           | Supported     | ?                   |
 
 [^1] Ocaml-bp has a sister project `Ocaml-bp-plugin` which emit
 Ocaml-pb definitions from a `.proto`. The plugin parses files are proto2
@@ -40,7 +40,7 @@ fields are not packed by default.
 marked optional, and does not *strictly* comply to the protobuf
 specification.
 
-[^4] Planned for release 5.1. See [#4](https://github.com/andersfugmann/ocaml-protoc-plugin/issues/4)
+
 
 ## Types
 Basic types are mapped trivially to Ocaml types:
@@ -125,6 +125,27 @@ specify the exact path to the plugin:
 ```
 protoc --plugin=protoc-gen-ocaml=../plugin/ocaml-protocol-plugin.exe --ocaml_out=. <file>.proto
 ```
+
+### Json serialization and deserialization
+Ocaml-proto-plugin can serialize and deserialize to/from json, using
+`Yojson.Basic.t` type. Using the function `to_json`, `from_json` and
+`from_json_exn` simmilar to regular protobuffer serialization and
+deserialization.
+
+Json serialization can be controlled using optional arguments:
+
+```ocaml
+val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+```
+
+| argument  | comment  | default  |
+|---|---|---|
+| `enum_names`  | By default enum names are used when serializing to json. Setting to false will use enum values instead | true  |
+| `json_names`  | By default Json will use camelCase names for fields. Setting to false will use the names as defined in the proto definition file | true  |
+| `omit_default_values` | By default json will not serialize default values to reduce size. Setting to false will for all values to be emitted to the json file. | true |
+
+Json deserialization will accept json constructed with any combination
+of the values.
 
 ### Older versions of protoc
 It seems that the `--ocaml_opt` flag may not be supported by older
