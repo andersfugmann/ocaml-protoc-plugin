@@ -27,6 +27,11 @@ end
 module rec Options : sig
   val name': unit -> string
   type t = (bool)
+  type t_tuple = (bool)
+  (**/**)
+  val to_tuple: t -> t_tuple
+  val from_tuple: t_tuple -> t
+  (**/**)
   val make: ?mangle_names:bool -> unit -> t
   val merge: t -> t -> t
   val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -39,23 +44,26 @@ module rec Options : sig
 end = struct
   let name' () = "options.Options"
   type t = (bool)
+  type t_tuple = (bool)
+  let to_tuple (mangle_names) = (mangle_names)
+  let from_tuple (mangle_names) = (mangle_names)
   let make ?(mangle_names = false) () = (mangle_names)
   let merge = (fun (t1_mangle_names) (t2_mangle_names) -> (Runtime'.Merge.merge Runtime'.Spec.( basic ((1, "mangle_names", "mangleNames"), bool, (false)) ) t1_mangle_names t2_mangle_names))
   let spec () = Runtime'.Spec.( basic ((1, "mangle_names", "mangleNames"), bool, (false)) ^:: nil )
   let to_proto' =
     let serialize = Runtime'.Serialize.serialize (spec ()) in
-    serialize
+    fun writer (mangle_names) -> serialize writer mangle_names
 
   let to_proto t = to_proto' (Runtime'.Writer.init ()) t
   let from_proto_exn =
-    let constructor = fun mangle_names -> (mangle_names) in
+    let constructor mangle_names = (mangle_names) in
     Runtime'.Deserialize.deserialize (spec ()) constructor
   let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
   let to_json ?enum_names ?json_names ?omit_default_values =
     let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
-    serialize
+    fun (mangle_names) -> serialize mangle_names
   let from_json_exn =
-    let constructor = fun mangle_names -> (mangle_names) in
+    let constructor mangle_names = (mangle_names) in
     Runtime'.Deserialize_json.deserialize (spec ()) constructor
   let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
 end
@@ -66,10 +74,10 @@ and Ocaml_options : sig
   val set: Imported'modules.Descriptor.Google.Protobuf.FileOptions.t -> Options.t option -> Imported'modules.Descriptor.Google.Protobuf.FileOptions.t
 end = struct
   type t = Options.t option
-  let get_exn extendee = Runtime'.Extensions.get Runtime'.Spec.(basic_opt ((1074, "ocaml_options", "ocamlOptions"), (message (module Options)))) (extendee.Imported'modules.Descriptor.Google.Protobuf.FileOptions.extensions')
+  let get_exn extendee = Runtime'.Extensions.get Runtime'.Spec.(basic_opt ((1074, "ocaml_options", "ocamlOptions"), (message (module Options) default))) (extendee.Imported'modules.Descriptor.Google.Protobuf.FileOptions.extensions')
   let get extendee = Runtime'.Result.catch (fun () -> get_exn extendee)
   let set extendee t =
-    let extensions' = Runtime'.Extensions.set Runtime'.Spec.(basic_opt ((1074, "ocaml_options", "ocamlOptions"), (message (module Options)))) (extendee.Imported'modules.Descriptor.Google.Protobuf.FileOptions.extensions') t in
+    let extensions' = Runtime'.Extensions.set Runtime'.Spec.(basic_opt ((1074, "ocaml_options", "ocamlOptions"), (message (module Options) default))) (extendee.Imported'modules.Descriptor.Google.Protobuf.FileOptions.extensions') t in
     { extendee with Imported'modules.Descriptor.Google.Protobuf.FileOptions.extensions' = extensions' } [@@warning "-23"]
 
 end

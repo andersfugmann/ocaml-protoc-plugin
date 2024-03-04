@@ -80,7 +80,15 @@ let read_value: type a b. (a, b) spec -> Yojson.Basic.t -> a = function
    | String -> to_string
    | Bytes -> to_bytes
    | Enum (module Enum) -> to_enum (module Enum)
-   | Message (module Message) -> Message.from_json_exn
+   | Message ((module Message), Empty) -> begin
+       function `Assoc [] -> Message.from_tuple ()
+              | json -> value_error "google.protobuf.empty" json
+     end
+   | Message ((module Message), Duration) -> begin
+       function `String _s -> (* expect "123.000000345s" *) Message.from_tuple (124, 456)
+              | _ -> failwith "String expected"
+     end
+   | Message ((module Message), Default) -> Message.from_json_exn
 
 let find_field (_number, field_name, json_name) fields =
   match FieldMap.find_opt json_name fields with

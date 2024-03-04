@@ -68,7 +68,7 @@ let rec json_of_spec: type a b. enum_names:bool -> json_names:bool -> omit_defau
       | true -> enum_name ~f:Enum.to_string
       | false -> enum_value ~f:Enum.to_int
     end
-  | Message (module Message) ->
+  | Message ((module Message), _) ->
     Message.to_json ~enum_names ~json_names ~omit_default_values
 
 and write: type a b. enum_names:bool -> json_names:bool -> omit_default_values:bool -> (a, b) compound -> a -> field list =
