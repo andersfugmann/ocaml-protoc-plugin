@@ -310,19 +310,10 @@ let string_of_packed = function
   | Packed -> "packed"
   | Not_packed -> "not_packed"
 
-let string_of_type ~add_deprecation type' =
-  let type_str = match type' with
-    | { name; modifier = (No_modifier _ | Required | Oneof_type _); _ } -> name
-    | { name; modifier = List; _ } -> sprintf "%s list" name
-    | { name; modifier = Optional; _ } -> sprintf "%s option" name
-  in
-  Code.append_deprecaton_if ~deprecated:(add_deprecation && type'.deprecated) type_str
-
-let append_deprecaton_if ~deprecated str =
-  match deprecated  with
-  | true -> sprintf "%s[@ocaml.deprecated \"Field deprecated in proto file\"]" str
-  | false -> str
-
+let string_of_type = function
+  | { name; modifier = (No_modifier _ | Required | Oneof_type _); _ } -> name
+  | { name; modifier = List; _ } -> sprintf "%s list" name
+  | { name; modifier = Optional; _ } -> sprintf "%s option" name
 
 let c_of_compound: type a. deprecated:bool -> string -> a compound -> c = fun ~deprecated name -> function
   | Basic (index, spec, default) ->
@@ -353,7 +344,7 @@ let c_of_compound: type a. deprecated:bool -> string -> a compound -> c = fun ~d
   | Map (index, { key_type; value_type } ) ->
     let index_string = string_of_index index in
     let spec_str = sprintf "map (%s, (%s, %s))" index_string key_type.spec_str value_type.spec_str in
-    let type_name = sprintf "(%s * %s)" (string_of_type ~add_deprecation:false key_type.type') (string_of_type value_type.type' ~add_deprecation:false) in
+    let type_name = sprintf "(%s * %s)" (string_of_type key_type.type') (string_of_type value_type.type') in
     let type' = { name = type_name; modifier = List; deprecated } in
     { name; type'; spec_str; }
   | Oneof { type'; spec; fields; _ } ->
@@ -519,7 +510,7 @@ let rec c_of_field ~params ~syntax ~scope ~map_type field =
 let spec_of_field ~params ~syntax ~scope ~map_type field : field_spec =
   let c = c_of_field ~params ~syntax ~scope ~map_type field in
   {
-    typestr = string_of_type ~add_deprecation:false c.type';
+    typestr = string_of_type c.type';
     spec_str = c.spec_str;
     deprecated = is_deprecated field;
   }
@@ -550,8 +541,8 @@ let c_of_oneof ~params ~syntax:_ ~scope OneofDescriptorProto.{ name; _ } fields 
       field_infos
       |> List.map ~f:(fun (_, name, type', _, deprecated) ->
         sprintf "%s of %s" (Scope.get_name_exn scope name) type'
-        |> append_deprecaton_if ~deprecated
-      )
+        |> Code.append_deprecaton_if ~deprecated `Attribute
+       )
       |> String.concat ~sep:" | "
       |> sprintf "[ `not_set | %s ]"
     in
@@ -653,14 +644,20 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
                    not is_cyclic
   in
 
+  let has_deprecated_fields = List.exists ~f:(fun ({ type' = { deprecated; _ }; _ }: c) -> deprecated) ts in
+
   let type_constr field_infos = match t_as_tuple, field_infos with
     | _, [] -> "unit"
     | true, fields ->
-      List.map ~f:snd fields
+      List.map ~f:snd fields |> List.map ~f:fst
       |> String.concat ~sep:" * "
       |> sprintf "(%s)"
+      |> Code.append_deprecaton_if ~deprecated:has_deprecated_fields `Item
     | false, fields ->
-      List.map ~f:(fun (name, type') -> sprintf "%s: %s" name type') fields
+      List.map ~f:(fun (name, (type', deprecated)) ->
+        sprintf "%s: %s" name type'
+        |> Code.append_deprecaton_if ~deprecated `Attribute
+      ) fields
       |> String.concat ~sep:"; "
       |> sprintf "{ %s }"
   in
@@ -678,8 +675,8 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
   in
 
   let field_info =
-    List.rev_map ~f:(fun { name; type'; _} -> (Scope.get_name scope name, string_of_type ~add_deprecation:true type') ) ts
-    |> prepend ~cond:has_extensions ("extensions'", "Runtime'.Extensions.t")
+    List.rev_map ~f:(fun { name; type'; _} -> (Scope.get_name scope name, (string_of_type type', type'.deprecated)) ) ts
+    |> prepend ~cond:has_extensions ("extensions'", ("Runtime'.Extensions.t", false))
     |> List.rev
   in
   let type' = type_constr field_info in

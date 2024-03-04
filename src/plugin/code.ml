@@ -56,10 +56,16 @@ let emit t indent fmt =
 
 let append t code = List.iter ~f:(emit t `None "%s") (code.code |> List.rev)
 
-let append_deprecaton_if ~deprecated str =
-  match deprecated  with
-  | true -> Printf.sprintf "%s[@ocaml.deprecated \"Field deprecated in proto file\"]" str
+let append_deprecaton_if ~deprecated level str =
+  match deprecated with
   | false -> str
+  | true ->
+    let level = match level with
+      | `Attribute-> "@"
+      | `Item -> "@@"
+      | `Floating -> "@@@"
+    in
+    Printf.sprintf "%s[%socaml.alert protobuf \"Deprecated global\"]" str level
 
 let contents t =
   List.map ~f:(Printf.sprintf "%s") (List.rev t.code)
