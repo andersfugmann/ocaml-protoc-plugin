@@ -11,12 +11,14 @@ type module' = {
   module_name : string;
   signature : Code.t;
   implementation : Code.t;
+  deprecated : bool;
 }
 
 (* Enums are not mangled - Maybe they should be lowercased though. *)
 let emit_enum_type ~scope ~params
-    EnumDescriptorProto.{name; value = values; options = _; reserved_range = _; reserved_name = _}
-    : module' =
+    EnumDescriptorProto.{name; value = values; options = options; reserved_range = _; reserved_name = _}
+  : module' =
+  let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
   let name = Option.value_exn ~message:"Enums must have a name" name in
   let module_name = Scope.get_name scope name in
   let signature = Code.init () in
@@ -24,7 +26,11 @@ let emit_enum_type ~scope ~params
   let scope = Scope.push scope name in
   let t = Code.init () in
   Code.emit t `None "type t = %s %s"
-    (List.map ~f:(fun EnumValueDescriptorProto.{name; _} -> Scope.get_name_exn scope name) values
+    (List.map ~f:(fun EnumValueDescriptorProto.{name; options; _} ->
+       let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
+       Scope.get_name_exn scope name
+       |> Code.append_deprecaton_if `Attribute ~deprecated
+     ) values
      |> String.concat ~sep:" | "
     )
     params.Parameters.annot;
@@ -64,15 +70,17 @@ let emit_enum_type ~scope ~params
   Code.emit implementation `None "| s -> Runtime'.Result.raise (`Unknown_enum_name s)";
   Code.emit implementation `End "";
 
-  {module_name; signature; implementation}
+  { module_name; signature; implementation; deprecated }
 
-let emit_service_type ~options scope ServiceDescriptorProto.{ name; method' = methods; _ } =
-  let emit_method signature implementation local_scope scope service_name MethodDescriptorProto.{ name; input_type; output_type; _} =
+let emit_service_type ~options scope ServiceDescriptorProto.{ name; method' = methods; options = service_options; _ } =
+  let emit_method signature implementation local_scope scope service_name MethodDescriptorProto.{ name; input_type; output_type; options = method_options; _} =
     let name = Option.value_exn name in
     let mangle_f = match Scope.has_mangle_option options with
       | false -> fun id -> id
       | true -> Names.to_snake_case
     in
+    let deprecated = match method_options with Some { deprecated; _ } -> deprecated | None -> false in
+
     let uncapitalized_name = mangle_f name |> String.uncapitalize_ascii |> Scope.Local.get_unique_name local_scope in
     (* To keep symmetry, only ensure that lowercased names are unique
        so that the upper case names are aswell.  We should remove this
@@ -96,7 +104,7 @@ let emit_service_type ~options scope ServiceDescriptorProto.{ name; method' = me
     Code.emit implementation `None "let name = \"/%s%s/%s\"" package_name service_name name;
     Code.emit implementation `None "module Request = %s" input;
     Code.emit implementation `None "module Response = %s" output;
-    Code.emit implementation `End "end";
+    Code.emit implementation `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
     let sig_t' =
       sprintf "(module Runtime'.Service.Message with type t = %s) * (module Runtime'.Service.Message with type t = %s)" input_t output_t
     in
@@ -113,11 +121,13 @@ let emit_service_type ~options scope ServiceDescriptorProto.{ name; method' = me
     Code.emit signature `None "include Runtime'.Service.Rpc with type Request.t = %s and type Response.t = %s" input_t output_t;
     Code.emit signature `None "module Request : module type of %s with type t = %s" input input_t;
     Code.emit signature `None "module Response : module type of %s with type t = %s" output output_t;
-    Code.emit signature `End "end";
+    Code.emit signature `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
     Code.emit signature `None "val %s : %s" uncapitalized_name sig_t';
     ()
   in
   let name = Option.value_exn ~message:"Service definitions must have a name" name in
+  let deprecated = match service_options with Some { deprecated; _ } -> deprecated | None -> false in
+
   let signature = Code.init () in
   let implementation = Code.init () in
   Code.emit signature `Begin "module %s : sig" (Scope.get_name scope name);
@@ -125,12 +135,13 @@ let emit_service_type ~options scope ServiceDescriptorProto.{ name; method' = me
   let local_scope = Scope.Local.init () in
 
   List.iter ~f:(emit_method signature implementation local_scope (Scope.push scope name) name) methods;
-  Code.emit signature `End "end";
-  Code.emit implementation `End "end";
+  Code.emit signature `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
+  Code.emit implementation `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
   signature, implementation
 
 let emit_extension ~scope ~params field =
-  let FieldDescriptorProto.{ name; extendee; _ } = field in
+  let FieldDescriptorProto.{ name; extendee; options; _ } = field in
+  let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
   let name = Option.value_exn ~message:"Extensions must have a name" name in
   let module_name = (Scope.get_name scope name) in
   let extendee_type = Scope.get_scoped_name scope ~postfix:"t" extendee in
@@ -156,10 +167,10 @@ let emit_extension ~scope ~params field =
   Code.emit implementation `None "let extensions' = Runtime'.Extensions.set Runtime'.Spec.(%s) (extendee.%s) t in" c.spec_str extendee_field;
   Code.emit implementation `None "{ extendee with %s = extensions' } [@@warning \"-23\"]" extendee_field;
   Code.emit implementation `End "";
-  { module_name; signature; implementation }
+  { module_name; signature; implementation; deprecated }
 
 (** Emit the nested types. *)
-let emit_sub dest ~is_implementation ~is_first {module_name; signature; implementation} =
+let emit_sub dest ~is_implementation ~is_first {module_name; signature; implementation; deprecated} =
   let () =
     match is_first with
     | true -> Code.emit dest `Begin "module rec %s : sig" module_name
@@ -173,7 +184,7 @@ let emit_sub dest ~is_implementation ~is_first {module_name; signature; implemen
       Code.emit dest `EndBegin "end = struct ";
       Code.append dest implementation
   in
-  Code.emit dest `End "end";
+  Code.emit dest `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
   ()
 
 let rec emit_nested_types ~syntax ~signature ~implementation ?(is_first = true) nested_types =
@@ -203,11 +214,11 @@ let rec emit_message ~params ~syntax scope
     DescriptorProto.{ name; field = fields; extension = extensions;
                       nested_type = nested_types; enum_type = enum_types;
                       extension_range = extension_ranges; oneof_decl = oneof_decls;
-                      reserved_range = _; reserved_name = _; options = _ } : module' =
+                      reserved_range = _; reserved_name = _; options = options } : module' =
 
   let signature = Code.init () in
   let implementation = Code.init () in
-
+  let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
 
   let extension_ranges =
     List.map ~f:(function
@@ -288,11 +299,11 @@ let rec emit_message ~params ~syntax scope
       Code.emit implementation `End "let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)";
     | None -> ()
   in
-  {module_name; signature; implementation}
+  { module_name; signature; implementation; deprecated }
 
 let rec wrap_packages ~params ~syntax ~options scope message_type services = function
   | [] ->
-    let { module_name = _; implementation; signature } = emit_message ~params ~syntax scope message_type in
+    let { module_name = _; implementation; signature; deprecated = _ } = emit_message ~params ~syntax scope message_type in
     List.iter ~f:(fun service ->
       let signature', implementation' = emit_service_type ~options scope service in
       Code.append implementation implementation';
@@ -322,7 +333,7 @@ let rec wrap_packages ~params ~syntax ~options scope message_type services = fun
 
     signature, implementation
 
-let emit_header implementation ~name ~syntax ~params =
+let emit_header implementation ~name ~syntax ~deprecated ~params =
   Code.emit implementation `None "(********************************************************)";
   Code.emit implementation `None "(*           AUTOGENERATED FILE - DO NOT EDIT!          *)";
   Code.emit implementation `None "(********************************************************)";
@@ -341,7 +352,8 @@ let emit_header implementation ~name ~syntax ~params =
   Code.emit implementation `None "    fixed_as_int=%b" params.fixed_as_int;
   Code.emit implementation `None "    singleton_record=%b" params.singleton_record;
   Code.emit implementation `None "*)";
-  Code.emit implementation `None "";
+  Code.emit implementation `None "[@@@ocaml.alert \"-protobuf\"] (* Disable deprecation warnings for protobuf*)";
+  Code.emit implementation `None "%s" (Code.append_deprecaton_if ~deprecated `Floating "");
   ()
 
 let parse_proto_file ~params scope
@@ -361,8 +373,9 @@ let parse_proto_file ~params scope
                      field = []; extension; extension_range = []; oneof_decl = [];
                      options = None; reserved_range = []; reserved_name = []; }
   in
+  let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
   let implementation = Code.init () in
-  emit_header implementation ~name ~syntax ~params;
+  emit_header implementation ~name ~syntax ~deprecated ~params;
   Code.emit implementation `None "open Ocaml_protoc_plugin.Runtime [@@warning \"-33\"]";
   List.iter ~f:(Code.emit implementation `None "open %s [@@warning \"-33\"]" ) params.opens;
   let _ = match dependencies with

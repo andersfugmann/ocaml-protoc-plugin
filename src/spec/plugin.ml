@@ -16,6 +16,7 @@
     fixed_as_int=false
     singleton_record=false
 *)
+[@@@warning "-3"] (* Disable deprecation warnings in general *)
 
 open Ocaml_protoc_plugin.Runtime [@@warning "-33"]
 (**/**)

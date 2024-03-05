@@ -13,6 +13,7 @@ type t = {
 type field_spec = {
   typestr : string;
   spec_str: string;
+  deprecated: bool;
 }
 
 val spec_of_field:

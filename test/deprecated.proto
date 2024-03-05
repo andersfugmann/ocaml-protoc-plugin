@@ -1,0 +1,42 @@
+syntax = "proto3";
+option deprecated = true; // Deprecated file.
+message Message1 {
+  option deprecated = true; // Deprecated message
+  int32 a = 1; // Deprecated field
+}
+
+message Message2 {
+  int32 a = 1 [deprecated = true]; // Deprecated field
+}
+
+message Message3 {
+  int32 a = 1 [deprecated = true]; // Deprecated field
+  int32 b = 2;
+
+  oneof c {
+    int64 x = 10[deprecated = true];
+    string y = 20;
+  }
+}
+
+
+enum E1 {
+  option deprecated = true; // Deprecated enum
+  e1 = 0; // Deprecated enum value
+}
+
+enum E2 {
+  e2 = 0 [deprecated = true]; // Deprecated enum value
+  e3 = 1;
+}
+
+
+service Service1 {
+  option deprecated = true; // Deprecated service
+  rpc Method1(Message2) returns (Message2);
+}
+
+service Service2 {
+  rpc Method1(Message2) returns (Message2) { option deprecated = true; }; // Deprecated method
+  rpc Method2(Message2) returns (Message2); // Deprecated method
+}
