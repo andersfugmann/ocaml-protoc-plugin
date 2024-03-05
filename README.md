@@ -206,6 +206,20 @@ option (ocaml_options) = { mangle_names:true };
 message MyProtoMessage { }
 ```
 
+### Deprecation annotations in proto files
+Protobug specification (.proto file) allow for deprecating *files*,
+*enums*, *enum values*, *messages*, *message fields*, *services* and
+*methods*.
+
+These deprecations are kept in the ocaml mapping to generate
+[alerts](https://ocaml.org/manual/alerts.html) for alert category
+'protobuf'.
+
+Alerts are automatically enabled as warnings. To disable deprecation
+alerts, either add the compiler flag `-alert -protobuf`, or though ocaml
+annotations e.g. by adding `[@@@ocaml.alert "-protobuf"]` to the top
+of a file.
+
 
 ## Using dune
 Below is a dune rule for generating code for `test.proto`. The
