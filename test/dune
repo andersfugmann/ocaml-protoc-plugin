@@ -1,3 +1,7 @@
+(rule
+ (targets google_include)
+ (action (with-stdout-to %{targets}
+          (run pkg-config protobuf --variable=includedir))))
 
 ;; Determine if the compiler supports the --experimental_allow_proto3_optional flag.
 ;; The output file will be non-empty if the flag is supported
@@ -20,7 +24,7 @@
 (library
  (name test)
  (enabled_if (and (<> %{architecture} x86_32) (<> %{architecture} arm32)))
- (libraries ocaml_protoc_plugin google_types yojson ctypes-foreign)
+ (libraries ocaml_protoc_plugin google_types_pp yojson ctypes-foreign)
  (inline_tests
   (executable (link_flags -linkall -cclib -l:libtest_stubs.a -cclib -lprotobuf -cclib "-u protobuf2json")))
  (modules :standard \ proto3_optional_test_opt)
@@ -31,25 +35,11 @@
   (language cxx)
   (names protobuf2json)
   (flags (:include c_flags.sexp) -fPIC))
- ;(c_library_flags -fPIC (:include c_library_flags.sexp))
 )
-
-
 
 (rule
  (targets c_flags.sexp c_library_flags.sexp)
  (action  (run ./config/discover.exe)))
-
-
-;(rule
-; (target protobuf2json)
-; (deps protobuf2json.cc)
-; (action (system "c++ -o %{target} %{deps} -I`pkg-config protobuf --variable=includedir` `pkg-config protobuf --libs`")))
-
-(rule
- (target google_include)
- (action (with-stdout-to %{target}
-          (system "pkg-config protobuf --variable=includedir"))))
 
 (rule
  (targets
@@ -58,7 +48,7 @@
    included2.ml included3_dash.ml service.ml recursive.ml protocol.ml name_clash.ml
    name_clash_mangle.ml proto2.ml packed.ml mangle_names.ml extensions.ml
    options.ml name_clash2.ml empty.ml service_rpc_clash.ml service_empty_package.ml
-   deprecated.ml)
+   deprecated.ml json_encoding.ml)
  (deps
   (:plugin ../src/plugin/protoc_gen_ocaml.exe)
   (:proto
@@ -68,12 +58,12 @@
     recursive.proto protocol.proto name_clash.proto name_clash_mangle.proto
     proto2.proto packed.proto mangle_names.proto extensions.proto options.proto
     name_clash2.proto empty.proto service_rpc_clash.proto service_empty_package.proto
-    deprecated.proto)
+    deprecated.proto json_encoding.proto)
  )
  (action
   (run protoc -I %{read-lines:google_include} -I .
        "--plugin=protoc-gen-ocaml=%{plugin}"
-       "--ocaml_out=open=Google_types;open=Test_runtime;annot=[@@deriving show { with_path = false }, eq]:." %{proto})))
+       "--ocaml_out=open=Google_types_pp;open=Test_runtime;annot=[@@deriving show { with_path = false }, eq]:." %{proto})))
 
 (rule
  (targets int_types_native.ml int_types_native_proto2.ml)
@@ -83,7 +73,7 @@
  (action
   (run protoc -I %{read-lines:google_include} -I .
        "--plugin=protoc-gen-ocaml=%{plugin}"
-       "--ocaml_out=open=Google_types;open=Test_runtime;int32_as_int=false;int64_as_int=false;annot=[@@deriving show { with_path = false }, eq]:." %{proto})))
+       "--ocaml_out=open=Google_types_pp;open=Test_runtime;int32_as_int=false;int64_as_int=false;annot=[@@deriving show { with_path = false }, eq]:." %{proto})))
 
 (rule
  (targets singleton_record.ml oneof2.ml)
@@ -93,7 +83,7 @@
  (action
   (run protoc -I %{read-lines:google_include} -I .
        "--plugin=protoc-gen-ocaml=%{plugin}"
-       "--ocaml_out=open=Google_types;open=Test_runtime;annot=[@@deriving show { with_path = false }, eq]:." %{proto})))
+       "--ocaml_out=open=Google_types_pp;open=Test_runtime;annot=[@@deriving show { with_path = false }, eq]:." %{proto})))
 
 (rule
  (enabled_if (<> %{read:config/support_proto3_optional.conf} ""))
@@ -106,4 +96,4 @@
   (run protoc -I %{read-lines:google_include} -I .
        "--experimental_allow_proto3_optional"
        "--plugin=protoc-gen-ocaml=%{plugin}"
-       "--ocaml_out=open=Google_types;open=Test_runtime;annot=[@@deriving show { with_path = false }, eq]:." %{proto})))
+       "--ocaml_out=open=Google_types_pp;open=Test_runtime;annot=[@@deriving show { with_path = false }, eq]:." %{proto})))

@@ -52,6 +52,98 @@ let read_map: type a b. read_key:(string -> a) -> read_value:(Yojson.Basic.t -> 
       ) entries
     | json -> value_error "map_entry" json
 
+(** What a strange encoding.
+    Durations less than one second are represented with a 0 seconds field and a positive or negative nanos field. For durations of one second or more, a non-zero value for the nanos field must be of the same sign as the seconds field.
+*)
+let duration_of_json json =
+  (* Capture the signedness of the duration, and apply to both seconds and nanos *)
+  (* nanos can be 0, 3, 6 or 9 digits *)
+  (* must end with a 's' *)
+
+  try
+    let s = Yojson.Basic.Util.to_string json in
+    assert (String.get s (String.length s - 1) = 's');
+    let sign, s = match String.get s 0 = '-' with
+      | true -> (-1), String.sub s ~pos:1 ~len:(String.length s - 2)
+      | false -> 1, String.sub s ~pos:0 ~len:(String.length s - 1)
+    in
+    let seconds, nanos = match String.split_on_char ~sep:'.' s with
+      | [seconds; nanos] -> seconds, nanos
+      | [seconds] -> seconds, "000"
+      | _ -> failwith "Too many '.' in string"
+    in
+    let seconds = int_of_string seconds in
+    let nano_fac = match String.length nanos with
+      | 3 -> 1_000_000
+      | 6 -> 1000
+      | 9 -> 1
+      | _ -> failwith "Nanos should be either 0, 3, 6 or 9 digits"
+    in
+
+    let nanos = int_of_string nanos * nano_fac in
+    assert (seconds >= 0 && nanos >= 0);
+    (seconds * sign, nanos * sign)
+  with
+  | _ -> value_error "google.protobuf.duration" json
+
+let%expect_test "google.protobuf.Duration" =
+  let test str =
+    try
+      let (s,n) = duration_of_json (`String str) in
+      Printf.printf "D: %s -> %d.%09ds\n" str s n
+    with
+    | Result.Error e -> Printf.printf "Error parsing %s: %s\n" str (Result.show_error e)
+  in
+  test "1s";
+  test "-1s";
+  test "1.001s";
+  test "-1.001s";
+  test "1.1";
+  test "1.-10s";
+  ();
+  [%expect {|
+    D: 1s -> 1.000000000s
+    D: -1s -> -1.000000000s
+    D: 1.001s -> 1.001000000s
+    D: -1.001s -> -1.-01000000s
+    Error parsing 1.1: `Wrong_field_type (("google.protobuf.duration", "\"1.1\""))
+    Error parsing 1.-10s: `Wrong_field_type (("google.protobuf.duration", "\"1.-10s\"")) |}]
+
+let timestamp_of_json = function
+  | `String timestamp ->
+    let t =
+      match Ptime.of_rfc3339 timestamp with
+      | Ok (t, _, _) -> t
+      | Error _e -> value_error "google.protobuf.duration" (`String timestamp)
+    in
+    let seconds = Ptime.to_float_s t |> Float.to_int in
+    let nanos = Ptime.frac_s t |> Ptime.Span.to_float_s |> Float.mul 1_000_000_000.0 |> Float.to_int in
+    (seconds, nanos)
+  | json -> value_error "google.protobuf.timestamp" json
+
+let%expect_test "google.protobuf.Timestamp" =
+  let test str =
+    try
+      let (s, n) = timestamp_of_json (`String str) in
+      Printf.printf "D: %s -> %d.%09ds\n" str s n
+    with
+    | Result.Error e -> Printf.printf "Error parsing %s: %s\n" str (Result.show_error e)
+  in
+  test "1972-01-01T10:00:20.021Z";
+  test "2024-03-06T21:10:27.020Z";
+  test "2024-03-06T21:10:27.123123123Z";
+  test "2024-03-06T21:10:27.999999Z";
+  test "2024-03-06T21:10:27.999999";
+  ();
+  [%expect {|
+    D: 1972-01-01T10:00:20.021Z -> 63108020.021000000s
+    D: 2024-03-06T21:10:27.020Z -> 1709759427.020000000s
+    D: 2024-03-06T21:10:27.123123123Z -> 1709759427.123123123s
+    D: 2024-03-06T21:10:27.999999Z -> 1709759427.999999000s
+    Error parsing 2024-03-06T21:10:27.999999: `Wrong_field_type (("google.protobuf.duration",
+                        "\"2024-03-06T21:10:27.999999\"")) |}]
+
+
 
 let read_value: type a b. (a, b) spec -> Yojson.Basic.t -> a = function
    | Double -> to_float
@@ -81,13 +173,14 @@ let read_value: type a b. (a, b) spec -> Yojson.Basic.t -> a = function
    | Bytes -> to_bytes
    | Enum (module Enum) -> to_enum (module Enum)
    | Message ((module Message), Empty) -> begin
-       function `Assoc [] -> Message.from_tuple ()
-              | json -> value_error "google.protobuf.empty" json
+       function
+       | `Assoc [] -> Message.from_tuple ()
+       | json -> value_error "google.protobuf.empty" json
      end
-   | Message ((module Message), Duration) -> begin
-       function `String _s -> (* expect "123.000000345s" *) Message.from_tuple (124, 456)
-              | _ -> failwith "String expected"
-     end
+   | Message ((module Message), Duration) ->
+     fun json -> duration_of_json json |> Message.from_tuple
+   | Message ((module Message), Timestamp) ->
+     fun json -> timestamp_of_json json |> Message.from_tuple
    | Message ((module Message), Default) -> Message.from_json_exn
 
 let find_field (_number, field_name, json_name) fields =

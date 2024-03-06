@@ -68,7 +68,14 @@ let rec json_of_spec: type a b. enum_names:bool -> json_names:bool -> omit_defau
       | true -> enum_name ~f:Enum.to_string
       | false -> enum_value ~f:Enum.to_int
     end
-  | Message ((module Message), _) ->
+  | Message ((module Message), Duration) ->
+    fun duration ->
+      let seconds, nanos = Message.to_tuple duration in
+      `String (Printf.sprintf "%d.%09ds" seconds nanos)
+  | Message ((module Message), Empty) ->
+    fun _ -> `Assoc []
+  | Message ((module Message), Timestamp) -> failwith "Unhandled"
+  | Message ((module Message), Default) ->
     Message.to_json ~enum_names ~json_names ~omit_default_values
 
 and write: type a b. enum_names:bool -> json_names:bool -> omit_default_values:bool -> (a, b) compound -> a -> field list =

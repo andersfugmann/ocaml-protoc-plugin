@@ -28,6 +28,7 @@ depends: [
   "dune-configurator" {with-test}
   "yojson"
   "base64"
+  "ptime"
 ]
 
 
