@@ -35,64 +35,68 @@ module Make(T : T) = struct
 
   type field = (int * string * string)
 
-  type _ spec =
-    | Double : float spec
-    | Float : float spec
+  type scalar = [ `Scalar ]
+  type message = [ `Message ]
 
-    | Int32 : Int32.t spec
-    | UInt32 : Int32.t spec
-    | SInt32 : Int32.t spec
-    | Fixed32 : Int32.t spec
-    | SFixed32 : Int32.t spec
+  type (_, _) spec =
+    | Double : (float, scalar) spec
+    | Float : (float, scalar) spec
 
-    | Int32_int : int spec
-    | UInt32_int : int spec
-    | SInt32_int : int spec
-    | Fixed32_int : int spec
-    | SFixed32_int : int spec
+    | Int32 : (Int32.t, scalar) spec
+    | UInt32 : (Int32.t, scalar) spec
+    | SInt32 : (Int32.t, scalar) spec
+    | Fixed32 : (Int32.t, scalar) spec
+    | SFixed32 : (Int32.t, scalar) spec
 
-    | UInt64 : Int64.t spec
-    | Int64 : Int64.t spec
-    | SInt64 : Int64.t spec
-    | Fixed64 : Int64.t spec
-    | SFixed64 : Int64.t spec
+    | Int32_int : (int, scalar) spec
+    | UInt32_int : (int, scalar) spec
+    | SInt32_int : (int, scalar) spec
+    | Fixed32_int : (int, scalar) spec
+    | SFixed32_int : (int, scalar) spec
 
-    | UInt64_int : int spec
-    | Int64_int : int spec
-    | SInt64_int : int spec
-    | Fixed64_int : int spec
-    | SFixed64_int : int spec
+    | UInt64 : (Int64.t, scalar) spec
+    | Int64 : (Int64.t, scalar) spec
+    | SInt64 : (Int64.t, scalar) spec
+    | Fixed64 : (Int64.t, scalar) spec
+    | SFixed64 : (Int64.t, scalar) spec
 
-    | Bool : bool spec
-    | String : string spec
-    | Bytes : bytes spec
-    | Enum :  (module Enum with type t = 'a) T.enum -> 'a spec
-    | Message : (module Message with type t = 'a) T.message -> 'a spec
+    | UInt64_int : (int, scalar) spec
+    | Int64_int : (int, scalar) spec
+    | SInt64_int : (int, scalar) spec
+    | Fixed64_int : (int, scalar) spec
+    | SFixed64_int : (int, scalar) spec
 
-  (* Existential types *)
-  type espec = Espec: _ spec -> espec [@@unboxed]
+    | Bool : (bool, scalar) spec
+    | String : (string, scalar) spec
+    | Bytes : (bytes, scalar) spec
+    | Enum :  (module Enum with type t = 'a) T.enum -> ('a, scalar) spec
+    | Message : (module Message with type t = 'a) T.message -> ('a, message) spec
 
   type _ oneof =
-    | Oneof_elem : field * 'b spec * (('b -> 'a) * ('a -> 'b)) T.oneof_elem -> 'a oneof
+    | Oneof_elem : field * ('b, _) spec * (('b -> 'a) * ('a -> 'b)) T.oneof_elem -> 'a oneof
 
-  type _ compound =
-    (* A field, where the default value is know (and set). This cannot be used for message types *)
-    | Basic : field * 'a spec * 'a -> 'a compound
+  type 'a basic = 'a * [`Basic]
+  type 'a any = 'a * [`Any]
+
+
+  type (_, _) compound =
+    (* A field, where the default value is know. *)
+    | Basic : field * ('a, scalar) spec * 'a -> ('a, scalar basic) compound
 
     (* Proto2/proto3 optional fields. *)
-    | Basic_opt : field * 'a spec -> 'a option compound
+    | Basic_opt : field * ('a, 'b) spec -> ('a option, 'b basic) compound
 
     (* Proto2 required fields (and oneof fields) *)
-    | Basic_req : field * 'a spec -> 'a compound
+    | Basic_req : field * ('a, 'b) spec -> ('a, 'b any) compound
 
     (* Repeated fields *)
-    | Repeated : field * 'a spec * packed -> 'a list compound
+    | Repeated : field * ('a, 'b) spec * packed -> ('a list, 'b any) compound
 
-    (* Map types *)
-    | Map : field * ('a compound * 'b compound) T.map -> ('a * 'b) list compound
+    (* Map types. Should we create a message_opt type? *)
+    | Map : field * (('a, scalar) spec * ('b, 'c basic) compound) T.map -> (('a * 'b) list, _ any) compound
 
     (* Oneofs. A list of fields + function to index the field *)
-    | Oneof : (('a oneof list) * ('a -> int)) T.oneof -> ([> `not_set ] as 'a) compound
+    | Oneof : (('a oneof list) * ('a -> int)) T.oneof -> ([> `not_set ] as 'a, _ any) compound
 
   type (_, _) compound_list =
     (* End of list *)
@@ -102,7 +106,7 @@ module Make(T : T) = struct
     | Nil_ext: extension_ranges -> (extensions -> 'a, 'a) compound_list
 
     (* List element *)
-    | Cons : ('a compound) * ('b, 'c) compound_list -> ('a -> 'b, 'c) compound_list
+    | Cons : (('a, _) compound) * ('b, 'c) compound_list -> ('a -> 'b, 'c) compound_list
 
   let double = Double
   let float = Float
@@ -153,7 +157,7 @@ module Make(T : T) = struct
   let nil = Nil
   let nil_ext extension_ranges = Nil_ext extension_ranges
 
-  let show: type a. a spec -> string = function
+  let show: type a b. (a, b) spec -> string = function
     | Double -> "Double"
     | Float -> "Float"
 
@@ -188,6 +192,7 @@ module Make(T : T) = struct
     | Message _ -> "Message"
 end
 
+
 include Make(struct
     type 'a message = 'a
     type 'a enum = 'a
@@ -195,3 +200,36 @@ include Make(struct
     type 'a oneof_elem = 'a
     type 'a map = 'a
   end)
+
+let default_of_spec: type a. (a, scalar) spec -> a = function
+  | Double -> 0.0
+  | Float -> 0.0
+
+  | Int32 -> Int32.zero
+  | UInt32 -> Int32.zero
+  | SInt32 -> Int32.zero
+  | Fixed32 -> Int32.zero
+  | SFixed32 -> Int32.zero
+
+  | Int32_int -> 0
+  | UInt32_int -> 0
+  | SInt32_int -> 0
+  | Fixed32_int -> 0
+  | SFixed32_int -> 0
+
+  | Int64 -> Int64.zero
+  | UInt64 -> Int64.zero
+  | SInt64 -> Int64.zero
+  | Fixed64 -> Int64.zero
+  | SFixed64 -> Int64.zero
+
+  | UInt64_int -> 0
+  | Int64_int -> 0
+  | SInt64_int -> 0
+  | Fixed64_int -> 0
+  | SFixed64_int -> 0
+
+  | Bool -> false
+  | String -> ""
+  | Bytes -> Bytes.create 0
+  | Enum (module Enum) -> Enum.from_int_exn 0

@@ -49,7 +49,7 @@ let int_of_uint32 =
     assert false
 
 
-let read_of_spec: type a. a spec -> Field.field_type * (Reader.t -> a) = function
+let read_of_spec: type a b. (a, b) spec -> Field.field_type * (Reader.t -> a) = function
   | Double -> Fixed64, fun reader -> Reader.read_fixed64 reader |> Int64.float_of_bits
   | Float  -> Fixed32, fun reader -> Reader.read_fixed32 reader |> Int32.float_of_bits
   | Int32 -> Varint, fun reader -> Reader.read_varint_unboxed reader |> Int32.of_int
@@ -127,7 +127,7 @@ let read_map_entry: type a b. read_key:a value -> read_value:b value -> Reader.t
   in
   read (default_key, default_value)
 
-let rec value: type a. a compound -> a value = function
+let rec value: type a b. (a, b) compound -> a value = function
   | Basic_req ((index, _, _), spec) ->
     let read = read_field ~read:(read_of_spec spec) ~map:keep_last_opt in
     let getter = function Some v -> v | None -> error_required_field_missing index spec in
@@ -164,9 +164,9 @@ let rec value: type a. a compound -> a value = function
   | Repeated ((index, _, _), spec, Not_packed) ->
     let read = read_field ~read:(read_of_spec spec) ~map:(fun vs v -> v :: vs) in
     Value ([(index, read)], [], List.rev)
-  | Map ((index, _, _), (key_spec, value_spec)) ->
-    let read_key = value key_spec in
-    let read_value = value value_spec in
+  | Map ((index, _, _), (key_spec, value_compound)) ->
+    let read_key = value (Basic ((1, "key", "key"), key_spec, default_of_spec key_spec)) in
+    let read_value = value value_compound in
     let read_entry = read_map_entry ~read_key ~read_value in
 
     let read_entry_message reader =
@@ -205,7 +205,6 @@ let deserialize_full: type constr a. extension_ranges -> (constr, a) value_list 
   let rec make_sentinel_list: type a b. (a, b) value_list -> (a, b) sentinel_list = function
     | VNil -> NNil
     | VNil_ext -> NNil_ext
-    (* Consider optimizing when optional is true *)
     | VCons (Value (fields, default, getter), rest) ->
       let v = ref default in
       let get () = getter !v in

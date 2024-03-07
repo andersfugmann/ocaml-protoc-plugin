@@ -8,7 +8,7 @@ let equal _ _ = true
 let compare _ _ = 0
 
 
-let index_of_spec: type a. a Spec.compound -> int = function
+let index_of_spec: type a b. (a, b) Spec.compound -> int = function
   | Basic ((index, _, _), _, _) -> index
   | Basic_opt ((index, _, _), _) -> index
   | Basic_req ((index, _, _), _) -> index
@@ -16,12 +16,12 @@ let index_of_spec: type a. a Spec.compound -> int = function
   | Map ((index, _, _), _) -> index
   | Oneof _ -> failwith "Oneof fields not allowed in extensions"
 
-let get: type a. a Spec.compound -> t -> a = fun spec t ->
+let get: type a b. (a, b) Spec.compound -> t -> a = fun spec t ->
   let writer = Writer.of_list t in
   let reader = Writer.contents writer |> Reader.create in
   Deserialize.deserialize Spec.(Cons (spec, Nil)) (fun a -> a) reader
 
-let set: type a. a Spec.compound -> t -> a -> t = fun spec t v ->
+let set: type a b. (a, b) Spec.compound -> t -> a -> t = fun spec t v ->
   let writer = Writer.init () in
   let writer = Serialize.serialize Spec.(Cons (spec, Nil)) writer v in
   let index = index_of_spec spec in

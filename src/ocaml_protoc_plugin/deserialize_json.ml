@@ -53,7 +53,7 @@ let read_map: type a b. read_key:(string -> a) -> read_value:(Yojson.Basic.t -> 
     | json -> value_error "map_entry" json
 
 
-let read_value: type a. a spec -> Yojson.Basic.t -> a = function
+let read_value: type a b. (a, b) spec -> Yojson.Basic.t -> a = function
    | Double -> to_float
    | Float -> to_float
    | Int32 -> to_int32
@@ -87,7 +87,7 @@ let find_field (_number, field_name, json_name) fields =
   | Some value -> Some value
   | None -> FieldMap.find_opt field_name fields
 
-let rec read: type a. fields -> a Spec.compound -> a = fun fields -> function
+let rec read: type a b. fields -> (a, b) Spec.compound -> a = fun fields -> function
   | Basic (index, spec, default) ->
     begin
       match find_field index fields with
@@ -114,7 +114,7 @@ let rec read: type a. fields -> a Spec.compound -> a = fun fields -> function
         to_list field |> List.map ~f:read
       | None -> []
     end
-  | Map (index, (Basic (_, key_spec, _), Basic (_, value_spec, _))) ->
+  | Map (index, (key_spec, Basic (_, value_spec, _))) ->
     let read_key = read_value key_spec in
     let read_key v = read_key (`String v) in
     let read_value = read_value value_spec in
@@ -123,7 +123,7 @@ let rec read: type a. fields -> a Spec.compound -> a = fun fields -> function
       read_map ~read_key ~read_value field
     | None -> []
     end
-  | Map (index, (Basic (_, key_spec, _), Basic_opt (_, value_spec))) ->
+  | Map (index, (key_spec, Basic_opt (_, value_spec))) ->
     let read_key = read_value key_spec in
     let read_key v = read_key (`String v) in
     let read_value = read_value value_spec in
@@ -136,8 +136,6 @@ let rec read: type a. fields -> a Spec.compound -> a = fun fields -> function
       read_map ~read_key ~read_value field
     | None -> []
     end
-  | Map _ ->
-    failwith "Illegal type for maps"
   | Oneof (oneofs, _) ->
     let rec inner = function
       | Oneof_elem (index, spec, (constr, _)) :: rest ->

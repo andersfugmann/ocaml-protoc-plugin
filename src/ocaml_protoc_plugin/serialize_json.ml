@@ -31,7 +31,7 @@ let key ~json_names (_, name, json_name) =
   | true -> json_name
   | false -> name
 
-let rec json_of_spec: type a. enum_names:bool -> json_names:bool -> omit_default_values:bool -> a spec -> a -> Yojson.Basic.t =
+let rec json_of_spec: type a b. enum_names:bool -> json_names:bool -> omit_default_values:bool -> (a, b) spec -> a -> Yojson.Basic.t =
   fun ~enum_names ~json_names ~omit_default_values -> function
   | Double -> float_value
   | Float -> float_value
@@ -71,7 +71,7 @@ let rec json_of_spec: type a. enum_names:bool -> json_names:bool -> omit_default
   | Message (module Message) ->
     Message.to_json ~enum_names ~json_names ~omit_default_values
 
-and write: type a. enum_names:bool -> json_names:bool -> omit_default_values:bool -> a compound -> a -> field list =
+and write: type a b. enum_names:bool -> json_names:bool -> omit_default_values:bool -> (a, b) compound -> a -> field list =
   fun ~enum_names ~json_names ~omit_default_values -> function
     | Basic (index, spec, default) ->
       begin
@@ -96,11 +96,8 @@ and write: type a. enum_names:bool -> json_names:bool -> omit_default_values:boo
     let to_json = json_of_spec ~enum_names ~json_names ~omit_default_values spec in
     let value = List.map ~f:to_json v |> list_value in
     [key ~json_names index, value]
-  | Map (index, (key_compound, value_compound)) -> fun vs ->
-    let json_of_key = match key_compound with
-      | Basic (_, key_spec, _) -> json_of_spec ~enum_names ~json_names ~omit_default_values:false key_spec
-      | _ -> failwith "Illegal type for key in map"
-    in
+  | Map (index, (key_spec, value_compound)) -> fun vs ->
+    let json_of_key = json_of_spec ~enum_names ~json_names ~omit_default_values:false key_spec in
     let json_of_value = match value_compound with
       | Basic (_, spec, _) -> json_of_spec ~enum_names ~json_names ~omit_default_values spec
       | Basic_opt (_, spec) ->
@@ -110,7 +107,6 @@ and write: type a. enum_names:bool -> json_names:bool -> omit_default_values:boo
           | Some v -> json_of_value v
         in
         json_of_value
-      | _ -> failwith "Illegal type for value in map"
     in
     let json_of_entry (key, value) =
       let key = json_of_key key |> key_to_string in

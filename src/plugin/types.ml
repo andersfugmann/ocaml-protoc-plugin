@@ -6,8 +6,6 @@ open StdLabels
    This will ensure that the plugin will only construct valid types,
    so that changes to the spec will require changes here also.
 *)
-
-
 open Spec.Descriptor.Google.Protobuf
 
 type type_modifier =
@@ -48,15 +46,19 @@ module T = struct
   type _ enum = { type': string; module_name: string; default: string }
   type _ oneof = { type': string; spec: string; fields: (string * string) list }
   type _ oneof_elem = { adt_name: string }
-  type _ map = { key_type: c; value_type: c }
+  type _ map = { key_spec: string; key_type: string; value_compound: c }
 end
 
 open Ocaml_protoc_plugin.Spec.Make(T)
 
+(* Existential types *)
+type _ espec = Espec: (_, scalar) spec -> _ espec [@@unboxed]
+type _ espec_any = Espec_any: (_, [< scalar | message]) spec -> _ espec_any [@@unboxed]
+
 
 let sprintf = Printf.sprintf
 
-let make_default: type a. a spec -> string -> a = function
+let make_default: type a. (a, scalar) spec -> string -> a = function
   | Double -> float_of_string
   | Float -> float_of_string
 
@@ -90,9 +92,8 @@ let make_default: type a. a spec -> string -> a = function
   | Enum _ -> fun _ ->
     (* Enum is 'a typed, so a default cannot be returned here as a string *)
     failwith (sprintf "Defaults for enums cannot be handled here")
-  | Message _ -> failwith "Messages do not have defaults"
 
-let string_of_default: type a. a spec -> a -> string = function
+let string_of_default: type a. (a, scalar) spec -> a -> string = function
   | Double -> string_of_float
   | Float -> string_of_float
 
@@ -124,9 +125,8 @@ let string_of_default: type a. a spec -> a -> string = function
   | String -> sprintf "{|%s|}"
   | Bytes -> fun bytes -> sprintf "(Bytes.of_string {|%s|})" (Bytes.to_string bytes)
   | Enum { default; _ } -> fun _ -> default
-  | Message _ -> failwith "Messages defaults are not relevant"
 
-let default_of_spec: type a. a spec -> a = fun spec -> match spec with
+let default_of_spec: type a. (a, scalar) spec -> a = fun spec -> match spec with
   | Double -> 0.0
   | Float -> 0.0
 
@@ -157,10 +157,9 @@ let default_of_spec: type a. a spec -> a = fun spec -> match spec with
   | Bool -> false
   | String -> ""
   | Bytes -> Bytes.of_string ""
-  | Enum _-> failwith "Enums not handled here"
-  | Message _ -> failwith "Messages defaults are not relevant"
+  | Enum _ -> failwith "Enums not handled here"
 
-let string_of_spec: type a. a spec -> string = function
+let string_of_spec: type a b. (a, b) spec -> string = function
   | Double -> "double"
   | Float -> "float"
 
@@ -194,7 +193,7 @@ let string_of_spec: type a. a spec -> string = function
   | Enum { module_name; _ }  -> sprintf "(enum (module %s))" module_name
   | Message { module_name; _ } -> sprintf "(message (module %s))" module_name
 
-let type_of_spec: type a. a spec -> string = function
+let type_of_spec: type a b. (a, b) spec -> string = function
   | Double -> "float"
   | Float -> "float"
 
@@ -290,7 +289,7 @@ let spec_of_type ~params ~scope type_name default =
   | TYPE_BYTES    -> Espec Bytes
 
   | TYPE_GROUP    -> failwith "Groups not supported"
-  | TYPE_MESSAGE  -> Espec (spec_of_message ~scope type_name)
+  | TYPE_MESSAGE  -> failwith "Messages not handled here"
   | TYPE_ENUM     -> Espec (spec_of_enum ~scope type_name default)
 
 let string_of_index (index, name, json_name) =
@@ -303,7 +302,7 @@ let string_of_oneof_elem (Oneof_elem (index, spec, { adt_name; _ } ) ) =
   let destr = sprintf "function %s v -> v | _ -> raise (Invalid_argument \"Cannot destruct given oneof\")" adt_name in
   sprintf "oneof_elem (%s, %s, ((%s), (%s)))" index_string spec_string constr destr
 
-let string_of_proto_type: type a. a spec -> a -> string = fun spec default ->
+let string_of_proto_type: type a. (a, scalar) spec -> a -> string = fun spec default ->
   sprintf "(%s)" (string_of_default spec default)
 
 let string_of_packed = function
@@ -315,15 +314,11 @@ let string_of_type = function
   | { name; modifier = List; _ } -> sprintf "%s list" name
   | { name; modifier = Optional; _ } -> sprintf "%s option" name
 
-let c_of_compound: type a. deprecated:bool -> string -> a compound -> c = fun ~deprecated name -> function
+let c_of_compound: type a b. deprecated:bool -> string -> (a, b) compound -> c = fun ~deprecated name -> function
   | Basic (index, spec, default) ->
     let index_string = string_of_index index in
     let spec_str = sprintf "basic (%s, %s, %s)" index_string (string_of_spec spec) (string_of_proto_type spec default) in
-    let modifier =
-      match spec with
-      | Message _ -> Optional
-      | _ -> No_modifier (string_of_default spec default)
-    in
+    let modifier = No_modifier (string_of_default spec default) in
     let type' = { name = type_of_spec spec; modifier; deprecated } in
     { name; type'; spec_str }
   | Basic_req (index, spec) ->
@@ -341,10 +336,10 @@ let c_of_compound: type a. deprecated:bool -> string -> a compound -> c = fun ~d
     let spec_str = sprintf "repeated (%s, %s, %s)" index_string (string_of_spec spec) (string_of_packed packed) in
     let type' = { name = type_of_spec spec; modifier = List; deprecated } in
     { name; type'; spec_str; }
-  | Map (index, { key_type; value_type } ) ->
+  | Map (index, { key_spec; key_type; value_compound } ) ->
     let index_string = string_of_index index in
-    let spec_str = sprintf "map (%s, (%s, %s))" index_string key_type.spec_str value_type.spec_str in
-    let type_name = sprintf "(%s * %s)" (string_of_type key_type.type') (string_of_type value_type.type') in
+    let spec_str = sprintf "map (%s, (%s, %s))" index_string key_spec value_compound.spec_str in
+    let type_name = sprintf "(%s * %s)" key_type (string_of_type value_compound.type') in
     let type' = { name = type_name; modifier = List; deprecated } in
     { name; type'; spec_str; }
   | Oneof { type'; spec; fields; _ } ->
@@ -456,17 +451,23 @@ let rec c_of_field ~params ~syntax ~scope ~map_type field =
       | Some DescriptorProto.{ field = fields; _ } -> List.find_opt ~f:(function { name = Some name; _ } -> String.equal name n | _ -> false) fields
       | None -> None
     in
-    (* A Map type cannot be recursibe. And we actually have the type. So lets create the spec *)
-    let key_type =
-      lookup "key" map_type |> Option.value_exn ~message:"Maps must contain a key field"
-      |> c_of_field ~params ~syntax ~scope ~map_type:None
+
+    let key_spec, key_type =
+      let { type_name; default_value; type'; _ } =
+        lookup "key" map_type
+        |> Option.value_exn ~message:"Maps must contain a key field"
+      in
+      let Espec spec = spec_of_type ~params ~scope type_name default_value (Option.value_exn type') in
+      string_of_spec spec, type_of_spec spec
     in
-    let value_type =
+
+    let value_compound =
       lookup "value" map_type |> Option.value_exn ~message:"Maps must contain a value field"
       |> c_of_field ~params ~syntax ~scope ~map_type:None
     in
-    Map (index, { key_type; value_type }) (* The spec is not the same here *)
+    Map (index, { key_spec; key_type; value_compound }) (* The spec is not the same here *)
     |> c_of_compound ~deprecated name
+
 
   (* Repeated message *)
   | _, { label = Some Label.LABEL_REPEATED; type' = Some Type.TYPE_MESSAGE; type_name; _ } ->
@@ -507,7 +508,7 @@ let rec c_of_field ~params ~syntax ~scope ~map_type field =
   | _, { type' = None; _ } -> failwith "Type must be set"
 
 
-let spec_of_field ~params ~syntax ~scope ~map_type field : field_spec =
+and spec_of_field ~params ~syntax ~scope ~map_type field : field_spec =
   let c = c_of_field ~params ~syntax ~scope ~map_type field in
   {
     typestr = string_of_type c.type';
@@ -520,10 +521,14 @@ let c_of_oneof ~params ~syntax:_ ~scope OneofDescriptorProto.{ name; _ } fields 
   (* Construct the type. *)
   let field_infos =
     List.map ~f:(function
+      | { number = Some number; name = Some name; type' = Some TYPE_MESSAGE; type_name; json_name = Some json_name; _ } as field, _map_type ->
+        let index = (number, name, json_name) in
+        let spec = spec_of_message ~scope type_name in
+        (index, Some name, type_of_spec spec, Espec_any spec, is_deprecated field)
       | { number = Some number; name = Some name; type' = Some type'; type_name; json_name = Some json_name; _ } as field, _map_type ->
         let index = (number, name, json_name) in
         let Espec spec = spec_of_type ~params ~scope type_name None type' in
-        (index, Some name, type_of_spec spec, Espec spec, is_deprecated field)
+        (index, Some name, type_of_spec spec, Espec_any spec, is_deprecated field)
       | _ -> failwith "No index or type"
     ) fields
   in
@@ -531,7 +536,7 @@ let c_of_oneof ~params ~syntax:_ ~scope OneofDescriptorProto.{ name; _ } fields 
     let oneof_elems =
       field_infos
       |>
-      List.map ~f:(fun (index, name, _type', Espec spec, _deprecated) ->
+      List.map ~f:(fun (index, name, _type', Espec_any spec, _deprecated) ->
         let adt_name = Scope.get_name_exn scope name in
         let arg : _ T.oneof_elem = { adt_name; } in
         adt_name, Oneof_elem (index, spec, arg)

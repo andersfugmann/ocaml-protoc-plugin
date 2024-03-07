@@ -1,6 +1,5 @@
 (** Merge a two values. Need to match on the spec to merge messages recursivly *)
-let merge: type t. t Spec.compound -> t -> t -> t = fun spec t t' -> match spec with
-  | Spec.Basic (_field, Message _, _) -> failwith "Messages with defaults cannot happen"
+let merge: type t v. (t, v) Spec.compound -> t -> t -> t = fun spec t t' -> match spec with
   | Spec.Basic (_field, _spec, default) when t' = default -> t
   | Spec.Basic (_field, _spec, _) -> t'
 
