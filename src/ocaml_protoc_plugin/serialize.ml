@@ -2,7 +2,7 @@ open StdLabels
 
 open Spec
 
-let field_type: type a. a spec -> int = function
+let field_type: type a b. (a, b) spec -> int = function
   | Int64 | UInt64 | SInt64 | Int32 | UInt32 | SInt32
   | Int64_int | UInt64_int | Int32_int | UInt32_int | SInt64_int | SInt32_int
   | Bool | Enum _ -> 0 (* Varint *)
@@ -44,7 +44,7 @@ let write_length_delimited_string ~f v =
 let id x = x
 let (@@) a b = fun v -> b (a v)
 
-let write_value : type a. a spec -> a -> Writer.t -> unit = function
+let write_value : type a b. (a, b) spec -> a -> Writer.t -> unit = function
   | Double -> write_fixed64 ~f:Int64.bits_of_float
   | Float -> write_fixed32 ~f:Int32.bits_of_float
   | Fixed64 -> write_fixed64 ~f:id
@@ -76,26 +76,26 @@ let write_value : type a. a spec -> a -> Writer.t -> unit = function
     Writer.write_length_delimited_f ~write_f:Message.to_proto'
 
 (** Optimized when the value is given in advance, and the continuation is expected to be called multiple times *)
-let write_value_const : type a. a spec -> a -> Writer.t -> unit = fun spec v ->
+let write_value_const : type a b. (a, b) spec -> a -> Writer.t -> unit = fun spec v ->
   let write_value = write_value spec in
   let writer = Writer.init () in
   write_value v writer;
   let data = Writer.contents writer in
   Writer.write_const_value data
 
-let write_field_header: 'a spec -> int -> Writer.t -> unit = fun spec index ->
+let write_field_header: _ spec -> int -> Writer.t -> unit = fun spec index ->
   let field_type = field_type spec in
   let header = (index lsl 3) + field_type in
   write_value_const Int64_int header
 
-let write_field: type a. a spec -> int -> Writer.t -> a -> unit = fun spec index ->
+let write_field: type a b. (a, b) spec -> int -> Writer.t -> a -> unit = fun spec index ->
   let write_field_header = write_field_header spec index in
   let write_value = write_value spec in
   fun writer v->
     write_field_header writer;
     write_value v writer
 
-let rec write: type a. a compound -> Writer.t -> a -> unit = function
+let rec write: type a b. (a, b) compound -> Writer.t -> a -> unit = function
   | Repeated ((index, _, _), spec, Packed) -> begin
       let write_value = write_value spec in
       let write_f writer vs = List.iter ~f:(fun v -> write_value v writer) vs; writer in
@@ -111,10 +111,10 @@ let rec write: type a. a compound -> Writer.t -> a -> unit = function
     let write = write_field spec index in
     fun writer vs ->
       List.iter ~f:(fun v -> write writer v) vs
-  | Map ((index, _, _), (key_spec, value_spec)) ->
+  | Map ((index, _, _), (key_spec, value_compound)) ->
     let write_header = write_field_header String index in
-    let write_key = write key_spec in
-    let write_value = write value_spec in
+    let write_key = write (Basic ((1, "key", "key"), key_spec, default_of_spec key_spec)) in
+    let write_value = write value_compound in
     let write_entry writer (key, value) =
       write_key writer key;
       write_value writer value;
