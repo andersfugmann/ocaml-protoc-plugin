@@ -18,6 +18,7 @@ end
 module type Message = sig
   type t
   type t_tuple
+  val name': unit -> string
   val from_proto: Reader.t -> t Result.t
   val from_proto_exn: Reader.t -> t
   val to_proto: t -> Writer.t

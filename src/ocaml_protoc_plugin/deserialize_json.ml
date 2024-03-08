@@ -144,6 +144,59 @@ let%expect_test "google.protobuf.Timestamp" =
                         "\"2024-03-06T21:10:27.999999\"")) |}]
 
 
+let map_json: type a. (module Message with type t = a) -> Yojson.Basic.t -> Yojson.Basic.t = fun (module Message) ->
+  match Message.name' () |> String.split_on_char ~sep:'.'  with
+  | [_; "google"; "protobuf"; "Empty"] (* Already mapped as it should I think *) ->
+    fun json -> json
+  | [_; "google"; "protobuf"; "Duration"] ->
+    let convert json =
+      let (seconds, nanos) = duration_of_json json in
+      `Assoc [ "seconds", `Int seconds; "nanos", `Int nanos ]
+    in
+    convert
+  | [_; "google"; "protobuf"; "Timestamp"] ->
+    let convert json =
+      let (seconds, nanos) = timestamp_of_json json in
+      `Assoc [ "seconds", `Int seconds; "nanos", `Int nanos ]
+    in
+    convert
+  | [_; "google"; "protobuf"; "DoubleValue"]
+  | [_; "google"; "protobuf"; "FloatValue"]
+  | [_; "google"; "protobuf"; "Int64Value"]
+  | [_; "google"; "protobuf"; "UInt64Value"]
+  | [_; "google"; "protobuf"; "Int32Value"]
+  | [_; "google"; "protobuf"; "UInt32Value"]
+  | [_; "google"; "protobuf"; "BoolValue"]
+  | [_; "google"; "protobuf"; "StringValue"]
+  | [_; "google"; "protobuf"; "BytesValue"] ->
+    (* Convert into a struct *)
+    let convert json = `Assoc ["value", json] in
+    convert
+  | [_; "google"; "protobuf"; "Value"] ->
+    (* Based on json type do the mapping *)
+    let convert (json: Yojson.Basic.t)  =
+      let value = match json with
+        | `Null -> "nullValue", `Int 0
+        | `Float _ -> "floatValue", json
+        | `Int _ -> "floatValue", json
+        | `String _ -> "stringValue", json
+        | `Bool _ -> "boolValue", json
+        | `Assoc l ->
+          let fields : Yojson.Basic.t =
+            List.map ~f:(fun (key, value) ->
+              `Assoc ["key", `String key; "value", value]
+            ) l
+            |> fun l -> `List l
+          in
+          let value = `Assoc ["fields", fields] in
+          "structValue", value
+        | `List _ -> "listValue", `Assoc ["values", json]
+      in
+      `Assoc [value ]
+    in
+    convert
+  | _ -> Message.from_json_exn
+
 
 let read_value: type a b. (a, b) spec -> Yojson.Basic.t -> a = function
    | Double -> to_float
@@ -172,6 +225,10 @@ let read_value: type a b. (a, b) spec -> Yojson.Basic.t -> a = function
    | String -> to_string
    | Bytes -> to_bytes
    | Enum (module Enum) -> to_enum (module Enum)
+   | Message ((module Message), _) ->
+     let from_json = json_mapping (module Message) in
+     to_json
+
    | Message ((module Message), Empty) -> begin
        function
        | `Assoc [] -> Message.from_tuple ()
