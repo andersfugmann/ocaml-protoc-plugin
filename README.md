@@ -147,6 +147,28 @@ val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -
 Json deserialization will accept json constructed with any combination
 of the values.
 
+The json serialization and deserialization also adds support for
+special handling of the following types, and tries to follow the
+[protobuf
+specification](https://protobuf.dev/programming-guides/proto3/#json)
+as close as possible:
+
+| type | json example | notes |
+|  --  |   --    | -- |
+| bytes | "Ynl0ZXM=" | Base64 encoded |
+| google.protobuf.Empty | {} | |
+| google.protobuf.Duration | "123.456s" | |
+| google.protobuf.Timestamp | "2024-03-08T20:54:43.000000000Z" |
+| google.protobuf.Value | { "x": 4 } |  |
+| google.protobuf.Struct | { "x": 4 } | |
+| google.protobuf.ListValue | [ 4,5,6 ] | |
+| google.protobuf.FieldMask | "camelCase,cmlCse" | Not guaranteed to be reversible due to camel case conversion |
+| google.protobuf.Any | | Not handled, as the ocaml-protobuf-plugin does not support dynamic protobuf parsing |
+
+
+Json serialization and deserializaiton is not well optimized and
+should not be used in performance critical applications.
+
 ### Older versions of protoc
 It seems that the `--ocaml_opt` flag may not be supported by older
 versions of the proto compiler. As an alternative, options can also be
