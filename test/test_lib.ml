@@ -6,9 +6,10 @@ module Reference = struct
   open Ctypes
   open Foreign
   (* extern "C" char* protobuf2json(const char *google_include_dir, const char *proto, const char* type, const char* in_data)  *)
-  let protobuf2json = foreign "protobuf2json" (string @-> string @-> string @-> int @-> returning string)
+  let protobuf2json = foreign "protobuf2json" (string @-> string @-> string @-> string @-> int @-> returning string)
   let to_json ~proto_file ~message_type data =
-    protobuf2json proto_file message_type data (String.length data)
+    let include_path = "/usr/include/" in
+    protobuf2json include_path proto_file message_type data (String.length data)
 end
 
 module type T = sig
@@ -77,7 +78,8 @@ let test_merge (type t) (module M : T with type t = t) (t: t) =
   in
   ()
 
-let test_json (type t) (module M : T with type t = t) (t: t) =
+let test_json ~debug (type t) (module M : T with type t = t) (t: t) =
+  ignore debug;
   let json_ref t =
     let proto_file, message_type =
       match M.name' () |> String.split_on_char ~sep:'.' with
@@ -89,7 +91,12 @@ let test_json (type t) (module M : T with type t = t) (t: t) =
     in
     let proto = M.to_proto t |> Writer.contents in
     let json = Reference.to_json ~proto_file ~message_type proto in
-    Yojson.Basic.from_string json
+    try
+      Yojson.Basic.from_string json
+    with
+    | _ ->
+      Printf.printf "Unable to parse reference json:\n  '%s'\n" json;
+      failwith "Could not parse reference json"
   in
 
   let test_json ?enum_names ?json_names ?omit_default_values t =
@@ -108,14 +115,12 @@ let test_json (type t) (module M : T with type t = t) (t: t) =
   (* Compare reference json *)
   let json' = json_ref t in
   let t' = M.from_json_exn json' in
-  let () = match t = t' with
-    | true -> ()
-    | false ->
-      Printf.printf "Cannot deserialize reference json.\n";
-      Printf.printf "Json: %s\nRef:  %s\n"
-    (Yojson.Basic.pretty_to_string (M.to_json t))
-    (Yojson.Basic.pretty_to_string json');
-  in
+  if t <> t' then Printf.printf "Cannot deserialize reference json.\n";
+  if t <> t' || debug then
+    Printf.printf "Json: %s\nRef:  %s\n"
+      (Yojson.Basic.pretty_to_string (M.to_json t))
+      (Yojson.Basic.pretty_to_string json');
+
   t
   |> test_json
   |> test_json ~enum_names:false
@@ -143,7 +148,7 @@ let test_decode (type t) (module M : T with type t = t) strategy expect data =
     Printf.printf "\n%s:Data: %s\n" (Test_runtime.show_strategy strategy) (List.map ~f:fst fields |> List.map ~f:string_of_int |> String.concat ~sep:", ")
 
 (** Create a common function for testing. *)
-let test_encode (type t) ?dump ?(protoc=true) ?protoc_args (module M : T with type t = t) ?(skip_json=false) ?(validate : t option) ?(expect : t option) (t : t) =
+let test_encode (type t) ?dump ?(debug_json=false) ?(protoc=true) ?protoc_args (module M : T with type t = t) ?(skip_json=false) ?(validate : t option) ?(expect : t option) (t : t) =
   let expect = Option.value ~default:t expect in
   let () = match validate with
     | Some v when v <> expect -> Printf.printf "Validate match failed\n"
@@ -171,5 +176,5 @@ let test_encode (type t) ?dump ?(protoc=true) ?protoc_args (module M : T with ty
   test_decode (module M) Test_runtime.Fast expect data;
   test_decode (module M) Test_runtime.Full expect data;
   test_merge (module M) expect;
-  if (not skip_json) then test_json (module M) expect;
+  if (not skip_json) then test_json ~debug:debug_json (module M) expect;
   ()

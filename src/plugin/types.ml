@@ -162,9 +162,6 @@ let default_of_spec: type a. (a, scalar) spec -> a = fun spec -> match spec with
 
 let string_of_message_type: type a. a message_type -> string = function
   | Default -> "default"
-  | Empty -> "empty"
-  | Duration -> "duration"
-  | Timestamp -> "timestamp"
 
 let string_of_spec: type a b. (a, b) spec -> string = function
   | Double -> "double"

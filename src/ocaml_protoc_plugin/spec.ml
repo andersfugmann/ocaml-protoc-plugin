@@ -43,9 +43,6 @@ module Make(T : T) = struct
   type message = [ `Message ]
   type _ message_type =
     | Default: 'a message_type
-    | Empty: unit message_type
-    | Duration: (int * int) message_type
-    | Timestamp: (int * int) message_type (* Thats not entirely clear. What if ints are native? *) (* We should have a type that is set based on the compilation options..... Generically?!?. We should make sure that the tuple is always int32 / int64 - even if conversion tells us othervice! *)
 
 
   type (_, _) spec =
@@ -149,8 +146,6 @@ module Make(T : T) = struct
   let message m t = Message (m, t)
 
   let default = Default
-  let empty = Empty
-  let duration = Duration
 
   let some v = Some v
   let none = None

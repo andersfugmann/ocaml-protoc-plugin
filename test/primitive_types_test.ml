@@ -46,7 +46,8 @@ let%expect_test _ =
   Test_lib.test_encode (module T) t;
   let bin = T.to_proto t in
   Printf.printf "Size: %d%!" (Ocaml_protoc_plugin.Writer.contents bin |> String.length);
-  [%expect {| Size: 0 |}]
+  [%expect {|
+    Size: 0 |}]
 
 
 let%expect_test _ =

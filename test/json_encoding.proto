@@ -1,7 +1,12 @@
 syntax = "proto3";
 
 import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
 
-message T {
+message Duration {
   google.protobuf.Duration duration = 1;
+}
+
+message Timestamp {
+  google.protobuf.Timestamp timestamp = 1;
 }

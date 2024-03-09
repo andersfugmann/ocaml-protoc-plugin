@@ -143,23 +143,60 @@ let%expect_test "google.protobuf.Timestamp" =
     Error parsing 2024-03-06T21:10:27.999999: `Wrong_field_type (("google.protobuf.duration",
                         "\"2024-03-06T21:10:27.999999\"")) |}]
 
+let from_camel_case s =
+  let open Stdlib in
+  let is_lowercase c = Char.lowercase_ascii c = c &&  Char.uppercase_ascii c <> c in
+  let is_uppercase c = Char.lowercase_ascii c <> c &&  Char.uppercase_ascii c = c in
+  let rec map = function
+    | c1 :: c2 :: cs when is_lowercase c1 && is_uppercase c2 ->
+      c1 :: '_' :: (Char.lowercase_ascii c2) :: map cs
+    | c :: cs -> c :: map cs
+    | [] -> []
+  in
+  String.to_seq s
+  |> List.of_seq
+  |> map
+  |> List.to_seq
+  |> String.of_seq
+
+let%expect_test "json name to proto name" =
+  let test s = Printf.printf "%10s -> %10s\n" s (from_camel_case s) in
+  test "camelCase";
+  test "CamelCase";
+  test "Camel_Case";
+  test "Camel_Case";
+  test "camelCASe";
+  test "CAMelCase";
+  ();
+  [%expect {|
+     camelCase -> camel_case
+     CamelCase -> Camel_case
+    Camel_Case -> Camel_Case
+    Camel_Case -> Camel_Case
+     camelCASe -> camel_cASe
+     CAMelCase -> CAMel_case |}]
+
+
 
 let map_json: type a. (module Message with type t = a) -> Yojson.Basic.t -> Yojson.Basic.t = fun (module Message) ->
-  match Message.name' () |> String.split_on_char ~sep:'.'  with
+  match Message.name' () |> String.split_on_char ~sep:'.' with
   | [_; "google"; "protobuf"; "Empty"] (* Already mapped as it should I think *) ->
     fun json -> json
+  (* Duration - google/protobuf/timestamp.proto *)
   | [_; "google"; "protobuf"; "Duration"] ->
     let convert json =
       let (seconds, nanos) = duration_of_json json in
       `Assoc [ "seconds", `Int seconds; "nanos", `Int nanos ]
     in
     convert
+  (* Timestamp - google/protobuf/timestamp.proto *)
   | [_; "google"; "protobuf"; "Timestamp"] ->
     let convert json =
       let (seconds, nanos) = timestamp_of_json json in
       `Assoc [ "seconds", `Int seconds; "nanos", `Int nanos ]
     in
     convert
+  (* Wrapper types - google/protobuf/wrappers.proto *)
   | [_; "google"; "protobuf"; "DoubleValue"]
   | [_; "google"; "protobuf"; "FloatValue"]
   | [_; "google"; "protobuf"; "Int64Value"]
@@ -173,6 +210,7 @@ let map_json: type a. (module Message with type t = a) -> Yojson.Basic.t -> Yojs
     let convert json = `Assoc ["value", json] in
     convert
   | [_; "google"; "protobuf"; "Value"] ->
+    (* Struct - google/protobuf/struct.proto *)
     (* Based on json type do the mapping *)
     let convert (json: Yojson.Basic.t)  =
       let value = match json with
@@ -192,11 +230,24 @@ let map_json: type a. (module Message with type t = a) -> Yojson.Basic.t -> Yojs
           "structValue", value
         | `List _ -> "listValue", `Assoc ["values", json]
       in
-      `Assoc [value ]
+      `Assoc [value]
     in
     convert
-  | _ -> Message.from_json_exn
-
+  (* FieldMask - /usr/include/google/protobuf/field_mask.proto *)
+  | [_; "google"; "protobuf"; "FieldMask"] ->
+    let open StdLabels in
+    let convert = function
+      | `String s ->
+        let masks =
+          String.split_on_char ~sep:',' s
+          |> List.map ~f:from_camel_case
+          |> List.map ~f:(fun s -> `String s)
+        in
+        `Assoc ["masks", `List masks]
+      | json -> value_error "google.protobuf.FieldMask" json
+    in
+    convert
+  | _ -> fun json -> json
 
 let read_value: type a b. (a, b) spec -> Yojson.Basic.t -> a = function
    | Double -> to_float
@@ -226,19 +277,11 @@ let read_value: type a b. (a, b) spec -> Yojson.Basic.t -> a = function
    | Bytes -> to_bytes
    | Enum (module Enum) -> to_enum (module Enum)
    | Message ((module Message), _) ->
-     let from_json = json_mapping (module Message) in
-     to_json
-
-   | Message ((module Message), Empty) -> begin
-       function
-       | `Assoc [] -> Message.from_tuple ()
-       | json -> value_error "google.protobuf.empty" json
-     end
-   | Message ((module Message), Duration) ->
-     fun json -> duration_of_json json |> Message.from_tuple
-   | Message ((module Message), Timestamp) ->
-     fun json -> timestamp_of_json json |> Message.from_tuple
-   | Message ((module Message), Default) -> Message.from_json_exn
+     let map_json = map_json (module Message) in
+     let of_json json =
+       map_json json |> Message.from_json_exn
+     in
+     of_json
 
 let find_field (_number, field_name, json_name) fields =
   match FieldMap.find_opt json_name fields with
