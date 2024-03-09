@@ -8,9 +8,9 @@ let merge: type t v. (t, v) Spec.compound -> t -> t -> t = fun spec t t' -> matc
        proto2 messages containing required fields.
        In this implementation, we choose to ignore this, and adopt 'keep last'
     *)
-  | Spec.Basic_req (_field, Message ((module Message), _)) -> Message.merge t t'
+  | Spec.Basic_req (_field, Message (module Message)) -> Message.merge t t'
   | Spec.Basic_req (_field, _spec) -> t'
-  | Spec.Basic_opt (_field, Message ((module Message), _)) ->
+  | Spec.Basic_opt (_field, Message (module Message)) ->
     begin
       match t, t' with
       | None, None -> None

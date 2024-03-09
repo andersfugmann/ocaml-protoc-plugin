@@ -32,7 +32,6 @@ type field_spec = {
 
 type t = {
   type' : string;
-  tuple_type : string;
   destructor: string;
   args: string list;
   spec_str: string;
@@ -160,9 +159,6 @@ let default_of_spec: type a. (a, scalar) spec -> a = fun spec -> match spec with
   | Bytes -> Bytes.of_string ""
   | Enum _ -> failwith "Enums not handled here"
 
-let string_of_message_type: type a. a message_type -> string = function
-  | Default -> "default"
-
 let string_of_spec: type a b. (a, b) spec -> string = function
   | Double -> "double"
   | Float -> "float"
@@ -195,7 +191,7 @@ let string_of_spec: type a b. (a, b) spec -> string = function
   | String -> "string"
   | Bytes -> "bytes"
   | Enum { module_name; _ }  -> sprintf "(enum (module %s))" module_name
-  | Message ({ module_name; _ }, message_type ) -> sprintf "(message (module %s) %s)" module_name (string_of_message_type message_type)
+  | Message { module_name; _ } -> sprintf "(message (module %s))" module_name
 
 let type_of_spec: type a b. (a, b) spec -> string = function
   | Double -> "float"
@@ -229,7 +225,7 @@ let type_of_spec: type a b. (a, b) spec -> string = function
   | String -> "string"
   | Bytes -> "bytes"
   | Enum { type'; _ } -> type'
-  | Message ({ type'; _ }, _) -> type'
+  | Message { type'; _ } -> type'
 
 let is_deprecated = function
   | FieldDescriptorProto.{ options = Some { deprecated; _ }; _ } -> deprecated
@@ -238,7 +234,7 @@ let is_deprecated = function
 let spec_of_message ~scope type_name =
   let type' = Scope.get_scoped_name ~postfix:"t" scope type_name in
   let module_name = Scope.get_scoped_name scope type_name in
-  Message ({ type'; module_name }, Default)
+  Message { type'; module_name }
 
 let spec_of_enum ~scope type_name default =
   let type' = Scope.get_scoped_name ~postfix:"t" scope type_name in
@@ -699,13 +695,6 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
     List.map ~f:fst field_info
   in
 
-  (* (a, b, c) *)
-  let _tuple =
-    List.map ~f:fst field_info
-    |> String.concat ~sep:", "
-    |> sprintf "(%s)"
-  in
-
   (* { a; b; c } *)
   let destructor = type_destr field_info in
 
@@ -802,4 +791,4 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
     sprintf "fun %s -> %s" args constr
   in
 
-  { type'; tuple_type; destructor; args; spec_str; default_constructor_sig; default_constructor_impl; merge_impl }
+  { type'; destructor; args; spec_str; default_constructor_sig; default_constructor_impl; merge_impl }

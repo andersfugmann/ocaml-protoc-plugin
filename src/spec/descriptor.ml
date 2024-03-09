@@ -24,11 +24,6 @@ module rec Google : sig
     module rec FileDescriptorSet : sig
       val name': unit -> string
       type t = (FileDescriptorProto.t list)
-      type t_tuple = (FileDescriptorProto.t list)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?file:FileDescriptorProto.t list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -42,11 +37,6 @@ module rec Google : sig
     and FileDescriptorProto : sig
       val name': unit -> string
       type t = { name: string option; package: string option; dependency: string list; message_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; service: ServiceDescriptorProto.t list; extension: FieldDescriptorProto.t list; options: FileOptions.t option; source_code_info: SourceCodeInfo.t option; public_dependency: int list; weak_dependency: int list; syntax: string option }
-      type t_tuple = (string option * string option * string list * DescriptorProto.t list * EnumDescriptorProto.t list * ServiceDescriptorProto.t list * FieldDescriptorProto.t list * FileOptions.t option * SourceCodeInfo.t option * int list * int list * string option)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -61,11 +51,6 @@ module rec Google : sig
       module rec ExtensionRange : sig
         val name': unit -> string
         type t = { start: int option; end': int option; options: ExtensionRangeOptions.t option }
-        type t_tuple = (int option * int option * ExtensionRangeOptions.t option)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -79,11 +64,6 @@ module rec Google : sig
       and ReservedRange : sig
         val name': unit -> string
         type t = { start: int option; end': int option }
-        type t_tuple = (int option * int option)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -96,11 +76,6 @@ module rec Google : sig
       end
       val name': unit -> string
       type t = { name: string option; field: FieldDescriptorProto.t list; nested_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; extension_range: ExtensionRange.t list; extension: FieldDescriptorProto.t list; options: MessageOptions.t option; oneof_decl: OneofDescriptorProto.t list; reserved_range: ReservedRange.t list; reserved_name: string list }
-      type t_tuple = (string option * FieldDescriptorProto.t list * DescriptorProto.t list * EnumDescriptorProto.t list * ExtensionRange.t list * FieldDescriptorProto.t list * MessageOptions.t option * OneofDescriptorProto.t list * ReservedRange.t list * string list)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -114,11 +89,6 @@ module rec Google : sig
     and ExtensionRangeOptions : sig
       val name': unit -> string
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -148,11 +118,6 @@ module rec Google : sig
       end
       val name': unit -> string
       type t = { name: string option; extendee: string option; number: int option; label: Label.t option; type': Type.t option; type_name: string option; default_value: string option; options: FieldOptions.t option; oneof_index: int option; json_name: string option; proto3_optional: bool option }
-      type t_tuple = (string option * string option * int option * Label.t option * Type.t option * string option * string option * FieldOptions.t option * int option * string option * bool option)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -166,11 +131,6 @@ module rec Google : sig
     and OneofDescriptorProto : sig
       val name': unit -> string
       type t = { name: string option; options: OneofOptions.t option }
-      type t_tuple = (string option * OneofOptions.t option)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?options:OneofOptions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -185,11 +145,6 @@ module rec Google : sig
       module rec EnumReservedRange : sig
         val name': unit -> string
         type t = { start: int option; end': int option }
-        type t_tuple = (int option * int option)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -202,11 +157,6 @@ module rec Google : sig
       end
       val name': unit -> string
       type t = { name: string option; value: EnumValueDescriptorProto.t list; options: EnumOptions.t option; reserved_range: EnumReservedRange.t list; reserved_name: string list }
-      type t_tuple = (string option * EnumValueDescriptorProto.t list * EnumOptions.t option * EnumReservedRange.t list * string list)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -220,11 +170,6 @@ module rec Google : sig
     and EnumValueDescriptorProto : sig
       val name': unit -> string
       type t = { name: string option; number: int option; options: EnumValueOptions.t option }
-      type t_tuple = (string option * int option * EnumValueOptions.t option)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -238,11 +183,6 @@ module rec Google : sig
     and ServiceDescriptorProto : sig
       val name': unit -> string
       type t = { name: string option; method': MethodDescriptorProto.t list; options: ServiceOptions.t option }
-      type t_tuple = (string option * MethodDescriptorProto.t list * ServiceOptions.t option)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -256,11 +196,6 @@ module rec Google : sig
     and MethodDescriptorProto : sig
       val name': unit -> string
       type t = { name: string option; input_type: string option; output_type: string option; options: MethodOptions.t option; client_streaming: bool; server_streaming: bool }
-      type t_tuple = (string option * string option * string option * MethodOptions.t option * bool * bool)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -282,11 +217,6 @@ module rec Google : sig
       end
       val name': unit -> string
       type t = { java_package: string option; java_outer_classname: string option; optimize_for: OptimizeMode.t; java_multiple_files: bool; go_package: string option; cc_generic_services: bool; java_generic_services: bool; py_generic_services: bool; java_generate_equals_and_hash: bool option[@ocaml.alert protobuf "Deprecated global"]; deprecated: bool; java_string_check_utf8: bool; cc_enable_arenas: bool; objc_class_prefix: string option; csharp_namespace: string option; swift_prefix: string option; php_class_prefix: string option; php_namespace: string option; php_generic_services: bool; php_metadata_namespace: string option; ruby_package: string option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (string option * string option * OptimizeMode.t * bool * string option * bool * bool * bool * bool option * bool * bool * bool * string option * string option * string option * string option * string option * bool * string option * string option * UninterpretedOption.t list * Runtime'.Extensions.t)[@@ocaml.alert protobuf "Deprecated global"]
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -300,11 +230,6 @@ module rec Google : sig
     and MessageOptions : sig
       val name': unit -> string
       type t = { message_set_wire_format: bool; no_standard_descriptor_accessor: bool; deprecated: bool; map_entry: bool option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool * bool * bool * bool option * UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -334,11 +259,6 @@ module rec Google : sig
       end
       val name': unit -> string
       type t = { ctype: CType.t; packed: bool option; deprecated: bool; lazy': bool; jstype: JSType.t; weak: bool; unverified_lazy: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (CType.t * bool option * bool * bool * JSType.t * bool * bool * UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -352,11 +272,6 @@ module rec Google : sig
     and OneofOptions : sig
       val name': unit -> string
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -370,11 +285,6 @@ module rec Google : sig
     and EnumOptions : sig
       val name': unit -> string
       type t = { allow_alias: bool option; deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool option * bool * UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -388,11 +298,6 @@ module rec Google : sig
     and EnumValueOptions : sig
       val name': unit -> string
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool * UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -406,11 +311,6 @@ module rec Google : sig
     and ServiceOptions : sig
       val name': unit -> string
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool * UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -432,11 +332,6 @@ module rec Google : sig
       end
       val name': unit -> string
       type t = { deprecated: bool; idempotency_level: IdempotencyLevel.t; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool * IdempotencyLevel.t * UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -451,11 +346,6 @@ module rec Google : sig
       module rec NamePart : sig
         val name': unit -> string
         type t = { name_part: string; is_extension: bool }
-        type t_tuple = (string * bool)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: name_part:string -> is_extension:bool -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -468,11 +358,6 @@ module rec Google : sig
       end
       val name': unit -> string
       type t = { name: NamePart.t list; identifier_value: string option; positive_int_value: int option; negative_int_value: int option; double_value: float option; string_value: bytes option; aggregate_value: string option }
-      type t_tuple = (NamePart.t list * string option * int option * int option * float option * bytes option * string option)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -487,11 +372,6 @@ module rec Google : sig
       module rec Location : sig
         val name': unit -> string
         type t = { path: int list; span: int list; leading_comments: string option; trailing_comments: string option; leading_detached_comments: string list }
-        type t_tuple = (int list * int list * string option * string option * string list)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -504,11 +384,6 @@ module rec Google : sig
       end
       val name': unit -> string
       type t = (Location.t list)
-      type t_tuple = (Location.t list)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?location:Location.t list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -523,11 +398,6 @@ module rec Google : sig
       module rec Annotation : sig
         val name': unit -> string
         type t = { path: int list; source_file: string option; begin': int option; end': int option }
-        type t_tuple = (int list * string option * int option * int option)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -540,11 +410,6 @@ module rec Google : sig
       end
       val name': unit -> string
       type t = (Annotation.t list)
-      type t_tuple = (Annotation.t list)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?annotation:Annotation.t list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -561,11 +426,6 @@ end = struct
     module rec FileDescriptorSet : sig
       val name': unit -> string
       type t = (FileDescriptorProto.t list)
-      type t_tuple = (FileDescriptorProto.t list)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?file:FileDescriptorProto.t list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -579,11 +439,6 @@ end = struct
     and FileDescriptorProto : sig
       val name': unit -> string
       type t = { name: string option; package: string option; dependency: string list; message_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; service: ServiceDescriptorProto.t list; extension: FieldDescriptorProto.t list; options: FileOptions.t option; source_code_info: SourceCodeInfo.t option; public_dependency: int list; weak_dependency: int list; syntax: string option }
-      type t_tuple = (string option * string option * string list * DescriptorProto.t list * EnumDescriptorProto.t list * ServiceDescriptorProto.t list * FieldDescriptorProto.t list * FileOptions.t option * SourceCodeInfo.t option * int list * int list * string option)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -598,11 +453,6 @@ end = struct
       module rec ExtensionRange : sig
         val name': unit -> string
         type t = { start: int option; end': int option; options: ExtensionRangeOptions.t option }
-        type t_tuple = (int option * int option * ExtensionRangeOptions.t option)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -616,11 +466,6 @@ end = struct
       and ReservedRange : sig
         val name': unit -> string
         type t = { start: int option; end': int option }
-        type t_tuple = (int option * int option)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -633,11 +478,6 @@ end = struct
       end
       val name': unit -> string
       type t = { name: string option; field: FieldDescriptorProto.t list; nested_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; extension_range: ExtensionRange.t list; extension: FieldDescriptorProto.t list; options: MessageOptions.t option; oneof_decl: OneofDescriptorProto.t list; reserved_range: ReservedRange.t list; reserved_name: string list }
-      type t_tuple = (string option * FieldDescriptorProto.t list * DescriptorProto.t list * EnumDescriptorProto.t list * ExtensionRange.t list * FieldDescriptorProto.t list * MessageOptions.t option * OneofDescriptorProto.t list * ReservedRange.t list * string list)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -651,11 +491,6 @@ end = struct
     and ExtensionRangeOptions : sig
       val name': unit -> string
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -685,11 +520,6 @@ end = struct
       end
       val name': unit -> string
       type t = { name: string option; extendee: string option; number: int option; label: Label.t option; type': Type.t option; type_name: string option; default_value: string option; options: FieldOptions.t option; oneof_index: int option; json_name: string option; proto3_optional: bool option }
-      type t_tuple = (string option * string option * int option * Label.t option * Type.t option * string option * string option * FieldOptions.t option * int option * string option * bool option)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -703,11 +533,6 @@ end = struct
     and OneofDescriptorProto : sig
       val name': unit -> string
       type t = { name: string option; options: OneofOptions.t option }
-      type t_tuple = (string option * OneofOptions.t option)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?options:OneofOptions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -722,11 +547,6 @@ end = struct
       module rec EnumReservedRange : sig
         val name': unit -> string
         type t = { start: int option; end': int option }
-        type t_tuple = (int option * int option)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -739,11 +559,6 @@ end = struct
       end
       val name': unit -> string
       type t = { name: string option; value: EnumValueDescriptorProto.t list; options: EnumOptions.t option; reserved_range: EnumReservedRange.t list; reserved_name: string list }
-      type t_tuple = (string option * EnumValueDescriptorProto.t list * EnumOptions.t option * EnumReservedRange.t list * string list)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -757,11 +572,6 @@ end = struct
     and EnumValueDescriptorProto : sig
       val name': unit -> string
       type t = { name: string option; number: int option; options: EnumValueOptions.t option }
-      type t_tuple = (string option * int option * EnumValueOptions.t option)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -775,11 +585,6 @@ end = struct
     and ServiceDescriptorProto : sig
       val name': unit -> string
       type t = { name: string option; method': MethodDescriptorProto.t list; options: ServiceOptions.t option }
-      type t_tuple = (string option * MethodDescriptorProto.t list * ServiceOptions.t option)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -793,11 +598,6 @@ end = struct
     and MethodDescriptorProto : sig
       val name': unit -> string
       type t = { name: string option; input_type: string option; output_type: string option; options: MethodOptions.t option; client_streaming: bool; server_streaming: bool }
-      type t_tuple = (string option * string option * string option * MethodOptions.t option * bool * bool)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -819,11 +619,6 @@ end = struct
       end
       val name': unit -> string
       type t = { java_package: string option; java_outer_classname: string option; optimize_for: OptimizeMode.t; java_multiple_files: bool; go_package: string option; cc_generic_services: bool; java_generic_services: bool; py_generic_services: bool; java_generate_equals_and_hash: bool option[@ocaml.alert protobuf "Deprecated global"]; deprecated: bool; java_string_check_utf8: bool; cc_enable_arenas: bool; objc_class_prefix: string option; csharp_namespace: string option; swift_prefix: string option; php_class_prefix: string option; php_namespace: string option; php_generic_services: bool; php_metadata_namespace: string option; ruby_package: string option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (string option * string option * OptimizeMode.t * bool * string option * bool * bool * bool * bool option * bool * bool * bool * string option * string option * string option * string option * string option * bool * string option * string option * UninterpretedOption.t list * Runtime'.Extensions.t)[@@ocaml.alert protobuf "Deprecated global"]
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -837,11 +632,6 @@ end = struct
     and MessageOptions : sig
       val name': unit -> string
       type t = { message_set_wire_format: bool; no_standard_descriptor_accessor: bool; deprecated: bool; map_entry: bool option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool * bool * bool * bool option * UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -871,11 +661,6 @@ end = struct
       end
       val name': unit -> string
       type t = { ctype: CType.t; packed: bool option; deprecated: bool; lazy': bool; jstype: JSType.t; weak: bool; unverified_lazy: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (CType.t * bool option * bool * bool * JSType.t * bool * bool * UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -889,11 +674,6 @@ end = struct
     and OneofOptions : sig
       val name': unit -> string
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -907,11 +687,6 @@ end = struct
     and EnumOptions : sig
       val name': unit -> string
       type t = { allow_alias: bool option; deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool option * bool * UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -925,11 +700,6 @@ end = struct
     and EnumValueOptions : sig
       val name': unit -> string
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool * UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -943,11 +713,6 @@ end = struct
     and ServiceOptions : sig
       val name': unit -> string
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool * UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -969,11 +734,6 @@ end = struct
       end
       val name': unit -> string
       type t = { deprecated: bool; idempotency_level: IdempotencyLevel.t; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool * IdempotencyLevel.t * UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -988,11 +748,6 @@ end = struct
       module rec NamePart : sig
         val name': unit -> string
         type t = { name_part: string; is_extension: bool }
-        type t_tuple = (string * bool)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: name_part:string -> is_extension:bool -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1005,11 +760,6 @@ end = struct
       end
       val name': unit -> string
       type t = { name: NamePart.t list; identifier_value: string option; positive_int_value: int option; negative_int_value: int option; double_value: float option; string_value: bytes option; aggregate_value: string option }
-      type t_tuple = (NamePart.t list * string option * int option * int option * float option * bytes option * string option)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1024,11 +774,6 @@ end = struct
       module rec Location : sig
         val name': unit -> string
         type t = { path: int list; span: int list; leading_comments: string option; trailing_comments: string option; leading_detached_comments: string list }
-        type t_tuple = (int list * int list * string option * string option * string list)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1041,11 +786,6 @@ end = struct
       end
       val name': unit -> string
       type t = (Location.t list)
-      type t_tuple = (Location.t list)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?location:Location.t list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1060,11 +800,6 @@ end = struct
       module rec Annotation : sig
         val name': unit -> string
         type t = { path: int list; source_file: string option; begin': int option; end': int option }
-        type t_tuple = (int list * string option * int option * int option)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1077,11 +812,6 @@ end = struct
       end
       val name': unit -> string
       type t = (Annotation.t list)
-      type t_tuple = (Annotation.t list)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?annotation:Annotation.t list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1096,11 +826,6 @@ end = struct
     module rec FileDescriptorSet : sig
       val name': unit -> string
       type t = (FileDescriptorProto.t list)
-      type t_tuple = (FileDescriptorProto.t list)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?file:FileDescriptorProto.t list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1113,12 +838,9 @@ end = struct
     end = struct
       let name' () = "descriptor.google.protobuf.FileDescriptorSet"
       type t = (FileDescriptorProto.t list)
-      type t_tuple = (FileDescriptorProto.t list)
-      let to_tuple (file) = (file)
-      let from_tuple (file) = (file)
       let make ?(file = []) () = (file)
-      let merge = (fun (t1_file) (t2_file) -> (Runtime'.Merge.merge Runtime'.Spec.( repeated ((1, "file", "file"), (message (module FileDescriptorProto) default), not_packed) ) t1_file t2_file))
-      let spec () = Runtime'.Spec.( repeated ((1, "file", "file"), (message (module FileDescriptorProto) default), not_packed) ^:: nil )
+      let merge = (fun (t1_file) (t2_file) -> (Runtime'.Merge.merge Runtime'.Spec.( repeated ((1, "file", "file"), (message (module FileDescriptorProto)), not_packed) ) t1_file t2_file))
+      let spec () = Runtime'.Spec.( repeated ((1, "file", "file"), (message (module FileDescriptorProto)), not_packed) ^:: nil )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer (file) -> serialize writer file
@@ -1139,11 +861,6 @@ end = struct
     and FileDescriptorProto : sig
       val name': unit -> string
       type t = { name: string option; package: string option; dependency: string list; message_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; service: ServiceDescriptorProto.t list; extension: FieldDescriptorProto.t list; options: FileOptions.t option; source_code_info: SourceCodeInfo.t option; public_dependency: int list; weak_dependency: int list; syntax: string option }
-      type t_tuple = (string option * string option * string list * DescriptorProto.t list * EnumDescriptorProto.t list * ServiceDescriptorProto.t list * FieldDescriptorProto.t list * FileOptions.t option * SourceCodeInfo.t option * int list * int list * string option)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1156,25 +873,22 @@ end = struct
     end = struct
       let name' () = "descriptor.google.protobuf.FileDescriptorProto"
       type t = { name: string option; package: string option; dependency: string list; message_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; service: ServiceDescriptorProto.t list; extension: FieldDescriptorProto.t list; options: FileOptions.t option; source_code_info: SourceCodeInfo.t option; public_dependency: int list; weak_dependency: int list; syntax: string option }
-      type t_tuple = (string option * string option * string list * DescriptorProto.t list * EnumDescriptorProto.t list * ServiceDescriptorProto.t list * FieldDescriptorProto.t list * FileOptions.t option * SourceCodeInfo.t option * int list * int list * string option)
-      let to_tuple { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } = (name, package, dependency, message_type, enum_type, service, extension, options, source_code_info, public_dependency, weak_dependency, syntax)
-      let from_tuple (name, package, dependency, message_type, enum_type, service, extension, options, source_code_info, public_dependency, weak_dependency, syntax) = { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax }
       let make ?name ?package ?(dependency = []) ?(message_type = []) ?(enum_type = []) ?(service = []) ?(extension = []) ?options ?source_code_info ?(public_dependency = []) ?(weak_dependency = []) ?syntax () = { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax }
       let merge = (fun t1 t2 -> {
         name = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ) t1.name t2.name);
         package = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "package", "package"), string) ) t1.package t2.package);
         dependency = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((3, "dependency", "dependency"), string, not_packed) ) t1.dependency t2.dependency);
-        message_type = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((4, "message_type", "messageType"), (message (module DescriptorProto) default), not_packed) ) t1.message_type t2.message_type);
-        enum_type = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((5, "enum_type", "enumType"), (message (module EnumDescriptorProto) default), not_packed) ) t1.enum_type t2.enum_type);
-        service = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((6, "service", "service"), (message (module ServiceDescriptorProto) default), not_packed) ) t1.service t2.service);
-        extension = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((7, "extension", "extension"), (message (module FieldDescriptorProto) default), not_packed) ) t1.extension t2.extension);
-        options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((8, "options", "options"), (message (module FileOptions) default)) ) t1.options t2.options);
-        source_code_info = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((9, "source_code_info", "sourceCodeInfo"), (message (module SourceCodeInfo) default)) ) t1.source_code_info t2.source_code_info);
+        message_type = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((4, "message_type", "messageType"), (message (module DescriptorProto)), not_packed) ) t1.message_type t2.message_type);
+        enum_type = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((5, "enum_type", "enumType"), (message (module EnumDescriptorProto)), not_packed) ) t1.enum_type t2.enum_type);
+        service = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((6, "service", "service"), (message (module ServiceDescriptorProto)), not_packed) ) t1.service t2.service);
+        extension = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((7, "extension", "extension"), (message (module FieldDescriptorProto)), not_packed) ) t1.extension t2.extension);
+        options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((8, "options", "options"), (message (module FileOptions))) ) t1.options t2.options);
+        source_code_info = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((9, "source_code_info", "sourceCodeInfo"), (message (module SourceCodeInfo))) ) t1.source_code_info t2.source_code_info);
         public_dependency = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((10, "public_dependency", "publicDependency"), int32_int, not_packed) ) t1.public_dependency t2.public_dependency);
         weak_dependency = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((11, "weak_dependency", "weakDependency"), int32_int, not_packed) ) t1.weak_dependency t2.weak_dependency);
         syntax = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((12, "syntax", "syntax"), string) ) t1.syntax t2.syntax);
          })
-      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "package", "package"), string) ^:: repeated ((3, "dependency", "dependency"), string, not_packed) ^:: repeated ((4, "message_type", "messageType"), (message (module DescriptorProto) default), not_packed) ^:: repeated ((5, "enum_type", "enumType"), (message (module EnumDescriptorProto) default), not_packed) ^:: repeated ((6, "service", "service"), (message (module ServiceDescriptorProto) default), not_packed) ^:: repeated ((7, "extension", "extension"), (message (module FieldDescriptorProto) default), not_packed) ^:: basic_opt ((8, "options", "options"), (message (module FileOptions) default)) ^:: basic_opt ((9, "source_code_info", "sourceCodeInfo"), (message (module SourceCodeInfo) default)) ^:: repeated ((10, "public_dependency", "publicDependency"), int32_int, not_packed) ^:: repeated ((11, "weak_dependency", "weakDependency"), int32_int, not_packed) ^:: basic_opt ((12, "syntax", "syntax"), string) ^:: nil )
+      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "package", "package"), string) ^:: repeated ((3, "dependency", "dependency"), string, not_packed) ^:: repeated ((4, "message_type", "messageType"), (message (module DescriptorProto)), not_packed) ^:: repeated ((5, "enum_type", "enumType"), (message (module EnumDescriptorProto)), not_packed) ^:: repeated ((6, "service", "service"), (message (module ServiceDescriptorProto)), not_packed) ^:: repeated ((7, "extension", "extension"), (message (module FieldDescriptorProto)), not_packed) ^:: basic_opt ((8, "options", "options"), (message (module FileOptions))) ^:: basic_opt ((9, "source_code_info", "sourceCodeInfo"), (message (module SourceCodeInfo))) ^:: repeated ((10, "public_dependency", "publicDependency"), int32_int, not_packed) ^:: repeated ((11, "weak_dependency", "weakDependency"), int32_int, not_packed) ^:: basic_opt ((12, "syntax", "syntax"), string) ^:: nil )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } -> serialize writer name package dependency message_type enum_type service extension options source_code_info public_dependency weak_dependency syntax
@@ -1196,11 +910,6 @@ end = struct
       module rec ExtensionRange : sig
         val name': unit -> string
         type t = { start: int option; end': int option; options: ExtensionRangeOptions.t option }
-        type t_tuple = (int option * int option * ExtensionRangeOptions.t option)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1214,11 +923,6 @@ end = struct
       and ReservedRange : sig
         val name': unit -> string
         type t = { start: int option; end': int option }
-        type t_tuple = (int option * int option)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1231,11 +935,6 @@ end = struct
       end
       val name': unit -> string
       type t = { name: string option; field: FieldDescriptorProto.t list; nested_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; extension_range: ExtensionRange.t list; extension: FieldDescriptorProto.t list; options: MessageOptions.t option; oneof_decl: OneofDescriptorProto.t list; reserved_range: ReservedRange.t list; reserved_name: string list }
-      type t_tuple = (string option * FieldDescriptorProto.t list * DescriptorProto.t list * EnumDescriptorProto.t list * ExtensionRange.t list * FieldDescriptorProto.t list * MessageOptions.t option * OneofDescriptorProto.t list * ReservedRange.t list * string list)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1249,11 +948,6 @@ end = struct
       module rec ExtensionRange : sig
         val name': unit -> string
         type t = { start: int option; end': int option; options: ExtensionRangeOptions.t option }
-        type t_tuple = (int option * int option * ExtensionRangeOptions.t option)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1266,16 +960,13 @@ end = struct
       end = struct
         let name' () = "descriptor.google.protobuf.DescriptorProto.ExtensionRange"
         type t = { start: int option; end': int option; options: ExtensionRangeOptions.t option }
-        type t_tuple = (int option * int option * ExtensionRangeOptions.t option)
-        let to_tuple { start; end'; options } = (start, end', options)
-        let from_tuple (start, end', options) = { start; end'; options }
         let make ?start ?end' ?options () = { start; end'; options }
         let merge = (fun t1 t2 -> {
           start = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ) t1.start t2.start);
           end' = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "end", "end"), int32_int) ) t1.end' t2.end');
-          options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "options", "options"), (message (module ExtensionRangeOptions) default)) ) t1.options t2.options);
+          options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "options", "options"), (message (module ExtensionRangeOptions))) ) t1.options t2.options);
            })
-        let spec () = Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ^:: basic_opt ((2, "end", "end"), int32_int) ^:: basic_opt ((3, "options", "options"), (message (module ExtensionRangeOptions) default)) ^:: nil )
+        let spec () = Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ^:: basic_opt ((2, "end", "end"), int32_int) ^:: basic_opt ((3, "options", "options"), (message (module ExtensionRangeOptions))) ^:: nil )
         let to_proto' =
           let serialize = Runtime'.Serialize.serialize (spec ()) in
           fun writer { start; end'; options } -> serialize writer start end' options
@@ -1296,11 +987,6 @@ end = struct
       and ReservedRange : sig
         val name': unit -> string
         type t = { start: int option; end': int option }
-        type t_tuple = (int option * int option)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1313,9 +999,6 @@ end = struct
       end = struct
         let name' () = "descriptor.google.protobuf.DescriptorProto.ReservedRange"
         type t = { start: int option; end': int option }
-        type t_tuple = (int option * int option)
-        let to_tuple { start; end' } = (start, end')
-        let from_tuple (start, end') = { start; end' }
         let make ?start ?end' () = { start; end' }
         let merge = (fun t1 t2 -> {
           start = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ) t1.start t2.start);
@@ -1341,23 +1024,20 @@ end = struct
       end
       let name' () = "descriptor.google.protobuf.DescriptorProto"
       type t = { name: string option; field: FieldDescriptorProto.t list; nested_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; extension_range: ExtensionRange.t list; extension: FieldDescriptorProto.t list; options: MessageOptions.t option; oneof_decl: OneofDescriptorProto.t list; reserved_range: ReservedRange.t list; reserved_name: string list }
-      type t_tuple = (string option * FieldDescriptorProto.t list * DescriptorProto.t list * EnumDescriptorProto.t list * ExtensionRange.t list * FieldDescriptorProto.t list * MessageOptions.t option * OneofDescriptorProto.t list * ReservedRange.t list * string list)
-      let to_tuple { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } = (name, field, nested_type, enum_type, extension_range, extension, options, oneof_decl, reserved_range, reserved_name)
-      let from_tuple (name, field, nested_type, enum_type, extension_range, extension, options, oneof_decl, reserved_range, reserved_name) = { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name }
       let make ?name ?(field = []) ?(nested_type = []) ?(enum_type = []) ?(extension_range = []) ?(extension = []) ?options ?(oneof_decl = []) ?(reserved_range = []) ?(reserved_name = []) () = { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name }
       let merge = (fun t1 t2 -> {
         name = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ) t1.name t2.name);
-        field = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((2, "field", "field"), (message (module FieldDescriptorProto) default), not_packed) ) t1.field t2.field);
-        nested_type = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((3, "nested_type", "nestedType"), (message (module DescriptorProto) default), not_packed) ) t1.nested_type t2.nested_type);
-        enum_type = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((4, "enum_type", "enumType"), (message (module EnumDescriptorProto) default), not_packed) ) t1.enum_type t2.enum_type);
-        extension_range = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((5, "extension_range", "extensionRange"), (message (module ExtensionRange) default), not_packed) ) t1.extension_range t2.extension_range);
-        extension = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((6, "extension", "extension"), (message (module FieldDescriptorProto) default), not_packed) ) t1.extension t2.extension);
-        options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((7, "options", "options"), (message (module MessageOptions) default)) ) t1.options t2.options);
-        oneof_decl = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((8, "oneof_decl", "oneofDecl"), (message (module OneofDescriptorProto) default), not_packed) ) t1.oneof_decl t2.oneof_decl);
-        reserved_range = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((9, "reserved_range", "reservedRange"), (message (module ReservedRange) default), not_packed) ) t1.reserved_range t2.reserved_range);
+        field = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((2, "field", "field"), (message (module FieldDescriptorProto)), not_packed) ) t1.field t2.field);
+        nested_type = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((3, "nested_type", "nestedType"), (message (module DescriptorProto)), not_packed) ) t1.nested_type t2.nested_type);
+        enum_type = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((4, "enum_type", "enumType"), (message (module EnumDescriptorProto)), not_packed) ) t1.enum_type t2.enum_type);
+        extension_range = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((5, "extension_range", "extensionRange"), (message (module ExtensionRange)), not_packed) ) t1.extension_range t2.extension_range);
+        extension = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((6, "extension", "extension"), (message (module FieldDescriptorProto)), not_packed) ) t1.extension t2.extension);
+        options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((7, "options", "options"), (message (module MessageOptions))) ) t1.options t2.options);
+        oneof_decl = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((8, "oneof_decl", "oneofDecl"), (message (module OneofDescriptorProto)), not_packed) ) t1.oneof_decl t2.oneof_decl);
+        reserved_range = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((9, "reserved_range", "reservedRange"), (message (module ReservedRange)), not_packed) ) t1.reserved_range t2.reserved_range);
         reserved_name = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((10, "reserved_name", "reservedName"), string, not_packed) ) t1.reserved_name t2.reserved_name);
          })
-      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "field", "field"), (message (module FieldDescriptorProto) default), not_packed) ^:: repeated ((3, "nested_type", "nestedType"), (message (module DescriptorProto) default), not_packed) ^:: repeated ((4, "enum_type", "enumType"), (message (module EnumDescriptorProto) default), not_packed) ^:: repeated ((5, "extension_range", "extensionRange"), (message (module ExtensionRange) default), not_packed) ^:: repeated ((6, "extension", "extension"), (message (module FieldDescriptorProto) default), not_packed) ^:: basic_opt ((7, "options", "options"), (message (module MessageOptions) default)) ^:: repeated ((8, "oneof_decl", "oneofDecl"), (message (module OneofDescriptorProto) default), not_packed) ^:: repeated ((9, "reserved_range", "reservedRange"), (message (module ReservedRange) default), not_packed) ^:: repeated ((10, "reserved_name", "reservedName"), string, not_packed) ^:: nil )
+      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "field", "field"), (message (module FieldDescriptorProto)), not_packed) ^:: repeated ((3, "nested_type", "nestedType"), (message (module DescriptorProto)), not_packed) ^:: repeated ((4, "enum_type", "enumType"), (message (module EnumDescriptorProto)), not_packed) ^:: repeated ((5, "extension_range", "extensionRange"), (message (module ExtensionRange)), not_packed) ^:: repeated ((6, "extension", "extension"), (message (module FieldDescriptorProto)), not_packed) ^:: basic_opt ((7, "options", "options"), (message (module MessageOptions))) ^:: repeated ((8, "oneof_decl", "oneofDecl"), (message (module OneofDescriptorProto)), not_packed) ^:: repeated ((9, "reserved_range", "reservedRange"), (message (module ReservedRange)), not_packed) ^:: repeated ((10, "reserved_name", "reservedName"), string, not_packed) ^:: nil )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } -> serialize writer name field nested_type enum_type extension_range extension options oneof_decl reserved_range reserved_name
@@ -1378,11 +1058,6 @@ end = struct
     and ExtensionRangeOptions : sig
       val name': unit -> string
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1395,15 +1070,12 @@ end = struct
     end = struct
       let name' () = "descriptor.google.protobuf.ExtensionRangeOptions"
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (UninterpretedOption.t list * Runtime'.Extensions.t)
-      let to_tuple { uninterpreted_option; extensions' } = (uninterpreted_option, extensions')
-      let from_tuple (uninterpreted_option, extensions') = { uninterpreted_option; extensions' }
       let make ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { uninterpreted_option; extensions' }
       let merge = (fun t1 t2 -> {
-        uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption) default), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
+        uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
         extensions' = (List.append t1.extensions' t2.extensions');
          })
-      let spec () = Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption) default), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
+      let spec () = Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { uninterpreted_option; extensions' } -> serialize writer uninterpreted_option extensions'
@@ -1440,11 +1112,6 @@ end = struct
       end
       val name': unit -> string
       type t = { name: string option; extendee: string option; number: int option; label: Label.t option; type': Type.t option; type_name: string option; default_value: string option; options: FieldOptions.t option; oneof_index: int option; json_name: string option; proto3_optional: bool option }
-      type t_tuple = (string option * string option * int option * Label.t option * Type.t option * string option * string option * FieldOptions.t option * int option * string option * bool option)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1577,9 +1244,6 @@ end = struct
       end
       let name' () = "descriptor.google.protobuf.FieldDescriptorProto"
       type t = { name: string option; extendee: string option; number: int option; label: Label.t option; type': Type.t option; type_name: string option; default_value: string option; options: FieldOptions.t option; oneof_index: int option; json_name: string option; proto3_optional: bool option }
-      type t_tuple = (string option * string option * int option * Label.t option * Type.t option * string option * string option * FieldOptions.t option * int option * string option * bool option)
-      let to_tuple { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } = (name, extendee, number, label, type', type_name, default_value, options, oneof_index, json_name, proto3_optional)
-      let from_tuple (name, extendee, number, label, type', type_name, default_value, options, oneof_index, json_name, proto3_optional) = { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional }
       let make ?name ?extendee ?number ?label ?type' ?type_name ?default_value ?options ?oneof_index ?json_name ?proto3_optional () = { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional }
       let merge = (fun t1 t2 -> {
         name = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ) t1.name t2.name);
@@ -1589,12 +1253,12 @@ end = struct
         type' = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((5, "type", "type"), (enum (module Type))) ) t1.type' t2.type');
         type_name = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((6, "type_name", "typeName"), string) ) t1.type_name t2.type_name);
         default_value = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((7, "default_value", "defaultValue"), string) ) t1.default_value t2.default_value);
-        options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((8, "options", "options"), (message (module FieldOptions) default)) ) t1.options t2.options);
+        options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((8, "options", "options"), (message (module FieldOptions))) ) t1.options t2.options);
         oneof_index = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((9, "oneof_index", "oneofIndex"), int32_int) ) t1.oneof_index t2.oneof_index);
         json_name = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((10, "json_name", "jsonName"), string) ) t1.json_name t2.json_name);
         proto3_optional = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((17, "proto3_optional", "proto3Optional"), bool) ) t1.proto3_optional t2.proto3_optional);
          })
-      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "extendee", "extendee"), string) ^:: basic_opt ((3, "number", "number"), int32_int) ^:: basic_opt ((4, "label", "label"), (enum (module Label))) ^:: basic_opt ((5, "type", "type"), (enum (module Type))) ^:: basic_opt ((6, "type_name", "typeName"), string) ^:: basic_opt ((7, "default_value", "defaultValue"), string) ^:: basic_opt ((8, "options", "options"), (message (module FieldOptions) default)) ^:: basic_opt ((9, "oneof_index", "oneofIndex"), int32_int) ^:: basic_opt ((10, "json_name", "jsonName"), string) ^:: basic_opt ((17, "proto3_optional", "proto3Optional"), bool) ^:: nil )
+      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "extendee", "extendee"), string) ^:: basic_opt ((3, "number", "number"), int32_int) ^:: basic_opt ((4, "label", "label"), (enum (module Label))) ^:: basic_opt ((5, "type", "type"), (enum (module Type))) ^:: basic_opt ((6, "type_name", "typeName"), string) ^:: basic_opt ((7, "default_value", "defaultValue"), string) ^:: basic_opt ((8, "options", "options"), (message (module FieldOptions))) ^:: basic_opt ((9, "oneof_index", "oneofIndex"), int32_int) ^:: basic_opt ((10, "json_name", "jsonName"), string) ^:: basic_opt ((17, "proto3_optional", "proto3Optional"), bool) ^:: nil )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } -> serialize writer name extendee number label type' type_name default_value options oneof_index json_name proto3_optional
@@ -1615,11 +1279,6 @@ end = struct
     and OneofDescriptorProto : sig
       val name': unit -> string
       type t = { name: string option; options: OneofOptions.t option }
-      type t_tuple = (string option * OneofOptions.t option)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?options:OneofOptions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1632,15 +1291,12 @@ end = struct
     end = struct
       let name' () = "descriptor.google.protobuf.OneofDescriptorProto"
       type t = { name: string option; options: OneofOptions.t option }
-      type t_tuple = (string option * OneofOptions.t option)
-      let to_tuple { name; options } = (name, options)
-      let from_tuple (name, options) = { name; options }
       let make ?name ?options () = { name; options }
       let merge = (fun t1 t2 -> {
         name = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ) t1.name t2.name);
-        options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "options", "options"), (message (module OneofOptions) default)) ) t1.options t2.options);
+        options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "options", "options"), (message (module OneofOptions))) ) t1.options t2.options);
          })
-      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "options", "options"), (message (module OneofOptions) default)) ^:: nil )
+      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "options", "options"), (message (module OneofOptions))) ^:: nil )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; options } -> serialize writer name options
@@ -1662,11 +1318,6 @@ end = struct
       module rec EnumReservedRange : sig
         val name': unit -> string
         type t = { start: int option; end': int option }
-        type t_tuple = (int option * int option)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1679,11 +1330,6 @@ end = struct
       end
       val name': unit -> string
       type t = { name: string option; value: EnumValueDescriptorProto.t list; options: EnumOptions.t option; reserved_range: EnumReservedRange.t list; reserved_name: string list }
-      type t_tuple = (string option * EnumValueDescriptorProto.t list * EnumOptions.t option * EnumReservedRange.t list * string list)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1697,11 +1343,6 @@ end = struct
       module rec EnumReservedRange : sig
         val name': unit -> string
         type t = { start: int option; end': int option }
-        type t_tuple = (int option * int option)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1714,9 +1355,6 @@ end = struct
       end = struct
         let name' () = "descriptor.google.protobuf.EnumDescriptorProto.EnumReservedRange"
         type t = { start: int option; end': int option }
-        type t_tuple = (int option * int option)
-        let to_tuple { start; end' } = (start, end')
-        let from_tuple (start, end') = { start; end' }
         let make ?start ?end' () = { start; end' }
         let merge = (fun t1 t2 -> {
           start = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ) t1.start t2.start);
@@ -1742,18 +1380,15 @@ end = struct
       end
       let name' () = "descriptor.google.protobuf.EnumDescriptorProto"
       type t = { name: string option; value: EnumValueDescriptorProto.t list; options: EnumOptions.t option; reserved_range: EnumReservedRange.t list; reserved_name: string list }
-      type t_tuple = (string option * EnumValueDescriptorProto.t list * EnumOptions.t option * EnumReservedRange.t list * string list)
-      let to_tuple { name; value; options; reserved_range; reserved_name } = (name, value, options, reserved_range, reserved_name)
-      let from_tuple (name, value, options, reserved_range, reserved_name) = { name; value; options; reserved_range; reserved_name }
       let make ?name ?(value = []) ?options ?(reserved_range = []) ?(reserved_name = []) () = { name; value; options; reserved_range; reserved_name }
       let merge = (fun t1 t2 -> {
         name = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ) t1.name t2.name);
-        value = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((2, "value", "value"), (message (module EnumValueDescriptorProto) default), not_packed) ) t1.value t2.value);
-        options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "options", "options"), (message (module EnumOptions) default)) ) t1.options t2.options);
-        reserved_range = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((4, "reserved_range", "reservedRange"), (message (module EnumReservedRange) default), not_packed) ) t1.reserved_range t2.reserved_range);
+        value = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((2, "value", "value"), (message (module EnumValueDescriptorProto)), not_packed) ) t1.value t2.value);
+        options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "options", "options"), (message (module EnumOptions))) ) t1.options t2.options);
+        reserved_range = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((4, "reserved_range", "reservedRange"), (message (module EnumReservedRange)), not_packed) ) t1.reserved_range t2.reserved_range);
         reserved_name = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((5, "reserved_name", "reservedName"), string, not_packed) ) t1.reserved_name t2.reserved_name);
          })
-      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "value", "value"), (message (module EnumValueDescriptorProto) default), not_packed) ^:: basic_opt ((3, "options", "options"), (message (module EnumOptions) default)) ^:: repeated ((4, "reserved_range", "reservedRange"), (message (module EnumReservedRange) default), not_packed) ^:: repeated ((5, "reserved_name", "reservedName"), string, not_packed) ^:: nil )
+      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "value", "value"), (message (module EnumValueDescriptorProto)), not_packed) ^:: basic_opt ((3, "options", "options"), (message (module EnumOptions))) ^:: repeated ((4, "reserved_range", "reservedRange"), (message (module EnumReservedRange)), not_packed) ^:: repeated ((5, "reserved_name", "reservedName"), string, not_packed) ^:: nil )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; value; options; reserved_range; reserved_name } -> serialize writer name value options reserved_range reserved_name
@@ -1774,11 +1409,6 @@ end = struct
     and EnumValueDescriptorProto : sig
       val name': unit -> string
       type t = { name: string option; number: int option; options: EnumValueOptions.t option }
-      type t_tuple = (string option * int option * EnumValueOptions.t option)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1791,16 +1421,13 @@ end = struct
     end = struct
       let name' () = "descriptor.google.protobuf.EnumValueDescriptorProto"
       type t = { name: string option; number: int option; options: EnumValueOptions.t option }
-      type t_tuple = (string option * int option * EnumValueOptions.t option)
-      let to_tuple { name; number; options } = (name, number, options)
-      let from_tuple (name, number, options) = { name; number; options }
       let make ?name ?number ?options () = { name; number; options }
       let merge = (fun t1 t2 -> {
         name = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ) t1.name t2.name);
         number = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "number", "number"), int32_int) ) t1.number t2.number);
-        options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "options", "options"), (message (module EnumValueOptions) default)) ) t1.options t2.options);
+        options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "options", "options"), (message (module EnumValueOptions))) ) t1.options t2.options);
          })
-      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "number", "number"), int32_int) ^:: basic_opt ((3, "options", "options"), (message (module EnumValueOptions) default)) ^:: nil )
+      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "number", "number"), int32_int) ^:: basic_opt ((3, "options", "options"), (message (module EnumValueOptions))) ^:: nil )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; number; options } -> serialize writer name number options
@@ -1821,11 +1448,6 @@ end = struct
     and ServiceDescriptorProto : sig
       val name': unit -> string
       type t = { name: string option; method': MethodDescriptorProto.t list; options: ServiceOptions.t option }
-      type t_tuple = (string option * MethodDescriptorProto.t list * ServiceOptions.t option)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1838,16 +1460,13 @@ end = struct
     end = struct
       let name' () = "descriptor.google.protobuf.ServiceDescriptorProto"
       type t = { name: string option; method': MethodDescriptorProto.t list; options: ServiceOptions.t option }
-      type t_tuple = (string option * MethodDescriptorProto.t list * ServiceOptions.t option)
-      let to_tuple { name; method'; options } = (name, method', options)
-      let from_tuple (name, method', options) = { name; method'; options }
       let make ?name ?(method' = []) ?options () = { name; method'; options }
       let merge = (fun t1 t2 -> {
         name = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ) t1.name t2.name);
-        method' = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((2, "method", "method"), (message (module MethodDescriptorProto) default), not_packed) ) t1.method' t2.method');
-        options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "options", "options"), (message (module ServiceOptions) default)) ) t1.options t2.options);
+        method' = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((2, "method", "method"), (message (module MethodDescriptorProto)), not_packed) ) t1.method' t2.method');
+        options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "options", "options"), (message (module ServiceOptions))) ) t1.options t2.options);
          })
-      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "method", "method"), (message (module MethodDescriptorProto) default), not_packed) ^:: basic_opt ((3, "options", "options"), (message (module ServiceOptions) default)) ^:: nil )
+      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "method", "method"), (message (module MethodDescriptorProto)), not_packed) ^:: basic_opt ((3, "options", "options"), (message (module ServiceOptions))) ^:: nil )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; method'; options } -> serialize writer name method' options
@@ -1868,11 +1487,6 @@ end = struct
     and MethodDescriptorProto : sig
       val name': unit -> string
       type t = { name: string option; input_type: string option; output_type: string option; options: MethodOptions.t option; client_streaming: bool; server_streaming: bool }
-      type t_tuple = (string option * string option * string option * MethodOptions.t option * bool * bool)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1885,19 +1499,16 @@ end = struct
     end = struct
       let name' () = "descriptor.google.protobuf.MethodDescriptorProto"
       type t = { name: string option; input_type: string option; output_type: string option; options: MethodOptions.t option; client_streaming: bool; server_streaming: bool }
-      type t_tuple = (string option * string option * string option * MethodOptions.t option * bool * bool)
-      let to_tuple { name; input_type; output_type; options; client_streaming; server_streaming } = (name, input_type, output_type, options, client_streaming, server_streaming)
-      let from_tuple (name, input_type, output_type, options, client_streaming, server_streaming) = { name; input_type; output_type; options; client_streaming; server_streaming }
       let make ?name ?input_type ?output_type ?options ?(client_streaming = false) ?(server_streaming = false) () = { name; input_type; output_type; options; client_streaming; server_streaming }
       let merge = (fun t1 t2 -> {
         name = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ) t1.name t2.name);
         input_type = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "input_type", "inputType"), string) ) t1.input_type t2.input_type);
         output_type = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "output_type", "outputType"), string) ) t1.output_type t2.output_type);
-        options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((4, "options", "options"), (message (module MethodOptions) default)) ) t1.options t2.options);
+        options = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((4, "options", "options"), (message (module MethodOptions))) ) t1.options t2.options);
         client_streaming = (Runtime'.Merge.merge Runtime'.Spec.( basic ((5, "client_streaming", "clientStreaming"), bool, (false)) ) t1.client_streaming t2.client_streaming);
         server_streaming = (Runtime'.Merge.merge Runtime'.Spec.( basic ((6, "server_streaming", "serverStreaming"), bool, (false)) ) t1.server_streaming t2.server_streaming);
          })
-      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "input_type", "inputType"), string) ^:: basic_opt ((3, "output_type", "outputType"), string) ^:: basic_opt ((4, "options", "options"), (message (module MethodOptions) default)) ^:: basic ((5, "client_streaming", "clientStreaming"), bool, (false)) ^:: basic ((6, "server_streaming", "serverStreaming"), bool, (false)) ^:: nil )
+      let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "input_type", "inputType"), string) ^:: basic_opt ((3, "output_type", "outputType"), string) ^:: basic_opt ((4, "options", "options"), (message (module MethodOptions))) ^:: basic ((5, "client_streaming", "clientStreaming"), bool, (false)) ^:: basic ((6, "server_streaming", "serverStreaming"), bool, (false)) ^:: nil )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; input_type; output_type; options; client_streaming; server_streaming } -> serialize writer name input_type output_type options client_streaming server_streaming
@@ -1926,11 +1537,6 @@ end = struct
       end
       val name': unit -> string
       type t = { java_package: string option; java_outer_classname: string option; optimize_for: OptimizeMode.t; java_multiple_files: bool; go_package: string option; cc_generic_services: bool; java_generic_services: bool; py_generic_services: bool; java_generate_equals_and_hash: bool option[@ocaml.alert protobuf "Deprecated global"]; deprecated: bool; java_string_check_utf8: bool; cc_enable_arenas: bool; objc_class_prefix: string option; csharp_namespace: string option; swift_prefix: string option; php_class_prefix: string option; php_namespace: string option; php_generic_services: bool; php_metadata_namespace: string option; ruby_package: string option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (string option * string option * OptimizeMode.t * bool * string option * bool * bool * bool * bool option * bool * bool * bool * string option * string option * string option * string option * string option * bool * string option * string option * UninterpretedOption.t list * Runtime'.Extensions.t)[@@ocaml.alert protobuf "Deprecated global"]
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -1973,9 +1579,6 @@ end = struct
       end
       let name' () = "descriptor.google.protobuf.FileOptions"
       type t = { java_package: string option; java_outer_classname: string option; optimize_for: OptimizeMode.t; java_multiple_files: bool; go_package: string option; cc_generic_services: bool; java_generic_services: bool; py_generic_services: bool; java_generate_equals_and_hash: bool option[@ocaml.alert protobuf "Deprecated global"]; deprecated: bool; java_string_check_utf8: bool; cc_enable_arenas: bool; objc_class_prefix: string option; csharp_namespace: string option; swift_prefix: string option; php_class_prefix: string option; php_namespace: string option; php_generic_services: bool; php_metadata_namespace: string option; ruby_package: string option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (string option * string option * OptimizeMode.t * bool * string option * bool * bool * bool * bool option * bool * bool * bool * string option * string option * string option * string option * string option * bool * string option * string option * UninterpretedOption.t list * Runtime'.Extensions.t)[@@ocaml.alert protobuf "Deprecated global"]
-      let to_tuple { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } = (java_package, java_outer_classname, optimize_for, java_multiple_files, go_package, cc_generic_services, java_generic_services, py_generic_services, java_generate_equals_and_hash, deprecated, java_string_check_utf8, cc_enable_arenas, objc_class_prefix, csharp_namespace, swift_prefix, php_class_prefix, php_namespace, php_generic_services, php_metadata_namespace, ruby_package, uninterpreted_option, extensions')
-      let from_tuple (java_package, java_outer_classname, optimize_for, java_multiple_files, go_package, cc_generic_services, java_generic_services, py_generic_services, java_generate_equals_and_hash, deprecated, java_string_check_utf8, cc_enable_arenas, objc_class_prefix, csharp_namespace, swift_prefix, php_class_prefix, php_namespace, php_generic_services, php_metadata_namespace, ruby_package, uninterpreted_option, extensions') = { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' }
       let make ?java_package ?java_outer_classname ?(optimize_for = OptimizeMode.SPEED) ?(java_multiple_files = false) ?go_package ?(cc_generic_services = false) ?(java_generic_services = false) ?(py_generic_services = false) ?java_generate_equals_and_hash ?(deprecated = false) ?(java_string_check_utf8 = false) ?(cc_enable_arenas = true) ?objc_class_prefix ?csharp_namespace ?swift_prefix ?php_class_prefix ?php_namespace ?(php_generic_services = false) ?php_metadata_namespace ?ruby_package ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' }
       let merge = (fun t1 t2 -> {
         java_package = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "java_package", "javaPackage"), string) ) t1.java_package t2.java_package);
@@ -1998,10 +1601,10 @@ end = struct
         php_generic_services = (Runtime'.Merge.merge Runtime'.Spec.( basic ((42, "php_generic_services", "phpGenericServices"), bool, (false)) ) t1.php_generic_services t2.php_generic_services);
         php_metadata_namespace = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((44, "php_metadata_namespace", "phpMetadataNamespace"), string) ) t1.php_metadata_namespace t2.php_metadata_namespace);
         ruby_package = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((45, "ruby_package", "rubyPackage"), string) ) t1.ruby_package t2.ruby_package);
-        uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption) default), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
+        uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
         extensions' = (List.append t1.extensions' t2.extensions');
          })
-      let spec () = Runtime'.Spec.( basic_opt ((1, "java_package", "javaPackage"), string) ^:: basic_opt ((8, "java_outer_classname", "javaOuterClassname"), string) ^:: basic ((9, "optimize_for", "optimizeFor"), (enum (module OptimizeMode)), (OptimizeMode.SPEED)) ^:: basic ((10, "java_multiple_files", "javaMultipleFiles"), bool, (false)) ^:: basic_opt ((11, "go_package", "goPackage"), string) ^:: basic ((16, "cc_generic_services", "ccGenericServices"), bool, (false)) ^:: basic ((17, "java_generic_services", "javaGenericServices"), bool, (false)) ^:: basic ((18, "py_generic_services", "pyGenericServices"), bool, (false)) ^:: basic_opt ((20, "java_generate_equals_and_hash", "javaGenerateEqualsAndHash"), bool) ^:: basic ((23, "deprecated", "deprecated"), bool, (false)) ^:: basic ((27, "java_string_check_utf8", "javaStringCheckUtf8"), bool, (false)) ^:: basic ((31, "cc_enable_arenas", "ccEnableArenas"), bool, (true)) ^:: basic_opt ((36, "objc_class_prefix", "objcClassPrefix"), string) ^:: basic_opt ((37, "csharp_namespace", "csharpNamespace"), string) ^:: basic_opt ((39, "swift_prefix", "swiftPrefix"), string) ^:: basic_opt ((40, "php_class_prefix", "phpClassPrefix"), string) ^:: basic_opt ((41, "php_namespace", "phpNamespace"), string) ^:: basic ((42, "php_generic_services", "phpGenericServices"), bool, (false)) ^:: basic_opt ((44, "php_metadata_namespace", "phpMetadataNamespace"), string) ^:: basic_opt ((45, "ruby_package", "rubyPackage"), string) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption) default), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
+      let spec () = Runtime'.Spec.( basic_opt ((1, "java_package", "javaPackage"), string) ^:: basic_opt ((8, "java_outer_classname", "javaOuterClassname"), string) ^:: basic ((9, "optimize_for", "optimizeFor"), (enum (module OptimizeMode)), (OptimizeMode.SPEED)) ^:: basic ((10, "java_multiple_files", "javaMultipleFiles"), bool, (false)) ^:: basic_opt ((11, "go_package", "goPackage"), string) ^:: basic ((16, "cc_generic_services", "ccGenericServices"), bool, (false)) ^:: basic ((17, "java_generic_services", "javaGenericServices"), bool, (false)) ^:: basic ((18, "py_generic_services", "pyGenericServices"), bool, (false)) ^:: basic_opt ((20, "java_generate_equals_and_hash", "javaGenerateEqualsAndHash"), bool) ^:: basic ((23, "deprecated", "deprecated"), bool, (false)) ^:: basic ((27, "java_string_check_utf8", "javaStringCheckUtf8"), bool, (false)) ^:: basic ((31, "cc_enable_arenas", "ccEnableArenas"), bool, (true)) ^:: basic_opt ((36, "objc_class_prefix", "objcClassPrefix"), string) ^:: basic_opt ((37, "csharp_namespace", "csharpNamespace"), string) ^:: basic_opt ((39, "swift_prefix", "swiftPrefix"), string) ^:: basic_opt ((40, "php_class_prefix", "phpClassPrefix"), string) ^:: basic_opt ((41, "php_namespace", "phpNamespace"), string) ^:: basic ((42, "php_generic_services", "phpGenericServices"), bool, (false)) ^:: basic_opt ((44, "php_metadata_namespace", "phpMetadataNamespace"), string) ^:: basic_opt ((45, "ruby_package", "rubyPackage"), string) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } -> serialize writer java_package java_outer_classname optimize_for java_multiple_files go_package cc_generic_services java_generic_services py_generic_services java_generate_equals_and_hash deprecated java_string_check_utf8 cc_enable_arenas objc_class_prefix csharp_namespace swift_prefix php_class_prefix php_namespace php_generic_services php_metadata_namespace ruby_package uninterpreted_option extensions'
@@ -2022,11 +1625,6 @@ end = struct
     and MessageOptions : sig
       val name': unit -> string
       type t = { message_set_wire_format: bool; no_standard_descriptor_accessor: bool; deprecated: bool; map_entry: bool option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool * bool * bool * bool option * UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -2039,19 +1637,16 @@ end = struct
     end = struct
       let name' () = "descriptor.google.protobuf.MessageOptions"
       type t = { message_set_wire_format: bool; no_standard_descriptor_accessor: bool; deprecated: bool; map_entry: bool option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool * bool * bool * bool option * UninterpretedOption.t list * Runtime'.Extensions.t)
-      let to_tuple { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } = (message_set_wire_format, no_standard_descriptor_accessor, deprecated, map_entry, uninterpreted_option, extensions')
-      let from_tuple (message_set_wire_format, no_standard_descriptor_accessor, deprecated, map_entry, uninterpreted_option, extensions') = { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' }
       let make ?(message_set_wire_format = false) ?(no_standard_descriptor_accessor = false) ?(deprecated = false) ?map_entry ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' }
       let merge = (fun t1 t2 -> {
         message_set_wire_format = (Runtime'.Merge.merge Runtime'.Spec.( basic ((1, "message_set_wire_format", "messageSetWireFormat"), bool, (false)) ) t1.message_set_wire_format t2.message_set_wire_format);
         no_standard_descriptor_accessor = (Runtime'.Merge.merge Runtime'.Spec.( basic ((2, "no_standard_descriptor_accessor", "noStandardDescriptorAccessor"), bool, (false)) ) t1.no_standard_descriptor_accessor t2.no_standard_descriptor_accessor);
         deprecated = (Runtime'.Merge.merge Runtime'.Spec.( basic ((3, "deprecated", "deprecated"), bool, (false)) ) t1.deprecated t2.deprecated);
         map_entry = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((7, "map_entry", "mapEntry"), bool) ) t1.map_entry t2.map_entry);
-        uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption) default), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
+        uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
         extensions' = (List.append t1.extensions' t2.extensions');
          })
-      let spec () = Runtime'.Spec.( basic ((1, "message_set_wire_format", "messageSetWireFormat"), bool, (false)) ^:: basic ((2, "no_standard_descriptor_accessor", "noStandardDescriptorAccessor"), bool, (false)) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: basic_opt ((7, "map_entry", "mapEntry"), bool) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption) default), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
+      let spec () = Runtime'.Spec.( basic ((1, "message_set_wire_format", "messageSetWireFormat"), bool, (false)) ^:: basic ((2, "no_standard_descriptor_accessor", "noStandardDescriptorAccessor"), bool, (false)) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: basic_opt ((7, "map_entry", "mapEntry"), bool) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } -> serialize writer message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option extensions'
@@ -2088,11 +1683,6 @@ end = struct
       end
       val name': unit -> string
       type t = { ctype: CType.t; packed: bool option; deprecated: bool; lazy': bool; jstype: JSType.t; weak: bool; unverified_lazy: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (CType.t * bool option * bool * bool * JSType.t * bool * bool * UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -2165,9 +1755,6 @@ end = struct
       end
       let name' () = "descriptor.google.protobuf.FieldOptions"
       type t = { ctype: CType.t; packed: bool option; deprecated: bool; lazy': bool; jstype: JSType.t; weak: bool; unverified_lazy: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (CType.t * bool option * bool * bool * JSType.t * bool * bool * UninterpretedOption.t list * Runtime'.Extensions.t)
-      let to_tuple { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } = (ctype, packed, deprecated, lazy', jstype, weak, unverified_lazy, uninterpreted_option, extensions')
-      let from_tuple (ctype, packed, deprecated, lazy', jstype, weak, unverified_lazy, uninterpreted_option, extensions') = { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' }
       let make ?(ctype = CType.STRING) ?packed ?(deprecated = false) ?(lazy' = false) ?(jstype = JSType.JS_NORMAL) ?(weak = false) ?(unverified_lazy = false) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' }
       let merge = (fun t1 t2 -> {
         ctype = (Runtime'.Merge.merge Runtime'.Spec.( basic ((1, "ctype", "ctype"), (enum (module CType)), (CType.STRING)) ) t1.ctype t2.ctype);
@@ -2177,10 +1764,10 @@ end = struct
         jstype = (Runtime'.Merge.merge Runtime'.Spec.( basic ((6, "jstype", "jstype"), (enum (module JSType)), (JSType.JS_NORMAL)) ) t1.jstype t2.jstype);
         weak = (Runtime'.Merge.merge Runtime'.Spec.( basic ((10, "weak", "weak"), bool, (false)) ) t1.weak t2.weak);
         unverified_lazy = (Runtime'.Merge.merge Runtime'.Spec.( basic ((15, "unverified_lazy", "unverifiedLazy"), bool, (false)) ) t1.unverified_lazy t2.unverified_lazy);
-        uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption) default), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
+        uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
         extensions' = (List.append t1.extensions' t2.extensions');
          })
-      let spec () = Runtime'.Spec.( basic ((1, "ctype", "ctype"), (enum (module CType)), (CType.STRING)) ^:: basic_opt ((2, "packed", "packed"), bool) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: basic ((5, "lazy", "lazy"), bool, (false)) ^:: basic ((6, "jstype", "jstype"), (enum (module JSType)), (JSType.JS_NORMAL)) ^:: basic ((10, "weak", "weak"), bool, (false)) ^:: basic ((15, "unverified_lazy", "unverifiedLazy"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption) default), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
+      let spec () = Runtime'.Spec.( basic ((1, "ctype", "ctype"), (enum (module CType)), (CType.STRING)) ^:: basic_opt ((2, "packed", "packed"), bool) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: basic ((5, "lazy", "lazy"), bool, (false)) ^:: basic ((6, "jstype", "jstype"), (enum (module JSType)), (JSType.JS_NORMAL)) ^:: basic ((10, "weak", "weak"), bool, (false)) ^:: basic ((15, "unverified_lazy", "unverifiedLazy"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } -> serialize writer ctype packed deprecated lazy' jstype weak unverified_lazy uninterpreted_option extensions'
@@ -2201,11 +1788,6 @@ end = struct
     and OneofOptions : sig
       val name': unit -> string
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -2218,15 +1800,12 @@ end = struct
     end = struct
       let name' () = "descriptor.google.protobuf.OneofOptions"
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (UninterpretedOption.t list * Runtime'.Extensions.t)
-      let to_tuple { uninterpreted_option; extensions' } = (uninterpreted_option, extensions')
-      let from_tuple (uninterpreted_option, extensions') = { uninterpreted_option; extensions' }
       let make ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { uninterpreted_option; extensions' }
       let merge = (fun t1 t2 -> {
-        uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption) default), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
+        uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
         extensions' = (List.append t1.extensions' t2.extensions');
          })
-      let spec () = Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption) default), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
+      let spec () = Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { uninterpreted_option; extensions' } -> serialize writer uninterpreted_option extensions'
@@ -2247,11 +1826,6 @@ end = struct
     and EnumOptions : sig
       val name': unit -> string
       type t = { allow_alias: bool option; deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool option * bool * UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -2264,17 +1838,14 @@ end = struct
     end = struct
       let name' () = "descriptor.google.protobuf.EnumOptions"
       type t = { allow_alias: bool option; deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool option * bool * UninterpretedOption.t list * Runtime'.Extensions.t)
-      let to_tuple { allow_alias; deprecated; uninterpreted_option; extensions' } = (allow_alias, deprecated, uninterpreted_option, extensions')
-      let from_tuple (allow_alias, deprecated, uninterpreted_option, extensions') = { allow_alias; deprecated; uninterpreted_option; extensions' }
       let make ?allow_alias ?(deprecated = false) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { allow_alias; deprecated; uninterpreted_option; extensions' }
       let merge = (fun t1 t2 -> {
         allow_alias = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "allow_alias", "allowAlias"), bool) ) t1.allow_alias t2.allow_alias);
         deprecated = (Runtime'.Merge.merge Runtime'.Spec.( basic ((3, "deprecated", "deprecated"), bool, (false)) ) t1.deprecated t2.deprecated);
-        uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption) default), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
+        uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
         extensions' = (List.append t1.extensions' t2.extensions');
          })
-      let spec () = Runtime'.Spec.( basic_opt ((2, "allow_alias", "allowAlias"), bool) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption) default), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
+      let spec () = Runtime'.Spec.( basic_opt ((2, "allow_alias", "allowAlias"), bool) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { allow_alias; deprecated; uninterpreted_option; extensions' } -> serialize writer allow_alias deprecated uninterpreted_option extensions'
@@ -2295,11 +1866,6 @@ end = struct
     and EnumValueOptions : sig
       val name': unit -> string
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool * UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -2312,16 +1878,13 @@ end = struct
     end = struct
       let name' () = "descriptor.google.protobuf.EnumValueOptions"
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool * UninterpretedOption.t list * Runtime'.Extensions.t)
-      let to_tuple { deprecated; uninterpreted_option; extensions' } = (deprecated, uninterpreted_option, extensions')
-      let from_tuple (deprecated, uninterpreted_option, extensions') = { deprecated; uninterpreted_option; extensions' }
       let make ?(deprecated = false) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { deprecated; uninterpreted_option; extensions' }
       let merge = (fun t1 t2 -> {
         deprecated = (Runtime'.Merge.merge Runtime'.Spec.( basic ((1, "deprecated", "deprecated"), bool, (false)) ) t1.deprecated t2.deprecated);
-        uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption) default), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
+        uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
         extensions' = (List.append t1.extensions' t2.extensions');
          })
-      let spec () = Runtime'.Spec.( basic ((1, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption) default), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
+      let spec () = Runtime'.Spec.( basic ((1, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { deprecated; uninterpreted_option; extensions' } -> serialize writer deprecated uninterpreted_option extensions'
@@ -2342,11 +1905,6 @@ end = struct
     and ServiceOptions : sig
       val name': unit -> string
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool * UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -2359,16 +1917,13 @@ end = struct
     end = struct
       let name' () = "descriptor.google.protobuf.ServiceOptions"
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool * UninterpretedOption.t list * Runtime'.Extensions.t)
-      let to_tuple { deprecated; uninterpreted_option; extensions' } = (deprecated, uninterpreted_option, extensions')
-      let from_tuple (deprecated, uninterpreted_option, extensions') = { deprecated; uninterpreted_option; extensions' }
       let make ?(deprecated = false) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { deprecated; uninterpreted_option; extensions' }
       let merge = (fun t1 t2 -> {
         deprecated = (Runtime'.Merge.merge Runtime'.Spec.( basic ((33, "deprecated", "deprecated"), bool, (false)) ) t1.deprecated t2.deprecated);
-        uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption) default), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
+        uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
         extensions' = (List.append t1.extensions' t2.extensions');
          })
-      let spec () = Runtime'.Spec.( basic ((33, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption) default), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
+      let spec () = Runtime'.Spec.( basic ((33, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { deprecated; uninterpreted_option; extensions' } -> serialize writer deprecated uninterpreted_option extensions'
@@ -2397,11 +1952,6 @@ end = struct
       end
       val name': unit -> string
       type t = { deprecated: bool; idempotency_level: IdempotencyLevel.t; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool * IdempotencyLevel.t * UninterpretedOption.t list * Runtime'.Extensions.t)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -2444,17 +1994,14 @@ end = struct
       end
       let name' () = "descriptor.google.protobuf.MethodOptions"
       type t = { deprecated: bool; idempotency_level: IdempotencyLevel.t; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
-      type t_tuple = (bool * IdempotencyLevel.t * UninterpretedOption.t list * Runtime'.Extensions.t)
-      let to_tuple { deprecated; idempotency_level; uninterpreted_option; extensions' } = (deprecated, idempotency_level, uninterpreted_option, extensions')
-      let from_tuple (deprecated, idempotency_level, uninterpreted_option, extensions') = { deprecated; idempotency_level; uninterpreted_option; extensions' }
       let make ?(deprecated = false) ?(idempotency_level = IdempotencyLevel.IDEMPOTENCY_UNKNOWN) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { deprecated; idempotency_level; uninterpreted_option; extensions' }
       let merge = (fun t1 t2 -> {
         deprecated = (Runtime'.Merge.merge Runtime'.Spec.( basic ((33, "deprecated", "deprecated"), bool, (false)) ) t1.deprecated t2.deprecated);
         idempotency_level = (Runtime'.Merge.merge Runtime'.Spec.( basic ((34, "idempotency_level", "idempotencyLevel"), (enum (module IdempotencyLevel)), (IdempotencyLevel.IDEMPOTENCY_UNKNOWN)) ) t1.idempotency_level t2.idempotency_level);
-        uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption) default), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
+        uninterpreted_option = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) t1.uninterpreted_option t2.uninterpreted_option);
         extensions' = (List.append t1.extensions' t2.extensions');
          })
-      let spec () = Runtime'.Spec.( basic ((33, "deprecated", "deprecated"), bool, (false)) ^:: basic ((34, "idempotency_level", "idempotencyLevel"), (enum (module IdempotencyLevel)), (IdempotencyLevel.IDEMPOTENCY_UNKNOWN)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption) default), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
+      let spec () = Runtime'.Spec.( basic ((33, "deprecated", "deprecated"), bool, (false)) ^:: basic ((34, "idempotency_level", "idempotencyLevel"), (enum (module IdempotencyLevel)), (IdempotencyLevel.IDEMPOTENCY_UNKNOWN)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { deprecated; idempotency_level; uninterpreted_option; extensions' } -> serialize writer deprecated idempotency_level uninterpreted_option extensions'
@@ -2476,11 +2023,6 @@ end = struct
       module rec NamePart : sig
         val name': unit -> string
         type t = { name_part: string; is_extension: bool }
-        type t_tuple = (string * bool)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: name_part:string -> is_extension:bool -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -2493,11 +2035,6 @@ end = struct
       end
       val name': unit -> string
       type t = { name: NamePart.t list; identifier_value: string option; positive_int_value: int option; negative_int_value: int option; double_value: float option; string_value: bytes option; aggregate_value: string option }
-      type t_tuple = (NamePart.t list * string option * int option * int option * float option * bytes option * string option)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -2511,11 +2048,6 @@ end = struct
       module rec NamePart : sig
         val name': unit -> string
         type t = { name_part: string; is_extension: bool }
-        type t_tuple = (string * bool)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: name_part:string -> is_extension:bool -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -2528,9 +2060,6 @@ end = struct
       end = struct
         let name' () = "descriptor.google.protobuf.UninterpretedOption.NamePart"
         type t = { name_part: string; is_extension: bool }
-        type t_tuple = (string * bool)
-        let to_tuple { name_part; is_extension } = (name_part, is_extension)
-        let from_tuple (name_part, is_extension) = { name_part; is_extension }
         let make ~name_part ~is_extension () = { name_part; is_extension }
         let merge = (fun t1 t2 -> {
           name_part = (Runtime'.Merge.merge Runtime'.Spec.( basic_req ((1, "name_part", "namePart"), string) ) t1.name_part t2.name_part);
@@ -2556,12 +2085,9 @@ end = struct
       end
       let name' () = "descriptor.google.protobuf.UninterpretedOption"
       type t = { name: NamePart.t list; identifier_value: string option; positive_int_value: int option; negative_int_value: int option; double_value: float option; string_value: bytes option; aggregate_value: string option }
-      type t_tuple = (NamePart.t list * string option * int option * int option * float option * bytes option * string option)
-      let to_tuple { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } = (name, identifier_value, positive_int_value, negative_int_value, double_value, string_value, aggregate_value)
-      let from_tuple (name, identifier_value, positive_int_value, negative_int_value, double_value, string_value, aggregate_value) = { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value }
       let make ?(name = []) ?identifier_value ?positive_int_value ?negative_int_value ?double_value ?string_value ?aggregate_value () = { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value }
       let merge = (fun t1 t2 -> {
-        name = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((2, "name", "name"), (message (module NamePart) default), not_packed) ) t1.name t2.name);
+        name = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((2, "name", "name"), (message (module NamePart)), not_packed) ) t1.name t2.name);
         identifier_value = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "identifier_value", "identifierValue"), string) ) t1.identifier_value t2.identifier_value);
         positive_int_value = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((4, "positive_int_value", "positiveIntValue"), uint64_int) ) t1.positive_int_value t2.positive_int_value);
         negative_int_value = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((5, "negative_int_value", "negativeIntValue"), int64_int) ) t1.negative_int_value t2.negative_int_value);
@@ -2569,7 +2095,7 @@ end = struct
         string_value = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((7, "string_value", "stringValue"), bytes) ) t1.string_value t2.string_value);
         aggregate_value = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((8, "aggregate_value", "aggregateValue"), string) ) t1.aggregate_value t2.aggregate_value);
          })
-      let spec () = Runtime'.Spec.( repeated ((2, "name", "name"), (message (module NamePart) default), not_packed) ^:: basic_opt ((3, "identifier_value", "identifierValue"), string) ^:: basic_opt ((4, "positive_int_value", "positiveIntValue"), uint64_int) ^:: basic_opt ((5, "negative_int_value", "negativeIntValue"), int64_int) ^:: basic_opt ((6, "double_value", "doubleValue"), double) ^:: basic_opt ((7, "string_value", "stringValue"), bytes) ^:: basic_opt ((8, "aggregate_value", "aggregateValue"), string) ^:: nil )
+      let spec () = Runtime'.Spec.( repeated ((2, "name", "name"), (message (module NamePart)), not_packed) ^:: basic_opt ((3, "identifier_value", "identifierValue"), string) ^:: basic_opt ((4, "positive_int_value", "positiveIntValue"), uint64_int) ^:: basic_opt ((5, "negative_int_value", "negativeIntValue"), int64_int) ^:: basic_opt ((6, "double_value", "doubleValue"), double) ^:: basic_opt ((7, "string_value", "stringValue"), bytes) ^:: basic_opt ((8, "aggregate_value", "aggregateValue"), string) ^:: nil )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } -> serialize writer name identifier_value positive_int_value negative_int_value double_value string_value aggregate_value
@@ -2591,11 +2117,6 @@ end = struct
       module rec Location : sig
         val name': unit -> string
         type t = { path: int list; span: int list; leading_comments: string option; trailing_comments: string option; leading_detached_comments: string list }
-        type t_tuple = (int list * int list * string option * string option * string list)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -2608,11 +2129,6 @@ end = struct
       end
       val name': unit -> string
       type t = (Location.t list)
-      type t_tuple = (Location.t list)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?location:Location.t list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -2626,11 +2142,6 @@ end = struct
       module rec Location : sig
         val name': unit -> string
         type t = { path: int list; span: int list; leading_comments: string option; trailing_comments: string option; leading_detached_comments: string list }
-        type t_tuple = (int list * int list * string option * string option * string list)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -2643,9 +2154,6 @@ end = struct
       end = struct
         let name' () = "descriptor.google.protobuf.SourceCodeInfo.Location"
         type t = { path: int list; span: int list; leading_comments: string option; trailing_comments: string option; leading_detached_comments: string list }
-        type t_tuple = (int list * int list * string option * string option * string list)
-        let to_tuple { path; span; leading_comments; trailing_comments; leading_detached_comments } = (path, span, leading_comments, trailing_comments, leading_detached_comments)
-        let from_tuple (path, span, leading_comments, trailing_comments, leading_detached_comments) = { path; span; leading_comments; trailing_comments; leading_detached_comments }
         let make ?(path = []) ?(span = []) ?leading_comments ?trailing_comments ?(leading_detached_comments = []) () = { path; span; leading_comments; trailing_comments; leading_detached_comments }
         let merge = (fun t1 t2 -> {
           path = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((1, "path", "path"), int32_int, packed) ) t1.path t2.path);
@@ -2674,12 +2182,9 @@ end = struct
       end
       let name' () = "descriptor.google.protobuf.SourceCodeInfo"
       type t = (Location.t list)
-      type t_tuple = (Location.t list)
-      let to_tuple (location) = (location)
-      let from_tuple (location) = (location)
       let make ?(location = []) () = (location)
-      let merge = (fun (t1_location) (t2_location) -> (Runtime'.Merge.merge Runtime'.Spec.( repeated ((1, "location", "location"), (message (module Location) default), not_packed) ) t1_location t2_location))
-      let spec () = Runtime'.Spec.( repeated ((1, "location", "location"), (message (module Location) default), not_packed) ^:: nil )
+      let merge = (fun (t1_location) (t2_location) -> (Runtime'.Merge.merge Runtime'.Spec.( repeated ((1, "location", "location"), (message (module Location)), not_packed) ) t1_location t2_location))
+      let spec () = Runtime'.Spec.( repeated ((1, "location", "location"), (message (module Location)), not_packed) ^:: nil )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer (location) -> serialize writer location
@@ -2701,11 +2206,6 @@ end = struct
       module rec Annotation : sig
         val name': unit -> string
         type t = { path: int list; source_file: string option; begin': int option; end': int option }
-        type t_tuple = (int list * string option * int option * int option)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -2718,11 +2218,6 @@ end = struct
       end
       val name': unit -> string
       type t = (Annotation.t list)
-      type t_tuple = (Annotation.t list)
-      (**/**)
-      val to_tuple: t -> t_tuple
-      val from_tuple: t_tuple -> t
-      (**/**)
       val make: ?annotation:Annotation.t list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -2736,11 +2231,6 @@ end = struct
       module rec Annotation : sig
         val name': unit -> string
         type t = { path: int list; source_file: string option; begin': int option; end': int option }
-        type t_tuple = (int list * string option * int option * int option)
-        (**/**)
-        val to_tuple: t -> t_tuple
-        val from_tuple: t_tuple -> t
-        (**/**)
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
@@ -2753,9 +2243,6 @@ end = struct
       end = struct
         let name' () = "descriptor.google.protobuf.GeneratedCodeInfo.Annotation"
         type t = { path: int list; source_file: string option; begin': int option; end': int option }
-        type t_tuple = (int list * string option * int option * int option)
-        let to_tuple { path; source_file; begin'; end' } = (path, source_file, begin', end')
-        let from_tuple (path, source_file, begin', end') = { path; source_file; begin'; end' }
         let make ?(path = []) ?source_file ?begin' ?end' () = { path; source_file; begin'; end' }
         let merge = (fun t1 t2 -> {
           path = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((1, "path", "path"), int32_int, packed) ) t1.path t2.path);
@@ -2783,12 +2270,9 @@ end = struct
       end
       let name' () = "descriptor.google.protobuf.GeneratedCodeInfo"
       type t = (Annotation.t list)
-      type t_tuple = (Annotation.t list)
-      let to_tuple (annotation) = (annotation)
-      let from_tuple (annotation) = (annotation)
       let make ?(annotation = []) () = (annotation)
-      let merge = (fun (t1_annotation) (t2_annotation) -> (Runtime'.Merge.merge Runtime'.Spec.( repeated ((1, "annotation", "annotation"), (message (module Annotation) default), not_packed) ) t1_annotation t2_annotation))
-      let spec () = Runtime'.Spec.( repeated ((1, "annotation", "annotation"), (message (module Annotation) default), not_packed) ^:: nil )
+      let merge = (fun (t1_annotation) (t2_annotation) -> (Runtime'.Merge.merge Runtime'.Spec.( repeated ((1, "annotation", "annotation"), (message (module Annotation)), not_packed) ) t1_annotation t2_annotation))
+      let spec () = Runtime'.Spec.( repeated ((1, "annotation", "annotation"), (message (module Annotation)), not_packed) ^:: nil )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer (annotation) -> serialize writer annotation

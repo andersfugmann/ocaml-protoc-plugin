@@ -72,7 +72,7 @@ let write_value : type a b. (a, b) spec -> a -> Writer.t -> unit = function
   | String -> write_length_delimited_string ~f:id
   | Bytes -> write_length_delimited_string ~f:Bytes.unsafe_to_string
   | Enum (module Enum) -> write_varint_unboxed ~f:Enum.to_int
-  | Message ((module Message), _) ->
+  | Message (module Message) ->
     Writer.write_length_delimited_f ~write_f:Message.to_proto'
 
 (** Optimized when the value is given in advance, and the continuation is expected to be called multiple times *)

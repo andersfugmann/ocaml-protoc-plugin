@@ -85,7 +85,7 @@ let read_of_spec: type a b. (a, b) spec -> Field.field_type * (Reader.t -> a) = 
     let v = Bytes.create length in
     Bytes.blit_string ~src:data ~src_pos:offset ~dst:v ~dst_pos:0 ~len:length;
     v
-  | Message ((module Message), _) -> Length_delimited, fun reader ->
+  | Message (module Message) -> Length_delimited, fun reader ->
     let Field.{ offset; length; data } = Reader.read_length_delimited reader in
     Message.from_proto_exn (Reader.create ~offset ~length data)
 
@@ -137,7 +137,7 @@ let rec value: type a b. (a, b) compound -> a value = function
     Value ([(index, read)], default, id)
   | Basic_opt ((index, _, _), spec) ->
     let map = match spec with
-      | Message ((module Message), _) -> merge_opt Message.merge
+      | Message (module Message) -> merge_opt Message.merge
       | _ -> keep_last_opt
     in
     let read = read_field ~read:(read_of_spec spec) ~map in

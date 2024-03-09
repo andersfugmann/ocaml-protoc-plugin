@@ -2,7 +2,6 @@ open Spec.Descriptor.Google.Protobuf
 
 type t = {
   type': string;
-  tuple_type: string;
   destructor: string;
   args: string list;
   spec_str: string;

@@ -247,18 +247,12 @@ let rec emit_message ~params ~syntax scope
       let is_cyclic = Scope.is_cyclic scope in
       (* Map fields to denote if they are map types *)
       let fields = List.map ~f:(fun field -> field, find_map_type ~scope field nested_types) fields in
-      let Types.{ type'; tuple_type; destructor; args; spec_str;
+      let Types.{ type'; destructor; args; spec_str;
                   default_constructor_sig; default_constructor_impl; merge_impl } =
         Types.make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
       in
       Code.emit signature `None "val name': unit -> string";
       Code.emit signature `None "type t = %s%s" type' params.annot;
-      Code.emit signature `None "type t_tuple = %s" tuple_type;
-      Code.emit signature `None "(**/**)";
-      Code.emit signature `None "val to_tuple: t -> t_tuple";
-      Code.emit signature `None "val from_tuple: t_tuple -> t";
-      Code.emit signature `None "(**/**)";
-
       Code.emit signature `None "val make: %s" default_constructor_sig;
       Code.emit signature `None "val merge: t -> t -> t";
       Code.emit signature `None "val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t";
@@ -271,9 +265,6 @@ let rec emit_message ~params ~syntax scope
 
       Code.emit implementation `None "let name' () = \"%s\"" (Scope.get_current_scope scope);
       Code.emit implementation `None "type t = %s%s" type' params.annot;
-      Code.emit implementation `None "type t_tuple = %s" tuple_type;
-      Code.emit implementation `None "let to_tuple %s = (%s)" destructor (String.concat ~sep:", " args);
-      Code.emit implementation `None "let from_tuple (%s) = %s" (String.concat ~sep:", " args) destructor;
 
       Code.emit implementation `None "let make %s" default_constructor_impl;
       Code.emit implementation `None "let merge = (%s)" merge_impl;

@@ -276,7 +276,7 @@ let read_value: type a b. (a, b) spec -> Yojson.Basic.t -> a = function
    | String -> to_string
    | Bytes -> to_bytes
    | Enum (module Enum) -> to_enum (module Enum)
-   | Message ((module Message), _) ->
+   | Message (module Message) ->
      let map_json = map_json (module Message) in
      let of_json json =
        map_json json |> Message.from_json_exn

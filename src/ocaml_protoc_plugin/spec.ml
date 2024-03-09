@@ -17,7 +17,6 @@ end
 
 module type Message = sig
   type t
-  type t_tuple
   val name': unit -> string
   val from_proto: Reader.t -> t Result.t
   val from_proto_exn: Reader.t -> t
@@ -27,9 +26,6 @@ module type Message = sig
   val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
   val from_json_exn: Yojson.Basic.t -> t
   val from_json: Yojson.Basic.t -> t Result.t
-
-  val from_tuple: t_tuple -> t
-  val to_tuple: t -> t_tuple
 end
 
 module Make(T : T) = struct
@@ -41,9 +37,6 @@ module Make(T : T) = struct
 
   type scalar = [ `Scalar ]
   type message = [ `Message ]
-  type _ message_type =
-    | Default: 'a message_type
-
 
   type (_, _) spec =
     | Double : (float, scalar) spec
@@ -77,7 +70,7 @@ module Make(T : T) = struct
     | String : (string, scalar) spec
     | Bytes : (bytes, scalar) spec
     | Enum :  (module Enum with type t = 'a) T.enum -> ('a, scalar) spec
-    | Message : (module Message with type t = 'a and type t_tuple = 'b) T.message * 'b message_type -> ('a, message) spec
+    | Message : (module Message with type t = 'a) T.message -> ('a, message) spec
 
   type _ oneof =
     | Oneof_elem : field * ('b, _) spec * (('b -> 'a) * ('a -> 'b)) T.oneof_elem -> 'a oneof
@@ -143,9 +136,7 @@ module Make(T : T) = struct
   let string = String
   let bytes = Bytes
   let enum e = Enum e
-  let message m t = Message (m, t)
-
-  let default = Default
+  let message m = Message m
 
   let some v = Some v
   let none = None
