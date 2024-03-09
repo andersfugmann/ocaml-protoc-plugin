@@ -21,6 +21,7 @@ util::TypeResolver * make_resolver(const char* include, const char *proto) {
     auto source_tree = new compiler::DiskSourceTree();
     source_tree->MapPath("", ".");
     source_tree->MapPath("", include);
+    source_tree->MapPath("/", include);
 
     auto importer = new compiler::Importer(source_tree, NULL);
     auto * fd = importer->Import(proto);
@@ -31,11 +32,11 @@ std::string make_url(const char * type) {
     return std::string("type.googleapis.com/") + std::string(type);
 }
 
-char* status_to_string(const util::Status& status, const std::string& output_str) {
+char* status_to_string(const util::Status& status, const std::string& output_str, const char* protobuf) {
     if (status.ok()) {
         return strdup(output_str.c_str());
     } else {
-        std::string s = status.ToString();
+        std::string s = status.ToString() + " file: " + protobuf;
         return strdup(s.c_str());
     }
 }
@@ -53,7 +54,7 @@ extern "C" char* protobuf2json(const char *include, const char *proto_file, cons
     //options.always_print_primitive_fields = true;
     auto status = BinaryToJsonStream(
         resolver, url, &input, &output, options);
-    return status_to_string(status, output_str);
+    return status_to_string(status, output_str, proto_file);
 }
 
 extern "C" char* json2protobuf(const char *include, const char *proto_file, const char* type, const void* in_data, int data_length) {
@@ -70,7 +71,6 @@ extern "C" char* json2protobuf(const char *include, const char *proto_file, cons
 
     auto status = JsonToBinaryStream(
         resolver, url, &input, &output, options);
-    return status_to_string(status, output_str);
-    // We have a problem that we cannot know how long is data size is.
-    // We need some way of returning that also. So we should update a pointer to hold the size.
+    return status_to_string(status, output_str, proto_file);
+    // This function should return the length of the buffer also.
 }

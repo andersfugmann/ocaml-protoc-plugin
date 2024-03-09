@@ -6,8 +6,10 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/struct.proto";
 import "google/protobuf/any.proto";
 import "google/protobuf/wrappers.proto";
+import "google/protobuf/field_mask.proto";
 
 package Json_test;
+
 message Duration {
   google.protobuf.Duration duration = 1;
 }
@@ -39,4 +41,12 @@ message Wrappers {
   google.protobuf.BoolValue bool = 7;
   google.protobuf.StringValue string = 8;
   google.protobuf.BytesValue bytes = 9;
+}
+
+message FieldMask {
+  google.protobuf.FieldMask mask = 1;
+}
+
+message Struct {
+  google.protobuf.Struct struct = 1;
 }

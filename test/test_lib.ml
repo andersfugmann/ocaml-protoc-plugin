@@ -101,26 +101,38 @@ let test_json ~debug (type t) (module M : T with type t = t) (t: t) =
 
   let test_json ?enum_names ?json_names ?omit_default_values t =
     let compare ~message t json =
-      let t' = M.from_json_exn json in
-      match (t = t') with
+      match (M.from_json_exn json = t) with
       | true -> ()
       | false ->
-        Printf.printf "Json encode/decode failed for %s: %s\n" message (Yojson.Basic.to_string json)
+        let ref_json = M.from_json_exn json |> json_ref in
+        Printf.printf "Json encode/decode not identical. %s\n  Json: %s\n  Ref: %s\n" message
+          (Yojson.Basic.to_string json) (Yojson.Basic.to_string ref_json)
+      | exception exn ->
+        Printf.printf "Json encode/decode failed for %s: %s\n" message (Yojson.Basic.to_string json);
+        Printf.printf "  Error: %s\n" (Printexc.to_string exn);
     in
-    let json = M.to_json ?enum_names ?json_names ?omit_default_values t in
-    compare ~message:"Ocaml proto plugin" t json;
+    (* May fail! *)
+    let () =
+      try
+        let json = M.to_json ?enum_names ?json_names ?omit_default_values t in
+        compare ~message:"Ocaml proto plugin" t json
+      with | exn -> Printf.printf "Cannot serialize to json\n  Error: %s\n" (Printexc.to_string exn)
+    in
     (* compare ~message:"Protobuf reference implementation" t (to_json_ref t); *)
     t
   in
   (* Compare reference json *)
-  let json' = json_ref t in
-  let t' = M.from_json_exn json' in
-  if t <> t' then Printf.printf "Cannot deserialize reference json.\n";
-  if t <> t' || debug then
-    Printf.printf "Json: %s\nRef:  %s\n"
-      (Yojson.Basic.pretty_to_string (M.to_json t))
-      (Yojson.Basic.pretty_to_string json');
-
+  let () = try
+      let json' = json_ref t in
+      let t' = M.from_json_exn json' in
+      if t <> t' then Printf.printf "Cannot deserialize reference json.\n";
+      if t <> t' || debug then
+        Printf.printf "Json: %s\nRef:  %s\n"
+          (Yojson.Basic.pretty_to_string (M.to_json t))
+          (Yojson.Basic.pretty_to_string json');
+    with
+    | exn -> Printf.printf "Cannot deserialize reference json\n  Error: %s\n" (Printexc.to_string exn);
+  in
   t
   |> test_json
   |> test_json ~enum_names:false

@@ -3,7 +3,7 @@ open Spec
 
 (** Serialize to json as per https://protobuf.dev/programming-guides/proto3/#json-options *)
 let value_error type_name json =
-  Result.raise (`Wrong_field_type (type_name, Yojson.Basic.to_string json))
+  Result.raise (`Wrong_field_type (type_name, Yojson.Basic.show json))
 
 type field = string * Yojson.Basic.t
 
@@ -41,19 +41,12 @@ let get_key ~f ~default key = function
   | json -> value_error "Expected Assoc" json
 
 let to_camel_case s =
-  let open Stdlib in
-  let is_ascii c = Char.lowercase_ascii c <> Char.uppercase_ascii c in
-  let rec map = function
-    | '_' :: c :: cs when is_ascii c ->
-      Char.uppercase_ascii c :: map cs
-    | c :: cs -> c :: map cs
-    | [] -> []
-  in
-  String.to_seq s
-  |> List.of_seq
-  |> map
-  |> List.to_seq
-  |> String.of_seq
+  let open StdLabels in
+  String.split_on_char ~sep:'_' s
+  |> List.map ~f:String.lowercase_ascii
+  |> List.map ~f:String.capitalize_ascii
+  |> String.concat ~sep:""
+  |> String.uncapitalize_ascii
 
 let%expect_test "json name to proto name" =
   let test s = Printf.printf "%10s -> %10s\n" s (to_camel_case s) in
@@ -66,11 +59,11 @@ let%expect_test "json name to proto name" =
   ();
   [%expect {|
     camel_case ->  camelCase
-    Camel_case ->  CamelCase
-    Camel_Case ->  CamelCase
-    Camel_Case ->  CamelCase
-    camel_cASe ->  camelCASe
-    CAMel_case ->  CAMelCase |}]
+    Camel_case ->  camelCase
+    Camel_Case ->  camelCase
+    Camel_Case ->  camelCase
+    camel_cASe ->  camelCase
+    CAMel_case ->  camelCase |}]
 
 let duration_to_json json =
   let seconds = get_key "seconds" ~f:Deserialize_json.to_int64 ~default:0L json in
@@ -141,44 +134,62 @@ let wrapper_to_json json = get_key ~f:(fun id -> id) ~default:`Null "value" json
 
 (* Convert already emitted json based on json mappings *)
 let map_json: type a. (module Message with type t = a) -> (Yojson.Basic.t -> Yojson.Basic.t) option = fun (module Message) ->
-  match Message.name' () |> String.split_on_char ~sep:'.' with
-  | [_; "google"; "protobuf"; "Empty"]  ->
+  let name =
+    Message.name' ()
+    |> String.split_on_char ~sep:'.'
+    |> List.tl
+    |> String.concat ~sep:"."
+  in
+
+  match name with
+  | "google.protobuf.Empty"  ->
     Some (fun json -> json)
   (* Duration - google/protobuf/timestamp.proto *)
-  | [_; "google"; "protobuf"; "Duration"] ->
+  | "google.protobuf.Duration" ->
     Some (duration_to_json)
   (* Timestamp - google/protobuf/timestamp.proto *)
-  | [_; "google"; "protobuf"; "Timestamp"] ->
+  | "google.protobuf.Timestamp" ->
     Some (timestamp_to_json)
   (* Wrapper types - google/protobuf/wrappers.proto *)
-  | [_; "google"; "protobuf"; "DoubleValue"]
-  | [_; "google"; "protobuf"; "FloatValue"]
-  | [_; "google"; "protobuf"; "Int64Value"]
-  | [_; "google"; "protobuf"; "UInt64Value"]
-  | [_; "google"; "protobuf"; "Int32Value"]
-  | [_; "google"; "protobuf"; "UInt32Value"]
-  | [_; "google"; "protobuf"; "BoolValue"]
-  | [_; "google"; "protobuf"; "StringValue"]
-  | [_; "google"; "protobuf"; "BytesValue"] ->
+  | "google.protobuf.DoubleValue"
+  | "google.protobuf.FloatValue"
+  | "google.protobuf.Int64Value"
+  | "google.protobuf.UInt64Value"
+  | "google.protobuf.Int32Value"
+  | "google.protobuf.UInt32Value"
+  | "google.protobuf.BoolValue"
+  | "google.protobuf.StringValue"
+  | "google.protobuf.BytesValue" ->
     Some (wrapper_to_json)
-  | [_; "google"; "protobuf"; "Value"] ->
+  | "google.protobuf.Value" ->
     let map = function
       | `Assoc [_, json] -> json
-      | json -> value_error "google.protobuf.Value" json
+      | json -> value_error name json
     in
     Some map
-  (* FieldMask - /usr/include/google/protobuf/field_mask.proto *)
-  | [_; "google"; "protobuf"; "FieldMask"] ->
+  | "google.protobuf.Struct" ->
+    let map = function
+      | `Assoc ["fields", json ] -> json
+      | json -> value_error name json
+    in
+    Some map
+  | "google.protobuf.ListValue" ->
+    let map = function
+      | `Assoc ["values", json ] -> json
+      | json -> value_error name json
+    in
+    Some map
+  | "google.protobuf.FieldMask" ->
     let open StdLabels in
     let map = function
-      | `Assoc ["masks", `List masks] ->
+      | `Assoc ["paths", `List masks] ->
         List.map ~f:(function
           | `String mask -> (to_camel_case mask)
-          | json -> value_error "google.protobuf.FieldMask" json
+          | json -> value_error name json
         ) masks
         |> String.concat ~sep:","
         |> fun mask -> `String mask
-      | json -> value_error "google.protobuf.FieldMask" json
+      | json -> value_error name json
     in
     Some map
   | _ -> None

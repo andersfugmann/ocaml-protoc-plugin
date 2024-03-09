@@ -176,65 +176,79 @@ let%expect_test "json name to proto name" =
      camelCASe -> camel_cASe
      CAMelCase -> CAMel_case |}]
 
+let value_to_json json =
+  let value = match json with
+    | `Null -> "nullValue", `Int 0
+    | `Float _ -> "numberValue", json
+    | `Int _ -> "numberValue", json
+    | `String _ -> "stringValue", json
+    | `Bool _ -> "boolValue", json
+    | `Assoc _ -> "structValue", json
+    | `List _ -> "listValue", json
+  in
+  `Assoc [value]
+
 
 
 let map_json: type a. (module Message with type t = a) -> Yojson.Basic.t -> Yojson.Basic.t = fun (module Message) ->
-  match Message.name' () |> String.split_on_char ~sep:'.' with
-  | [_; "google"; "protobuf"; "Empty"] (* Already mapped as it should I think *) ->
+  let name =
+    Message.name' ()
+    |> String.split_on_char ~sep:'.'
+    |> List.tl
+    |> String.concat ~sep:"."
+  in
+  match name with
+  | "google.protobuf.Empty" (* Already mapped as it should I think *) ->
     fun json -> json
   (* Duration - google/protobuf/timestamp.proto *)
-  | [_; "google"; "protobuf"; "Duration"] ->
+  | "google.protobuf.Duration" ->
     let convert json =
       let (seconds, nanos) = duration_of_json json in
       `Assoc [ "seconds", `Int seconds; "nanos", `Int nanos ]
     in
     convert
   (* Timestamp - google/protobuf/timestamp.proto *)
-  | [_; "google"; "protobuf"; "Timestamp"] ->
+  | "google.protobuf.Timestamp" ->
     let convert json =
       let (seconds, nanos) = timestamp_of_json json in
       `Assoc [ "seconds", `Int seconds; "nanos", `Int nanos ]
     in
     convert
   (* Wrapper types - google/protobuf/wrappers.proto *)
-  | [_; "google"; "protobuf"; "DoubleValue"]
-  | [_; "google"; "protobuf"; "FloatValue"]
-  | [_; "google"; "protobuf"; "Int64Value"]
-  | [_; "google"; "protobuf"; "UInt64Value"]
-  | [_; "google"; "protobuf"; "Int32Value"]
-  | [_; "google"; "protobuf"; "UInt32Value"]
-  | [_; "google"; "protobuf"; "BoolValue"]
-  | [_; "google"; "protobuf"; "StringValue"]
-  | [_; "google"; "protobuf"; "BytesValue"] ->
+  | "google.protobuf.DoubleValue"
+  | "google.protobuf.FloatValue"
+  | "google.protobuf.Int64Value"
+  | "google.protobuf.UInt64Value"
+  | "google.protobuf.Int32Value"
+  | "google.protobuf.UInt32Value"
+  | "google.protobuf.BoolValue"
+  | "google.protobuf.StringValue"
+  | "google.protobuf.BytesValue" ->
     (* Convert into a struct *)
     let convert json = `Assoc ["value", json] in
     convert
-  | [_; "google"; "protobuf"; "Value"] ->
+  | "google.protobuf.Value" ->
     (* Struct - google/protobuf/struct.proto *)
     (* Based on json type do the mapping *)
-    let convert (json: Yojson.Basic.t)  =
-      let value = match json with
-        | `Null -> "nullValue", `Int 0
-        | `Float _ -> "floatValue", json
-        | `Int _ -> "floatValue", json
-        | `String _ -> "stringValue", json
-        | `Bool _ -> "boolValue", json
-        | `Assoc l ->
-          let fields : Yojson.Basic.t =
-            List.map ~f:(fun (key, value) ->
-              `Assoc ["key", `String key; "value", value]
-            ) l
-            |> fun l -> `List l
-          in
-          let value = `Assoc ["fields", fields] in
-          "structValue", value
-        | `List _ -> "listValue", `Assoc ["values", json]
-      in
-      `Assoc [value]
+    value_to_json
+  | "google.protobuf.Struct" ->
+    (* Struct - google/protobuf/struct.proto *)
+    let convert = function
+      | `Assoc _ as json ->
+        `Assoc ["fields", json ]
+      | json -> value_error name json
     in
     convert
+    (* ListValue - google/protobuf/struct.proto *)
+  | "google.protobuf.ListValue" ->
+    let convert = function
+      | `List _ as json ->  `Assoc ["values", json ]
+      | json -> value_error name json
+    in
+    convert
+
   (* FieldMask - /usr/include/google/protobuf/field_mask.proto *)
-  | [_; "google"; "protobuf"; "FieldMask"] ->
+  | "google.protobuf.FieldMask" ->
     let open StdLabels in
     let convert = function
       | `String s ->
@@ -243,8 +257,8 @@ let map_json: type a. (module Message with type t = a) -> Yojson.Basic.t -> Yojs
           |> List.map ~f:from_camel_case
           |> List.map ~f:(fun s -> `String s)
         in
-        `Assoc ["masks", `List masks]
-      | json -> value_error "google.protobuf.FieldMask" json
+        `Assoc ["paths", `List masks]
+      | json -> value_error name json
     in
     convert
   | _ -> fun json -> json
