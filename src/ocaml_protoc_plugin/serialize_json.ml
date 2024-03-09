@@ -140,16 +140,16 @@ let%expect_test "timestamp_to_json" =
 let wrapper_to_json json = get_key ~f:(fun id -> id) ~default:`Null "value" json
 
 (* Convert already emitted json based on json mappings *)
-let map_json: type a. (module Message with type t = a) -> Yojson.Basic.t -> Yojson.Basic.t = fun (module Message) ->
+let map_json: type a. (module Message with type t = a) -> (Yojson.Basic.t -> Yojson.Basic.t) option = fun (module Message) ->
   match Message.name' () |> String.split_on_char ~sep:'.' with
   | [_; "google"; "protobuf"; "Empty"]  ->
-    fun json -> json
+    Some (fun json -> json)
   (* Duration - google/protobuf/timestamp.proto *)
   | [_; "google"; "protobuf"; "Duration"] ->
-    duration_to_json
+    Some (duration_to_json)
   (* Timestamp - google/protobuf/timestamp.proto *)
   | [_; "google"; "protobuf"; "Timestamp"] ->
-    timestamp_to_json
+    Some (timestamp_to_json)
   (* Wrapper types - google/protobuf/wrappers.proto *)
   | [_; "google"; "protobuf"; "DoubleValue"]
   | [_; "google"; "protobuf"; "FloatValue"]
@@ -160,17 +160,17 @@ let map_json: type a. (module Message with type t = a) -> Yojson.Basic.t -> Yojs
   | [_; "google"; "protobuf"; "BoolValue"]
   | [_; "google"; "protobuf"; "StringValue"]
   | [_; "google"; "protobuf"; "BytesValue"] ->
-    wrapper_to_json
+    Some (wrapper_to_json)
   | [_; "google"; "protobuf"; "Value"] ->
     let map = function
       | `Assoc [_, json] -> json
       | json -> value_error "google.protobuf.Value" json
     in
-    map
+    Some map
   (* FieldMask - /usr/include/google/protobuf/field_mask.proto *)
   | [_; "google"; "protobuf"; "FieldMask"] ->
     let open StdLabels in
-    let convert = function
+    let map = function
       | `Assoc ["masks", `List masks] ->
         List.map ~f:(function
           | `String mask -> (to_camel_case mask)
@@ -180,8 +180,8 @@ let map_json: type a. (module Message with type t = a) -> Yojson.Basic.t -> Yojs
         |> fun mask -> `String mask
       | json -> value_error "google.protobuf.FieldMask" json
     in
-    convert
-  | _ -> fun json -> json
+    Some map
+  | _ -> None
 
 let rec json_of_spec: type a b. enum_names:bool -> json_names:bool -> omit_default_values:bool -> (a, b) spec -> a -> Yojson.Basic.t =
   fun ~enum_names ~json_names ~omit_default_values -> function
@@ -221,7 +221,12 @@ let rec json_of_spec: type a b. enum_names:bool -> json_names:bool -> omit_defau
       | false -> enum_value ~f:Enum.to_int
     end
   | Message (module Message) ->
-    fun v -> Message.to_json ~enum_names ~json_names ~omit_default_values v |> map_json (module Message)
+    let omit_default_values, map =
+      match map_json (module Message) with
+      | Some map -> false, map
+      | None -> omit_default_values, (fun json -> json)
+    in
+    fun v -> Message.to_json ~enum_names ~json_names ~omit_default_values v |> map
 
 and write: type a b. enum_names:bool -> json_names:bool -> omit_default_values:bool -> (a, b) compound -> a -> field list =
   fun ~enum_names ~json_names ~omit_default_values -> function
