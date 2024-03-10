@@ -5,11 +5,12 @@ open Ocaml_protoc_plugin
 module Reference = struct
   open Ctypes
   open Foreign
+  let google_include_path =
+    In_channel.with_open_text "google_include" (fun ch -> In_channel.input_line ch |> Option.get)
   (* extern "C" char* protobuf2json(const char *google_include_dir, const char *proto, const char* type, const char* in_data)  *)
   let protobuf2json = foreign "protobuf2json" (string @-> string @-> string @-> string @-> int @-> returning string)
   let to_json ~proto_file ~message_type data =
-    let include_path = "/usr/include/" in
-    protobuf2json include_path proto_file message_type data (String.length data)
+    protobuf2json google_include_path proto_file message_type data (String.length data)
 end
 
 module type T = sig

@@ -26,6 +26,7 @@
  (enabled_if (and (<> %{architecture} x86_32) (<> %{architecture} arm32)))
  (libraries ocaml_protoc_plugin google_types_pp yojson ctypes-foreign)
  (inline_tests
+  (deps google_include)
   (executable (link_flags -linkall -cclib -l:libtest_stubs.a -cclib -lprotobuf -cclib "-u protobuf2json")))
  (modules :standard \ proto3_optional_test_opt)
  (preprocess
