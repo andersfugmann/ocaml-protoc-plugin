@@ -6,7 +6,11 @@ module Reference = struct
   open Ctypes
   open Foreign
   let google_include_path =
-    In_channel.with_open_text "google_include" (fun ch -> In_channel.input_line ch |> Option.get)
+    let ch = open_in "google_include" in
+    let include_path = input_line ch in
+    close_in ch;
+    include_path
+
   (* extern "C" char* protobuf2json(const char *google_include_dir, const char *proto, const char* type, const char* in_data)  *)
   let protobuf2json = foreign "protobuf2json" (string @-> string @-> string @-> string @-> int @-> returning string)
   let to_json ~proto_file ~message_type data =
