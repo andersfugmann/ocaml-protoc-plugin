@@ -102,6 +102,7 @@ module rec Google : sig
     and FieldDescriptorProto : sig
       module rec Type : sig
         type t = TYPE_DOUBLE | TYPE_FLOAT | TYPE_INT64 | TYPE_UINT64 | TYPE_INT32 | TYPE_FIXED64 | TYPE_FIXED32 | TYPE_BOOL | TYPE_STRING | TYPE_GROUP | TYPE_MESSAGE | TYPE_BYTES | TYPE_UINT32 | TYPE_ENUM | TYPE_SFIXED32 | TYPE_SFIXED64 | TYPE_SINT32 | TYPE_SINT64
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -110,6 +111,7 @@ module rec Google : sig
       end
       and Label : sig
         type t = LABEL_OPTIONAL | LABEL_REQUIRED | LABEL_REPEATED
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -209,6 +211,7 @@ module rec Google : sig
     and FileOptions : sig
       module rec OptimizeMode : sig
         type t = SPEED | CODE_SIZE | LITE_RUNTIME
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -243,6 +246,7 @@ module rec Google : sig
     and FieldOptions : sig
       module rec CType : sig
         type t = STRING | CORD | STRING_PIECE
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -251,6 +255,7 @@ module rec Google : sig
       end
       and JSType : sig
         type t = JS_NORMAL | JS_STRING | JS_NUMBER
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -324,6 +329,7 @@ module rec Google : sig
     and MethodOptions : sig
       module rec IdempotencyLevel : sig
         type t = IDEMPOTENCY_UNKNOWN | NO_SIDE_EFFECTS | IDEMPOTENT
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -504,6 +510,7 @@ end = struct
     and FieldDescriptorProto : sig
       module rec Type : sig
         type t = TYPE_DOUBLE | TYPE_FLOAT | TYPE_INT64 | TYPE_UINT64 | TYPE_INT32 | TYPE_FIXED64 | TYPE_FIXED32 | TYPE_BOOL | TYPE_STRING | TYPE_GROUP | TYPE_MESSAGE | TYPE_BYTES | TYPE_UINT32 | TYPE_ENUM | TYPE_SFIXED32 | TYPE_SFIXED64 | TYPE_SINT32 | TYPE_SINT64
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -512,6 +519,7 @@ end = struct
       end
       and Label : sig
         type t = LABEL_OPTIONAL | LABEL_REQUIRED | LABEL_REPEATED
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -611,6 +619,7 @@ end = struct
     and FileOptions : sig
       module rec OptimizeMode : sig
         type t = SPEED | CODE_SIZE | LITE_RUNTIME
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -645,6 +654,7 @@ end = struct
     and FieldOptions : sig
       module rec CType : sig
         type t = STRING | CORD | STRING_PIECE
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -653,6 +663,7 @@ end = struct
       end
       and JSType : sig
         type t = JS_NORMAL | JS_STRING | JS_NUMBER
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -726,6 +737,7 @@ end = struct
     and MethodOptions : sig
       module rec IdempotencyLevel : sig
         type t = IDEMPOTENCY_UNKNOWN | NO_SIDE_EFFECTS | IDEMPOTENT
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -843,18 +855,18 @@ end = struct
       let spec () = Runtime'.Spec.( repeated ((1, "file", "file"), (message (module FileDescriptorProto)), not_packed) ^:: nil )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
-        serialize
+        fun writer (file) -> serialize writer file
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun file -> (file) in
+        let constructor file = (file) in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
-        serialize
+        fun (file) -> serialize file
       let from_json_exn =
-        let constructor = fun file -> (file) in
+        let constructor file = (file) in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
@@ -895,14 +907,14 @@ end = struct
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun name package dependency message_type enum_type service extension options source_code_info public_dependency weak_dependency syntax -> { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } in
+        let constructor name package dependency message_type enum_type service extension options source_code_info public_dependency weak_dependency syntax = { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
         fun { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } -> serialize name package dependency message_type enum_type service extension options source_code_info public_dependency weak_dependency syntax
       let from_json_exn =
-        let constructor = fun name package dependency message_type enum_type service extension options source_code_info public_dependency weak_dependency syntax -> { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } in
+        let constructor name package dependency message_type enum_type service extension options source_code_info public_dependency weak_dependency syntax = { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
@@ -973,14 +985,14 @@ end = struct
 
         let to_proto t = to_proto' (Runtime'.Writer.init ()) t
         let from_proto_exn =
-          let constructor = fun start end' options -> { start; end'; options } in
+          let constructor start end' options = { start; end'; options } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json ?enum_names ?json_names ?omit_default_values =
           let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
           fun { start; end'; options } -> serialize start end' options
         let from_json_exn =
-          let constructor = fun start end' options -> { start; end'; options } in
+          let constructor start end' options = { start; end'; options } in
           Runtime'.Deserialize_json.deserialize (spec ()) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
@@ -1011,14 +1023,14 @@ end = struct
 
         let to_proto t = to_proto' (Runtime'.Writer.init ()) t
         let from_proto_exn =
-          let constructor = fun start end' -> { start; end' } in
+          let constructor start end' = { start; end' } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json ?enum_names ?json_names ?omit_default_values =
           let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
           fun { start; end' } -> serialize start end'
         let from_json_exn =
-          let constructor = fun start end' -> { start; end' } in
+          let constructor start end' = { start; end' } in
           Runtime'.Deserialize_json.deserialize (spec ()) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
@@ -1044,14 +1056,14 @@ end = struct
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun name field nested_type enum_type extension_range extension options oneof_decl reserved_range reserved_name -> { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } in
+        let constructor name field nested_type enum_type extension_range extension options oneof_decl reserved_range reserved_name = { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
         fun { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } -> serialize name field nested_type enum_type extension_range extension options oneof_decl reserved_range reserved_name
       let from_json_exn =
-        let constructor = fun name field nested_type enum_type extension_range extension options oneof_decl reserved_range reserved_name -> { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } in
+        let constructor name field nested_type enum_type extension_range extension options oneof_decl reserved_range reserved_name = { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
@@ -1082,20 +1094,21 @@ end = struct
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun uninterpreted_option extensions' -> { uninterpreted_option; extensions' } in
+        let constructor uninterpreted_option extensions' = { uninterpreted_option; extensions' } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
         fun { uninterpreted_option; extensions' } -> serialize uninterpreted_option extensions'
       let from_json_exn =
-        let constructor = fun uninterpreted_option extensions' -> { uninterpreted_option; extensions' } in
+        let constructor uninterpreted_option extensions' = { uninterpreted_option; extensions' } in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and FieldDescriptorProto : sig
       module rec Type : sig
         type t = TYPE_DOUBLE | TYPE_FLOAT | TYPE_INT64 | TYPE_UINT64 | TYPE_INT32 | TYPE_FIXED64 | TYPE_FIXED32 | TYPE_BOOL | TYPE_STRING | TYPE_GROUP | TYPE_MESSAGE | TYPE_BYTES | TYPE_UINT32 | TYPE_ENUM | TYPE_SFIXED32 | TYPE_SFIXED64 | TYPE_SINT32 | TYPE_SINT64
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1104,6 +1117,7 @@ end = struct
       end
       and Label : sig
         type t = LABEL_OPTIONAL | LABEL_REQUIRED | LABEL_REPEATED
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1124,6 +1138,7 @@ end = struct
     end = struct
       module rec Type : sig
         type t = TYPE_DOUBLE | TYPE_FLOAT | TYPE_INT64 | TYPE_UINT64 | TYPE_INT32 | TYPE_FIXED64 | TYPE_FIXED32 | TYPE_BOOL | TYPE_STRING | TYPE_GROUP | TYPE_MESSAGE | TYPE_BYTES | TYPE_UINT32 | TYPE_ENUM | TYPE_SFIXED32 | TYPE_SFIXED64 | TYPE_SINT32 | TYPE_SINT64
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1131,6 +1146,7 @@ end = struct
         val from_string_exn: string -> t
       end = struct
         type t = TYPE_DOUBLE | TYPE_FLOAT | TYPE_INT64 | TYPE_UINT64 | TYPE_INT32 | TYPE_FIXED64 | TYPE_FIXED32 | TYPE_BOOL | TYPE_STRING | TYPE_GROUP | TYPE_MESSAGE | TYPE_BYTES | TYPE_UINT32 | TYPE_ENUM | TYPE_SFIXED32 | TYPE_SFIXED64 | TYPE_SINT32 | TYPE_SINT64
+        let name () = "descriptor.google.protobuf.FieldDescriptorProto.Type"
         let to_int = function
           | TYPE_DOUBLE -> 1
           | TYPE_FLOAT -> 2
@@ -1214,6 +1230,7 @@ end = struct
       end
       and Label : sig
         type t = LABEL_OPTIONAL | LABEL_REQUIRED | LABEL_REPEATED
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1221,6 +1238,7 @@ end = struct
         val from_string_exn: string -> t
       end = struct
         type t = LABEL_OPTIONAL | LABEL_REQUIRED | LABEL_REPEATED
+        let name () = "descriptor.google.protobuf.FieldDescriptorProto.Label"
         let to_int = function
           | LABEL_OPTIONAL -> 1
           | LABEL_REQUIRED -> 2
@@ -1265,14 +1283,14 @@ end = struct
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun name extendee number label type' type_name default_value options oneof_index json_name proto3_optional -> { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } in
+        let constructor name extendee number label type' type_name default_value options oneof_index json_name proto3_optional = { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
         fun { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } -> serialize name extendee number label type' type_name default_value options oneof_index json_name proto3_optional
       let from_json_exn =
-        let constructor = fun name extendee number label type' type_name default_value options oneof_index json_name proto3_optional -> { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } in
+        let constructor name extendee number label type' type_name default_value options oneof_index json_name proto3_optional = { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
@@ -1303,14 +1321,14 @@ end = struct
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun name options -> { name; options } in
+        let constructor name options = { name; options } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
         fun { name; options } -> serialize name options
       let from_json_exn =
-        let constructor = fun name options -> { name; options } in
+        let constructor name options = { name; options } in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
@@ -1367,14 +1385,14 @@ end = struct
 
         let to_proto t = to_proto' (Runtime'.Writer.init ()) t
         let from_proto_exn =
-          let constructor = fun start end' -> { start; end' } in
+          let constructor start end' = { start; end' } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json ?enum_names ?json_names ?omit_default_values =
           let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
           fun { start; end' } -> serialize start end'
         let from_json_exn =
-          let constructor = fun start end' -> { start; end' } in
+          let constructor start end' = { start; end' } in
           Runtime'.Deserialize_json.deserialize (spec ()) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
@@ -1395,14 +1413,14 @@ end = struct
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun name value options reserved_range reserved_name -> { name; value; options; reserved_range; reserved_name } in
+        let constructor name value options reserved_range reserved_name = { name; value; options; reserved_range; reserved_name } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
         fun { name; value; options; reserved_range; reserved_name } -> serialize name value options reserved_range reserved_name
       let from_json_exn =
-        let constructor = fun name value options reserved_range reserved_name -> { name; value; options; reserved_range; reserved_name } in
+        let constructor name value options reserved_range reserved_name = { name; value; options; reserved_range; reserved_name } in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
@@ -1434,14 +1452,14 @@ end = struct
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun name number options -> { name; number; options } in
+        let constructor name number options = { name; number; options } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
         fun { name; number; options } -> serialize name number options
       let from_json_exn =
-        let constructor = fun name number options -> { name; number; options } in
+        let constructor name number options = { name; number; options } in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
@@ -1473,14 +1491,14 @@ end = struct
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun name method' options -> { name; method'; options } in
+        let constructor name method' options = { name; method'; options } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
         fun { name; method'; options } -> serialize name method' options
       let from_json_exn =
-        let constructor = fun name method' options -> { name; method'; options } in
+        let constructor name method' options = { name; method'; options } in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
@@ -1515,20 +1533,21 @@ end = struct
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun name input_type output_type options client_streaming server_streaming -> { name; input_type; output_type; options; client_streaming; server_streaming } in
+        let constructor name input_type output_type options client_streaming server_streaming = { name; input_type; output_type; options; client_streaming; server_streaming } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
         fun { name; input_type; output_type; options; client_streaming; server_streaming } -> serialize name input_type output_type options client_streaming server_streaming
       let from_json_exn =
-        let constructor = fun name input_type output_type options client_streaming server_streaming -> { name; input_type; output_type; options; client_streaming; server_streaming } in
+        let constructor name input_type output_type options client_streaming server_streaming = { name; input_type; output_type; options; client_streaming; server_streaming } in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and FileOptions : sig
       module rec OptimizeMode : sig
         type t = SPEED | CODE_SIZE | LITE_RUNTIME
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1549,6 +1568,7 @@ end = struct
     end = struct
       module rec OptimizeMode : sig
         type t = SPEED | CODE_SIZE | LITE_RUNTIME
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1556,6 +1576,7 @@ end = struct
         val from_string_exn: string -> t
       end = struct
         type t = SPEED | CODE_SIZE | LITE_RUNTIME
+        let name () = "descriptor.google.protobuf.FileOptions.OptimizeMode"
         let to_int = function
           | SPEED -> 1
           | CODE_SIZE -> 2
@@ -1611,14 +1632,14 @@ end = struct
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun java_package java_outer_classname optimize_for java_multiple_files go_package cc_generic_services java_generic_services py_generic_services java_generate_equals_and_hash deprecated java_string_check_utf8 cc_enable_arenas objc_class_prefix csharp_namespace swift_prefix php_class_prefix php_namespace php_generic_services php_metadata_namespace ruby_package uninterpreted_option extensions' -> { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } in
+        let constructor java_package java_outer_classname optimize_for java_multiple_files go_package cc_generic_services java_generic_services py_generic_services java_generate_equals_and_hash deprecated java_string_check_utf8 cc_enable_arenas objc_class_prefix csharp_namespace swift_prefix php_class_prefix php_namespace php_generic_services php_metadata_namespace ruby_package uninterpreted_option extensions' = { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
         fun { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } -> serialize java_package java_outer_classname optimize_for java_multiple_files go_package cc_generic_services java_generic_services py_generic_services java_generate_equals_and_hash deprecated java_string_check_utf8 cc_enable_arenas objc_class_prefix csharp_namespace swift_prefix php_class_prefix php_namespace php_generic_services php_metadata_namespace ruby_package uninterpreted_option extensions'
       let from_json_exn =
-        let constructor = fun java_package java_outer_classname optimize_for java_multiple_files go_package cc_generic_services java_generic_services py_generic_services java_generate_equals_and_hash deprecated java_string_check_utf8 cc_enable_arenas objc_class_prefix csharp_namespace swift_prefix php_class_prefix php_namespace php_generic_services php_metadata_namespace ruby_package uninterpreted_option extensions' -> { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } in
+        let constructor java_package java_outer_classname optimize_for java_multiple_files go_package cc_generic_services java_generic_services py_generic_services java_generate_equals_and_hash deprecated java_string_check_utf8 cc_enable_arenas objc_class_prefix csharp_namespace swift_prefix php_class_prefix php_namespace php_generic_services php_metadata_namespace ruby_package uninterpreted_option extensions' = { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
@@ -1653,20 +1674,21 @@ end = struct
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option extensions' -> { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } in
+        let constructor message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option extensions' = { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
         fun { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } -> serialize message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option extensions'
       let from_json_exn =
-        let constructor = fun message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option extensions' -> { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } in
+        let constructor message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option extensions' = { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and FieldOptions : sig
       module rec CType : sig
         type t = STRING | CORD | STRING_PIECE
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1675,6 +1697,7 @@ end = struct
       end
       and JSType : sig
         type t = JS_NORMAL | JS_STRING | JS_NUMBER
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1695,6 +1718,7 @@ end = struct
     end = struct
       module rec CType : sig
         type t = STRING | CORD | STRING_PIECE
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1702,6 +1726,7 @@ end = struct
         val from_string_exn: string -> t
       end = struct
         type t = STRING | CORD | STRING_PIECE
+        let name () = "descriptor.google.protobuf.FieldOptions.CType"
         let to_int = function
           | STRING -> 0
           | CORD -> 1
@@ -1725,6 +1750,7 @@ end = struct
       end
       and JSType : sig
         type t = JS_NORMAL | JS_STRING | JS_NUMBER
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1732,6 +1758,7 @@ end = struct
         val from_string_exn: string -> t
       end = struct
         type t = JS_NORMAL | JS_STRING | JS_NUMBER
+        let name () = "descriptor.google.protobuf.FieldOptions.JSType"
         let to_int = function
           | JS_NORMAL -> 0
           | JS_STRING -> 1
@@ -1774,14 +1801,14 @@ end = struct
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun ctype packed deprecated lazy' jstype weak unverified_lazy uninterpreted_option extensions' -> { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } in
+        let constructor ctype packed deprecated lazy' jstype weak unverified_lazy uninterpreted_option extensions' = { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
         fun { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } -> serialize ctype packed deprecated lazy' jstype weak unverified_lazy uninterpreted_option extensions'
       let from_json_exn =
-        let constructor = fun ctype packed deprecated lazy' jstype weak unverified_lazy uninterpreted_option extensions' -> { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } in
+        let constructor ctype packed deprecated lazy' jstype weak unverified_lazy uninterpreted_option extensions' = { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
@@ -1812,14 +1839,14 @@ end = struct
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun uninterpreted_option extensions' -> { uninterpreted_option; extensions' } in
+        let constructor uninterpreted_option extensions' = { uninterpreted_option; extensions' } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
         fun { uninterpreted_option; extensions' } -> serialize uninterpreted_option extensions'
       let from_json_exn =
-        let constructor = fun uninterpreted_option extensions' -> { uninterpreted_option; extensions' } in
+        let constructor uninterpreted_option extensions' = { uninterpreted_option; extensions' } in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
@@ -1852,14 +1879,14 @@ end = struct
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun allow_alias deprecated uninterpreted_option extensions' -> { allow_alias; deprecated; uninterpreted_option; extensions' } in
+        let constructor allow_alias deprecated uninterpreted_option extensions' = { allow_alias; deprecated; uninterpreted_option; extensions' } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
         fun { allow_alias; deprecated; uninterpreted_option; extensions' } -> serialize allow_alias deprecated uninterpreted_option extensions'
       let from_json_exn =
-        let constructor = fun allow_alias deprecated uninterpreted_option extensions' -> { allow_alias; deprecated; uninterpreted_option; extensions' } in
+        let constructor allow_alias deprecated uninterpreted_option extensions' = { allow_alias; deprecated; uninterpreted_option; extensions' } in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
@@ -1891,14 +1918,14 @@ end = struct
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun deprecated uninterpreted_option extensions' -> { deprecated; uninterpreted_option; extensions' } in
+        let constructor deprecated uninterpreted_option extensions' = { deprecated; uninterpreted_option; extensions' } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
         fun { deprecated; uninterpreted_option; extensions' } -> serialize deprecated uninterpreted_option extensions'
       let from_json_exn =
-        let constructor = fun deprecated uninterpreted_option extensions' -> { deprecated; uninterpreted_option; extensions' } in
+        let constructor deprecated uninterpreted_option extensions' = { deprecated; uninterpreted_option; extensions' } in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
@@ -1930,20 +1957,21 @@ end = struct
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun deprecated uninterpreted_option extensions' -> { deprecated; uninterpreted_option; extensions' } in
+        let constructor deprecated uninterpreted_option extensions' = { deprecated; uninterpreted_option; extensions' } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
         fun { deprecated; uninterpreted_option; extensions' } -> serialize deprecated uninterpreted_option extensions'
       let from_json_exn =
-        let constructor = fun deprecated uninterpreted_option extensions' -> { deprecated; uninterpreted_option; extensions' } in
+        let constructor deprecated uninterpreted_option extensions' = { deprecated; uninterpreted_option; extensions' } in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and MethodOptions : sig
       module rec IdempotencyLevel : sig
         type t = IDEMPOTENCY_UNKNOWN | NO_SIDE_EFFECTS | IDEMPOTENT
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1964,6 +1992,7 @@ end = struct
     end = struct
       module rec IdempotencyLevel : sig
         type t = IDEMPOTENCY_UNKNOWN | NO_SIDE_EFFECTS | IDEMPOTENT
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1971,6 +2000,7 @@ end = struct
         val from_string_exn: string -> t
       end = struct
         type t = IDEMPOTENCY_UNKNOWN | NO_SIDE_EFFECTS | IDEMPOTENT
+        let name () = "descriptor.google.protobuf.MethodOptions.IdempotencyLevel"
         let to_int = function
           | IDEMPOTENCY_UNKNOWN -> 0
           | NO_SIDE_EFFECTS -> 1
@@ -2008,14 +2038,14 @@ end = struct
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun deprecated idempotency_level uninterpreted_option extensions' -> { deprecated; idempotency_level; uninterpreted_option; extensions' } in
+        let constructor deprecated idempotency_level uninterpreted_option extensions' = { deprecated; idempotency_level; uninterpreted_option; extensions' } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
         fun { deprecated; idempotency_level; uninterpreted_option; extensions' } -> serialize deprecated idempotency_level uninterpreted_option extensions'
       let from_json_exn =
-        let constructor = fun deprecated idempotency_level uninterpreted_option extensions' -> { deprecated; idempotency_level; uninterpreted_option; extensions' } in
+        let constructor deprecated idempotency_level uninterpreted_option extensions' = { deprecated; idempotency_level; uninterpreted_option; extensions' } in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
@@ -2072,14 +2102,14 @@ end = struct
 
         let to_proto t = to_proto' (Runtime'.Writer.init ()) t
         let from_proto_exn =
-          let constructor = fun name_part is_extension -> { name_part; is_extension } in
+          let constructor name_part is_extension = { name_part; is_extension } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json ?enum_names ?json_names ?omit_default_values =
           let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
           fun { name_part; is_extension } -> serialize name_part is_extension
         let from_json_exn =
-          let constructor = fun name_part is_extension -> { name_part; is_extension } in
+          let constructor name_part is_extension = { name_part; is_extension } in
           Runtime'.Deserialize_json.deserialize (spec ()) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
@@ -2102,14 +2132,14 @@ end = struct
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun name identifier_value positive_int_value negative_int_value double_value string_value aggregate_value -> { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } in
+        let constructor name identifier_value positive_int_value negative_int_value double_value string_value aggregate_value = { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
         fun { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } -> serialize name identifier_value positive_int_value negative_int_value double_value string_value aggregate_value
       let from_json_exn =
-        let constructor = fun name identifier_value positive_int_value negative_int_value double_value string_value aggregate_value -> { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } in
+        let constructor name identifier_value positive_int_value negative_int_value double_value string_value aggregate_value = { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
@@ -2169,14 +2199,14 @@ end = struct
 
         let to_proto t = to_proto' (Runtime'.Writer.init ()) t
         let from_proto_exn =
-          let constructor = fun path span leading_comments trailing_comments leading_detached_comments -> { path; span; leading_comments; trailing_comments; leading_detached_comments } in
+          let constructor path span leading_comments trailing_comments leading_detached_comments = { path; span; leading_comments; trailing_comments; leading_detached_comments } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json ?enum_names ?json_names ?omit_default_values =
           let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
           fun { path; span; leading_comments; trailing_comments; leading_detached_comments } -> serialize path span leading_comments trailing_comments leading_detached_comments
         let from_json_exn =
-          let constructor = fun path span leading_comments trailing_comments leading_detached_comments -> { path; span; leading_comments; trailing_comments; leading_detached_comments } in
+          let constructor path span leading_comments trailing_comments leading_detached_comments = { path; span; leading_comments; trailing_comments; leading_detached_comments } in
           Runtime'.Deserialize_json.deserialize (spec ()) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
@@ -2187,18 +2217,18 @@ end = struct
       let spec () = Runtime'.Spec.( repeated ((1, "location", "location"), (message (module Location)), not_packed) ^:: nil )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
-        serialize
+        fun writer (location) -> serialize writer location
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun location -> (location) in
+        let constructor location = (location) in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
-        serialize
+        fun (location) -> serialize location
       let from_json_exn =
-        let constructor = fun location -> (location) in
+        let constructor location = (location) in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
@@ -2257,14 +2287,14 @@ end = struct
 
         let to_proto t = to_proto' (Runtime'.Writer.init ()) t
         let from_proto_exn =
-          let constructor = fun path source_file begin' end' -> { path; source_file; begin'; end' } in
+          let constructor path source_file begin' end' = { path; source_file; begin'; end' } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json ?enum_names ?json_names ?omit_default_values =
           let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
           fun { path; source_file; begin'; end' } -> serialize path source_file begin' end'
         let from_json_exn =
-          let constructor = fun path source_file begin' end' -> { path; source_file; begin'; end' } in
+          let constructor path source_file begin' end' = { path; source_file; begin'; end' } in
           Runtime'.Deserialize_json.deserialize (spec ()) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
@@ -2275,18 +2305,18 @@ end = struct
       let spec () = Runtime'.Spec.( repeated ((1, "annotation", "annotation"), (message (module Annotation)), not_packed) ^:: nil )
       let to_proto' =
         let serialize = Runtime'.Serialize.serialize (spec ()) in
-        serialize
+        fun writer (annotation) -> serialize writer annotation
 
       let to_proto t = to_proto' (Runtime'.Writer.init ()) t
       let from_proto_exn =
-        let constructor = fun annotation -> (annotation) in
+        let constructor annotation = (annotation) in
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json ?enum_names ?json_names ?omit_default_values =
         let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
-        serialize
+        fun (annotation) -> serialize annotation
       let from_json_exn =
-        let constructor = fun annotation -> (annotation) in
+        let constructor annotation = (annotation) in
         Runtime'.Deserialize_json.deserialize (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end

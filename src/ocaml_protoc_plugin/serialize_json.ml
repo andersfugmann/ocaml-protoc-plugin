@@ -2,6 +2,8 @@ open! StdLabels
 open Spec
 
 (** Serialize to json as per https://protobuf.dev/programming-guides/proto3/#json-options *)
+let value_error type_name json =
+  Result.raise (`Wrong_field_type (type_name, Yojson.Basic.show json))
 
 type field = string * Yojson.Basic.t
 
@@ -30,6 +32,184 @@ let key ~json_names (_, name, json_name) =
   match json_names with
   | true -> json_name
   | false -> name
+
+let get_key ~f ~default key = function
+  | `Assoc l ->
+    List.assoc_opt key l
+    |> Option.map f
+    |> Option.value ~default
+  | json -> value_error "Expected Assoc" json
+
+let to_camel_case s =
+  let open StdLabels in
+  String.split_on_char ~sep:'_' s
+  |> List.map ~f:String.lowercase_ascii
+  |> List.map ~f:String.capitalize_ascii
+  |> String.concat ~sep:""
+  |> String.uncapitalize_ascii
+
+let%expect_test "json name to proto name" =
+  let test s = Printf.printf "%10s -> %10s\n" s (to_camel_case s) in
+  test "camel_case";
+  test "Camel_case";
+  test "Camel_Case";
+  test "Camel_Case";
+  test "camel_cASe";
+  test "CAMel_case";
+  ();
+  [%expect {|
+    camel_case ->  camelCase
+    Camel_case ->  camelCase
+    Camel_Case ->  camelCase
+    Camel_Case ->  camelCase
+    camel_cASe ->  camelCase
+    CAMel_case ->  camelCase |}]
+
+let duration_to_json json =
+  let seconds = get_key "seconds" ~f:Deserialize_json.to_int64 ~default:0L json in
+  let nanos = get_key "nanos" ~f:Deserialize_json.to_int32 ~default:0l json in
+  let seconds = match seconds < 0L || nanos < 0l with
+    | true -> Int64.mul (-1L) (Int64.abs seconds)
+    | false -> (Int64.abs seconds)
+  in
+  let duration =
+    match nanos with
+    | 0l -> Printf.sprintf "%Lds" seconds
+    | _ -> Printf.sprintf "%Ld.%09lds" seconds (Int32.abs nanos)
+  in
+  `String duration
+
+let%expect_test "duration_to_json" =
+  let test seconds nanos =
+    let json = `Assoc ["seconds", `Int seconds; "nanos", `Int nanos] in
+    Printf.printf "%d.%d -> %s\n" seconds nanos (Yojson.Basic.to_string (duration_to_json json))
+  in
+  test 100 0;
+  test (1000) (123456);
+  test (-1000) (-123456);
+  ();
+  [%expect {|
+    100.0 -> "100s"
+    1000.123456 -> "1000.000123456s"
+    -1000.-123456 -> "-1000.000123456s" |}]
+
+let timestamp_to_json json =
+  let open Stdlib in
+  let open StdLabels in
+  let seconds = get_key "seconds" ~f:Deserialize_json.to_int ~default:0 json in
+  let nanos = get_key "nanos" ~f:Deserialize_json.to_int ~default:0 json in
+  let s1 = Ptime.Span.of_int_s seconds in
+  let s2 = Ptime.Span.of_float_s (float nanos /. 1_000_000_000.0) |> Option.get in
+  let t =
+    Ptime.Span.add s1 s2
+    |> Ptime.of_span
+    |> Option.get
+   in
+  t
+  |> Ptime.to_rfc3339 ~frac_s:9
+  |> String.split_on_char ~sep:'-'
+  |> List.rev
+  |> List.tl
+  |> List.rev
+  |> String.concat ~sep:"-"
+  |> fun s -> `String (s^"Z")
+
+let%expect_test "timestamp_to_json" =
+  let test seconds nanos =
+    let json = `Assoc ["seconds", `Int seconds; "nanos", `Int nanos] in
+    Printf.printf "%d.%d -> %s\n" seconds nanos (Yojson.Basic.to_string (timestamp_to_json json))
+  in
+  test 1709931283 0;
+  test 1709931283 (1_000_000_002/2);
+  test 1709931283 1_000_000_000;
+  test 0 1;
+  ();
+  [%expect {|
+    1709931283.0 -> "2024-03-08T20:54:43.000000000Z"
+    1709931283.500000001 -> "2024-03-08T20:54:43.500000001Z"
+    1709931283.1000000000 -> "2024-03-08T20:54:44.000000000Z"
+    0.1 -> "1970-01-01T00:00:00.000000001Z" |}]
+
+let wrapper_to_json json = get_key ~f:(fun id -> id) ~default:`Null "value" json
+
+let map_enum_json: (module Enum) -> Yojson.Basic.t -> Yojson.Basic.t = fun (module Enum) ->
+  let name =
+    Enum.name ()
+    |> String.split_on_char ~sep:'.'
+    |> List.tl
+    |> String.concat ~sep:"."
+  in
+  match name with
+  | "google.protobuf.NullValue" -> begin
+      function
+      | `Int 0 -> `Null
+      | `String s when s = Enum.to_string (Enum.from_int_exn 0) -> `Null
+      | json -> value_error name json
+    end
+  | _ -> fun json -> json
+
+
+(* Convert already emitted json based on json mappings *)
+let map_message_json: (module Message) -> (Yojson.Basic.t -> Yojson.Basic.t) option = fun (module Message) ->
+  let name =
+    Message.name' ()
+    |> String.split_on_char ~sep:'.'
+    |> List.tl
+    |> String.concat ~sep:"."
+  in
+
+  match name with
+  | "google.protobuf.Empty"  ->
+    Some (fun json -> json)
+  (* Duration - google/protobuf/timestamp.proto *)
+  | "google.protobuf.Duration" ->
+    Some (duration_to_json)
+  (* Timestamp - google/protobuf/timestamp.proto *)
+  | "google.protobuf.Timestamp" ->
+    Some (timestamp_to_json)
+  (* Wrapper types - google/protobuf/wrappers.proto *)
+  | "google.protobuf.DoubleValue"
+  | "google.protobuf.FloatValue"
+  | "google.protobuf.Int64Value"
+  | "google.protobuf.UInt64Value"
+  | "google.protobuf.Int32Value"
+  | "google.protobuf.UInt32Value"
+  | "google.protobuf.BoolValue"
+  | "google.protobuf.StringValue"
+  | "google.protobuf.BytesValue" ->
+    Some (wrapper_to_json)
+  | "google.protobuf.Value" ->
+    let map = function
+      | `Assoc [_, json] -> json
+      | json -> value_error name json
+    in
+    Some map
+  | "google.protobuf.Struct" ->
+    let map = function
+      | `Assoc ["fields", json ] -> json
+      | json -> value_error name json
+    in
+    Some map
+  | "google.protobuf.ListValue" ->
+    let map = function
+      | `Assoc ["values", json ] -> json
+      | json -> value_error name json
+    in
+    Some map
+  | "google.protobuf.FieldMask" ->
+    let open StdLabels in
+    let map = function
+      | `Assoc ["paths", `List masks] ->
+        List.map ~f:(function
+          | `String mask -> (to_camel_case mask)
+          | json -> value_error name json
+        ) masks
+        |> String.concat ~sep:","
+        |> fun mask -> `String mask
+      | json -> value_error name json
+    in
+    Some map
+  | _ -> None
 
 let rec json_of_spec: type a b. enum_names:bool -> json_names:bool -> omit_default_values:bool -> (a, b) spec -> a -> Yojson.Basic.t =
   fun ~enum_names ~json_names ~omit_default_values -> function
@@ -64,12 +244,20 @@ let rec json_of_spec: type a b. enum_names:bool -> json_names:bool -> omit_defau
   | SFixed64_int -> int64_int_value
 
   | Enum (module Enum) -> begin
-      match enum_names with
-      | true -> enum_name ~f:Enum.to_string
-      | false -> enum_value ~f:Enum.to_int
-    end
+    fun v ->
+      let f = match enum_names with
+        | true -> enum_name ~f:Enum.to_string
+        | false -> enum_value ~f:Enum.to_int
+      in
+      f v |> map_enum_json (module Enum)
+  end
   | Message (module Message) ->
-    Message.to_json ~enum_names ~json_names ~omit_default_values
+    let omit_default_values, map =
+      match map_message_json (module Message) with
+      | Some map -> false, map
+      | None -> omit_default_values, (fun json -> json)
+    in
+    fun v -> Message.to_json ~enum_names ~json_names ~omit_default_values v |> map
 
 and write: type a b. enum_names:bool -> json_names:bool -> omit_default_values:bool -> (a, b) compound -> a -> field list =
   fun ~enum_names ~json_names ~omit_default_values -> function

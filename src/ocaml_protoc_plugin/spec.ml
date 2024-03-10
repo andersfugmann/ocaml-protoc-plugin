@@ -8,6 +8,7 @@ end
 
 module type Enum = sig
   type t
+  val name: unit -> string
   val to_int: t -> int
   val from_int: int -> t Result.t
   val from_int_exn: int -> t
@@ -17,6 +18,7 @@ end
 
 module type Message = sig
   type t
+  val name': unit -> string
   val from_proto: Reader.t -> t Result.t
   val from_proto_exn: Reader.t -> t
   val to_proto: t -> Writer.t
@@ -32,7 +34,6 @@ module Make(T : T) = struct
   type extension_ranges = (int * int) list
   type extensions = (int * Field.t) list
   type 'a merge = 'a -> 'a -> 'a
-
   type field = (int * string * string)
 
   type scalar = [ `Scalar ]
@@ -135,8 +136,8 @@ module Make(T : T) = struct
   let bool = Bool
   let string = String
   let bytes = Bytes
-  let enum f = Enum f
-  let message f = Message f
+  let enum e = Enum e
+  let message m = Message m
 
   let some v = Some v
   let none = None

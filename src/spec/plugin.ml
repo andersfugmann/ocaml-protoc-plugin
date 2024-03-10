@@ -56,6 +56,7 @@ module rec Google : sig
       and CodeGeneratorResponse : sig
         module rec Feature : sig
           type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
+          val name: unit -> string
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
@@ -121,6 +122,7 @@ end = struct
       and CodeGeneratorResponse : sig
         module rec Feature : sig
           type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
+          val name: unit -> string
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
@@ -184,6 +186,7 @@ end = struct
       and CodeGeneratorResponse : sig
         module rec Feature : sig
           type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
+          val name: unit -> string
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
@@ -245,14 +248,14 @@ end = struct
 
         let to_proto t = to_proto' (Runtime'.Writer.init ()) t
         let from_proto_exn =
-          let constructor = fun major minor patch suffix -> { major; minor; patch; suffix } in
+          let constructor major minor patch suffix = { major; minor; patch; suffix } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json ?enum_names ?json_names ?omit_default_values =
           let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
           fun { major; minor; patch; suffix } -> serialize major minor patch suffix
         let from_json_exn =
-          let constructor = fun major minor patch suffix -> { major; minor; patch; suffix } in
+          let constructor major minor patch suffix = { major; minor; patch; suffix } in
           Runtime'.Deserialize_json.deserialize (spec ()) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
@@ -285,20 +288,21 @@ end = struct
 
         let to_proto t = to_proto' (Runtime'.Writer.init ()) t
         let from_proto_exn =
-          let constructor = fun file_to_generate parameter compiler_version proto_file -> { file_to_generate; parameter; compiler_version; proto_file } in
+          let constructor file_to_generate parameter compiler_version proto_file = { file_to_generate; parameter; compiler_version; proto_file } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json ?enum_names ?json_names ?omit_default_values =
           let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
           fun { file_to_generate; parameter; compiler_version; proto_file } -> serialize file_to_generate parameter compiler_version proto_file
         let from_json_exn =
-          let constructor = fun file_to_generate parameter compiler_version proto_file -> { file_to_generate; parameter; compiler_version; proto_file } in
+          let constructor file_to_generate parameter compiler_version proto_file = { file_to_generate; parameter; compiler_version; proto_file } in
           Runtime'.Deserialize_json.deserialize (spec ()) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       and CodeGeneratorResponse : sig
         module rec Feature : sig
           type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
+          val name: unit -> string
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
@@ -332,6 +336,7 @@ end = struct
       end = struct
         module rec Feature : sig
           type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
+          val name: unit -> string
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
@@ -339,6 +344,7 @@ end = struct
           val from_string_exn: string -> t
         end = struct
           type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
+          let name () = "plugin.google.protobuf.compiler.CodeGeneratorResponse.Feature"
           let to_int = function
             | FEATURE_NONE -> 0
             | FEATURE_PROTO3_OPTIONAL -> 1
@@ -385,14 +391,14 @@ end = struct
 
           let to_proto t = to_proto' (Runtime'.Writer.init ()) t
           let from_proto_exn =
-            let constructor = fun name insertion_point content generated_code_info -> { name; insertion_point; content; generated_code_info } in
+            let constructor name insertion_point content generated_code_info = { name; insertion_point; content; generated_code_info } in
             Runtime'.Deserialize.deserialize (spec ()) constructor
           let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
           let to_json ?enum_names ?json_names ?omit_default_values =
             let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
             fun { name; insertion_point; content; generated_code_info } -> serialize name insertion_point content generated_code_info
           let from_json_exn =
-            let constructor = fun name insertion_point content generated_code_info -> { name; insertion_point; content; generated_code_info } in
+            let constructor name insertion_point content generated_code_info = { name; insertion_point; content; generated_code_info } in
             Runtime'.Deserialize_json.deserialize (spec ()) constructor
           let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
         end
@@ -411,14 +417,14 @@ end = struct
 
         let to_proto t = to_proto' (Runtime'.Writer.init ()) t
         let from_proto_exn =
-          let constructor = fun error supported_features file -> { error; supported_features; file } in
+          let constructor error supported_features file = { error; supported_features; file } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json ?enum_names ?json_names ?omit_default_values =
           let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
           fun { error; supported_features; file } -> serialize error supported_features file
         let from_json_exn =
-          let constructor = fun error supported_features file -> { error; supported_features; file } in
+          let constructor error supported_features file = { error; supported_features; file } in
           Runtime'.Deserialize_json.deserialize (spec ()) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end

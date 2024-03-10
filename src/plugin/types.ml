@@ -32,8 +32,8 @@ type field_spec = {
 
 type t = {
   type' : string;
-  constructor: string;
-  apply: (string * string) option;
+  destructor: string;
+  args: string list;
   spec_str: string;
   default_constructor_sig: string;
   default_constructor_impl: string;
@@ -604,6 +604,14 @@ let sort_fields fields =
   in
   List.sort ~cmp:(fun v v' -> Int.compare (number v) (number v')) fields
 
+let prepend ?(cond=true) elm l = match cond with
+  | true -> elm :: l
+  | false -> l
+
+let append ?(cond=true) elm l = match cond with
+  | true -> l @ [elm]
+  | false -> l
+
 let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls =
   let fields = sort_fields fields in
   let ts =
@@ -615,8 +623,21 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
       | `Oneof (decl, fields) -> c_of_oneof ~params ~syntax ~scope decl fields
     )
   in
-
   let has_extensions = match extension_ranges with [] -> false | _ -> true in
+
+  let field_info =
+    List.rev_map ~f:(fun { name; type'; _} -> (Scope.get_name scope name, (string_of_type type', type'.deprecated)) ) ts
+    |> prepend ~cond:has_extensions ("extensions'", ("Runtime'.Extensions.t", false))
+    |> List.rev
+  in
+
+  let t_as_tuple = List.length field_info < 2 &&
+                   not has_extensions &&
+                   params.singleton_record = false &&
+                   not is_cyclic
+  in
+  let has_deprecated_fields = List.exists ~f:(fun ({ type' = { deprecated; _ }; _ }: c) -> deprecated) ts in
+
 
   let constructor_sig_arg = function
     | { name; type' = { name = type_name; modifier = Required; deprecated = _ }; _ } ->
@@ -634,38 +655,6 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
     | { type' = { modifier = List; _ }; _} -> sprintf "?(%s = [])" name
     | { type' = { modifier = (No_modifier default | Oneof_type (default, _)); _}; _} -> sprintf "?(%s = %s)" name default
   in
-  let prepend ?(cond=true) elm l = match cond with
-    | true -> elm :: l
-    | false -> l
-  in
-  let append ?(cond=true) elm l = match cond with
-    | true -> l @ [elm]
-    | false -> l
-  in
-
-  let t_as_tuple = List.length ts = 1 &&
-                   params.singleton_record = false &&
-                   not has_extensions &&
-                   not is_cyclic
-  in
-
-  let has_deprecated_fields = List.exists ~f:(fun ({ type' = { deprecated; _ }; _ }: c) -> deprecated) ts in
-
-  let type_constr field_infos = match t_as_tuple, field_infos with
-    | _, [] -> "unit"
-    | true, fields ->
-      List.map ~f:snd fields |> List.map ~f:fst
-      |> String.concat ~sep:" * "
-      |> sprintf "(%s)"
-      |> Code.append_deprecaton_if ~deprecated:has_deprecated_fields `Item
-    | false, fields ->
-      List.map ~f:(fun (name, (type', deprecated)) ->
-        sprintf "%s: %s" name type'
-        |> Code.append_deprecaton_if ~deprecated `Attribute
-      ) fields
-      |> String.concat ~sep:"; "
-      |> sprintf "{ %s }"
-  in
 
   let type_destr field_infos = match t_as_tuple, field_infos with
     | _, [] -> "()"
@@ -679,28 +668,35 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
       |> sprintf "{ %s }"
   in
 
-  let field_info =
-    List.rev_map ~f:(fun { name; type'; _} -> (Scope.get_name scope name, (string_of_type type', type'.deprecated)) ) ts
-    |> prepend ~cond:has_extensions ("extensions'", ("Runtime'.Extensions.t", false))
-    |> List.rev
+  let tuple_type =
+    match field_info = [] with
+    | true -> "unit"
+    | false ->
+      List.map ~f:snd field_info
+      |> List.map ~f:fst
+      |> String.concat ~sep:" * "
+      |> sprintf "(%s)"
+      |> Code.append_deprecaton_if ~deprecated:has_deprecated_fields `Item
   in
-  let type' = type_constr field_info in
 
-  let args =
+  let type' = match t_as_tuple || field_info = [] with
+    | true -> tuple_type
+    | false ->
+      List.map ~f:(fun (name, (type', deprecated)) ->
+        sprintf "%s: %s" name type'
+        |> Code.append_deprecaton_if ~deprecated `Attribute
+      ) field_info
+      |> String.concat ~sep:"; "
+      |> sprintf "{ %s }"
+  in
+
+  (* a b c *)
+  let args = (* Could be a list! *)
     List.map ~f:fst field_info
-    |> String.concat ~sep:" "
   in
 
-  let constructor =
-    let destr = type_destr field_info in
-    match field_info with
-    | [] -> destr
-    | _ -> sprintf "fun %s -> %s" args destr
-  in
-  let apply = match t_as_tuple with
-    | true -> None
-    | false -> Some ((type_destr field_info), args)
-  in
+  (* { a; b; c } *)
+  let destructor = type_destr field_info in
 
   let default_constructor_sig =
     List.rev_map ~f:constructor_sig_arg ts
@@ -722,36 +718,35 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
     let constructor = type_destr field_info in
     sprintf "%s = %s" args constructor
   in
-  let nil =
-    match has_extensions with
-    | true ->
-      extension_ranges
-      |> List.map ~f:(fun (start', end') -> sprintf "(%d, %d)" start' end')
-      |> String.concat ~sep:"; "
-      |> sprintf "nil_ext [ %s ]"
-    | false -> "nil"
-  in
   (* Create the deserialize spec *)
   let spec_str =
+    let nil =
+      match has_extensions with
+      | true ->
+        extension_ranges
+        |> List.map ~f:(fun (start', end') -> sprintf "(%d, %d)" start' end')
+        |> String.concat ~sep:"; "
+        |> sprintf "nil_ext [ %s ]"
+      | false -> "nil"
+    in
     let spec = List.map ~f:(fun (c : c) -> c.spec_str) ts in
     String.concat ~sep:" ^:: " (spec @ [nil])
     |> sprintf "Runtime'.Spec.( %s )"
   in
 
   let merge_impl =
-    let as_tuple = t_as_tuple || List.length ts = 0 && not has_extensions in
     let args =
       List.map ["t1";"t2"] ~f:(fun s ->
-        match as_tuple with
+        match t_as_tuple with
         | true ->
-          List.map ~f:(fun c -> sprintf "%s_%s" s (Scope.get_name scope c.name)) ts
+          List.map ~f:(fun arg -> sprintf "%s_%s" s arg) args
           |> String.concat ~sep:","
           |> sprintf "(%s)"
         | false -> s
       )
       |> String.concat ~sep:" "
     in
-    let sep = match as_tuple with true -> "_" | false -> "." in
+    let sep = match t_as_tuple with true -> "_" | false -> "." in
     let merge_values =
       List.map ts ~f:(function
         | { name; type' = { modifier = Oneof_type (_, ctrs); _ }; _ } ->
@@ -781,7 +776,7 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
       |> append ~cond:has_extensions ("extensions'", sprintf "List.append t1%sextensions' t2%sextensions'" sep sep)
     in
     let constr =
-      match as_tuple with
+      match t_as_tuple with
       | true ->
         List.map ~f:snd merge_values
         |> String.concat ~sep:","
@@ -796,4 +791,4 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
     sprintf "fun %s -> %s" args constr
   in
 
-  { type'; constructor; apply; spec_str; default_constructor_sig; default_constructor_impl; merge_impl }
+  { type'; destructor; args; spec_str; default_constructor_sig; default_constructor_impl; merge_impl }

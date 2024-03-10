@@ -1,9 +1,9 @@
 open Spec.Descriptor.Google.Protobuf
 
 type t = {
-  type' : string;
-  constructor: string;
-  apply: (string * string) option;
+  type': string;
+  destructor: string;
+  args: string list;
   spec_str: string;
   default_constructor_sig: string;
   default_constructor_impl: string;

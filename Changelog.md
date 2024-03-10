@@ -3,6 +3,7 @@
       handling
 - [x] Simplify types used in code generation to improve readaility
 - [x] Implement json serialization and deserialization (#5)
+- [x] Support special json mapping for google types (#9)
 - [x] Add deprecation annotations for deprecated fields, services etc (#8)
 
 ## 5.0.0: 2024-02-24

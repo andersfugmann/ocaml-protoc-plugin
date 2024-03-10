@@ -64,4 +64,5 @@ let%expect_test "Default values in oneofs are ignored" =
   let module T = Proto2.Oneof_default in
   let t = T.make ~a:(`I 5) () in
   Test_lib.test_encode (module T) t;
-  [%expect {| i: 5 |}]
+  [%expect {|
+    i: 5 |}]

@@ -44,18 +44,18 @@ end = struct
   let spec () = Runtime'.Spec.( basic ((1, "mangle_names", "mangleNames"), bool, (false)) ^:: nil )
   let to_proto' =
     let serialize = Runtime'.Serialize.serialize (spec ()) in
-    serialize
+    fun writer (mangle_names) -> serialize writer mangle_names
 
   let to_proto t = to_proto' (Runtime'.Writer.init ()) t
   let from_proto_exn =
-    let constructor = fun mangle_names -> (mangle_names) in
+    let constructor mangle_names = (mangle_names) in
     Runtime'.Deserialize.deserialize (spec ()) constructor
   let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
   let to_json ?enum_names ?json_names ?omit_default_values =
     let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
-    serialize
+    fun (mangle_names) -> serialize mangle_names
   let from_json_exn =
-    let constructor = fun mangle_names -> (mangle_names) in
+    let constructor mangle_names = (mangle_names) in
     Runtime'.Deserialize_json.deserialize (spec ()) constructor
   let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
 end
