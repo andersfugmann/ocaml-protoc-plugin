@@ -22,7 +22,7 @@ module type T = sig
   val to_proto' : Writer.t -> t -> Writer.t
   val to_proto : t -> Writer.t
   val from_proto : Reader.t -> t Result.t
-  val name' : unit -> string
+  val name : unit -> string
   val merge: t -> t -> t
   val to_json: Json_options.t -> t -> Yojson.Basic.t
   val from_json_exn: Yojson.Basic.t -> t
@@ -87,7 +87,8 @@ let test_json ~debug (type t) (module M : T with type t = t) (t: t) =
   ignore debug;
   let json_ref t =
     let proto_file, message_type =
-      match M.name' () |> String.split_on_char ~sep:'.' with
+      (* Nice. We can get the name of the file. in which this is defined.  Wonder if there is a different way of doing that! *)
+      match M.name () |> String.split_on_char ~sep:'.' with
       | hd :: tl ->
         let proto_file = hd ^ ".proto" in
         let message_type = String.concat ~sep:"." tl in
@@ -181,7 +182,7 @@ let test_encode (type t) ?dump ?(debug_json=false) ?(protoc=true) ?protoc_args (
     | None -> ()
   in
   let () = match protoc with
-    | true -> dump_protoc ?protoc_args (M.name' ()) data
+    | true -> dump_protoc ?protoc_args (M.name ()) data
     | false -> ()
   in
 

@@ -517,11 +517,10 @@ and spec_of_field ~params ~syntax ~scope ~map_type field : field_spec =
   }
 
 let c_of_oneof ~params ~syntax:_ ~scope OneofDescriptorProto.{ name; _ } fields =
-  let open FieldDescriptorProto in
   (* Construct the type. *)
   let field_infos =
     List.map ~f:(function
-      | { number = Some number; name = Some name; type' = Some TYPE_MESSAGE; type_name; json_name = Some json_name; _ } as field, _map_type ->
+      | { FieldDescriptorProto.number = Some number; name = Some name; type' = Some TYPE_MESSAGE; type_name; json_name = Some json_name; _ } as field, _map_type ->
         let index = (number, name, json_name) in
         let spec = spec_of_message ~scope type_name in
         (index, Some name, type_of_spec spec, Espec_any spec, is_deprecated field)

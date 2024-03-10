@@ -43,7 +43,7 @@ let emit_enum_type ~scope ~params
   Code.emit signature `None "val to_string: t -> string";
   Code.emit signature `None "val from_string_exn: string -> t";
 
-  Code.emit implementation `None "let name () = \"%s\"" (Scope.get_current_scope scope);
+  Code.emit implementation `None "let name () = \"%s\"" (Scope.get_proto_path scope);
   Code.emit implementation `Begin "let to_int = function";
   List.iter ~f:(fun EnumValueDescriptorProto.{name; number; _} ->
     Code.emit implementation `None "| %s -> %d" (Scope.get_name_exn scope name) (Option.value_exn number)
@@ -253,7 +253,7 @@ let rec emit_message ~params ~syntax ~scope
                   default_constructor_sig; default_constructor_impl; merge_impl } =
         Types.make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
       in
-      Code.emit signature `None "val name': unit -> string";
+      Code.emit signature `None "val name: unit -> string";
       Code.emit signature `None "type t = %s%s" type' params.annot;
       Code.emit signature `None "val make: %s" default_constructor_sig;
       Code.emit signature `None "val merge: t -> t -> t";
@@ -265,7 +265,7 @@ let rec emit_message ~params ~syntax ~scope
       Code.emit signature `None "val from_json_exn: Yojson.Basic.t -> t";
       Code.emit signature `None "val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result";
 
-      Code.emit implementation `None "let name' () = \"%s\"" (Scope.get_current_scope scope);
+      Code.emit implementation `None "let name () = \"%s\"" (Scope.get_current_scope scope);
       Code.emit implementation `None "type t = %s%s" type' params.annot;
 
       Code.emit implementation `None "let make %s" default_constructor_impl;
@@ -373,10 +373,12 @@ let parse_proto_file ~params scope
   List.iter ~f:(Code.emit implementation `None "open %s [@@warning \"-33\"]" ) params.opens;
   let _ = match dependencies with
     | [] -> ()
-    | dependencies ->
+    | dependencies (* Dont we know the package of each here? How can we import if we dont know the package. *) ->
       Code.emit implementation `None "(**/**)";
       Code.emit implementation `Begin "module %s = struct" Scope.import_module_name;
       List.iter ~f:(fun proto_file ->
+        (* TODO!. Somehow capture the package.
+           The question is if protoc can give us this *)
           let module_name = Scope.module_name_of_proto proto_file in
           Code.emit implementation `None "module %s = %s" module_name module_name;
         ) dependencies;
@@ -391,4 +393,16 @@ let parse_proto_file ~params scope
   Code.emit implementation `None "";
 
   let base_name = Filename.remove_extension name in
-  (base_name ^ ".ml"), implementation
+  let output_file_name = match params.prefix_output_with_package with
+    | false -> sprintf "%s.ml" base_name
+    | true ->
+      let prefix = match package with
+        | None -> ""
+        | Some package ->
+          String.map ~f:(function '.' -> '_' | ch -> ch) package
+          |> String.lowercase_ascii
+      in
+      sprintf "%s_%s.ml" prefix base_name
+  in
+
+  (output_file_name), implementation

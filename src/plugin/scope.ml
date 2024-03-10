@@ -1,6 +1,11 @@
 open StdLabels
 open MoreLabels
 
+(* Extend functionality such that under import_module_name the module names is prefixed with package names *)
+(* i.e. prefix module name *)
+(* And also allow exposure to the module names to create correct mappings *)
+(* module_name must be prefixed *)
+
 let failwith_f fmt =
   Printf.ksprintf (fun s -> failwith s) fmt
 
@@ -40,22 +45,31 @@ end
 
 open Spec.Descriptor.Google.Protobuf
 
-type element = { module_name: string; ocaml_name: string; cyclic: bool; default_enum: string option;  }
+type element = { module_name: string; (** The name of the module that holds the implementation (i.e. Ocaml module name of the generated ocaml file) *)
+                 ocaml_name: string; (** Ocaml name of this type inside the module *)
+                 cyclic: bool; (** True if the element contains cyclic references, in which case the type cannot be represented as a tuple *)
+                 default_enum: string option;  }
 
 let import_module_name = "Imported'modules"
 
-let module_name_of_proto file =
+(* This will not work if we need to prefix with the package name *)
+let module_name_of_proto ?package file =
   Filename.chop_extension file
   |> Filename.basename
+  |> (
+    match package with
+    | Some package -> if true then failwith "Not possible yet"; Printf.sprintf "%s.%s" package
+    | None -> fun s -> s
+  )
   |> String.capitalize_ascii
-  |> String.map ~f:(function '-' -> '_' | c -> c)
+  |> String.map ~f:(function '-' | '.' -> '_' | c -> c)
 
 let has_mangle_option options =
   match options with
   | None -> false
   | Some options ->
     Spec.Options.Ocaml_options.get options
-    |> Ocaml_protoc_plugin.Result.get ~msg:"Could not parse ocaml-protoc-plugin options with id 1074"
+    |> Ocaml_protoc_plugin.Result.get ~msg:"Could not parse ocaml-protoc-plugin option id 1074"
     |> function
     | Some v -> v
     | None -> false
@@ -69,7 +83,7 @@ module Type_tree = struct
              enum_names: string list;
              service_names: string list
            }
-  type file = { module_name: string; types: t list }
+  type file = { module_name: string; types: t list; package: string option }
 
   let map_enum EnumDescriptorProto.{ name; value = values; _ } =
     let name = Option.value_exn ~message:"All enums must have a name" name in
@@ -157,9 +171,9 @@ module Type_tree = struct
     let types = List.fold_right ~init:types ~f:(fun name types ->
       [ { name; types; depends = []; fields = [], []; enum_names = []; service_names = [] } ]) packages in
 
-    { module_name; types }
+    { module_name; types; package } (* TODO: Maybe I should change the module name here to include the package, or have the complete package name here. *)
 
-  let create_cyclic_map { module_name = _ ; types } =
+  let create_cyclic_map { module_name = _ ; types; package = _ } =
     let rec traverse path map { name; types; depends; _ } =
       let path = path ^ "." ^ name in
       let map = StringMap.add ~key:path ~data:(StringSet.of_list depends) map in
@@ -228,12 +242,19 @@ module Type_tree = struct
       )
 
   (** Create a type db: map proto-type -> { module_name, ocaml_name, is_cyclic } *)
-  let create_file_db ~mangle cyclic_map { module_name; types } =
+  let create_file_db ~prefix_module_names ~mangle cyclic_map { module_name; types; package } =
     let mangle_f = match mangle with
       | true -> Names.to_snake_case
       | false -> fun x -> x
     in
-    let module_name = module_name_of_proto module_name in
+    let module_name =
+      let package = match prefix_module_names with
+        | false -> None
+        | true -> package
+      in
+      module_name_of_proto ?package module_name
+    in
+
     let add_names ~path ~ocaml_name map names =
       StringMap.fold ~init:map ~f:(fun ~key ~data map ->
           StringMap.add_uniq
@@ -304,11 +325,11 @@ module Type_tree = struct
     let map = StringMap.singleton "" { ocaml_name = ""; module_name; default_enum = None; cyclic = false } in
     traverse_types map "" types
 
-  let create_db (files : FileDescriptorProto.t list)=
+  let create_db ~prefix_module_names (files : FileDescriptorProto.t list) =
     let inner proto_file =
       let map = map_file proto_file in
       let cyclic_map = create_cyclic_map map in
-      let file_db = create_file_db ~mangle:(has_mangle_option proto_file.options) cyclic_map map in
+      let file_db = create_file_db ~prefix_module_names ~mangle:(has_mangle_option proto_file.options) cyclic_map map in
       file_db
     in
     List.map ~f:inner files
@@ -334,8 +355,9 @@ let dump_type_map type_map =
     ) type_map;
   Printf.eprintf "Type map end.\n%!"
 
-let init files =
-  let type_db = Type_tree.create_db files in
+let init ~params files =
+  ignore params;
+  let type_db = Type_tree.create_db ~prefix_module_names:params.Parameters.prefix_output_with_package files in
   let ocaml_names =
     StringMap.fold ~init:StringSet.empty
       ~f:(fun ~key:_ ~data:{ocaml_name; _} acc ->
@@ -349,9 +371,15 @@ let init files =
 
   { module_name = ""; proto_path = []; package_depth = 0; type_db; ocaml_names}
 
-let for_descriptor t FileDescriptorProto.{ name; package; _ } =
+let for_descriptor ~params t FileDescriptorProto.{ name; package; _ } =
   let name = Option.value_exn ~message:"All file descriptors must have a name" name in
-  let module_name = module_name_of_proto name in
+  let module_name =
+    let package = match params.Parameters.prefix_output_with_package with
+      | true -> package
+      | false -> None
+    in
+    module_name_of_proto ?package name
+  in
   let package_depth = Option.value_map ~default:0 ~f:(fun p -> String.split_on_char ~sep:'.' p |> List.length) package in
   { t with package_depth; module_name; proto_path = [] }
 
@@ -457,8 +485,7 @@ let get_name_exn t name =
   let name = Option.value_exn ~message:"Does not contain a name" name in
   get_name t name
 
-
-
+(* Getting the current scope. *)
 let get_current_scope t =
   let { module_name; ocaml_name = _; _ } = StringMap.find (get_proto_path t) t.type_db in
   (String.lowercase_ascii module_name) ^ (get_proto_path t)
