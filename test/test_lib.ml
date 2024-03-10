@@ -104,9 +104,9 @@ let test_json ~debug (type t) (module M : T with type t = t) (t: t) =
       match (M.from_json_exn json = t) with
       | true -> ()
       | false ->
-        let ref_json = M.from_json_exn json |> json_ref in
-        Printf.printf "Json encode/decode not identical. %s\n  Json: %s\n  Ref: %s\n" message
-          (Yojson.Basic.to_string json) (Yojson.Basic.to_string ref_json)
+        let observed = M.from_json_exn json |> json_ref in
+        Printf.printf "Json encode/decode not identical. %s\n  Expect:  %s\n  Observe: %s\n" message
+          (Yojson.Basic.to_string json) (Yojson.Basic.to_string observed)
       | exception exn ->
         Printf.printf "Json encode/decode failed for %s: %s\n" message (Yojson.Basic.to_string json);
         Printf.printf "  Error: %s\n" (Printexc.to_string exn);

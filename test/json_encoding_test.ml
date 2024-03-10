@@ -206,10 +206,11 @@ let%expect_test _ =
   let module T = Struct in
   let module I = G.Struct.Google.Protobuf.Struct in
   let module V = G.Struct.Google.Protobuf.Value in
+  let nullValue = G.Struct.Google.Protobuf.NullValue.NULL_VALUE in
   T.make () |> Test_lib.test_encode ~debug_json:true (module T);
 
   let v b f s =
-    ["Bool", `Bool_value b; "Number", `Number_value f; "String", `String_value s]
+    ["Bool", `Bool_value b; "Number", `Number_value f; "String", `String_value s; "Null", `Null_value nullValue]
     |>  List.map ~f:(fun (k,v) -> (k, Some (G.Struct.Google.Protobuf.Value.make ~kind:v ())))
   in
   let make struct' =
@@ -237,6 +238,12 @@ let%expect_test _ =
         }
       }
       fields {
+        key: "Null"
+        value {
+          null_value: NULL_VALUE
+        }
+      }
+      fields {
         key: "Number"
         value {
           number_value: 5
@@ -249,13 +256,19 @@ let%expect_test _ =
         }
       }
     }
-    Json: { "struct": { "Bool": true, "Number": 5, "String": "hello" } }
-    Ref:  { "struct": { "Bool": true, "Number": 5, "String": "hello" } }
+    Json: { "struct": { "Bool": true, "Number": 5, "String": "hello", "Null": null } }
+    Ref:  { "struct": { "Bool": true, "Number": 5, "String": "hello", "Null": null } }
     struct {
       fields {
         key: "Bool"
         value {
           bool_value: false
+        }
+      }
+      fields {
+        key: "Null"
+        value {
+          null_value: NULL_VALUE
         }
       }
       fields {
@@ -271,8 +284,8 @@ let%expect_test _ =
         }
       }
     }
-    Json: { "struct": { "Bool": false, "Number": 0, "String": "" } }
-    Ref:  { "struct": { "Bool": false, "Number": 0, "String": "" } }
+    Json: { "struct": { "Bool": false, "Number": 0, "String": "", "Null": null } }
+    Ref:  { "struct": { "Bool": false, "Number": 0, "String": "", "Null": null } }
     struct {
       fields {
         key: "Struct1"
@@ -282,6 +295,12 @@ let%expect_test _ =
               key: "Bool"
               value {
                 bool_value: true
+              }
+            }
+            fields {
+              key: "Null"
+              value {
+                null_value: NULL_VALUE
               }
             }
             fields {
@@ -310,6 +329,12 @@ let%expect_test _ =
               }
             }
             fields {
+              key: "Null"
+              value {
+                null_value: NULL_VALUE
+              }
+            }
+            fields {
               key: "Number"
               value {
                 number_value: 2
@@ -327,14 +352,14 @@ let%expect_test _ =
     }
     Json: {
       "struct": {
-        "Struct1": { "Bool": true, "Number": 1, "String": "a" },
-        "Struct2": { "Bool": false, "Number": 2, "String": "b" }
+        "Struct1": { "Bool": true, "Number": 1, "String": "a", "Null": null },
+        "Struct2": { "Bool": false, "Number": 2, "String": "b", "Null": null }
       }
     }
     Ref:  {
       "struct": {
-        "Struct1": { "Bool": true, "Number": 1, "String": "a" },
-        "Struct2": { "Bool": false, "Number": 2, "String": "b" }
+        "Struct1": { "Bool": true, "Number": 1, "String": "a", "Null": null },
+        "Struct2": { "Bool": false, "Number": 2, "String": "b", "Null": null }
       }
     }
     struct {

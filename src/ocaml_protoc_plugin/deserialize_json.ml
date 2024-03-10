@@ -178,7 +178,7 @@ let%expect_test "json name to proto name" =
 
 let value_to_json json =
   let value = match json with
-    | `Null -> "nullValue", `Int 0
+    | `Null -> "nullValue", json
     | `Float _ -> "numberValue", json
     | `Int _ -> "numberValue", json
     | `String _ -> "stringValue", json
@@ -189,8 +189,23 @@ let value_to_json json =
   `Assoc [value]
 
 
+let map_enum_json: (module Enum) -> Yojson.Basic.t -> Yojson.Basic.t = fun (module Enum) ->
+  let name =
+    Enum.name ()
+    |> String.split_on_char ~sep:'.'
+    |> List.tl
+    |> String.concat ~sep:"."
+  in
+  match name with
+  | "google.protobuf.NullValue" ->
+    let map = function
+      | `Null -> `String (Enum.to_string (Enum.from_int_exn 0))
+      | json -> value_error name json
+    in
+    map
+  | _ -> fun json -> json
 
-let map_json: type a. (module Message with type t = a) -> Yojson.Basic.t -> Yojson.Basic.t = fun (module Message) ->
+let map_message_json: (module Message) -> Yojson.Basic.t -> Yojson.Basic.t = fun (module Message) ->
   let name =
     Message.name' ()
     |> String.split_on_char ~sep:'.'
@@ -289,13 +304,10 @@ let read_value: type a b. (a, b) spec -> Yojson.Basic.t -> a = function
    | Bool -> to_bool
    | String -> to_string
    | Bytes -> to_bytes
-   | Enum (module Enum) -> to_enum (module Enum)
+   | Enum (module Enum) ->
+     fun json -> map_enum_json (module Enum) json |> to_enum (module Enum)
    | Message (module Message) ->
-     let map_json = map_json (module Message) in
-     let of_json json =
-       map_json json |> Message.from_json_exn
-     in
-     of_json
+     fun json -> map_message_json (module Message) json |> Message.from_json_exn
 
 let find_field (_number, field_name, json_name) fields =
   match FieldMap.find_opt json_name fields with
@@ -342,8 +354,9 @@ let rec read: type a b. fields -> (a, b) Spec.compound -> a = fun fields -> func
     let read_key = read_value key_spec in
     let read_key v = read_key (`String v) in
     let read_value = read_value value_spec in
+
     let read_value = function
-      | `Null -> None
+      | `Null -> begin try Some (read_value `Null) with | _ -> None end
       | json -> Some (read_value json)
     in
     begin match find_field index fields with
@@ -366,7 +379,7 @@ let rec read: type a b. fields -> (a, b) Spec.compound -> a = fun fields -> func
 
 let rec deserialize: type constr a. (constr, a) compound_list -> constr -> fields -> a = function
   | Nil -> fun constr _json -> constr
-  | Nil_ext _extension_ranges -> fun constr _json -> constr [] (* TODO implement support for extensions *)
+  | Nil_ext _extension_ranges -> fun constr _json -> constr [] (* TODO: implement support for extensions *)
   | Cons (spec, rest) ->
     fun constr fields ->
       let v = read fields spec in
@@ -377,7 +390,7 @@ let deserialize: type constr a. (constr, a) compound_list -> constr -> Yojson.Ba
   fun spec constr -> function
   | `Assoc fields ->
     fields
-    |> List.filter ~f:(function (_, `Null) -> false | _ -> true)
+    (* |> List.filter ~f:(function (_, `Null) -> false | _ -> true) *)
     |> List.fold_left ~f:(fun map (key, value) -> FieldMap.add key value map) ~init:FieldMap.empty
     |> deserialize spec constr
   | json -> value_error "message" json

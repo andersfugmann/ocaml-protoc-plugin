@@ -102,6 +102,7 @@ module rec Google : sig
     and FieldDescriptorProto : sig
       module rec Type : sig
         type t = TYPE_DOUBLE | TYPE_FLOAT | TYPE_INT64 | TYPE_UINT64 | TYPE_INT32 | TYPE_FIXED64 | TYPE_FIXED32 | TYPE_BOOL | TYPE_STRING | TYPE_GROUP | TYPE_MESSAGE | TYPE_BYTES | TYPE_UINT32 | TYPE_ENUM | TYPE_SFIXED32 | TYPE_SFIXED64 | TYPE_SINT32 | TYPE_SINT64
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -110,6 +111,7 @@ module rec Google : sig
       end
       and Label : sig
         type t = LABEL_OPTIONAL | LABEL_REQUIRED | LABEL_REPEATED
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -209,6 +211,7 @@ module rec Google : sig
     and FileOptions : sig
       module rec OptimizeMode : sig
         type t = SPEED | CODE_SIZE | LITE_RUNTIME
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -243,6 +246,7 @@ module rec Google : sig
     and FieldOptions : sig
       module rec CType : sig
         type t = STRING | CORD | STRING_PIECE
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -251,6 +255,7 @@ module rec Google : sig
       end
       and JSType : sig
         type t = JS_NORMAL | JS_STRING | JS_NUMBER
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -324,6 +329,7 @@ module rec Google : sig
     and MethodOptions : sig
       module rec IdempotencyLevel : sig
         type t = IDEMPOTENCY_UNKNOWN | NO_SIDE_EFFECTS | IDEMPOTENT
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -504,6 +510,7 @@ end = struct
     and FieldDescriptorProto : sig
       module rec Type : sig
         type t = TYPE_DOUBLE | TYPE_FLOAT | TYPE_INT64 | TYPE_UINT64 | TYPE_INT32 | TYPE_FIXED64 | TYPE_FIXED32 | TYPE_BOOL | TYPE_STRING | TYPE_GROUP | TYPE_MESSAGE | TYPE_BYTES | TYPE_UINT32 | TYPE_ENUM | TYPE_SFIXED32 | TYPE_SFIXED64 | TYPE_SINT32 | TYPE_SINT64
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -512,6 +519,7 @@ end = struct
       end
       and Label : sig
         type t = LABEL_OPTIONAL | LABEL_REQUIRED | LABEL_REPEATED
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -611,6 +619,7 @@ end = struct
     and FileOptions : sig
       module rec OptimizeMode : sig
         type t = SPEED | CODE_SIZE | LITE_RUNTIME
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -645,6 +654,7 @@ end = struct
     and FieldOptions : sig
       module rec CType : sig
         type t = STRING | CORD | STRING_PIECE
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -653,6 +663,7 @@ end = struct
       end
       and JSType : sig
         type t = JS_NORMAL | JS_STRING | JS_NUMBER
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -726,6 +737,7 @@ end = struct
     and MethodOptions : sig
       module rec IdempotencyLevel : sig
         type t = IDEMPOTENCY_UNKNOWN | NO_SIDE_EFFECTS | IDEMPOTENT
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1096,6 +1108,7 @@ end = struct
     and FieldDescriptorProto : sig
       module rec Type : sig
         type t = TYPE_DOUBLE | TYPE_FLOAT | TYPE_INT64 | TYPE_UINT64 | TYPE_INT32 | TYPE_FIXED64 | TYPE_FIXED32 | TYPE_BOOL | TYPE_STRING | TYPE_GROUP | TYPE_MESSAGE | TYPE_BYTES | TYPE_UINT32 | TYPE_ENUM | TYPE_SFIXED32 | TYPE_SFIXED64 | TYPE_SINT32 | TYPE_SINT64
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1104,6 +1117,7 @@ end = struct
       end
       and Label : sig
         type t = LABEL_OPTIONAL | LABEL_REQUIRED | LABEL_REPEATED
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1124,6 +1138,7 @@ end = struct
     end = struct
       module rec Type : sig
         type t = TYPE_DOUBLE | TYPE_FLOAT | TYPE_INT64 | TYPE_UINT64 | TYPE_INT32 | TYPE_FIXED64 | TYPE_FIXED32 | TYPE_BOOL | TYPE_STRING | TYPE_GROUP | TYPE_MESSAGE | TYPE_BYTES | TYPE_UINT32 | TYPE_ENUM | TYPE_SFIXED32 | TYPE_SFIXED64 | TYPE_SINT32 | TYPE_SINT64
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1131,6 +1146,7 @@ end = struct
         val from_string_exn: string -> t
       end = struct
         type t = TYPE_DOUBLE | TYPE_FLOAT | TYPE_INT64 | TYPE_UINT64 | TYPE_INT32 | TYPE_FIXED64 | TYPE_FIXED32 | TYPE_BOOL | TYPE_STRING | TYPE_GROUP | TYPE_MESSAGE | TYPE_BYTES | TYPE_UINT32 | TYPE_ENUM | TYPE_SFIXED32 | TYPE_SFIXED64 | TYPE_SINT32 | TYPE_SINT64
+        let name () = "descriptor.google.protobuf.FieldDescriptorProto.Type"
         let to_int = function
           | TYPE_DOUBLE -> 1
           | TYPE_FLOAT -> 2
@@ -1214,6 +1230,7 @@ end = struct
       end
       and Label : sig
         type t = LABEL_OPTIONAL | LABEL_REQUIRED | LABEL_REPEATED
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1221,6 +1238,7 @@ end = struct
         val from_string_exn: string -> t
       end = struct
         type t = LABEL_OPTIONAL | LABEL_REQUIRED | LABEL_REPEATED
+        let name () = "descriptor.google.protobuf.FieldDescriptorProto.Label"
         let to_int = function
           | LABEL_OPTIONAL -> 1
           | LABEL_REQUIRED -> 2
@@ -1529,6 +1547,7 @@ end = struct
     and FileOptions : sig
       module rec OptimizeMode : sig
         type t = SPEED | CODE_SIZE | LITE_RUNTIME
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1549,6 +1568,7 @@ end = struct
     end = struct
       module rec OptimizeMode : sig
         type t = SPEED | CODE_SIZE | LITE_RUNTIME
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1556,6 +1576,7 @@ end = struct
         val from_string_exn: string -> t
       end = struct
         type t = SPEED | CODE_SIZE | LITE_RUNTIME
+        let name () = "descriptor.google.protobuf.FileOptions.OptimizeMode"
         let to_int = function
           | SPEED -> 1
           | CODE_SIZE -> 2
@@ -1667,6 +1688,7 @@ end = struct
     and FieldOptions : sig
       module rec CType : sig
         type t = STRING | CORD | STRING_PIECE
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1675,6 +1697,7 @@ end = struct
       end
       and JSType : sig
         type t = JS_NORMAL | JS_STRING | JS_NUMBER
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1695,6 +1718,7 @@ end = struct
     end = struct
       module rec CType : sig
         type t = STRING | CORD | STRING_PIECE
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1702,6 +1726,7 @@ end = struct
         val from_string_exn: string -> t
       end = struct
         type t = STRING | CORD | STRING_PIECE
+        let name () = "descriptor.google.protobuf.FieldOptions.CType"
         let to_int = function
           | STRING -> 0
           | CORD -> 1
@@ -1725,6 +1750,7 @@ end = struct
       end
       and JSType : sig
         type t = JS_NORMAL | JS_STRING | JS_NUMBER
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1732,6 +1758,7 @@ end = struct
         val from_string_exn: string -> t
       end = struct
         type t = JS_NORMAL | JS_STRING | JS_NUMBER
+        let name () = "descriptor.google.protobuf.FieldOptions.JSType"
         let to_int = function
           | JS_NORMAL -> 0
           | JS_STRING -> 1
@@ -1944,6 +1971,7 @@ end = struct
     and MethodOptions : sig
       module rec IdempotencyLevel : sig
         type t = IDEMPOTENCY_UNKNOWN | NO_SIDE_EFFECTS | IDEMPOTENT
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1964,6 +1992,7 @@ end = struct
     end = struct
       module rec IdempotencyLevel : sig
         type t = IDEMPOTENCY_UNKNOWN | NO_SIDE_EFFECTS | IDEMPOTENT
+        val name: unit -> string
         val to_int: t -> int
         val from_int: int -> t Runtime'.Result.t
         val from_int_exn: int -> t
@@ -1971,6 +2000,7 @@ end = struct
         val from_string_exn: string -> t
       end = struct
         type t = IDEMPOTENCY_UNKNOWN | NO_SIDE_EFFECTS | IDEMPOTENT
+        let name () = "descriptor.google.protobuf.MethodOptions.IdempotencyLevel"
         let to_int = function
           | IDEMPOTENCY_UNKNOWN -> 0
           | NO_SIDE_EFFECTS -> 1

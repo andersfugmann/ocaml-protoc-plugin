@@ -132,8 +132,25 @@ let%expect_test "timestamp_to_json" =
 
 let wrapper_to_json json = get_key ~f:(fun id -> id) ~default:`Null "value" json
 
+let map_enum_json: (module Enum) -> Yojson.Basic.t -> Yojson.Basic.t = fun (module Enum) ->
+  let name =
+    Enum.name ()
+    |> String.split_on_char ~sep:'.'
+    |> List.tl
+    |> String.concat ~sep:"."
+  in
+  match name with
+  | "google.protobuf.NullValue" -> begin
+      function
+      | `Int 0 -> `Null
+      | `String s when s = Enum.to_string (Enum.from_int_exn 0) -> `Null
+      | json -> value_error name json
+    end
+  | _ -> fun json -> json
+
+
 (* Convert already emitted json based on json mappings *)
-let map_json: type a. (module Message with type t = a) -> (Yojson.Basic.t -> Yojson.Basic.t) option = fun (module Message) ->
+let map_message_json: (module Message) -> (Yojson.Basic.t -> Yojson.Basic.t) option = fun (module Message) ->
   let name =
     Message.name' ()
     |> String.split_on_char ~sep:'.'
@@ -227,13 +244,16 @@ let rec json_of_spec: type a b. enum_names:bool -> json_names:bool -> omit_defau
   | SFixed64_int -> int64_int_value
 
   | Enum (module Enum) -> begin
-      match enum_names with
-      | true -> enum_name ~f:Enum.to_string
-      | false -> enum_value ~f:Enum.to_int
-    end
+    fun v ->
+      let f = match enum_names with
+        | true -> enum_name ~f:Enum.to_string
+        | false -> enum_value ~f:Enum.to_int
+      in
+      f v |> map_enum_json (module Enum)
+  end
   | Message (module Message) ->
     let omit_default_values, map =
-      match map_json (module Message) with
+      match map_message_json (module Message) with
       | Some map -> false, map
       | None -> omit_default_values, (fun json -> json)
     in

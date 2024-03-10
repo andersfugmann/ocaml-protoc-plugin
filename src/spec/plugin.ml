@@ -56,6 +56,7 @@ module rec Google : sig
       and CodeGeneratorResponse : sig
         module rec Feature : sig
           type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
+          val name: unit -> string
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
@@ -121,6 +122,7 @@ end = struct
       and CodeGeneratorResponse : sig
         module rec Feature : sig
           type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
+          val name: unit -> string
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
@@ -184,6 +186,7 @@ end = struct
       and CodeGeneratorResponse : sig
         module rec Feature : sig
           type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
+          val name: unit -> string
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
@@ -299,6 +302,7 @@ end = struct
       and CodeGeneratorResponse : sig
         module rec Feature : sig
           type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
+          val name: unit -> string
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
@@ -332,6 +336,7 @@ end = struct
       end = struct
         module rec Feature : sig
           type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
+          val name: unit -> string
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
@@ -339,6 +344,7 @@ end = struct
           val from_string_exn: string -> t
         end = struct
           type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
+          let name () = "plugin.google.protobuf.compiler.CodeGeneratorResponse.Feature"
           let to_int = function
             | FEATURE_NONE -> 0
             | FEATURE_PROTO3_OPTIONAL -> 1

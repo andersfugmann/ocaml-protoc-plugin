@@ -8,6 +8,7 @@ end
 
 module type Enum = sig
   type t
+  val name: unit -> string
   val to_int: t -> int
   val from_int: int -> t Result.t
   val from_int_exn: int -> t

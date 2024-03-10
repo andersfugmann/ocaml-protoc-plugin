@@ -36,12 +36,14 @@ let emit_enum_type ~scope ~params
     params.Parameters.annot;
   Code.append signature t;
   Code.append implementation t;
+  Code.emit signature `None "val name: unit -> string";
   Code.emit signature `None "val to_int: t -> int";
   Code.emit signature `None "val from_int: int -> t Runtime'.Result.t";
   Code.emit signature `None "val from_int_exn: int -> t";
   Code.emit signature `None "val to_string: t -> string";
   Code.emit signature `None "val from_string_exn: string -> t";
 
+  Code.emit implementation `None "let name () = \"%s\"" (Scope.get_current_scope scope);
   Code.emit implementation `Begin "let to_int = function";
   List.iter ~f:(fun EnumValueDescriptorProto.{name; number; _} ->
     Code.emit implementation `None "| %s -> %d" (Scope.get_name_exn scope name) (Option.value_exn number)
