@@ -52,11 +52,11 @@ end = struct
     Runtime'.Deserialize.deserialize (spec ()) constructor
   let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
   let to_json ?enum_names ?json_names ?omit_default_values =
-    let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in
+    let serialize = Runtime'.Serialize_json.serialize ~message_name:".Options" ?enum_names ?json_names ?omit_default_values (spec ()) in
     fun (mangle_names) -> serialize mangle_names
   let from_json_exn =
     let constructor mangle_names = (mangle_names) in
-    Runtime'.Deserialize_json.deserialize (spec ()) constructor
+    Runtime'.Deserialize_json.deserialize ~message_name:".Options" (spec ()) constructor
   let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
 end
 and Ocaml_options : sig

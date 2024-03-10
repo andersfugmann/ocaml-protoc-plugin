@@ -212,7 +212,7 @@ let find_map_type ~scope field nested_types =
 (* Emit a message plus all its subtypes.
    Why is this not being called recursively, but rather calling sub functions which never returns
 *)
-let rec emit_message ~params ~syntax scope
+let rec emit_message ~params ~syntax ~scope
     DescriptorProto.{ name; field = fields; extension = extensions;
                       nested_type = nested_types; enum_type = enum_types;
                       extension_range = extension_ranges; oneof_decl = oneof_decls;
@@ -239,7 +239,7 @@ let rec emit_message ~params ~syntax scope
   (* Filter map types *)
   let nested_types_no_map = List.filter ~f:(function DescriptorProto.{ options = Some { map_entry = Some true; _ }; _ } -> false | _ -> true) nested_types in
   List.map ~f:(emit_enum_type ~scope ~params) enum_types
-  @ List.map ~f:(emit_message ~params ~syntax scope) nested_types_no_map
+  @ List.map ~f:(emit_message ~params ~syntax ~scope) nested_types_no_map
   @ List.map ~f:(emit_extension ~scope ~params) extensions
   |> emit_nested_types ~syntax ~signature ~implementation;
 
@@ -284,11 +284,11 @@ let rec emit_message ~params ~syntax scope
       Code.emit implementation `None "Runtime'.Deserialize.deserialize (spec ()) constructor";
       Code.emit implementation `End "let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)";
       Code.emit implementation `Begin "let to_json ?enum_names ?json_names ?omit_default_values = ";
-      Code.emit implementation `None "let serialize = Runtime'.Serialize_json.serialize ?enum_names ?json_names ?omit_default_values (spec ()) in";
+      Code.emit implementation `None "let serialize = Runtime'.Serialize_json.serialize ~message_name:\"%s\" ?enum_names ?json_names ?omit_default_values (spec ()) in" (Scope.get_proto_path scope);
       Code.emit implementation `None "fun %s -> serialize %s" destructor (String.concat ~sep:" " args);
       Code.emit implementation `EndBegin "let from_json_exn =";
       Code.emit implementation `None "let constructor %s = %s in" (String.concat ~sep:" " args) destructor;
-      Code.emit implementation `None "Runtime'.Deserialize_json.deserialize (spec ()) constructor";
+      Code.emit implementation `None "Runtime'.Deserialize_json.deserialize ~message_name:\"%s\" (spec ()) constructor" (Scope.get_proto_path scope);
       Code.emit implementation `End "let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)";
     | None -> ()
   in
@@ -296,7 +296,7 @@ let rec emit_message ~params ~syntax scope
 
 let rec wrap_packages ~params ~syntax ~options scope message_type services = function
   | [] ->
-    let { module_name = _; implementation; signature; deprecated = _ } = emit_message ~params ~syntax scope message_type in
+    let { module_name = _; implementation; signature; deprecated = _ } = emit_message ~params ~syntax ~scope message_type in
     List.iter ~f:(fun service ->
       let signature', implementation' = emit_service_type ~options scope service in
       Code.append implementation implementation';

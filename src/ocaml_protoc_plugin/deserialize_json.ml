@@ -205,48 +205,42 @@ let map_enum_json: (module Enum) -> Yojson.Basic.t -> Yojson.Basic.t = fun (modu
     map
   | _ -> fun json -> json
 
-let map_message_json: (module Message) -> Yojson.Basic.t -> Yojson.Basic.t = fun (module Message) ->
-  let name =
-    Message.name' ()
-    |> String.split_on_char ~sep:'.'
-    |> List.tl
-    |> String.concat ~sep:"."
-  in
+let map_message_json: name:string -> Yojson.Basic.t -> Yojson.Basic.t = fun ~name ->
   match name with
-  | "google.protobuf.Empty" (* Already mapped as it should I think *) ->
+  | ".google.protobuf.Empty" (* Already mapped as it should I think *) ->
     fun json -> json
   (* Duration - google/protobuf/timestamp.proto *)
-  | "google.protobuf.Duration" ->
+  | ".google.protobuf.Duration" ->
     let convert json =
       let (seconds, nanos) = duration_of_json json in
       `Assoc [ "seconds", `Int seconds; "nanos", `Int nanos ]
     in
     convert
   (* Timestamp - google/protobuf/timestamp.proto *)
-  | "google.protobuf.Timestamp" ->
+  | ".google.protobuf.Timestamp" ->
     let convert json =
       let (seconds, nanos) = timestamp_of_json json in
       `Assoc [ "seconds", `Int seconds; "nanos", `Int nanos ]
     in
     convert
   (* Wrapper types - google/protobuf/wrappers.proto *)
-  | "google.protobuf.DoubleValue"
-  | "google.protobuf.FloatValue"
-  | "google.protobuf.Int64Value"
-  | "google.protobuf.UInt64Value"
-  | "google.protobuf.Int32Value"
-  | "google.protobuf.UInt32Value"
-  | "google.protobuf.BoolValue"
-  | "google.protobuf.StringValue"
-  | "google.protobuf.BytesValue" ->
+  | ".google.protobuf.DoubleValue"
+  | ".google.protobuf.FloatValue"
+  | ".google.protobuf.Int64Value"
+  | ".google.protobuf.UInt64Value"
+  | ".google.protobuf.Int32Value"
+  | ".google.protobuf.UInt32Value"
+  | ".google.protobuf.BoolValue"
+  | ".google.protobuf.StringValue"
+  | ".google.protobuf.BytesValue" ->
     (* Convert into a struct *)
     let convert json = `Assoc ["value", json] in
     convert
-  | "google.protobuf.Value" ->
+  | ".google.protobuf.Value" ->
     (* Struct - google/protobuf/struct.proto *)
     (* Based on json type do the mapping *)
     value_to_json
-  | "google.protobuf.Struct" ->
+  | ".google.protobuf.Struct" ->
     (* Struct - google/protobuf/struct.proto *)
     let convert = function
       | `Assoc _ as json ->
@@ -255,7 +249,7 @@ let map_message_json: (module Message) -> Yojson.Basic.t -> Yojson.Basic.t = fun
     in
     convert
     (* ListValue - google/protobuf/struct.proto *)
-  | "google.protobuf.ListValue" ->
+  | ".google.protobuf.ListValue" ->
     let convert = function
       | `List _ as json ->  `Assoc ["values", json ]
       | json -> value_error name json
@@ -263,7 +257,7 @@ let map_message_json: (module Message) -> Yojson.Basic.t -> Yojson.Basic.t = fun
     convert
 
   (* FieldMask - /usr/include/google/protobuf/field_mask.proto *)
-  | "google.protobuf.FieldMask" ->
+  | ".google.protobuf.FieldMask" ->
     let open StdLabels in
     let convert = function
       | `String s ->
@@ -307,7 +301,7 @@ let read_value: type a b. (a, b) spec -> Yojson.Basic.t -> a = function
    | Enum (module Enum) ->
      fun json -> map_enum_json (module Enum) json |> to_enum (module Enum)
    | Message (module Message) ->
-     fun json -> map_message_json (module Message) json |> Message.from_json_exn
+     Message.from_json_exn
 
 let find_field (_number, field_name, json_name) fields =
   match FieldMap.find_opt json_name fields with
@@ -381,16 +375,19 @@ let rec deserialize: type constr a. (constr, a) compound_list -> constr -> field
   | Nil -> fun constr _json -> constr
   | Nil_ext _extension_ranges -> fun constr _json -> constr [] (* TODO: implement support for extensions *)
   | Cons (spec, rest) ->
+    let cont = deserialize rest in
     fun constr fields ->
       let v = read fields spec in
-      deserialize rest (constr v) fields
+      cont (constr v) fields
 
 
-let deserialize: type constr a. (constr, a) compound_list -> constr -> Yojson.Basic.t -> a =
-  fun spec constr -> function
-  | `Assoc fields ->
-    fields
-    (* |> List.filter ~f:(function (_, `Null) -> false | _ -> true) *)
-    |> List.fold_left ~f:(fun map (key, value) -> FieldMap.add key value map) ~init:FieldMap.empty
-    |> deserialize spec constr
-  | json -> value_error "message" json
+let deserialize: type constr a. message_name:string -> (constr, a) compound_list -> constr -> Yojson.Basic.t -> a =
+  fun ~message_name spec constr ->
+  let deserialize = deserialize spec constr in
+  let map_message = map_message_json ~name:message_name in
+  fun json -> match map_message json with
+    | `Assoc fields ->
+      fields
+      |> List.fold_left ~f:(fun map (key, value) -> FieldMap.add key value map) ~init:FieldMap.empty
+      |> deserialize
+    | json -> value_error "message" json

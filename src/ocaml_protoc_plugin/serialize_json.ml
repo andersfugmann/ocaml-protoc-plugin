@@ -150,53 +150,46 @@ let map_enum_json: (module Enum) -> Yojson.Basic.t -> Yojson.Basic.t = fun (modu
 
 
 (* Convert already emitted json based on json mappings *)
-let map_message_json: (module Message) -> (Yojson.Basic.t -> Yojson.Basic.t) option = fun (module Message) ->
-  let name =
-    Message.name' ()
-    |> String.split_on_char ~sep:'.'
-    |> List.tl
-    |> String.concat ~sep:"."
-  in
-
+let map_message_json: name:string -> (Yojson.Basic.t -> Yojson.Basic.t) option = fun ~name ->
   match name with
-  | "google.protobuf.Empty"  ->
+  | ".google.protobuf.Empty"  ->
     Some (fun json -> json)
   (* Duration - google/protobuf/timestamp.proto *)
-  | "google.protobuf.Duration" ->
+  | ".google.protobuf.Duration" ->
     Some (duration_to_json)
   (* Timestamp - google/protobuf/timestamp.proto *)
-  | "google.protobuf.Timestamp" ->
+  | ".google.protobuf.Timestamp" ->
     Some (timestamp_to_json)
   (* Wrapper types - google/protobuf/wrappers.proto *)
-  | "google.protobuf.DoubleValue"
-  | "google.protobuf.FloatValue"
-  | "google.protobuf.Int64Value"
-  | "google.protobuf.UInt64Value"
-  | "google.protobuf.Int32Value"
-  | "google.protobuf.UInt32Value"
-  | "google.protobuf.BoolValue"
-  | "google.protobuf.StringValue"
-  | "google.protobuf.BytesValue" ->
+  | ".google.protobuf.DoubleValue"
+  | ".google.protobuf.FloatValue"
+  | ".google.protobuf.Int64Value"
+  | ".google.protobuf.UInt64Value"
+  | ".google.protobuf.Int32Value"
+  | ".google.protobuf.UInt32Value"
+  | ".google.protobuf.BoolValue"
+  | ".google.protobuf.StringValue"
+  | ".google.protobuf.BytesValue" ->
     Some (wrapper_to_json)
-  | "google.protobuf.Value" ->
+  | ".google.protobuf.Value" ->
     let map = function
       | `Assoc [_, json] -> json
       | json -> value_error name json
     in
     Some map
-  | "google.protobuf.Struct" ->
+  | ".google.protobuf.Struct" ->
     let map = function
       | `Assoc ["fields", json ] -> json
       | json -> value_error name json
     in
     Some map
-  | "google.protobuf.ListValue" ->
+  | ".google.protobuf.ListValue" ->
     let map = function
       | `Assoc ["values", json ] -> json
       | json -> value_error name json
     in
     Some map
-  | "google.protobuf.FieldMask" ->
+  | ".google.protobuf.FieldMask" ->
     let open StdLabels in
     let map = function
       | `Assoc ["paths", `List masks] ->
@@ -252,12 +245,7 @@ let rec json_of_spec: type a b. enum_names:bool -> json_names:bool -> omit_defau
       f v |> map_enum_json (module Enum)
   end
   | Message (module Message) ->
-    let omit_default_values, map =
-      match map_message_json (module Message) with
-      | Some map -> false, map
-      | None -> omit_default_values, (fun json -> json)
-    in
-    fun v -> Message.to_json ~enum_names ~json_names ~omit_default_values v |> map
+    Message.to_json ~enum_names ~json_names ~omit_default_values
 
 and write: type a b. enum_names:bool -> json_names:bool -> omit_default_values:bool -> (a, b) compound -> a -> field list =
   fun ~enum_names ~json_names ~omit_default_values -> function
@@ -316,18 +304,25 @@ and write: type a b. enum_names:bool -> json_names:bool -> omit_default_values:b
         [key ~json_names index, value]
     end
 
-let rec serialize: type a. enum_names:bool -> json_names:bool -> omit_default_values:bool -> (a, Yojson.Basic.t) compound_list -> field list -> a =
-  fun ~enum_names ~json_names ~omit_default_values -> function
-  | Nil -> (fun json -> `Assoc (List.rev json))
-  | Nil_ext _extension_ranges ->
-    (fun json _extensions -> `Assoc (List.rev json))
-  | Cons (compound, rest) ->
-    let cont = serialize rest in
-    let write = write ~enum_names ~json_names ~omit_default_values compound in
-    fun acc v ->
-     let v = write v in
-     cont ~enum_names ~json_names ~omit_default_values (List.rev_append v acc)
+let serialize: type a. message_name:string -> enum_names:bool -> json_names:bool -> omit_default_values:bool -> (a, Yojson.Basic.t) compound_list -> field list -> a =
+  fun ~message_name ~enum_names ~json_names ~omit_default_values ->
+    let omit_default_values, map_result = match map_message_json ~name:message_name with
+    | Some mapping -> false, fun json -> `Assoc (List.rev json) |> mapping
+    | None -> omit_default_values, fun json -> `Assoc (List.rev json)
+    in
+    let rec inner: type a. (a, Yojson.Basic.t) compound_list -> field list -> a =
+      function
+      | Nil -> map_result
+      | Nil_ext _extension_ranges -> fun json _extensions -> map_result json
+      | Cons (compound, rest) ->
+        let cont = inner rest in
+        let write = write ~enum_names ~json_names ~omit_default_values compound in
+        fun acc v ->
+          let v = write v in
+          cont (List.rev_append v acc)
+    in
+    inner
 
-let serialize: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> ('a, Yojson.Basic.t) compound_list -> 'a =
-  fun ?(enum_names=true) ?(json_names=true) ?(omit_default_values=true) spec ->
-  serialize ~enum_names ~json_names ~omit_default_values spec []
+let serialize: message_name:string -> ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> ('a, Yojson.Basic.t) compound_list -> 'a =
+  fun ~message_name ?(enum_names=true) ?(json_names=true) ?(omit_default_values=true) spec ->
+    serialize ~message_name ~enum_names ~json_names ~omit_default_values spec []

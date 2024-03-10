@@ -1,4 +1,4 @@
-val deserialize: ('constr, 'a) Spec.compound_list -> 'constr -> Yojson.Basic.t -> 'a
+val deserialize: message_name:string -> ('constr, 'a) Spec.compound_list -> 'constr -> Yojson.Basic.t -> 'a
 
 (**)
 val to_int64: Yojson.Basic.t -> int64
