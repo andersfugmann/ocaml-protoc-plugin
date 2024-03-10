@@ -261,7 +261,7 @@ let rec emit_message ~params ~syntax ~scope
       Code.emit signature `None "val to_proto: t -> Runtime'.Writer.t";
       Code.emit signature `None "val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result";
       Code.emit signature `None "val from_proto_exn: Runtime'.Reader.t -> t";
-      Code.emit signature `None "val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t";
+      Code.emit signature `None "val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t";
       Code.emit signature `None "val from_json_exn: Yojson.Basic.t -> t";
       Code.emit signature `None "val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result";
 
@@ -283,8 +283,8 @@ let rec emit_message ~params ~syntax ~scope
       Code.emit implementation `None "let constructor %s = %s in" (String.concat ~sep:" " args) destructor;
       Code.emit implementation `None "Runtime'.Deserialize.deserialize (spec ()) constructor";
       Code.emit implementation `End "let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)";
-      Code.emit implementation `Begin "let to_json ?enum_names ?json_names ?omit_default_values = ";
-      Code.emit implementation `None "let serialize = Runtime'.Serialize_json.serialize ~message_name:\"%s\" ?enum_names ?json_names ?omit_default_values (spec ()) in" (Scope.get_proto_path scope);
+      Code.emit implementation `Begin "let to_json options = ";
+      Code.emit implementation `None "let serialize = Runtime'.Serialize_json.serialize ~message_name:\"%s\" (spec ()) options in" (Scope.get_proto_path scope);
       Code.emit implementation `None "fun %s -> serialize %s" destructor (String.concat ~sep:" " args);
       Code.emit implementation `EndBegin "let from_json_exn =";
       Code.emit implementation `None "let constructor %s = %s in" (String.concat ~sep:" " args) destructor;

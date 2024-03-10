@@ -33,7 +33,7 @@ module rec Options : sig
   val to_proto: t -> Runtime'.Writer.t
   val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
   val from_proto_exn: Runtime'.Reader.t -> t
-  val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+  val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
   val from_json_exn: Yojson.Basic.t -> t
   val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
 end = struct
@@ -51,8 +51,8 @@ end = struct
     let constructor mangle_names = (mangle_names) in
     Runtime'.Deserialize.deserialize (spec ()) constructor
   let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
-  let to_json ?enum_names ?json_names ?omit_default_values =
-    let serialize = Runtime'.Serialize_json.serialize ~message_name:".Options" ?enum_names ?json_names ?omit_default_values (spec ()) in
+  let to_json options =
+    let serialize = Runtime'.Serialize_json.serialize ~message_name:".Options" (spec ()) options in
     fun (mangle_names) -> serialize mangle_names
   let from_json_exn =
     let constructor mangle_names = (mangle_names) in

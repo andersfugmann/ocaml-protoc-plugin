@@ -13,3 +13,4 @@ module Writer = Writer
 module Service = Service
 module Result = Result
 module Extensions = Extensions
+module Json_options =Json_options

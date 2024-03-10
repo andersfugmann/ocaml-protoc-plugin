@@ -24,7 +24,7 @@ module type Message = sig
   val to_proto: t -> Writer.t
   val to_proto': Writer.t -> t -> Writer.t
   val merge: t -> t -> t
-  val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+  val to_json: Json_options.t -> t -> Yojson.Basic.t
   val from_json_exn: Yojson.Basic.t -> t
   val from_json: Yojson.Basic.t -> t Result.t
 end

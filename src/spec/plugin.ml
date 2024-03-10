@@ -36,7 +36,7 @@ module rec Google : sig
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
@@ -49,7 +49,7 @@ module rec Google : sig
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
@@ -72,7 +72,7 @@ module rec Google : sig
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
-          val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+          val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
           val from_json_exn: Yojson.Basic.t -> t
           val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
         end
@@ -84,7 +84,7 @@ module rec Google : sig
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
@@ -102,7 +102,7 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
@@ -115,7 +115,7 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
@@ -138,7 +138,7 @@ end = struct
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
-          val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+          val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
           val from_json_exn: Yojson.Basic.t -> t
           val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
         end
@@ -150,7 +150,7 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
@@ -166,7 +166,7 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
@@ -179,7 +179,7 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
@@ -202,7 +202,7 @@ end = struct
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
-          val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+          val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
           val from_json_exn: Yojson.Basic.t -> t
           val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
         end
@@ -214,7 +214,7 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
@@ -228,7 +228,7 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end = struct
@@ -251,8 +251,8 @@ end = struct
           let constructor major minor patch suffix = { major; minor; patch; suffix } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
-        let to_json ?enum_names ?json_names ?omit_default_values =
-          let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.compiler.Version" ?enum_names ?json_names ?omit_default_values (spec ()) in
+        let to_json options =
+          let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.compiler.Version" (spec ()) options in
           fun { major; minor; patch; suffix } -> serialize major minor patch suffix
         let from_json_exn =
           let constructor major minor patch suffix = { major; minor; patch; suffix } in
@@ -268,7 +268,7 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end = struct
@@ -291,8 +291,8 @@ end = struct
           let constructor file_to_generate parameter compiler_version proto_file = { file_to_generate; parameter; compiler_version; proto_file } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
-        let to_json ?enum_names ?json_names ?omit_default_values =
-          let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.compiler.CodeGeneratorRequest" ?enum_names ?json_names ?omit_default_values (spec ()) in
+        let to_json options =
+          let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.compiler.CodeGeneratorRequest" (spec ()) options in
           fun { file_to_generate; parameter; compiler_version; proto_file } -> serialize file_to_generate parameter compiler_version proto_file
         let from_json_exn =
           let constructor file_to_generate parameter compiler_version proto_file = { file_to_generate; parameter; compiler_version; proto_file } in
@@ -318,7 +318,7 @@ end = struct
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
-          val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+          val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
           val from_json_exn: Yojson.Basic.t -> t
           val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
         end
@@ -330,7 +330,7 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end = struct
@@ -371,7 +371,7 @@ end = struct
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
-          val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+          val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
           val from_json_exn: Yojson.Basic.t -> t
           val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
         end = struct
@@ -394,8 +394,8 @@ end = struct
             let constructor name insertion_point content generated_code_info = { name; insertion_point; content; generated_code_info } in
             Runtime'.Deserialize.deserialize (spec ()) constructor
           let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
-          let to_json ?enum_names ?json_names ?omit_default_values =
-            let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.compiler.CodeGeneratorResponse.File" ?enum_names ?json_names ?omit_default_values (spec ()) in
+          let to_json options =
+            let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.compiler.CodeGeneratorResponse.File" (spec ()) options in
             fun { name; insertion_point; content; generated_code_info } -> serialize name insertion_point content generated_code_info
           let from_json_exn =
             let constructor name insertion_point content generated_code_info = { name; insertion_point; content; generated_code_info } in
@@ -420,8 +420,8 @@ end = struct
           let constructor error supported_features file = { error; supported_features; file } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
-        let to_json ?enum_names ?json_names ?omit_default_values =
-          let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.compiler.CodeGeneratorResponse" ?enum_names ?json_names ?omit_default_values (spec ()) in
+        let to_json options =
+          let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.compiler.CodeGeneratorResponse" (spec ()) options in
           fun { error; supported_features; file } -> serialize error supported_features file
         let from_json_exn =
           let constructor error supported_features file = { error; supported_features; file } in

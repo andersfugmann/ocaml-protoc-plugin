@@ -135,8 +135,10 @@ deserialization.
 Json serialization can be controlled using optional arguments:
 
 ```ocaml
-val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+val to_json: Json_options.t -> (t -> Yojson.Basic.t)
 ```
+The options argument allows finer grained control over json
+serialization. The followin options are supported:
 
 | argument  | comment  | default  |
 |---|---|---|
@@ -162,12 +164,25 @@ as close as possible:
 | google.protobuf.Value | { "x": 4 } |  |
 | google.protobuf.Struct | { "x": 4 } | |
 | google.protobuf.ListValue | [ 4,5,6 ] | |
-| google.protobuf.FieldMask | "camelCase,cmlCse" | Not guaranteed to be reversible due to camel case conversion |
+| google.protobuf.FieldMask | "camelCase,camelCased" | Not guaranteed to be reversible due to camel case conversion |
 | google.protobuf.Any | | Not handled, as the ocaml-protobuf-plugin does not support dynamic protobuf parsing |
 
 
 Json serialization and deserializaiton is not well optimized and
-should not be used in performance critical applications.
+should not be used in performance critical applications. For improved
+serialization speed, its possible to reuse the function returned after
+supplying json options. To examplify:
+
+```ocaml
+(** Serialize a list of messages into a json list *)
+let to_json: type a. (module Message : Spec.Message with type t = a)
+  -> a list -> Yojson.Basic.t =
+    (* Capture the result of applying the options. This will construct
+        the actual json serialization function with optimization applied *)
+    let to_json = Message.to_json (Json_options.default) in
+    `List (List.map ~f:to_json ts)
+```
+
 
 ### Older versions of protoc
 It seems that the `--ocaml_opt` flag may not be supported by older

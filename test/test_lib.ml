@@ -20,7 +20,7 @@ module type T = sig
   val from_proto : Reader.t -> t Result.t
   val name' : unit -> string
   val merge: t -> t -> t
-  val to_json: ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> t -> Yojson.Basic.t
+  val to_json: Json_options.t -> t -> Yojson.Basic.t
   val from_json_exn: Yojson.Basic.t -> t
   val from_json: Yojson.Basic.t -> t Result.t
 end
@@ -112,14 +112,13 @@ let test_json ~debug (type t) (module M : T with type t = t) (t: t) =
         Printf.printf "Json encode/decode failed for %s: %s\n" message (Yojson.Basic.to_string json);
         Printf.printf "  Error: %s\n" (Printexc.to_string exn);
     in
-    (* May fail! *)
     let () =
       try
-        let json = M.to_json ?enum_names ?json_names ?omit_default_values t in
+        let options = Json_options.make ?enum_names ?json_names ?omit_default_values () in
+        let json = M.to_json options t in
         compare ~message:"Ocaml proto plugin" t json
       with | exn -> Printf.printf "Cannot serialize to json\n  Error: %s\n" (Printexc.to_string exn)
     in
-    (* compare ~message:"Protobuf reference implementation" t (to_json_ref t); *)
     t
   in
   (* Compare reference json *)
@@ -129,7 +128,7 @@ let test_json ~debug (type t) (module M : T with type t = t) (t: t) =
       if t <> t' then Printf.printf "Cannot deserialize reference json.\n";
       if t <> t' || debug then
         Printf.printf "Json: %s\nRef:  %s\n"
-          (Yojson.Basic.pretty_to_string (M.to_json t))
+          (Yojson.Basic.pretty_to_string (M.to_json (Json_options.default) t))
           (Yojson.Basic.pretty_to_string json');
     with
     | exn -> Printf.printf "Cannot deserialize reference json\n  Error: %s\n" (Printexc.to_string exn);

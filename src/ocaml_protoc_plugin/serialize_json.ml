@@ -204,8 +204,8 @@ let map_message_json: name:string -> (Yojson.Basic.t -> Yojson.Basic.t) option =
     Some map
   | _ -> None
 
-let rec json_of_spec: type a b. enum_names:bool -> json_names:bool -> omit_default_values:bool -> (a, b) spec -> a -> Yojson.Basic.t =
-  fun ~enum_names ~json_names ~omit_default_values -> function
+let rec json_of_spec: type a b. Json_options.t -> (a, b) spec -> a -> Yojson.Basic.t =
+  fun options -> function
   | Double -> float_value
   | Float -> float_value
   | Bool -> bool_value
@@ -238,46 +238,48 @@ let rec json_of_spec: type a b. enum_names:bool -> json_names:bool -> omit_defau
 
   | Enum (module Enum) -> begin
     fun v ->
-      let f = match enum_names with
+      let f = match options.enum_names with
         | true -> enum_name ~f:Enum.to_string
         | false -> enum_value ~f:Enum.to_int
       in
       f v |> map_enum_json (module Enum)
   end
   | Message (module Message) ->
-    Message.to_json ~enum_names ~json_names ~omit_default_values
+    Message.to_json options
 
-and write: type a b. enum_names:bool -> json_names:bool -> omit_default_values:bool -> (a, b) compound -> a -> field list =
-  fun ~enum_names ~json_names ~omit_default_values -> function
+and write: type a b. Json_options.t -> (a, b) compound -> a -> field list =
+  fun options ->
+  let key = key ~json_names:options.json_names in
+  function
     | Basic (index, spec, default) ->
       begin
         function
-        | v when omit_default_values && v = default -> []
+        | v when options.omit_default_values && v = default -> []
         | v ->
-          let value = json_of_spec ~enum_names ~json_names ~omit_default_values spec v in
-          [key ~json_names index, value]
+          let value = json_of_spec options spec v in
+          [key  index, value]
       end
     | Basic_opt (index, spec) ->
       begin
         function
         | Some v ->
-          let value = json_of_spec ~enum_names ~json_names ~omit_default_values spec v in
-          [key ~json_names index, value]
+          let value = json_of_spec options spec v in
+          [key  index, value]
         | None -> []
       end
   | Basic_req (index, spec) -> fun v ->
-    let value = json_of_spec ~enum_names ~json_names ~omit_default_values spec v in
-    [key ~json_names index, value]
+    let value = json_of_spec options spec v in
+    [key  index, value]
   | Repeated (index, spec, _packed) -> fun v ->
-    let to_json = json_of_spec ~enum_names ~json_names ~omit_default_values spec in
+    let to_json = json_of_spec options spec in
     let value = List.map ~f:to_json v |> list_value in
-    [key ~json_names index, value]
+    [key  index, value]
   | Map (index, (key_spec, value_compound)) -> fun vs ->
-    let json_of_key = json_of_spec ~enum_names ~json_names ~omit_default_values:false key_spec in
+    let json_of_key = json_of_spec { options with omit_default_values=false }  key_spec in
     let json_of_value = match value_compound with
-      | Basic (_, spec, _) -> json_of_spec ~enum_names ~json_names ~omit_default_values spec
+      | Basic (_, spec, _) -> json_of_spec options spec
       | Basic_opt (_, spec) ->
-        let json_of_value = json_of_spec ~enum_names ~json_names ~omit_default_values spec in
+        let json_of_value = json_of_spec options spec in
         let json_of_value = function
           | None -> `Null
           | Some v -> json_of_value v
@@ -291,8 +293,8 @@ and write: type a b. enum_names:bool -> json_names:bool -> omit_default_values:b
     in
     begin
       match vs with
-      | [] when not omit_default_values -> []
-      | vs -> [key ~json_names index, `Assoc (List.map ~f:json_of_entry vs )]
+      | [] when not options.omit_default_values -> []
+      | vs -> [key index, `Assoc (List.map ~f:json_of_entry vs )]
     end
   | Oneof (oneofs, index_f) -> begin
       function
@@ -300,29 +302,30 @@ and write: type a b. enum_names:bool -> json_names:bool -> omit_default_values:b
       | v ->
         let index = index_f v in
         let Oneof_elem (index, spec, (_, destr)) = List.nth oneofs index in
-        let value = json_of_spec ~enum_names ~json_names ~omit_default_values spec (destr v) in
-        [key ~json_names index, value]
+        let value = json_of_spec options spec (destr v) in
+        [key index, value]
     end
 
-let serialize: type a. message_name:string -> enum_names:bool -> json_names:bool -> omit_default_values:bool -> (a, Yojson.Basic.t) compound_list -> field list -> a =
-  fun ~message_name ~enum_names ~json_names ~omit_default_values ->
+let serialize: type a. message_name:string -> Json_options.t -> (a, Yojson.Basic.t) compound_list -> field list -> a =
+  fun ~message_name options ->
     let omit_default_values, map_result = match map_message_json ~name:message_name with
     | Some mapping -> false, fun json -> `Assoc (List.rev json) |> mapping
-    | None -> omit_default_values, fun json -> `Assoc (List.rev json)
+    | None -> options.omit_default_values, fun json -> `Assoc (List.rev json)
     in
+    let options = { options with omit_default_values } in
     let rec inner: type a. (a, Yojson.Basic.t) compound_list -> field list -> a =
       function
       | Nil -> map_result
       | Nil_ext _extension_ranges -> fun json _extensions -> map_result json
       | Cons (compound, rest) ->
         let cont = inner rest in
-        let write = write ~enum_names ~json_names ~omit_default_values compound in
+        let write = write options compound in
         fun acc v ->
           let v = write v in
           cont (List.rev_append v acc)
     in
     inner
 
-let serialize: message_name:string -> ?enum_names:bool -> ?json_names:bool -> ?omit_default_values:bool -> ('a, Yojson.Basic.t) compound_list -> 'a =
-  fun ~message_name ?(enum_names=true) ?(json_names=true) ?(omit_default_values=true) spec ->
-    serialize ~message_name ~enum_names ~json_names ~omit_default_values spec []
+let serialize: message_name:string -> ('a, Yojson.Basic.t) compound_list -> Json_options.t -> 'a =
+  fun ~message_name spec options ->
+    serialize ~message_name options spec []
