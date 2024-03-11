@@ -41,3 +41,6 @@ val has_mangle_option: Spec.Descriptor.Google.Protobuf.FileOptions.t option -> b
 
 (** Get stringified version of the current proto path *)
 val get_proto_path: t -> string
+
+(** Return the mapped module name for a protobuf file *)
+val get_module_name: filename:string -> t -> string

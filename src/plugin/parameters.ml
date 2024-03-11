@@ -40,7 +40,7 @@ let parse parameters =
       | `Expr ("int32_as_int", (("true"|"false") as v)) -> { param with int32_as_int = (bool_of_string v) };
       | `Expr ("singleton_record", (("true"|"false") as v)) -> { param with singleton_record = (bool_of_string v) };
       | `Stmt "debug" -> { param with debug = true}
-      | `Stmt "prefix_output_with_package" -> { param with prefix_output_with_package = true}
+      | `Expr ("prefix_output_with_package", (("true"|"false") as v)) -> { param with prefix_output_with_package = (bool_of_string v)}
       | `Stmt "" -> param
       | _ -> failwith ("Unknown parameter: " ^ option)
     )

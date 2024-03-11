@@ -371,20 +371,17 @@ let parse_proto_file ~params scope
   emit_header implementation ~name ~syntax ~deprecated ~params;
   Code.emit implementation `None "open Ocaml_protoc_plugin.Runtime [@@warning \"-33\"]";
   List.iter ~f:(Code.emit implementation `None "open %s [@@warning \"-33\"]" ) params.opens;
-  let _ = match dependencies with
-    | [] -> ()
-    | dependencies (* Dont we know the package of each here? How can we import if we dont know the package. *) ->
-      Code.emit implementation `None "(**/**)";
-      Code.emit implementation `Begin "module %s = struct" Scope.import_module_name;
-      List.iter ~f:(fun proto_file ->
-        (* TODO!. Somehow capture the package.
-           The question is if protoc can give us this *)
-          let module_name = Scope.module_name_of_proto proto_file in
-          Code.emit implementation `None "module %s = %s" module_name module_name;
-        ) dependencies;
-      Code.emit implementation `End "end";
-      Code.emit implementation `None "(**/**)";
-  in
+
+  Code.emit implementation `None "(**/**)";
+  Code.emit implementation `Begin "module %s = struct" Scope.import_module_name;
+
+  List.iter ~f:(fun dependency ->
+    let module_name = Scope.get_module_name ~filename:dependency scope in
+    Code.emit implementation `None "module %s = %s" module_name module_name;
+  ) dependencies;
+  Code.emit implementation `End "end";
+  Code.emit implementation `None "(**/**)";
+
   let _signature', implementation' =
     wrap_packages ~params ~syntax ~options scope message_type services (Option.value_map ~default:[] ~f:(String.split_on_char ~sep:'.') package)
   in
