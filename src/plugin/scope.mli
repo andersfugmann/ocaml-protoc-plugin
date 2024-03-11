@@ -30,9 +30,6 @@ val get_name : t -> string -> string
 (** Get the ocaml name of the given proto type name, based on the current scope *)
 val get_name_exn : t -> string option -> string
 
-(** Get the type of the current scope. This is prefixed with the filename containing the definition *)
-val get_current_scope : t -> string
-
 (** Get the package name. This function assumes callee is in service scope *)
 val get_package_name : t -> string option
 

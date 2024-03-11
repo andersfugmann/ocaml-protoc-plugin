@@ -252,11 +252,11 @@ end = struct
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
-          let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.compiler.Version" (spec ()) options in
+          let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { major; minor; patch; suffix } -> serialize major minor patch suffix
         let from_json_exn =
           let constructor major minor patch suffix = { major; minor; patch; suffix } in
-          Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.compiler.Version" (spec ()) constructor
+          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       and CodeGeneratorRequest : sig
@@ -292,11 +292,11 @@ end = struct
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
-          let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.compiler.CodeGeneratorRequest" (spec ()) options in
+          let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { file_to_generate; parameter; compiler_version; proto_file } -> serialize file_to_generate parameter compiler_version proto_file
         let from_json_exn =
           let constructor file_to_generate parameter compiler_version proto_file = { file_to_generate; parameter; compiler_version; proto_file } in
-          Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.compiler.CodeGeneratorRequest" (spec ()) constructor
+          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       and CodeGeneratorResponse : sig
@@ -395,11 +395,11 @@ end = struct
             Runtime'.Deserialize.deserialize (spec ()) constructor
           let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
           let to_json options =
-            let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.compiler.CodeGeneratorResponse.File" (spec ()) options in
+            let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
             fun { name; insertion_point; content; generated_code_info } -> serialize name insertion_point content generated_code_info
           let from_json_exn =
             let constructor name insertion_point content generated_code_info = { name; insertion_point; content; generated_code_info } in
-            Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.compiler.CodeGeneratorResponse.File" (spec ()) constructor
+            Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
           let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
         end
         let name () = ".google.protobuf.compiler.CodeGeneratorResponse"
@@ -421,11 +421,11 @@ end = struct
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
-          let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.compiler.CodeGeneratorResponse" (spec ()) options in
+          let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { error; supported_features; file } -> serialize error supported_features file
         let from_json_exn =
           let constructor error supported_features file = { error; supported_features; file } in
-          Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.compiler.CodeGeneratorResponse" (spec ()) constructor
+          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
     end

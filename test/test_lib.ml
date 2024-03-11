@@ -11,7 +11,7 @@ module Reference = struct
     close_in ch;
     include_path
 
-  (* extern "C" char* protobuf2json(const char *google_include_dir, const char *proto, const char* type, const char* in_data)  *)
+  (* extern "C" char* protobuf2json(const char *google_include_dir, const char* proto_file, const char* type, const char* in_data)  *)
   let protobuf2json = foreign "protobuf2json" (string @-> string @-> string @-> string @-> int @-> returning string)
   let to_json ~proto_file ~message_type data =
     protobuf2json google_include_path proto_file message_type data (String.length data)
@@ -37,31 +37,24 @@ let hexlify data =
   |> String.concat ~sep:"-"
   |> Printf.printf "Buffer: '%s'\n"
 
-let dump_protoc ?(protoc_args=[]) name data =
-  let protobuf_file, type_name =
-    match String.split_on_char ~sep:'.' name with
-    | protobuf_name :: type_name ->
-      Printf.sprintf "%s.proto" (String.uncapitalize_ascii protobuf_name),
-      String.concat ~sep:"." type_name
-      | _ -> failwith "Illegal type name"
-  in
-  let filename = Filename.temp_file name ".bin" in
+let dump_protoc ?(protoc_args=[]) ~proto_file type_name data =
+  let filename = Filename.temp_file type_name ".bin" in
   let cout = open_out filename in
   output_string cout data;
   close_out cout;
   Printf.printf "%!";
-  let res = Sys.command
-      (Printf.sprintf
-         "protoc %s --decode=%s %s < %s 2>/dev/null"
-         (String.concat ~sep:" " protoc_args)
-         type_name
-         protobuf_file
-         filename)
+  let command =
+    Printf.sprintf "protoc %s --decode=%s %s < %s 2>/dev/null"
+      (String.concat ~sep:" " protoc_args)
+      type_name
+      proto_file
+      filename
   in
+  let res = Sys.command command in
   Sys.remove filename;
   match res with
   | 0 -> ()
-  | n -> Printf.printf "'protoc' exited with status code: %d\n" n
+  | n -> Printf.printf "'protoc' exited with status code: %d. \n%s\n" n command
 
 let test_merge (type t) (module M : T with type t = t) (t: t) =
   Test_runtime.set_stragegy Test_runtime.Standard;
@@ -83,19 +76,22 @@ let test_merge (type t) (module M : T with type t = t) (t: t) =
   in
   ()
 
-let test_json ~debug (type t) (module M : T with type t = t) (t: t) =
+let test_json ~debug ?proto_file (type t) (module M : T with type t = t) (t: t) =
   ignore debug;
   let json_ref t =
-    let proto_file, message_type =
+    let message_type =
       (* Nice. We can get the name of the file. in which this is defined.  Wonder if there is a different way of doing that! *)
       match M.name () |> String.split_on_char ~sep:'.' with
-      | hd :: tl ->
-        let proto_file = hd ^ ".proto" in
+      | _ :: tl ->
         let message_type = String.concat ~sep:"." tl in
-        proto_file, message_type
+        message_type
       | _ -> failwith "Illegal name"
     in
     let proto = M.to_proto t |> Writer.contents in
+    let proto_file = match proto_file with
+      | None -> ""
+      | Some proto_file -> proto_file
+    in
     let json = Reference.to_json ~proto_file ~message_type proto in
     try
       Yojson.Basic.from_string json
@@ -165,7 +161,7 @@ let test_decode (type t) (module M : T with type t = t) strategy expect data =
     Printf.printf "\n%s:Data: %s\n" (Test_runtime.show_strategy strategy) (List.map ~f:fst fields |> List.map ~f:string_of_int |> String.concat ~sep:", ")
 
 (** Create a common function for testing. *)
-let test_encode (type t) ?dump ?(debug_json=false) ?(protoc=true) ?protoc_args (module M : T with type t = t) ?(skip_json=false) ?(validate : t option) ?(expect : t option) (t : t) =
+let test_encode (type t) ?dump ?(debug_json=false) ?proto_file ?protoc_args (module M : T with type t = t) ?(skip_json=false) ?(validate : t option) ?(expect : t option) (t : t) =
   let expect = Option.value ~default:t expect in
   let () = match validate with
     | Some v when v <> expect -> Printf.printf "Validate match failed\n"
@@ -181,9 +177,12 @@ let test_encode (type t) ?dump ?(debug_json=false) ?(protoc=true) ?protoc_args (
     | Some _ -> hexlify data
     | None -> ()
   in
-  let () = match protoc with
-    | true -> dump_protoc ?protoc_args (M.name ()) data
-    | false -> ()
+  let () = match proto_file with
+    | Some proto_file ->
+      let typename = M.name () in
+      let typename = String.sub typename ~pos:1 ~len:(String.length typename - 1) in
+      dump_protoc ?protoc_args ~proto_file typename data
+    | None -> ()
   in
 
   test_decode (module M) Test_runtime.Standard expect data_space;

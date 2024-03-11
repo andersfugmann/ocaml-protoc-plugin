@@ -265,7 +265,7 @@ let rec emit_message ~params ~syntax ~scope
       Code.emit signature `None "val from_json_exn: Yojson.Basic.t -> t";
       Code.emit signature `None "val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result";
 
-      Code.emit implementation `None "let name () = \"%s\"" (Scope.get_current_scope scope);
+      Code.emit implementation `None "let name () = \"%s\"" (Scope.get_proto_path scope);
       Code.emit implementation `None "type t = %s%s" type' params.annot;
 
       Code.emit implementation `None "let make %s" default_constructor_impl;
@@ -284,11 +284,11 @@ let rec emit_message ~params ~syntax ~scope
       Code.emit implementation `None "Runtime'.Deserialize.deserialize (spec ()) constructor";
       Code.emit implementation `End "let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)";
       Code.emit implementation `Begin "let to_json options = ";
-      Code.emit implementation `None "let serialize = Runtime'.Serialize_json.serialize ~message_name:\"%s\" (spec ()) options in" (Scope.get_proto_path scope);
+      Code.emit implementation `None "let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in";
       Code.emit implementation `None "fun %s -> serialize %s" destructor (String.concat ~sep:" " args);
       Code.emit implementation `EndBegin "let from_json_exn =";
       Code.emit implementation `None "let constructor %s = %s in" (String.concat ~sep:" " args) destructor;
-      Code.emit implementation `None "Runtime'.Deserialize_json.deserialize ~message_name:\"%s\" (spec ()) constructor" (Scope.get_proto_path scope);
+      Code.emit implementation `None "Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor";
       Code.emit implementation `End "let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)";
     | None -> ()
   in

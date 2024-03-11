@@ -2,13 +2,15 @@ open Json_encoding.Json_test
 module G = Google_types_pp
 open StdLabels
 
+let proto_file = "json_encoding.proto"
+
 let%expect_test _ =
   let module T = Duration in
   let module I = G.Duration.Google.Protobuf.Duration in
-  Some (I.make ()) |> Test_lib.test_encode ~debug_json:true (module T);
-  Some (I.make ~seconds:10 ~nanos:5 ()) |> Test_lib.test_encode ~debug_json:true (module T);
-  Some (I.make ~seconds:10 ()) |> Test_lib.test_encode ~debug_json:true (module T);
-  Some (I.make ~nanos:5 ()) |> Test_lib.test_encode ~debug_json:true (module T);
+  Some (I.make ()) |> Test_lib.test_encode ~proto_file ~debug_json:true (module T);
+  Some (I.make ~seconds:10 ~nanos:5 ()) |> Test_lib.test_encode ~proto_file ~debug_json:true (module T);
+  Some (I.make ~seconds:10 ()) |> Test_lib.test_encode~proto_file  ~debug_json:true (module T);
+  Some (I.make ~nanos:5 ()) |> Test_lib.test_encode ~proto_file ~debug_json:true (module T);
   ();
   [%expect {|
     duration {
@@ -35,10 +37,10 @@ let%expect_test _ =
 let%expect_test _ =
   let module T = Timestamp in
   let module I = G.Timestamp.Google.Protobuf.Timestamp in
-  Some (I.make ()) |> Test_lib.test_encode ~debug_json:true (module T);
-  Some (I.make ~seconds:1709985346 ~nanos:5 ()) |> Test_lib.test_encode ~debug_json:true (module T);
-  Some (I.make ~seconds:1709985346 ()) |> Test_lib.test_encode ~debug_json:true (module T);
-  Some (I.make ~nanos:5 ()) |> Test_lib.test_encode ~debug_json:true (module T);
+  Some (I.make ()) |> Test_lib.test_encode ~proto_file ~debug_json:true (module T);
+  Some (I.make ~seconds:1709985346 ~nanos:5 ()) |> Test_lib.test_encode ~proto_file ~debug_json:true (module T);
+  Some (I.make ~seconds:1709985346 ()) |> Test_lib.test_encode ~proto_file ~debug_json:true (module T);
+  Some (I.make ~nanos:5 ()) |> Test_lib.test_encode ~proto_file ~debug_json:true (module T);
   ();
   [%expect {|
     timestamp {
@@ -65,7 +67,7 @@ let%expect_test _ =
 let%expect_test _ =
   let module T = Empty in
   let module I = G.Empty.Google.Protobuf.Empty in
-  Some (I.make ()) |> Test_lib.test_encode ~debug_json:true (module T);
+  Some (I.make ()) |> Test_lib.test_encode ~proto_file ~debug_json:true (module T);
   ();
   [%expect {|
     empty {
@@ -76,12 +78,12 @@ let%expect_test _ =
 
 let%expect_test _ =
   let module T = Wrappers in
-  T.make () |> Test_lib.test_encode ~debug_json:true (module T);
+  T.make () |> Test_lib.test_encode ~proto_file ~debug_json:true (module T);
   let bytes = Bytes.of_string "bytes" in
   T.make ~double:0.0 ~float:0.0 ~s64:0 ~u64:0 ~s32:0 ~u32:0 ~string:"" ~bytes:Bytes.empty ~bool:false ()
-  |> Test_lib.test_encode ~debug_json:true (module T);
+  |> Test_lib.test_encode ~proto_file ~debug_json:true (module T);
   T.make ~double:5.5 ~float:5.5 ~s64:5 ~u64:5 ~s32:5 ~u32:5 ~string:"str" ~bytes ~bool:true ()
-  |> Test_lib.test_encode ~debug_json:true (module T);
+  |> Test_lib.test_encode ~proto_file ~debug_json:true (module T);
   ();
   [%expect {|
     Json: {}
@@ -178,13 +180,13 @@ let%expect_test _ =
 
 let%expect_test _ =
   let module T = FieldMask in
-  T.make () |> Test_lib.test_encode ~debug_json:true (module T);
+  T.make () |> Test_lib.test_encode ~proto_file ~debug_json:true (module T);
   T.make ~mask:["a"; "b"] ()
-  |> Test_lib.test_encode ~debug_json:true (module T);
+  |> Test_lib.test_encode ~proto_file ~debug_json:true (module T);
   let mask = ["camel_case"; "CAMEL"] in
   let t = T.make ~mask () in
   let expect = T.make ~mask:(List.map ~f:String.lowercase_ascii mask) () in
-  Test_lib.test_encode ~debug_json:true ~expect (module T) t;
+  Test_lib.test_encode ~proto_file ~debug_json:true ~expect (module T) t;
   ();
   [%expect {|
     Json: {}
@@ -207,7 +209,7 @@ let%expect_test _ =
   let module I = G.Struct.Google.Protobuf.Struct in
   let module V = G.Struct.Google.Protobuf.Value in
   let nullValue = G.Struct.Google.Protobuf.NullValue.NULL_VALUE in
-  T.make () |> Test_lib.test_encode ~debug_json:true (module T);
+  T.make () |> Test_lib.test_encode ~proto_file ~debug_json:true (module T);
 
   let v b f s =
     ["Bool", `Bool_value b; "Number", `Number_value f; "String", `String_value s; "Null", `Null_value nullValue]
@@ -216,15 +218,15 @@ let%expect_test _ =
   let make struct' =
     T.make ~struct' ()
   in
-  make (v true 5.0 "hello") |> Test_lib.test_encode ~debug_json:true (module T);
-  make (v false 0.0 "") |> Test_lib.test_encode ~debug_json:true (module T);
+  make (v true 5.0 "hello") |> Test_lib.test_encode ~proto_file ~debug_json:true (module T);
+  make (v false 0.0 "") |> Test_lib.test_encode ~proto_file ~debug_json:true (module T);
 
   (* Test embeded struct *)
   make [ "Struct1", Some (`Struct_value (v true 1.0 "a")); "Struct2", Some (`Struct_value (v false 2.0 "b")) ]
-  |> Test_lib.test_encode ~debug_json:true (module T);
+  |> Test_lib.test_encode ~proto_file ~debug_json:true (module T);
 
   make [ "List", Some (`List_value (List.map ~f:(fun v -> V.make ~kind:(`Number_value v) ()) [3.;4.;5.])) ]
-  |> Test_lib.test_encode ~debug_json:true (module T);
+  |> Test_lib.test_encode ~proto_file ~debug_json:true (module T);
 
   ();
   [%expect {|

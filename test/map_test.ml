@@ -1,8 +1,11 @@
 open Map
+
+let proto_file = "map.proto"
+
 let%expect_test _ =
   let module T = Map.Test in
   let t = [ 1, "1"; 2, "2"; 3, "3" ] in
-  Test_lib.test_encode (module T) t;
+  Test_lib.test_encode ~proto_file (module T) t;
   [%expect {|
     m {
       key: 1
@@ -20,7 +23,7 @@ let%expect_test _ =
 let%expect_test _ =
   let module T = Map.Bool_map in
   let t = [ true, "true"; false, "false" ] in
-  Test_lib.test_encode (module T) t;
+  Test_lib.test_encode ~proto_file (module T) t;
   [%expect {|
     m {
       key: false
@@ -37,7 +40,7 @@ let%expect_test _ =
   let module T = Map.Two in
   let t = T.{ m = [ 0, "10"; 1, "1"; 2, "2"; 3, "3" ];
               n = [ 0, 0.0; 1, 1.0; 2, 2.0; 3, 3.0 ]} in
-  Test_lib.test_encode (module T) t;
+  Test_lib.test_encode ~proto_file (module T) t;
   Printf.printf "The reference implementation drops elements when the values is the default value";
 
   [%expect {|
@@ -92,7 +95,7 @@ let%expect_test _ =
             3, Some 3;
             4, Some 4; ]
   in
-  Test_lib.test_encode (module T) t;
+  Test_lib.test_encode ~proto_file (module T) t;
   [%expect {|
     m {
       key: 1
@@ -129,7 +132,7 @@ let%expect_test _ =
             10, Some 0;
           ]
   in
-  Test_lib.test_encode (module T) t;
+  Test_lib.test_encode ~proto_file (module T) t;
   Printf.printf "The reference implementation drops elements when the values is the default value";
 
   [%expect {|

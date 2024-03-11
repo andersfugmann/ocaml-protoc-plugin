@@ -1,6 +1,9 @@
 open Include
 module Enum = Enum.Enum_test
-let test_encode = Test_lib.test_encode ~skip_json:true
+
+let proto_file = "include.proto"
+let test_encode = Test_lib.test_encode ~proto_file ~skip_json:true
+
 let%expect_test _ =
   let module T = Include.I in
   let t = T.{ enum = Enum.Message.E.B;

@@ -1,4 +1,6 @@
 open Primitive_types
+let proto_file = "primitive_types.proto"
+
 let%expect_test _ =
   let module T = Primitive_types.Types in
   let t =
@@ -21,7 +23,7 @@ let%expect_test _ =
         bytes = Bytes.of_string "bytes";
       }
   in
-  Test_lib.test_encode (module T) t;
+  Test_lib.test_encode ~proto_file (module T) t;
   [%expect
     {|
     int64: 1
@@ -43,7 +45,7 @@ let%expect_test _ =
 let%expect_test _ =
   let module T = Primitive_types.Types in
   let t = T.make () in
-  Test_lib.test_encode (module T) t;
+  Test_lib.test_encode ~proto_file (module T) t;
   let bin = T.to_proto t in
   Printf.printf "Size: %d%!" (Ocaml_protoc_plugin.Writer.contents bin |> String.length);
   [%expect {|
@@ -53,5 +55,5 @@ let%expect_test _ =
 let%expect_test _ =
   let module T = Primitive_types.Empty in
   let t = () in
-  Test_lib.test_encode (module T) t;
+  Test_lib.test_encode ~proto_file (module T) t;
   [%expect {| |}]

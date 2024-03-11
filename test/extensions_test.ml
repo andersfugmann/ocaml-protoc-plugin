@@ -16,7 +16,7 @@ let%expect_test _ =
   let foo = Extensions.Foo.{ bar = Some 5; extensions' = Ocaml_protoc_plugin.Extensions.default } in
   let foo = Extensions.Baz'.set foo (Some 8) in
   let foo = Extensions.Baz'.set foo (Some 7) in
-  Test_lib.test_encode ~skip_json:true ~protoc:false (module Extensions.Foo) foo;
+  Test_lib.test_encode ~skip_json:true (module Extensions.Foo) foo;
   let baz = Extensions.Baz'.get foo in
   print_endline ([%show: Extensions.Foo.t] foo);
   print_endline ([%show: Extensions.Baz.t Ocaml_protoc_plugin.Result.t] baz);
@@ -35,7 +35,7 @@ let%expect_test _ =
   let foo = Extensions.Baz'.set foo (Some 0) in
   let foo = Extensions.B2.set foo ([6;7;8]) in
   let foo = Extensions.B2.set foo ([]) in
-  Test_lib.test_encode ~skip_json:true ~protoc:false (module Extensions.Foo) foo;
+  Test_lib.test_encode ~skip_json:true (module Extensions.Foo) foo;
 
   print_endline ([%show: Extensions.Foo.t] foo);
   ();
@@ -45,7 +45,7 @@ let%expect_test _ =
 let%expect_test _ =
   let foo = Extensions.Foo.{ bar = Some 5; extensions' = Ocaml_protoc_plugin.Extensions.default } in
   let foo = Extensions.Baz'.set foo (Some 7) in
-  Test_lib.test_encode ~skip_json:true ~protoc:false (module Extensions.Foo) foo;
+  Test_lib.test_encode ~skip_json:true (module Extensions.Foo) foo;
 
   let foo' =
     Extensions.Foo.to_proto foo
@@ -67,7 +67,7 @@ let%expect_test _ =
 let%expect_test _ =
   let v = [6;7;8;9] in
   let foo = Extensions.Foo.{ bar = Some 5; extensions' = Ocaml_protoc_plugin.Extensions.default } in
-  Test_lib.test_encode ~skip_json:true ~protoc:false (module Extensions.Foo) foo;
+  Test_lib.test_encode ~skip_json:true (module Extensions.Foo) foo;
   let foo = Extensions.R_baz.set foo v in
   let foo' =
     Extensions.Foo.to_proto foo
@@ -107,7 +107,7 @@ let%expect_test _ =
 
   let foo = Extensions.B.set foo 0 in
   Printf.printf "Set B = 0: %d\n" (Extensions.B.get foo |> Ocaml_protoc_plugin.Result.get ~msg:"No Value");
-  Test_lib.test_encode ~skip_json:true ~protoc:false (module Extensions.Foo) foo;
+  Test_lib.test_encode ~skip_json:true (module Extensions.Foo) foo;
   print_endline ([%show: Extensions.Foo.t] foo);
   ();
   [%expect {|

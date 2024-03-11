@@ -485,11 +485,6 @@ let get_name_exn t name =
   let name = Option.value_exn ~message:"Does not contain a name" name in
   get_name t name
 
-(* Getting the current scope. *)
-let get_current_scope t =
-  let { module_name; ocaml_name = _; _ } = StringMap.find (get_proto_path t) t.type_db in
-  (String.lowercase_ascii module_name) ^ (get_proto_path t)
-
 let get_package_name t =
   match t.proto_path with
   | _ :: xs -> List.rev xs |> String.concat ~sep:"." |> Option.some
