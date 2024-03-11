@@ -344,6 +344,7 @@ let emit_header implementation ~name ~syntax ~deprecated ~params =
   Code.emit implementation `None "    int32_as_int=%b" params.int32_as_int;
   Code.emit implementation `None "    fixed_as_int=%b" params.fixed_as_int;
   Code.emit implementation `None "    singleton_record=%b" params.singleton_record;
+  Code.emit implementation `None "    prefix_output_with_package=%b" params.prefix_output_with_package;
   Code.emit implementation `None "*)";
   Code.emit implementation `None "[@@@ocaml.alert \"-protobuf\"] (* Disable deprecation warnings for protobuf*)";
   Code.emit implementation `None "%s" (Code.append_deprecaton_if ~deprecated `Floating "");
