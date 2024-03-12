@@ -269,7 +269,7 @@ let rec emit_message ~params ~syntax ~scope
       Code.emit implementation `None "type t = %s%s" type' params.annot;
 
       Code.emit implementation `None "let make %s" default_constructor_impl;
-      Code.emit implementation `None "let merge = (%s)" merge_impl;
+      Code.emit implementation `None "let merge = \n%s" merge_impl;
       Code.emit implementation `None "let spec () = %s" spec_str;
 
       Code.emit implementation `Begin "let to_proto' =";
