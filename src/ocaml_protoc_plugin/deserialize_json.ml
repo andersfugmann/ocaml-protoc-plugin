@@ -299,7 +299,8 @@ let read_value: type a b. (a, b) spec -> Yojson.Basic.t -> a = function
    | String -> to_string
    | Bytes -> to_bytes
    | Enum (module Enum) ->
-     fun json -> map_enum_json (module Enum) json |> to_enum (module Enum)
+     let map_enum_json = map_enum_json (module Enum) in
+     fun json -> map_enum_json json |> to_enum (module Enum)
    | Message (module Message) ->
      Message.from_json_exn
 
@@ -308,76 +309,96 @@ let find_field (_number, field_name, json_name) fields =
   | Some value -> Some value
   | None -> FieldMap.find_opt field_name fields
 
-let rec read: type a b. fields -> (a, b) Spec.compound -> a = fun fields -> function
+let rec read: type a b. (a, b) Spec.compound -> fields -> a = function
   | Basic (index, spec, default) ->
     begin
-      match find_field index fields with
-      | Some field -> read_value spec field
-      | None -> default
+      let read_value = read_value spec in
+      fun fields ->
+        match find_field index fields with
+        | Some field -> read_value field
+        | None -> default
     end
   | Basic_opt (index, spec) ->
     begin
-      match find_field index fields with
-      | Some field -> Some (read_value spec field)
-      | None -> None
+      let read_value = read_value spec in
+      fun fields ->
+        match find_field index fields with
+        | Some field -> Some (read_value field)
+        | None -> None
     end
   | Basic_req (index, spec) ->
     begin
-      match find_field index fields with
-      | Some field -> read_value spec field
-      | None -> Result.raise (`Required_field_missing (0, ""))
+      let read_value = read_value spec in
+      fun fields ->
+        match find_field index fields with
+        | Some field -> read_value field
+        | None -> Result.raise (`Required_field_missing (0, ""))
     end
   | Repeated (index, spec, _packed) ->
     begin
-      match find_field index fields with
-      | Some field ->
-        let read = read_value spec in
-        to_list field |> List.map ~f:read
-      | None -> []
+      let read = read_value spec in
+      fun fields ->
+        match find_field index fields with
+        | Some field ->
+          to_list field |> List.map ~f:read
+        | None -> []
     end
   | Map (index, (key_spec, Basic (_, value_spec, _))) ->
-    let read_key = read_value key_spec in
-    let read_key v = read_key (`String v) in
-    let read_value = read_value value_spec in
-    begin match find_field index fields with
-    | Some field ->
-      read_map ~read_key ~read_value field
-    | None -> []
+    begin
+      let read_key = read_value key_spec in
+      let read_key v = read_key (`String v) in
+      let read_value = read_value value_spec in
+      fun fields ->
+        match find_field index fields with
+        | Some field ->
+          read_map ~read_key ~read_value field
+        | None -> []
     end
   | Map (index, (key_spec, Basic_opt (_, value_spec))) ->
-    let read_key = read_value key_spec in
-    let read_key v = read_key (`String v) in
-    let read_value = read_value value_spec in
-
-    let read_value = function
-      | `Null -> begin try Some (read_value `Null) with | _ -> None end
-      | json -> Some (read_value json)
-    in
-    begin match find_field index fields with
-    | Some field ->
-      read_map ~read_key ~read_value field
-    | None -> []
+    begin
+      let read_key = read_value key_spec in
+      let read_key v = read_key (`String v) in
+      let read_value = read_value value_spec in
+      let read_value = function
+        | `Null -> begin try Some (read_value `Null) with | _ -> None end
+        | json -> Some (read_value json)
+      in
+      fun fields -> match find_field index fields with
+        | Some field ->
+          read_map ~read_key ~read_value field
+        | None -> []
     end
   | Oneof (oneofs, _) ->
-    let rec inner = function
-      | Oneof_elem (index, spec, (constr, _)) :: rest ->
-        begin
-          match read fields (Spec.Basic_opt (index, spec)) with
-          | Some v -> constr v
-          | None -> inner rest
-        end
-      | [] -> `not_set
-    in
-    inner oneofs
-
+    begin
+      let rec make_readers = function
+        | Oneof_elem (index, spec, (constr, _)) :: rest ->
+          let read = read (Spec.Basic_opt (index, spec)) in
+          let read_opt fields =
+            match read fields with
+            | Some v -> Some (constr v)
+            | None -> None
+          in
+          read_opt :: make_readers rest
+        | [] -> []
+      in
+      let readers = make_readers oneofs in
+            let rec find fields = function
+        | [] -> `not_set
+        | read_opt :: rest -> match read_opt fields with
+          | Some v -> v
+          | None -> find fields rest
+      in
+      fun fields -> find fields readers
+    end
 
 let rec deserialize: type constr a. (constr, a) compound_list -> constr -> fields -> a = function
   | Nil -> fun constr _json -> constr
   | Nil_ext _extension_ranges -> fun constr _json -> constr [] (* TODO: implement support for extensions *)
   | Cons (spec, rest) ->
+    let read = read spec in
     let cont = deserialize rest in
     fun constr fields ->
-      let v = read fields spec in
+      let v = read fields in
       cont (constr v) fields
 
 

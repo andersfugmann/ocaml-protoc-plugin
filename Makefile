@@ -84,6 +84,15 @@ bench: ## Run benchmark to compare with ocaml-protoc
 publish: ## Publish a new package.
 	dune-release -p ocaml-protoc-plugin
 
+.PHONY: verify
+verify: # Verify partial evaluation though use of bisect
+	@rm -fr _verify
+	@mkdir _verify
+	@cd _verify; dune exec --instrument-with bisect_ppx ../bench/verify_evaluation.exe
+	@bisect-ppx-report html -o _verify --coverage-path=_verify/
+	open _verify/index.html
+
+
 .PHONY: force
 force:
 

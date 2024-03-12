@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+// Verify partial evaluation
+package Verify;
+
+  enum E {
+    A = 0;
+    B = 1;
+    C = 2;
+  }
+
+
+message M {
+
+  string a = 10;
+  int64 b = 20;
+  repeated int64 rp = 30;
+  repeated int64 r = 40 [packed = false];
+
+  map<bool, string> m = 50;
+  N message = 60;
+  E enum = 70;
+
+  oneof oneof {
+    int64 i = 100;
+    string j = 200;
+  }
+
+}
+
+message N {
+  int64 i = 1;
+}

@@ -737,6 +737,7 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
     |> sprintf "Runtime'.Spec.( %s )"
   in
 
+  (* Merge_impl should be a list of string potentially *)
   let merge_impl =
     let args =
       List.map ["t1";"t2"] ~f:(fun s ->
@@ -750,6 +751,7 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
       |> String.concat ~sep:" "
     in
     let sep = match t_as_tuple with true -> "_" | false -> "." in
+    (* Create a list of merge values and initializers - e.g. [let x = ... in] + the actual list of merges  *)
     let merge_values =
       List.map ts ~f:(function
         | { name; type' = { modifier = Oneof_type (_, ctrs); _ }; _ } ->
@@ -761,37 +763,50 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
           *)
 
           let name = Scope.get_name scope name in
-          sprintf "match ((t1%s%s), (t2%s%s)) with"sep name sep name ::
-          List.map ~f:(fun (ctr, type') ->
-            let spec = sprintf "basic_req ((0, \"\", \"\"), %s)" type' in (* Oneof messages are marked as required, as one must be set. *)
-            sprintf "  | (%s v1, %s v2) -> %s (Runtime'.Merge.merge Runtime'.Spec.( %s ) v1 v2)" ctr ctr ctr spec
-          ) ctrs
-          |> append "  | (v1, `not_set)  -> v1"
-          |> append "  | (_, v2) -> v2"
-          |> String.concat ~sep:"\n"
-          |> fun value -> name, value
+          let definitions, matches =
+            List.map ~f:(fun (ctr, type') ->
+              let alias = sprintf "merge_oneof_%s_%s" name (String.map ~f:(function '`' -> '_' | c -> c) ctr) in
+              (sprintf "let %s = Runtime'.Merge.merge Runtime'.Spec.( basic_req ((0, \"\", \"\"), %s) ) in" alias type',
+              sprintf "\t| (%s v1, %s v2) -> %s (%s v1 v2)" ctr ctr ctr alias)
+            ) ctrs
+            |> List.split
+          in
+          let merge = (sprintf "match (t1%s%s, t2%s%s) with" sep name sep name) :: matches
+                      |> append "\t| (v1, `not_set) -> v1"
+                      |> append "\t| (_, v2) -> v2"
+                      |> String.concat ~sep:"\n"
+          in
+          name, definitions, merge
 
         | { name; spec_str; _ } ->
           let name = Scope.get_name scope name in
-          name, sprintf "Runtime'.Merge.merge Runtime'.Spec.( %s ) t1%s%s t2%s%s"
-            spec_str sep name sep name
+          let alias = sprintf "merge_%s" name in
+          let definition = sprintf "let %s = Runtime'.Merge.merge Runtime'.Spec.( %s ) in" alias spec_str in
+          let merge = sprintf "%s t1%s%s t2%s%s" alias sep name sep name in
+          name, [definition], merge
       )
-      |> append ~cond:has_extensions ("extensions'", sprintf "List.append t1%sextensions' t2%sextensions'" sep sep)
+      |> append ~cond:has_extensions ("extensions'", [], sprintf "List.append t1%sextensions' t2%sextensions'" sep sep)
     in
     let constr =
       match t_as_tuple with
       | true ->
-        List.map ~f:snd merge_values
+        List.map ~f:(fun (_, _, s) -> s) merge_values
+        |> (function [] -> ["()"] | l -> l) (* Empty constructors are unit typed *)
         |> String.concat ~sep:","
-        |> sprintf "(%s)"
+        |> sprintf "%s"
       | false ->
-        List.map merge_values ~f:(fun (name, value) ->
+        List.map merge_values ~f:(fun (name, _definitions, value) ->
           Printf.sprintf "%s = (%s);" name value
         )
-        |> String.concat ~sep:"\n"
-        |> sprintf "{\n%s\n }"
+        |> String.concat ~sep:"\n\t"
+        |> sprintf "{\n\t%s\n }"
     in
-    sprintf "fun %s -> %s" args constr
+    let definitions =
+      List.map ~f:(fun (_, definitions, _) -> definitions) merge_values
+      |> List.flatten
+      |> String.concat ~sep:"\n"
+    in
+    sprintf "%s\nfun %s -> %s" definitions args constr
   in
 
   { type'; destructor; args; spec_str; default_constructor_sig; default_constructor_impl; merge_impl }

@@ -31,7 +31,12 @@ let emit t indent fmt =
   let prepend s =
     match String.split_on_char ~sep:'\n' s with
     | line :: lines ->
-      t.code <- (trim_end ~char:' ' (t.indent ^ line)) :: t.code;
+      (* Replace tabs with indent *)
+      let line =
+        "" :: String.split_on_char ~sep:'\t' line
+        |> String.concat ~sep:t.indent
+      in
+      t.code <- (trim_end ~char:' ' line) :: t.code;
       incr t;
       List.iter lines ~f:(fun line -> t.code <- (trim_end ~char:' ' (t.indent ^ line)) :: t.code);
       decr t;
