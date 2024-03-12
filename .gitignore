@@ -2,6 +2,7 @@
 /_opam/
 /*.install
 _coverage
+_verify
 .merlin
 node_modules
 lib
