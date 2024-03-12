@@ -8,6 +8,8 @@
 - [x] *Replace "val name': unit -> string" with "val name: unit ->
 string" which will only return the full protobuf name
 - [x] Add option to prefix generated files with their package name
+- [ ] Optimize merge functions by applying eager evaluation
+
 
 (Items with '*' is a breaking change)
 
