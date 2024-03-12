@@ -237,49 +237,53 @@ let rec json_of_spec: type a b. Json_options.t -> (a, b) spec -> a -> Yojson.Bas
   | SFixed64_int -> int64_int_value
 
   | Enum (module Enum) -> begin
-    fun v ->
+      let map_enum_json = map_enum_json (module Enum) in
       let f = match options.enum_names with
         | true -> enum_name ~f:Enum.to_string
         | false -> enum_value ~f:Enum.to_int
       in
-      f v |> map_enum_json (module Enum)
+      fun v ->
+        f v |> map_enum_json
   end
   | Message (module Message) ->
-    Message.to_json options
+    (* Break cycle if there are mutually recursive messages *)
+    let to_json = Lazy.from_fun (fun () -> Message.to_json options) in
+    fun json -> (Lazy.force to_json) json
 
-and write: type a b. Json_options.t -> (a, b) compound -> a -> field list =
-  fun options ->
-  let key = key ~json_names:options.json_names in
+and write: type a b. Json_options.t -> (a, b) compound -> a -> field list = fun options ->
   function
-    | Basic (index, spec, default) ->
-      begin
-        function
-        | v when options.omit_default_values && v = default -> []
-        | v ->
-          let value = json_of_spec options spec v in
-          [key  index, value]
-      end
-    | Basic_opt (index, spec) ->
-      begin
-        function
-        | Some v ->
-          let value = json_of_spec options spec v in
-          [key  index, value]
-        | None -> []
-      end
-  | Basic_req (index, spec) -> fun v ->
-    let value = json_of_spec options spec v in
-    [key  index, value]
-  | Repeated (index, spec, _packed) -> fun v ->
+  | Basic (index, spec, default) -> begin
+      let key = key ~json_names:options.json_names index in
+      let to_json = json_of_spec options spec in
+      function
+      | v when options.omit_default_values && v = default -> []
+      | v -> [key, to_json v]
+    end
+  | Basic_opt (index, spec) -> begin
+      let key = key ~json_names:options.json_names index in
+      let to_json = json_of_spec options spec in
+      function
+      | Some v ->
+        [key, to_json v]
+      | None -> []
+    end
+  | Basic_req (index, spec) ->
+    let key = key ~json_names:options.json_names index in
     let to_json = json_of_spec options spec in
-    let value = List.map ~f:to_json v |> list_value in
-    [key  index, value]
-  | Map (index, (key_spec, value_compound)) -> fun vs ->
-    let json_of_key = json_of_spec { options with omit_default_values=false }  key_spec in
+    fun v -> [key, to_json v]
+  | Repeated (index, spec, _packed) ->
+    let key = key ~json_names:options.json_names index in
+    let to_json = json_of_spec options spec in
+    fun v ->
+      let value = List.map ~f:to_json v |> list_value in
+      [key, value]
+  | Map (index, (key_spec, value_compound)) ->
+    let key = key ~json_names:options.json_names index in
+    let json_of_key = json_of_spec { options with omit_default_values=false } key_spec in
     let json_of_value = match value_compound with
       | Basic (_, spec, _) -> json_of_spec options spec
       | Basic_opt (_, spec) ->
-        let json_of_value = json_of_spec options spec in
+        let json_of_value = json_of_spec options spec in (* 3 *) (* This is a message. It will be evaluated recursively,  Indefinatly. *)
         let json_of_value = function
           | None -> `Null
           | Some v -> json_of_value v
@@ -292,39 +296,45 @@ and write: type a b. Json_options.t -> (a, b) compound -> a -> field list =
       (key, value)
     in
     begin
-      match vs with
+      function
       | [] when not options.omit_default_values -> []
-      | vs -> [key index, `Assoc (List.map ~f:json_of_entry vs )]
+      | vs -> [key, `Assoc (List.map ~f:json_of_entry vs )]
     end
+  (* Something is recursive. a -> b -> a -> b -> a -> b. How do we break the chain? *)
   | Oneof (oneofs, index_f) -> begin
+      let array =
+        List.map ~f:(fun (Oneof_elem (index, spec, (_, destr))) -> (* 1 *)
+          let to_json = json_of_spec options spec in (* 5 *)
+          let key = key ~json_names:options.json_names index in
+          fun v -> [key, to_json (destr v)]
+        ) oneofs
+        |> Array.of_list
+      in
       function
       | `not_set -> []
       | v ->
-        let index = index_f v in
-        let Oneof_elem (index, spec, (_, destr)) = List.nth oneofs index in
-        let value = json_of_spec options spec (destr v) in
-        [key index, value]
+        let f = array.(index_f v) in
+        f v
     end
 
-let serialize: type a. message_name:string -> Json_options.t -> (a, Yojson.Basic.t) compound_list -> field list -> a =
-  fun ~message_name options ->
-    let omit_default_values, map_result = match map_message_json ~name:message_name with
+let serialize: type a. message_name:string -> Json_options.t -> (a, Yojson.Basic.t) compound_list -> field list -> a = fun ~message_name options ->
+  let omit_default_values, map_result = match map_message_json ~name:message_name with
     | Some mapping -> false, fun json -> `Assoc (List.rev json) |> mapping
     | None -> options.omit_default_values, fun json -> `Assoc (List.rev json)
-    in
-    let options = { options with omit_default_values } in
-    let rec inner: type a. (a, Yojson.Basic.t) compound_list -> field list -> a =
-      function
-      | Nil -> map_result
-      | Nil_ext _extension_ranges -> fun json _extensions -> map_result json
-      | Cons (compound, rest) ->
-        let cont = inner rest in
-        let write = write options compound in
-        fun acc v ->
-          let v = write v in
-          cont (List.rev_append v acc)
-    in
-    inner
+  in
+  let options = { options with omit_default_values } in
+  let rec inner: type a. (a, Yojson.Basic.t) compound_list -> field list -> a =
+    function
+    | Nil -> map_result
+    | Nil_ext _extension_ranges -> fun json _extensions -> map_result json
+    | Cons (compound, rest) ->
+      let cont = inner rest in
+      let write = write options compound in (* 2 *) (* 4 *)
+      fun acc v ->
+        let v = write v in
+        cont (List.rev_append v acc)
+  in
+  inner
 
 let serialize: message_name:string -> ('a, Yojson.Basic.t) compound_list -> Json_options.t -> 'a =
   fun ~message_name spec options ->
