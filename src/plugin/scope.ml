@@ -490,12 +490,15 @@ let get_package_name t =
   | _ -> None
 
 let get_module_name ~filename t =
+  let rec find_module_name filename xs =
+    match xs () with
+    | Seq.Nil -> failwith "Could not find name"
+    | Cons ((_, { file_name; module_name; _ }), _) when file_name = filename -> module_name
+    | Cons (_, xs) -> find_module_name filename xs
+  in
+
   StringMap.to_seq t.type_db
-  |> Seq.find_map (function
-    | (_, { file_name = f; module_name; _ }) when f = filename -> Some module_name
-    | _ -> None
-  )
-  |> Option.value_exn
+  |> find_module_name filename
 
 let is_cyclic t =
   let { cyclic; _ } = StringMap.find (get_proto_path t) t.type_db in
