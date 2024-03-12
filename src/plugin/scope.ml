@@ -48,7 +48,6 @@ open Spec.Descriptor.Google.Protobuf
 type element = { module_name: string; (** The name of the module that holds the implementation (i.e. Ocaml module name of the generated ocaml file) *)
                  ocaml_name: string; (** Ocaml name of this type inside the module *)
                  cyclic: bool; (** True if the element contains cyclic references, in which case the type cannot be represented as a tuple *)
-                 default_enum: string option;
                  file_name: string;
                }
 
@@ -260,7 +259,7 @@ module Type_tree = struct
       StringMap.fold ~init:map ~f:(fun ~key ~data map ->
           StringMap.add_uniq
             ~key:(path ^ "." ^ key)
-            ~data:{ module_name; ocaml_name = ocaml_name ^ "." ^ data; default_enum = None; cyclic = false; file_name }
+            ~data:{ module_name; ocaml_name = ocaml_name ^ "." ^ data; cyclic = false; file_name }
             map
         ) names
     in
@@ -298,10 +297,6 @@ module Type_tree = struct
             enum_names
           |> add_names ~path ~ocaml_name map
         in
-        let default_enum =
-          List.nth_opt enum_names 0
-        in
-
         let map =
           create_name_map
             ~standard_f:(Names.field_name ~mangle_f:(fun x -> x))
@@ -310,7 +305,7 @@ module Type_tree = struct
           |> add_names ~path ~ocaml_name map
         in
 
-        let map = StringMap.add_uniq ~key:path ~data:{ module_name; ocaml_name; cyclic; default_enum; file_name } map in
+        let map = StringMap.add_uniq ~key:path ~data:{ module_name; ocaml_name; cyclic; file_name } map in
         traverse_types map path types
       in
       let name_map =
@@ -322,7 +317,7 @@ module Type_tree = struct
       List.fold_left ~init:map ~f:(fun map type_ -> map_type ~map ~name_map path type_) types
     in
 
-    let map = StringMap.singleton "" { ocaml_name = ""; module_name; default_enum = None; cyclic = false; file_name } in
+    let map = StringMap.singleton "" { ocaml_name = ""; module_name; cyclic = false; file_name } in
     traverse_types map "" types
 
   let create_db ~prefix_module_names (files : FileDescriptorProto.t list) =
@@ -350,8 +345,8 @@ type t = { module_name: string;
 
 let dump_type_map type_map =
   Printf.eprintf "Type map:\n";
-  StringMap.iter ~f:(fun ~key ~data:{module_name; ocaml_name; cyclic; default_enum; _ } ->
-      Printf.eprintf "     %s -> %s#%s, C:%b D:%s\n%!" key module_name ocaml_name cyclic (Option.value ~default:"" default_enum)
+  StringMap.iter ~f:(fun ~key ~data:{module_name; ocaml_name; cyclic; _ } ->
+      Printf.eprintf "     %s -> %s#%s, C:%b\n%!" key module_name ocaml_name cyclic
     ) type_map;
   Printf.eprintf "Type map end.\n%!"
 
@@ -468,11 +463,6 @@ let get_scoped_name ?postfix t name =
   | None, "" -> failwith "Empty type cannot be referenced"
   | None, type_name -> type_name
   | Some postfix, type_name -> Printf.sprintf "%s.%s" type_name postfix
-
-let get_scoped_enum_name t name =
-  let name = Option.value_exn ~message:"Does not contain a name" name in
-  let { default_enum; _ } = StringMap.find name t.type_db in
-  get_scoped_name t (Some (Printf.sprintf "%s.%s" name (Option.value_exn ~message:"Type is not an enum" default_enum)))
 
 let get_name t name =
   let path = Printf.sprintf "%s.%s" (get_proto_path t) name in

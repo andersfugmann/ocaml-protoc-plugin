@@ -242,12 +242,16 @@ let spec_of_enum ~scope type_name default =
   let default =
     match default with
     | Some default ->
-      Option.value_exn type_name
-      |> (fun type_name -> sprintf "%s.%s" type_name default)
-      |> Option.some
-      |> Scope.get_scoped_name scope
+      let default_value =
+        type_name
+        |> Option.map ~f:(fun type_name -> sprintf "%s.%s" type_name default)
+        |> Scope.get_scoped_name scope
+      in
+      default_value
     | None ->
-      Scope.get_scoped_enum_name scope type_name
+      (* We could just get the default from the module *)
+      sprintf "(%s.from_int_exn 0)" (Scope.get_scoped_name scope type_name);
+      (* Scope.get_scoped_enum_name scope type_name *)
   in
   Enum { type'; module_name; default }
 
