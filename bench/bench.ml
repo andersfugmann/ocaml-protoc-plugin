@@ -12,15 +12,7 @@ module type Protoc_impl = sig
 end
 
 module type Plugin_impl = sig
-  module M : sig
-    type t
-    val name' : unit -> string
-    val show: t -> string
-    val equal: t -> t -> bool
-    val to_proto: t -> Ocaml_protoc_plugin.Writer.t
-    val to_proto': Ocaml_protoc_plugin.Writer.t -> t -> Ocaml_protoc_plugin.Writer.t
-    val from_proto_exn: Ocaml_protoc_plugin.Reader.t -> t
-  end
+  module M : Ocaml_protoc_plugin.Spec.Message
 end
 
 let make_tests (type v) (module Protoc: Protoc_impl) (module Plugin: Plugin_impl with type M.t = v) v_plugin =
@@ -29,11 +21,9 @@ let make_tests (type v) (module Protoc: Protoc_impl) (module Plugin: Plugin_impl
   let verify_identity ~mode data =
     let writer = Plugin.M.to_proto' (Ocaml_protoc_plugin.Writer.init ~mode ()) data in
     let data' = Plugin.M.from_proto_exn (Ocaml_protoc_plugin.Reader.create (Ocaml_protoc_plugin.Writer.contents writer)) in
-    let () = match Plugin.M.equal data data' with
+    let () = match (Poly.equal data data') with
       | true -> ()
       | false ->
-        eprintf "Orig: %s\n" (Plugin.M.show data);
-        eprintf "New: %s\n" (Plugin.M.show data');
         failwith "Data not the same"
     in
     Ocaml_protoc_plugin.Writer.contents writer |> String.length,
@@ -50,14 +40,12 @@ let make_tests (type v) (module Protoc: Protoc_impl) (module Plugin: Plugin_impl
   let () = Protoc.encode_pb_m v_protoc protoc_encoder in
   let data_protoc = Pbrt.Encoder.to_string protoc_encoder in
   let v_plugin'' = Plugin.M.from_proto_exn (Ocaml_protoc_plugin.Reader.create data_protoc) in
-  let () = match Plugin.M.equal v_plugin v_plugin'' with
+  let () = match Poly.equal v_plugin v_plugin'' with
     | true -> ()
     | false ->
-       eprintf "Orig: %s\n" (Plugin.M.show v_plugin);
-       eprintf "New: %s\n" (Plugin.M.show v_plugin');
        failwith "Data not the same"
   in
-  printf "%-17s: %7d+%-7d(B) / %7d+%-7d(S) / %7d+%-7d(Sp) - %7d\n%!" (Plugin.M.name' ())
+  printf "%-17s: %7d+%-7d(B) / %7d+%-7d(S) / %7d+%-7d(Sp) - %7d\n%!" (Plugin.M.name ())
     size_normal unused_normal size_speed unused_speed size_space unused_space (String.length data_protoc);
 
 
@@ -76,7 +64,7 @@ let make_tests (type v) (module Protoc: Protoc_impl) (module Plugin: Plugin_impl
         Test.make ~name:"Protoc" (Staged.stage @@ fun () -> Protoc.decode_pb_m (Pbrt.Decoder.of_string data_protoc))
       ]
   in
-  Test.make_grouped ~name:(Plugin.M.name' ()) [test_encode; test_decode]
+  Test.make_grouped ~name:(Plugin.M.name ()) [test_encode; test_decode]
 
 let make_int_tests vl =
   let open Ocaml_protoc_plugin in

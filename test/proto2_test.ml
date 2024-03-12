@@ -1,4 +1,5 @@
 open Proto2
+let proto_file = "proto2.proto"
 
 let%expect_test _ =
   let module T = Proto2.Message in
@@ -7,7 +8,7 @@ let%expect_test _ =
   let t' = make ~enum:T.E.B ~i:0 ~j:5 ~required:(T.Required.make ~a:7 ()) ~k:5 () in
   let t = T.{enum = Some E.B; i = 0; j = 5; required = T.Required.make ~a:7 (); k = Some 5 } in
   if (not (T.equal t t')) then Printf.eprintf "Error: Type does not match";
-  Test_lib.test_encode (module T) t;
+  Test_lib.test_encode ~proto_file (module T) t;
   [%expect {|
     enum: B
     i: 0
@@ -63,6 +64,6 @@ let%expect_test "Default created messages should not set any fields" =
 let%expect_test "Default values in oneofs are ignored" =
   let module T = Proto2.Oneof_default in
   let t = T.make ~a:(`I 5) () in
-  Test_lib.test_encode (module T) t;
+  Test_lib.test_encode ~proto_file (module T) t;
   [%expect {|
     i: 5 |}]

@@ -1,9 +1,12 @@
 open Packed
+
+let proto_file = "packed.proto"
+
 let%expect_test "Packed" =
   let module T = Packed.Packed in
   let module T' = Packed.String in
   let t = [5; 6; 0; 7; 8; 9] in
-  Test_lib.test_encode (module T) t;
+  Test_lib.test_encode ~proto_file (module T) t;
   let contents =
     T.to_proto t
     |> Ocaml_protoc_plugin.Writer.contents
@@ -28,7 +31,7 @@ let%expect_test "Not packed" =
   let module T = Packed.Not_packed in
   let module T' = Packed.UInt in
   let t = [5; 6; 0; 7; 8; 9] in
-  Test_lib.test_encode (module T) t;
+  Test_lib.test_encode ~proto_file (module T) t;
   let contents =
     T.to_proto t
     |> Ocaml_protoc_plugin.Writer.contents
@@ -52,13 +55,13 @@ let%expect_test "Not packed" =
 
 (* Verify that empty lists are not serialized at all *)
 let%expect_test "Empty lists are not transmitted" =
-  Test_lib.test_encode (module Packed.Packed) [];
+  Test_lib.test_encode ~proto_file (module Packed.Packed) [];
   Packed.Packed.to_proto []
   |> Ocaml_protoc_plugin.Writer.contents
   |> String.length
   |> Printf.eprintf "Size packed %d\n";
 
-  Test_lib.test_encode (module Packed.Not_packed) [];
+  Test_lib.test_encode ~proto_file (module Packed.Not_packed) [];
   Packed.Not_packed.to_proto []
   |> Ocaml_protoc_plugin.Writer.contents
   |> String.length

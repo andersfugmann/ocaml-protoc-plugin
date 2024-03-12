@@ -1,9 +1,10 @@
 open Recursive
-let test_encode = Test_lib.test_encode ~skip_json:true
+let proto_file = "recursive.proto"
+
 let%expect_test _ =
   let module T = Recursive.Message in
   let t = T.{ m = Some T.Message1.{ m1 = Some T.{ m = Some T.Message1.{ m1 = None } } } }  in
-  Test_lib.test_encode (module T) t;
+  Test_lib.test_encode ~proto_file ~skip_json:true (module T) t;
   [%expect {|
     m {
       m1 {
@@ -16,7 +17,7 @@ let%expect_test _ =
   let module T1 = Recursive.Mutual1 in
   let module T2 = Recursive.Mutual2 in
   let t = T1.{ m2 = Some T2.{ m1 = Some T1.{ m2 = Some T2.{ m1 = None }}}} in
-  test_encode (module T1) t;
+  Test_lib.test_encode ~proto_file ~skip_json:true (module T1) t;
   [%expect {|
     m2 {
       m1 {
@@ -55,7 +56,7 @@ let%expect_test _ =
   Printf.printf "Elements: %d\n" (elements (Some t));
   Printf.printf "Depth: %d\n" (depth (Some t));
 
-  test_encode ~protoc:false (module T) t;
+  Test_lib.test_encode ~skip_json:true (module T) t;
   [%expect {|
     Elements: 10001
     Depth: 200 |}]

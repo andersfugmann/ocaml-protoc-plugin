@@ -67,6 +67,32 @@
        "--ocaml_out=open=Google_types_pp;open=Test_runtime;annot=[@@deriving show { with_path = false }, eq]:." %{proto})))
 
 (rule
+ (targets
+   protoc_plugin_test_basic.ml
+   include_include.ml
+   enum_test_enum.ml
+   package_a_b_package.ml
+   include_included.ml
+   include_included3_dash.ml
+ )
+ (deps
+  (:plugin ../src/plugin/protoc_gen_ocaml.exe)
+  (:proto
+    basic.proto
+    include.proto
+    enum.proto
+    package.proto
+    included.proto
+    included3-dash.proto
+  )
+ )
+ (action
+  (run protoc -I %{read-lines:google_include} -I .
+       "--plugin=protoc-gen-ocaml=%{plugin}"
+       "--ocaml_out=open=Google_types_pp;open=Test_runtime;prefix_output_with_package=true;annot=[@@deriving show { with_path = false }, eq]:." %{proto})))
+
+
+(rule
  (targets int_types_native.ml int_types_native_proto2.ml)
  (deps
   (:plugin ../src/plugin/protoc_gen_ocaml.exe)

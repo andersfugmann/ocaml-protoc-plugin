@@ -43,7 +43,7 @@ let emit_enum_type ~scope ~params
   Code.emit signature `None "val to_string: t -> string";
   Code.emit signature `None "val from_string_exn: string -> t";
 
-  Code.emit implementation `None "let name () = \"%s\"" (Scope.get_current_scope scope);
+  Code.emit implementation `None "let name () = \"%s\"" (Scope.get_proto_path scope);
   Code.emit implementation `Begin "let to_int = function";
   List.iter ~f:(fun EnumValueDescriptorProto.{name; number; _} ->
     Code.emit implementation `None "| %s -> %d" (Scope.get_name_exn scope name) (Option.value_exn number)
@@ -253,7 +253,7 @@ let rec emit_message ~params ~syntax ~scope
                   default_constructor_sig; default_constructor_impl; merge_impl } =
         Types.make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
       in
-      Code.emit signature `None "val name': unit -> string";
+      Code.emit signature `None "val name: unit -> string";
       Code.emit signature `None "type t = %s%s" type' params.annot;
       Code.emit signature `None "val make: %s" default_constructor_sig;
       Code.emit signature `None "val merge: t -> t -> t";
@@ -265,7 +265,7 @@ let rec emit_message ~params ~syntax ~scope
       Code.emit signature `None "val from_json_exn: Yojson.Basic.t -> t";
       Code.emit signature `None "val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result";
 
-      Code.emit implementation `None "let name' () = \"%s\"" (Scope.get_current_scope scope);
+      Code.emit implementation `None "let name () = \"%s\"" (Scope.get_proto_path scope);
       Code.emit implementation `None "type t = %s%s" type' params.annot;
 
       Code.emit implementation `None "let make %s" default_constructor_impl;
@@ -284,11 +284,11 @@ let rec emit_message ~params ~syntax ~scope
       Code.emit implementation `None "Runtime'.Deserialize.deserialize (spec ()) constructor";
       Code.emit implementation `End "let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)";
       Code.emit implementation `Begin "let to_json options = ";
-      Code.emit implementation `None "let serialize = Runtime'.Serialize_json.serialize ~message_name:\"%s\" (spec ()) options in" (Scope.get_proto_path scope);
+      Code.emit implementation `None "let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in";
       Code.emit implementation `None "fun %s -> serialize %s" destructor (String.concat ~sep:" " args);
       Code.emit implementation `EndBegin "let from_json_exn =";
       Code.emit implementation `None "let constructor %s = %s in" (String.concat ~sep:" " args) destructor;
-      Code.emit implementation `None "Runtime'.Deserialize_json.deserialize ~message_name:\"%s\" (spec ()) constructor" (Scope.get_proto_path scope);
+      Code.emit implementation `None "Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor";
       Code.emit implementation `End "let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)";
     | None -> ()
   in
@@ -344,6 +344,7 @@ let emit_header implementation ~name ~syntax ~deprecated ~params =
   Code.emit implementation `None "    int32_as_int=%b" params.int32_as_int;
   Code.emit implementation `None "    fixed_as_int=%b" params.fixed_as_int;
   Code.emit implementation `None "    singleton_record=%b" params.singleton_record;
+  Code.emit implementation `None "    prefix_output_with_package=%b" params.prefix_output_with_package;
   Code.emit implementation `None "*)";
   Code.emit implementation `None "[@@@ocaml.alert \"-protobuf\"] (* Disable deprecation warnings for protobuf*)";
   Code.emit implementation `None "%s" (Code.append_deprecaton_if ~deprecated `Floating "");
@@ -371,18 +372,17 @@ let parse_proto_file ~params scope
   emit_header implementation ~name ~syntax ~deprecated ~params;
   Code.emit implementation `None "open Ocaml_protoc_plugin.Runtime [@@warning \"-33\"]";
   List.iter ~f:(Code.emit implementation `None "open %s [@@warning \"-33\"]" ) params.opens;
-  let _ = match dependencies with
-    | [] -> ()
-    | dependencies ->
-      Code.emit implementation `None "(**/**)";
-      Code.emit implementation `Begin "module %s = struct" Scope.import_module_name;
-      List.iter ~f:(fun proto_file ->
-          let module_name = Scope.module_name_of_proto proto_file in
-          Code.emit implementation `None "module %s = %s" module_name module_name;
-        ) dependencies;
-      Code.emit implementation `End "end";
-      Code.emit implementation `None "(**/**)";
-  in
+
+  Code.emit implementation `None "(**/**)";
+  Code.emit implementation `Begin "module %s = struct" Scope.import_module_name;
+
+  List.iter ~f:(fun dependency ->
+    let module_name = Scope.get_module_name ~filename:dependency scope in
+    Code.emit implementation `None "module %s = %s" module_name module_name;
+  ) dependencies;
+  Code.emit implementation `End "end";
+  Code.emit implementation `None "(**/**)";
+
   let _signature', implementation' =
     wrap_packages ~params ~syntax ~options scope message_type services (Option.value_map ~default:[] ~f:(String.split_on_char ~sep:'.') package)
   in
@@ -391,4 +391,16 @@ let parse_proto_file ~params scope
   Code.emit implementation `None "";
 
   let base_name = Filename.remove_extension name in
-  (base_name ^ ".ml"), implementation
+  let output_file_name = match params.prefix_output_with_package with
+    | false -> sprintf "%s.ml" base_name
+    | true ->
+      let prefix = match package with
+        | None -> ""
+        | Some package ->
+          String.map ~f:(function '.' -> '_' | ch -> ch) package
+          |> String.lowercase_ascii
+      in
+      sprintf "%s_%s.ml" prefix base_name
+  in
+
+  (output_file_name), implementation

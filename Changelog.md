@@ -5,6 +5,11 @@
 - [x] Implement json serialization and deserialization (#5)
 - [x] Support special json mapping for google types (#9)
 - [x] Add deprecation annotations for deprecated fields, services etc (#8)
+- [x] *Replace "val name': unit -> string" with "val name: unit ->
+string" which will only return the full protobuf name
+- [x] Add option to prefix generated files with their package name
+
+(Items with '*' is a breaking change)
 
 ## 5.0.0: 2024-02-24
 - [x] Fix service signature to be backward compatible

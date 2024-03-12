@@ -22,7 +22,7 @@ open Ocaml_protoc_plugin.Runtime [@@warning "-33"]
 module rec Google : sig
   module rec Protobuf : sig
     module rec FileDescriptorSet : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = (FileDescriptorProto.t list)
       val make: ?file:FileDescriptorProto.t list -> unit -> t
       val merge: t -> t -> t
@@ -35,7 +35,7 @@ module rec Google : sig
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and FileDescriptorProto : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; package: string option; dependency: string list; message_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; service: ServiceDescriptorProto.t list; extension: FieldDescriptorProto.t list; options: FileOptions.t option; source_code_info: SourceCodeInfo.t option; public_dependency: int list; weak_dependency: int list; syntax: string option }
       val make: ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       val merge: t -> t -> t
@@ -49,7 +49,7 @@ module rec Google : sig
     end
     and DescriptorProto : sig
       module rec ExtensionRange : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { start: int option; end': int option; options: ExtensionRangeOptions.t option }
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         val merge: t -> t -> t
@@ -62,7 +62,7 @@ module rec Google : sig
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
       and ReservedRange : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { start: int option; end': int option }
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
@@ -74,7 +74,7 @@ module rec Google : sig
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; field: FieldDescriptorProto.t list; nested_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; extension_range: ExtensionRange.t list; extension: FieldDescriptorProto.t list; options: MessageOptions.t option; oneof_decl: OneofDescriptorProto.t list; reserved_range: ReservedRange.t list; reserved_name: string list }
       val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
@@ -87,7 +87,7 @@ module rec Google : sig
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and ExtensionRangeOptions : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -118,7 +118,7 @@ module rec Google : sig
         val to_string: t -> string
         val from_string_exn: string -> t
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; extendee: string option; number: int option; label: Label.t option; type': Type.t option; type_name: string option; default_value: string option; options: FieldOptions.t option; oneof_index: int option; json_name: string option; proto3_optional: bool option }
       val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       val merge: t -> t -> t
@@ -131,7 +131,7 @@ module rec Google : sig
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and OneofDescriptorProto : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; options: OneofOptions.t option }
       val make: ?name:string -> ?options:OneofOptions.t -> unit -> t
       val merge: t -> t -> t
@@ -145,7 +145,7 @@ module rec Google : sig
     end
     and EnumDescriptorProto : sig
       module rec EnumReservedRange : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { start: int option; end': int option }
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
@@ -157,7 +157,7 @@ module rec Google : sig
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; value: EnumValueDescriptorProto.t list; options: EnumOptions.t option; reserved_range: EnumReservedRange.t list; reserved_name: string list }
       val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
@@ -170,7 +170,7 @@ module rec Google : sig
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and EnumValueDescriptorProto : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; number: int option; options: EnumValueOptions.t option }
       val make: ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       val merge: t -> t -> t
@@ -183,7 +183,7 @@ module rec Google : sig
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and ServiceDescriptorProto : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; method': MethodDescriptorProto.t list; options: ServiceOptions.t option }
       val make: ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       val merge: t -> t -> t
@@ -196,7 +196,7 @@ module rec Google : sig
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and MethodDescriptorProto : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; input_type: string option; output_type: string option; options: MethodOptions.t option; client_streaming: bool; server_streaming: bool }
       val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       val merge: t -> t -> t
@@ -218,7 +218,7 @@ module rec Google : sig
         val to_string: t -> string
         val from_string_exn: string -> t
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { java_package: string option; java_outer_classname: string option; optimize_for: OptimizeMode.t; java_multiple_files: bool; go_package: string option; cc_generic_services: bool; java_generic_services: bool; py_generic_services: bool; java_generate_equals_and_hash: bool option[@ocaml.alert protobuf "Deprecated global"]; deprecated: bool; java_string_check_utf8: bool; cc_enable_arenas: bool; objc_class_prefix: string option; csharp_namespace: string option; swift_prefix: string option; php_class_prefix: string option; php_namespace: string option; php_generic_services: bool; php_metadata_namespace: string option; ruby_package: string option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -231,7 +231,7 @@ module rec Google : sig
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and MessageOptions : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { message_set_wire_format: bool; no_standard_descriptor_accessor: bool; deprecated: bool; map_entry: bool option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -262,7 +262,7 @@ module rec Google : sig
         val to_string: t -> string
         val from_string_exn: string -> t
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { ctype: CType.t; packed: bool option; deprecated: bool; lazy': bool; jstype: JSType.t; weak: bool; unverified_lazy: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -275,7 +275,7 @@ module rec Google : sig
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and OneofOptions : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -288,7 +288,7 @@ module rec Google : sig
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and EnumOptions : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { allow_alias: bool option; deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -301,7 +301,7 @@ module rec Google : sig
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and EnumValueOptions : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -314,7 +314,7 @@ module rec Google : sig
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and ServiceOptions : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -336,7 +336,7 @@ module rec Google : sig
         val to_string: t -> string
         val from_string_exn: string -> t
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { deprecated: bool; idempotency_level: IdempotencyLevel.t; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -350,7 +350,7 @@ module rec Google : sig
     end
     and UninterpretedOption : sig
       module rec NamePart : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { name_part: string; is_extension: bool }
         val make: name_part:string -> is_extension:bool -> unit -> t
         val merge: t -> t -> t
@@ -362,7 +362,7 @@ module rec Google : sig
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: NamePart.t list; identifier_value: string option; positive_int_value: int option; negative_int_value: int option; double_value: float option; string_value: bytes option; aggregate_value: string option }
       val make: ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       val merge: t -> t -> t
@@ -376,7 +376,7 @@ module rec Google : sig
     end
     and SourceCodeInfo : sig
       module rec Location : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { path: int list; span: int list; leading_comments: string option; trailing_comments: string option; leading_detached_comments: string list }
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         val merge: t -> t -> t
@@ -388,7 +388,7 @@ module rec Google : sig
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = (Location.t list)
       val make: ?location:Location.t list -> unit -> t
       val merge: t -> t -> t
@@ -402,7 +402,7 @@ module rec Google : sig
     end
     and GeneratedCodeInfo : sig
       module rec Annotation : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { path: int list; source_file: string option; begin': int option; end': int option }
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         val merge: t -> t -> t
@@ -414,7 +414,7 @@ module rec Google : sig
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = (Annotation.t list)
       val make: ?annotation:Annotation.t list -> unit -> t
       val merge: t -> t -> t
@@ -430,7 +430,7 @@ module rec Google : sig
 end = struct
   module rec Protobuf : sig
     module rec FileDescriptorSet : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = (FileDescriptorProto.t list)
       val make: ?file:FileDescriptorProto.t list -> unit -> t
       val merge: t -> t -> t
@@ -443,7 +443,7 @@ end = struct
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and FileDescriptorProto : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; package: string option; dependency: string list; message_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; service: ServiceDescriptorProto.t list; extension: FieldDescriptorProto.t list; options: FileOptions.t option; source_code_info: SourceCodeInfo.t option; public_dependency: int list; weak_dependency: int list; syntax: string option }
       val make: ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       val merge: t -> t -> t
@@ -457,7 +457,7 @@ end = struct
     end
     and DescriptorProto : sig
       module rec ExtensionRange : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { start: int option; end': int option; options: ExtensionRangeOptions.t option }
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         val merge: t -> t -> t
@@ -470,7 +470,7 @@ end = struct
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
       and ReservedRange : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { start: int option; end': int option }
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
@@ -482,7 +482,7 @@ end = struct
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; field: FieldDescriptorProto.t list; nested_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; extension_range: ExtensionRange.t list; extension: FieldDescriptorProto.t list; options: MessageOptions.t option; oneof_decl: OneofDescriptorProto.t list; reserved_range: ReservedRange.t list; reserved_name: string list }
       val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
@@ -495,7 +495,7 @@ end = struct
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and ExtensionRangeOptions : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -526,7 +526,7 @@ end = struct
         val to_string: t -> string
         val from_string_exn: string -> t
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; extendee: string option; number: int option; label: Label.t option; type': Type.t option; type_name: string option; default_value: string option; options: FieldOptions.t option; oneof_index: int option; json_name: string option; proto3_optional: bool option }
       val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       val merge: t -> t -> t
@@ -539,7 +539,7 @@ end = struct
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and OneofDescriptorProto : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; options: OneofOptions.t option }
       val make: ?name:string -> ?options:OneofOptions.t -> unit -> t
       val merge: t -> t -> t
@@ -553,7 +553,7 @@ end = struct
     end
     and EnumDescriptorProto : sig
       module rec EnumReservedRange : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { start: int option; end': int option }
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
@@ -565,7 +565,7 @@ end = struct
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; value: EnumValueDescriptorProto.t list; options: EnumOptions.t option; reserved_range: EnumReservedRange.t list; reserved_name: string list }
       val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
@@ -578,7 +578,7 @@ end = struct
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and EnumValueDescriptorProto : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; number: int option; options: EnumValueOptions.t option }
       val make: ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       val merge: t -> t -> t
@@ -591,7 +591,7 @@ end = struct
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and ServiceDescriptorProto : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; method': MethodDescriptorProto.t list; options: ServiceOptions.t option }
       val make: ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       val merge: t -> t -> t
@@ -604,7 +604,7 @@ end = struct
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and MethodDescriptorProto : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; input_type: string option; output_type: string option; options: MethodOptions.t option; client_streaming: bool; server_streaming: bool }
       val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       val merge: t -> t -> t
@@ -626,7 +626,7 @@ end = struct
         val to_string: t -> string
         val from_string_exn: string -> t
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { java_package: string option; java_outer_classname: string option; optimize_for: OptimizeMode.t; java_multiple_files: bool; go_package: string option; cc_generic_services: bool; java_generic_services: bool; py_generic_services: bool; java_generate_equals_and_hash: bool option[@ocaml.alert protobuf "Deprecated global"]; deprecated: bool; java_string_check_utf8: bool; cc_enable_arenas: bool; objc_class_prefix: string option; csharp_namespace: string option; swift_prefix: string option; php_class_prefix: string option; php_namespace: string option; php_generic_services: bool; php_metadata_namespace: string option; ruby_package: string option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -639,7 +639,7 @@ end = struct
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and MessageOptions : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { message_set_wire_format: bool; no_standard_descriptor_accessor: bool; deprecated: bool; map_entry: bool option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -670,7 +670,7 @@ end = struct
         val to_string: t -> string
         val from_string_exn: string -> t
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { ctype: CType.t; packed: bool option; deprecated: bool; lazy': bool; jstype: JSType.t; weak: bool; unverified_lazy: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -683,7 +683,7 @@ end = struct
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and OneofOptions : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -696,7 +696,7 @@ end = struct
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and EnumOptions : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { allow_alias: bool option; deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -709,7 +709,7 @@ end = struct
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and EnumValueOptions : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -722,7 +722,7 @@ end = struct
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end
     and ServiceOptions : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -744,7 +744,7 @@ end = struct
         val to_string: t -> string
         val from_string_exn: string -> t
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { deprecated: bool; idempotency_level: IdempotencyLevel.t; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -758,7 +758,7 @@ end = struct
     end
     and UninterpretedOption : sig
       module rec NamePart : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { name_part: string; is_extension: bool }
         val make: name_part:string -> is_extension:bool -> unit -> t
         val merge: t -> t -> t
@@ -770,7 +770,7 @@ end = struct
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: NamePart.t list; identifier_value: string option; positive_int_value: int option; negative_int_value: int option; double_value: float option; string_value: bytes option; aggregate_value: string option }
       val make: ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       val merge: t -> t -> t
@@ -784,7 +784,7 @@ end = struct
     end
     and SourceCodeInfo : sig
       module rec Location : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { path: int list; span: int list; leading_comments: string option; trailing_comments: string option; leading_detached_comments: string list }
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         val merge: t -> t -> t
@@ -796,7 +796,7 @@ end = struct
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = (Location.t list)
       val make: ?location:Location.t list -> unit -> t
       val merge: t -> t -> t
@@ -810,7 +810,7 @@ end = struct
     end
     and GeneratedCodeInfo : sig
       module rec Annotation : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { path: int list; source_file: string option; begin': int option; end': int option }
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         val merge: t -> t -> t
@@ -822,7 +822,7 @@ end = struct
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = (Annotation.t list)
       val make: ?annotation:Annotation.t list -> unit -> t
       val merge: t -> t -> t
@@ -836,7 +836,7 @@ end = struct
     end
   end = struct
     module rec FileDescriptorSet : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = (FileDescriptorProto.t list)
       val make: ?file:FileDescriptorProto.t list -> unit -> t
       val merge: t -> t -> t
@@ -848,7 +848,7 @@ end = struct
       val from_json_exn: Yojson.Basic.t -> t
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end = struct
-      let name' () = "descriptor.google.protobuf.FileDescriptorSet"
+      let name () = ".google.protobuf.FileDescriptorSet"
       type t = (FileDescriptorProto.t list)
       let make ?(file = []) () = (file)
       let merge = (fun (t1_file) (t2_file) -> (Runtime'.Merge.merge Runtime'.Spec.( repeated ((1, "file", "file"), (message (module FileDescriptorProto)), not_packed) ) t1_file t2_file))
@@ -863,15 +863,15 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.FileDescriptorSet" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun (file) -> serialize file
       let from_json_exn =
         let constructor file = (file) in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.FileDescriptorSet" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and FileDescriptorProto : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; package: string option; dependency: string list; message_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; service: ServiceDescriptorProto.t list; extension: FieldDescriptorProto.t list; options: FileOptions.t option; source_code_info: SourceCodeInfo.t option; public_dependency: int list; weak_dependency: int list; syntax: string option }
       val make: ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       val merge: t -> t -> t
@@ -883,7 +883,7 @@ end = struct
       val from_json_exn: Yojson.Basic.t -> t
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end = struct
-      let name' () = "descriptor.google.protobuf.FileDescriptorProto"
+      let name () = ".google.protobuf.FileDescriptorProto"
       type t = { name: string option; package: string option; dependency: string list; message_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; service: ServiceDescriptorProto.t list; extension: FieldDescriptorProto.t list; options: FileOptions.t option; source_code_info: SourceCodeInfo.t option; public_dependency: int list; weak_dependency: int list; syntax: string option }
       let make ?name ?package ?(dependency = []) ?(message_type = []) ?(enum_type = []) ?(service = []) ?(extension = []) ?options ?source_code_info ?(public_dependency = []) ?(weak_dependency = []) ?syntax () = { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax }
       let merge = (fun t1 t2 -> {
@@ -911,16 +911,16 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.FileDescriptorProto" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } -> serialize name package dependency message_type enum_type service extension options source_code_info public_dependency weak_dependency syntax
       let from_json_exn =
         let constructor name package dependency message_type enum_type service extension options source_code_info public_dependency weak_dependency syntax = { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.FileDescriptorProto" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and DescriptorProto : sig
       module rec ExtensionRange : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { start: int option; end': int option; options: ExtensionRangeOptions.t option }
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         val merge: t -> t -> t
@@ -933,7 +933,7 @@ end = struct
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
       and ReservedRange : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { start: int option; end': int option }
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
@@ -945,7 +945,7 @@ end = struct
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; field: FieldDescriptorProto.t list; nested_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; extension_range: ExtensionRange.t list; extension: FieldDescriptorProto.t list; options: MessageOptions.t option; oneof_decl: OneofDescriptorProto.t list; reserved_range: ReservedRange.t list; reserved_name: string list }
       val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
@@ -958,7 +958,7 @@ end = struct
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end = struct
       module rec ExtensionRange : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { start: int option; end': int option; options: ExtensionRangeOptions.t option }
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         val merge: t -> t -> t
@@ -970,7 +970,7 @@ end = struct
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end = struct
-        let name' () = "descriptor.google.protobuf.DescriptorProto.ExtensionRange"
+        let name () = ".google.protobuf.DescriptorProto.ExtensionRange"
         type t = { start: int option; end': int option; options: ExtensionRangeOptions.t option }
         let make ?start ?end' ?options () = { start; end'; options }
         let merge = (fun t1 t2 -> {
@@ -989,15 +989,15 @@ end = struct
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
-          let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.DescriptorProto.ExtensionRange" (spec ()) options in
+          let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { start; end'; options } -> serialize start end' options
         let from_json_exn =
           let constructor start end' options = { start; end'; options } in
-          Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.DescriptorProto.ExtensionRange" (spec ()) constructor
+          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       and ReservedRange : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { start: int option; end': int option }
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
@@ -1009,7 +1009,7 @@ end = struct
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end = struct
-        let name' () = "descriptor.google.protobuf.DescriptorProto.ReservedRange"
+        let name () = ".google.protobuf.DescriptorProto.ReservedRange"
         type t = { start: int option; end': int option }
         let make ?start ?end' () = { start; end' }
         let merge = (fun t1 t2 -> {
@@ -1027,14 +1027,14 @@ end = struct
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
-          let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.DescriptorProto.ReservedRange" (spec ()) options in
+          let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { start; end' } -> serialize start end'
         let from_json_exn =
           let constructor start end' = { start; end' } in
-          Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.DescriptorProto.ReservedRange" (spec ()) constructor
+          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
-      let name' () = "descriptor.google.protobuf.DescriptorProto"
+      let name () = ".google.protobuf.DescriptorProto"
       type t = { name: string option; field: FieldDescriptorProto.t list; nested_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; extension_range: ExtensionRange.t list; extension: FieldDescriptorProto.t list; options: MessageOptions.t option; oneof_decl: OneofDescriptorProto.t list; reserved_range: ReservedRange.t list; reserved_name: string list }
       let make ?name ?(field = []) ?(nested_type = []) ?(enum_type = []) ?(extension_range = []) ?(extension = []) ?options ?(oneof_decl = []) ?(reserved_range = []) ?(reserved_name = []) () = { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name }
       let merge = (fun t1 t2 -> {
@@ -1060,15 +1060,15 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.DescriptorProto" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } -> serialize name field nested_type enum_type extension_range extension options oneof_decl reserved_range reserved_name
       let from_json_exn =
         let constructor name field nested_type enum_type extension_range extension options oneof_decl reserved_range reserved_name = { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.DescriptorProto" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and ExtensionRangeOptions : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -1080,7 +1080,7 @@ end = struct
       val from_json_exn: Yojson.Basic.t -> t
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end = struct
-      let name' () = "descriptor.google.protobuf.ExtensionRangeOptions"
+      let name () = ".google.protobuf.ExtensionRangeOptions"
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       let make ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { uninterpreted_option; extensions' }
       let merge = (fun t1 t2 -> {
@@ -1098,11 +1098,11 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.ExtensionRangeOptions" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { uninterpreted_option; extensions' } -> serialize uninterpreted_option extensions'
       let from_json_exn =
         let constructor uninterpreted_option extensions' = { uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.ExtensionRangeOptions" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and FieldDescriptorProto : sig
@@ -1124,7 +1124,7 @@ end = struct
         val to_string: t -> string
         val from_string_exn: string -> t
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; extendee: string option; number: int option; label: Label.t option; type': Type.t option; type_name: string option; default_value: string option; options: FieldOptions.t option; oneof_index: int option; json_name: string option; proto3_optional: bool option }
       val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       val merge: t -> t -> t
@@ -1146,7 +1146,7 @@ end = struct
         val from_string_exn: string -> t
       end = struct
         type t = TYPE_DOUBLE | TYPE_FLOAT | TYPE_INT64 | TYPE_UINT64 | TYPE_INT32 | TYPE_FIXED64 | TYPE_FIXED32 | TYPE_BOOL | TYPE_STRING | TYPE_GROUP | TYPE_MESSAGE | TYPE_BYTES | TYPE_UINT32 | TYPE_ENUM | TYPE_SFIXED32 | TYPE_SFIXED64 | TYPE_SINT32 | TYPE_SINT64
-        let name () = "descriptor.google.protobuf.FieldDescriptorProto.Type"
+        let name () = ".google.protobuf.FieldDescriptorProto.Type"
         let to_int = function
           | TYPE_DOUBLE -> 1
           | TYPE_FLOAT -> 2
@@ -1238,7 +1238,7 @@ end = struct
         val from_string_exn: string -> t
       end = struct
         type t = LABEL_OPTIONAL | LABEL_REQUIRED | LABEL_REPEATED
-        let name () = "descriptor.google.protobuf.FieldDescriptorProto.Label"
+        let name () = ".google.protobuf.FieldDescriptorProto.Label"
         let to_int = function
           | LABEL_OPTIONAL -> 1
           | LABEL_REQUIRED -> 2
@@ -1260,7 +1260,7 @@ end = struct
           | s -> Runtime'.Result.raise (`Unknown_enum_name s)
 
       end
-      let name' () = "descriptor.google.protobuf.FieldDescriptorProto"
+      let name () = ".google.protobuf.FieldDescriptorProto"
       type t = { name: string option; extendee: string option; number: int option; label: Label.t option; type': Type.t option; type_name: string option; default_value: string option; options: FieldOptions.t option; oneof_index: int option; json_name: string option; proto3_optional: bool option }
       let make ?name ?extendee ?number ?label ?type' ?type_name ?default_value ?options ?oneof_index ?json_name ?proto3_optional () = { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional }
       let merge = (fun t1 t2 -> {
@@ -1287,15 +1287,15 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.FieldDescriptorProto" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } -> serialize name extendee number label type' type_name default_value options oneof_index json_name proto3_optional
       let from_json_exn =
         let constructor name extendee number label type' type_name default_value options oneof_index json_name proto3_optional = { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.FieldDescriptorProto" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and OneofDescriptorProto : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; options: OneofOptions.t option }
       val make: ?name:string -> ?options:OneofOptions.t -> unit -> t
       val merge: t -> t -> t
@@ -1307,7 +1307,7 @@ end = struct
       val from_json_exn: Yojson.Basic.t -> t
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end = struct
-      let name' () = "descriptor.google.protobuf.OneofDescriptorProto"
+      let name () = ".google.protobuf.OneofDescriptorProto"
       type t = { name: string option; options: OneofOptions.t option }
       let make ?name ?options () = { name; options }
       let merge = (fun t1 t2 -> {
@@ -1325,16 +1325,16 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.OneofDescriptorProto" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; options } -> serialize name options
       let from_json_exn =
         let constructor name options = { name; options } in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.OneofDescriptorProto" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and EnumDescriptorProto : sig
       module rec EnumReservedRange : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { start: int option; end': int option }
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
@@ -1346,7 +1346,7 @@ end = struct
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; value: EnumValueDescriptorProto.t list; options: EnumOptions.t option; reserved_range: EnumReservedRange.t list; reserved_name: string list }
       val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
@@ -1359,7 +1359,7 @@ end = struct
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end = struct
       module rec EnumReservedRange : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { start: int option; end': int option }
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
@@ -1371,7 +1371,7 @@ end = struct
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end = struct
-        let name' () = "descriptor.google.protobuf.EnumDescriptorProto.EnumReservedRange"
+        let name () = ".google.protobuf.EnumDescriptorProto.EnumReservedRange"
         type t = { start: int option; end': int option }
         let make ?start ?end' () = { start; end' }
         let merge = (fun t1 t2 -> {
@@ -1389,14 +1389,14 @@ end = struct
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
-          let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.EnumDescriptorProto.EnumReservedRange" (spec ()) options in
+          let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { start; end' } -> serialize start end'
         let from_json_exn =
           let constructor start end' = { start; end' } in
-          Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.EnumDescriptorProto.EnumReservedRange" (spec ()) constructor
+          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
-      let name' () = "descriptor.google.protobuf.EnumDescriptorProto"
+      let name () = ".google.protobuf.EnumDescriptorProto"
       type t = { name: string option; value: EnumValueDescriptorProto.t list; options: EnumOptions.t option; reserved_range: EnumReservedRange.t list; reserved_name: string list }
       let make ?name ?(value = []) ?options ?(reserved_range = []) ?(reserved_name = []) () = { name; value; options; reserved_range; reserved_name }
       let merge = (fun t1 t2 -> {
@@ -1417,15 +1417,15 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.EnumDescriptorProto" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; value; options; reserved_range; reserved_name } -> serialize name value options reserved_range reserved_name
       let from_json_exn =
         let constructor name value options reserved_range reserved_name = { name; value; options; reserved_range; reserved_name } in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.EnumDescriptorProto" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and EnumValueDescriptorProto : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; number: int option; options: EnumValueOptions.t option }
       val make: ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       val merge: t -> t -> t
@@ -1437,7 +1437,7 @@ end = struct
       val from_json_exn: Yojson.Basic.t -> t
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end = struct
-      let name' () = "descriptor.google.protobuf.EnumValueDescriptorProto"
+      let name () = ".google.protobuf.EnumValueDescriptorProto"
       type t = { name: string option; number: int option; options: EnumValueOptions.t option }
       let make ?name ?number ?options () = { name; number; options }
       let merge = (fun t1 t2 -> {
@@ -1456,15 +1456,15 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.EnumValueDescriptorProto" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; number; options } -> serialize name number options
       let from_json_exn =
         let constructor name number options = { name; number; options } in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.EnumValueDescriptorProto" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and ServiceDescriptorProto : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; method': MethodDescriptorProto.t list; options: ServiceOptions.t option }
       val make: ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       val merge: t -> t -> t
@@ -1476,7 +1476,7 @@ end = struct
       val from_json_exn: Yojson.Basic.t -> t
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end = struct
-      let name' () = "descriptor.google.protobuf.ServiceDescriptorProto"
+      let name () = ".google.protobuf.ServiceDescriptorProto"
       type t = { name: string option; method': MethodDescriptorProto.t list; options: ServiceOptions.t option }
       let make ?name ?(method' = []) ?options () = { name; method'; options }
       let merge = (fun t1 t2 -> {
@@ -1495,15 +1495,15 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.ServiceDescriptorProto" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; method'; options } -> serialize name method' options
       let from_json_exn =
         let constructor name method' options = { name; method'; options } in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.ServiceDescriptorProto" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and MethodDescriptorProto : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: string option; input_type: string option; output_type: string option; options: MethodOptions.t option; client_streaming: bool; server_streaming: bool }
       val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       val merge: t -> t -> t
@@ -1515,7 +1515,7 @@ end = struct
       val from_json_exn: Yojson.Basic.t -> t
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end = struct
-      let name' () = "descriptor.google.protobuf.MethodDescriptorProto"
+      let name () = ".google.protobuf.MethodDescriptorProto"
       type t = { name: string option; input_type: string option; output_type: string option; options: MethodOptions.t option; client_streaming: bool; server_streaming: bool }
       let make ?name ?input_type ?output_type ?options ?(client_streaming = false) ?(server_streaming = false) () = { name; input_type; output_type; options; client_streaming; server_streaming }
       let merge = (fun t1 t2 -> {
@@ -1537,11 +1537,11 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.MethodDescriptorProto" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; input_type; output_type; options; client_streaming; server_streaming } -> serialize name input_type output_type options client_streaming server_streaming
       let from_json_exn =
         let constructor name input_type output_type options client_streaming server_streaming = { name; input_type; output_type; options; client_streaming; server_streaming } in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.MethodDescriptorProto" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and FileOptions : sig
@@ -1554,7 +1554,7 @@ end = struct
         val to_string: t -> string
         val from_string_exn: string -> t
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { java_package: string option; java_outer_classname: string option; optimize_for: OptimizeMode.t; java_multiple_files: bool; go_package: string option; cc_generic_services: bool; java_generic_services: bool; py_generic_services: bool; java_generate_equals_and_hash: bool option[@ocaml.alert protobuf "Deprecated global"]; deprecated: bool; java_string_check_utf8: bool; cc_enable_arenas: bool; objc_class_prefix: string option; csharp_namespace: string option; swift_prefix: string option; php_class_prefix: string option; php_namespace: string option; php_generic_services: bool; php_metadata_namespace: string option; ruby_package: string option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -1576,7 +1576,7 @@ end = struct
         val from_string_exn: string -> t
       end = struct
         type t = SPEED | CODE_SIZE | LITE_RUNTIME
-        let name () = "descriptor.google.protobuf.FileOptions.OptimizeMode"
+        let name () = ".google.protobuf.FileOptions.OptimizeMode"
         let to_int = function
           | SPEED -> 1
           | CODE_SIZE -> 2
@@ -1598,7 +1598,7 @@ end = struct
           | s -> Runtime'.Result.raise (`Unknown_enum_name s)
 
       end
-      let name' () = "descriptor.google.protobuf.FileOptions"
+      let name () = ".google.protobuf.FileOptions"
       type t = { java_package: string option; java_outer_classname: string option; optimize_for: OptimizeMode.t; java_multiple_files: bool; go_package: string option; cc_generic_services: bool; java_generic_services: bool; py_generic_services: bool; java_generate_equals_and_hash: bool option[@ocaml.alert protobuf "Deprecated global"]; deprecated: bool; java_string_check_utf8: bool; cc_enable_arenas: bool; objc_class_prefix: string option; csharp_namespace: string option; swift_prefix: string option; php_class_prefix: string option; php_namespace: string option; php_generic_services: bool; php_metadata_namespace: string option; ruby_package: string option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       let make ?java_package ?java_outer_classname ?(optimize_for = OptimizeMode.SPEED) ?(java_multiple_files = false) ?go_package ?(cc_generic_services = false) ?(java_generic_services = false) ?(py_generic_services = false) ?java_generate_equals_and_hash ?(deprecated = false) ?(java_string_check_utf8 = false) ?(cc_enable_arenas = true) ?objc_class_prefix ?csharp_namespace ?swift_prefix ?php_class_prefix ?php_namespace ?(php_generic_services = false) ?php_metadata_namespace ?ruby_package ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' }
       let merge = (fun t1 t2 -> {
@@ -1636,15 +1636,15 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.FileOptions" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } -> serialize java_package java_outer_classname optimize_for java_multiple_files go_package cc_generic_services java_generic_services py_generic_services java_generate_equals_and_hash deprecated java_string_check_utf8 cc_enable_arenas objc_class_prefix csharp_namespace swift_prefix php_class_prefix php_namespace php_generic_services php_metadata_namespace ruby_package uninterpreted_option extensions'
       let from_json_exn =
         let constructor java_package java_outer_classname optimize_for java_multiple_files go_package cc_generic_services java_generic_services py_generic_services java_generate_equals_and_hash deprecated java_string_check_utf8 cc_enable_arenas objc_class_prefix csharp_namespace swift_prefix php_class_prefix php_namespace php_generic_services php_metadata_namespace ruby_package uninterpreted_option extensions' = { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.FileOptions" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and MessageOptions : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { message_set_wire_format: bool; no_standard_descriptor_accessor: bool; deprecated: bool; map_entry: bool option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -1656,7 +1656,7 @@ end = struct
       val from_json_exn: Yojson.Basic.t -> t
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end = struct
-      let name' () = "descriptor.google.protobuf.MessageOptions"
+      let name () = ".google.protobuf.MessageOptions"
       type t = { message_set_wire_format: bool; no_standard_descriptor_accessor: bool; deprecated: bool; map_entry: bool option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       let make ?(message_set_wire_format = false) ?(no_standard_descriptor_accessor = false) ?(deprecated = false) ?map_entry ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' }
       let merge = (fun t1 t2 -> {
@@ -1678,11 +1678,11 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.MessageOptions" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } -> serialize message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option extensions'
       let from_json_exn =
         let constructor message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option extensions' = { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.MessageOptions" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and FieldOptions : sig
@@ -1704,7 +1704,7 @@ end = struct
         val to_string: t -> string
         val from_string_exn: string -> t
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { ctype: CType.t; packed: bool option; deprecated: bool; lazy': bool; jstype: JSType.t; weak: bool; unverified_lazy: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -1726,7 +1726,7 @@ end = struct
         val from_string_exn: string -> t
       end = struct
         type t = STRING | CORD | STRING_PIECE
-        let name () = "descriptor.google.protobuf.FieldOptions.CType"
+        let name () = ".google.protobuf.FieldOptions.CType"
         let to_int = function
           | STRING -> 0
           | CORD -> 1
@@ -1758,7 +1758,7 @@ end = struct
         val from_string_exn: string -> t
       end = struct
         type t = JS_NORMAL | JS_STRING | JS_NUMBER
-        let name () = "descriptor.google.protobuf.FieldOptions.JSType"
+        let name () = ".google.protobuf.FieldOptions.JSType"
         let to_int = function
           | JS_NORMAL -> 0
           | JS_STRING -> 1
@@ -1780,7 +1780,7 @@ end = struct
           | s -> Runtime'.Result.raise (`Unknown_enum_name s)
 
       end
-      let name' () = "descriptor.google.protobuf.FieldOptions"
+      let name () = ".google.protobuf.FieldOptions"
       type t = { ctype: CType.t; packed: bool option; deprecated: bool; lazy': bool; jstype: JSType.t; weak: bool; unverified_lazy: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       let make ?(ctype = CType.STRING) ?packed ?(deprecated = false) ?(lazy' = false) ?(jstype = JSType.JS_NORMAL) ?(weak = false) ?(unverified_lazy = false) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' }
       let merge = (fun t1 t2 -> {
@@ -1805,15 +1805,15 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.FieldOptions" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } -> serialize ctype packed deprecated lazy' jstype weak unverified_lazy uninterpreted_option extensions'
       let from_json_exn =
         let constructor ctype packed deprecated lazy' jstype weak unverified_lazy uninterpreted_option extensions' = { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.FieldOptions" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and OneofOptions : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -1825,7 +1825,7 @@ end = struct
       val from_json_exn: Yojson.Basic.t -> t
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end = struct
-      let name' () = "descriptor.google.protobuf.OneofOptions"
+      let name () = ".google.protobuf.OneofOptions"
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       let make ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { uninterpreted_option; extensions' }
       let merge = (fun t1 t2 -> {
@@ -1843,15 +1843,15 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.OneofOptions" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { uninterpreted_option; extensions' } -> serialize uninterpreted_option extensions'
       let from_json_exn =
         let constructor uninterpreted_option extensions' = { uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.OneofOptions" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and EnumOptions : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { allow_alias: bool option; deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -1863,7 +1863,7 @@ end = struct
       val from_json_exn: Yojson.Basic.t -> t
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end = struct
-      let name' () = "descriptor.google.protobuf.EnumOptions"
+      let name () = ".google.protobuf.EnumOptions"
       type t = { allow_alias: bool option; deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       let make ?allow_alias ?(deprecated = false) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { allow_alias; deprecated; uninterpreted_option; extensions' }
       let merge = (fun t1 t2 -> {
@@ -1883,15 +1883,15 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.EnumOptions" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { allow_alias; deprecated; uninterpreted_option; extensions' } -> serialize allow_alias deprecated uninterpreted_option extensions'
       let from_json_exn =
         let constructor allow_alias deprecated uninterpreted_option extensions' = { allow_alias; deprecated; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.EnumOptions" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and EnumValueOptions : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -1903,7 +1903,7 @@ end = struct
       val from_json_exn: Yojson.Basic.t -> t
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end = struct
-      let name' () = "descriptor.google.protobuf.EnumValueOptions"
+      let name () = ".google.protobuf.EnumValueOptions"
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       let make ?(deprecated = false) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { deprecated; uninterpreted_option; extensions' }
       let merge = (fun t1 t2 -> {
@@ -1922,15 +1922,15 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.EnumValueOptions" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { deprecated; uninterpreted_option; extensions' } -> serialize deprecated uninterpreted_option extensions'
       let from_json_exn =
         let constructor deprecated uninterpreted_option extensions' = { deprecated; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.EnumValueOptions" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and ServiceOptions : sig
-      val name': unit -> string
+      val name: unit -> string
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -1942,7 +1942,7 @@ end = struct
       val from_json_exn: Yojson.Basic.t -> t
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end = struct
-      let name' () = "descriptor.google.protobuf.ServiceOptions"
+      let name () = ".google.protobuf.ServiceOptions"
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       let make ?(deprecated = false) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { deprecated; uninterpreted_option; extensions' }
       let merge = (fun t1 t2 -> {
@@ -1961,11 +1961,11 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.ServiceOptions" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { deprecated; uninterpreted_option; extensions' } -> serialize deprecated uninterpreted_option extensions'
       let from_json_exn =
         let constructor deprecated uninterpreted_option extensions' = { deprecated; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.ServiceOptions" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and MethodOptions : sig
@@ -1978,7 +1978,7 @@ end = struct
         val to_string: t -> string
         val from_string_exn: string -> t
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { deprecated: bool; idempotency_level: IdempotencyLevel.t; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
@@ -2000,7 +2000,7 @@ end = struct
         val from_string_exn: string -> t
       end = struct
         type t = IDEMPOTENCY_UNKNOWN | NO_SIDE_EFFECTS | IDEMPOTENT
-        let name () = "descriptor.google.protobuf.MethodOptions.IdempotencyLevel"
+        let name () = ".google.protobuf.MethodOptions.IdempotencyLevel"
         let to_int = function
           | IDEMPOTENCY_UNKNOWN -> 0
           | NO_SIDE_EFFECTS -> 1
@@ -2022,7 +2022,7 @@ end = struct
           | s -> Runtime'.Result.raise (`Unknown_enum_name s)
 
       end
-      let name' () = "descriptor.google.protobuf.MethodOptions"
+      let name () = ".google.protobuf.MethodOptions"
       type t = { deprecated: bool; idempotency_level: IdempotencyLevel.t; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       let make ?(deprecated = false) ?(idempotency_level = IdempotencyLevel.IDEMPOTENCY_UNKNOWN) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { deprecated; idempotency_level; uninterpreted_option; extensions' }
       let merge = (fun t1 t2 -> {
@@ -2042,16 +2042,16 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.MethodOptions" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { deprecated; idempotency_level; uninterpreted_option; extensions' } -> serialize deprecated idempotency_level uninterpreted_option extensions'
       let from_json_exn =
         let constructor deprecated idempotency_level uninterpreted_option extensions' = { deprecated; idempotency_level; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.MethodOptions" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and UninterpretedOption : sig
       module rec NamePart : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { name_part: string; is_extension: bool }
         val make: name_part:string -> is_extension:bool -> unit -> t
         val merge: t -> t -> t
@@ -2063,7 +2063,7 @@ end = struct
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = { name: NamePart.t list; identifier_value: string option; positive_int_value: int option; negative_int_value: int option; double_value: float option; string_value: bytes option; aggregate_value: string option }
       val make: ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       val merge: t -> t -> t
@@ -2076,7 +2076,7 @@ end = struct
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end = struct
       module rec NamePart : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { name_part: string; is_extension: bool }
         val make: name_part:string -> is_extension:bool -> unit -> t
         val merge: t -> t -> t
@@ -2088,7 +2088,7 @@ end = struct
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end = struct
-        let name' () = "descriptor.google.protobuf.UninterpretedOption.NamePart"
+        let name () = ".google.protobuf.UninterpretedOption.NamePart"
         type t = { name_part: string; is_extension: bool }
         let make ~name_part ~is_extension () = { name_part; is_extension }
         let merge = (fun t1 t2 -> {
@@ -2106,14 +2106,14 @@ end = struct
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
-          let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.UninterpretedOption.NamePart" (spec ()) options in
+          let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { name_part; is_extension } -> serialize name_part is_extension
         let from_json_exn =
           let constructor name_part is_extension = { name_part; is_extension } in
-          Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.UninterpretedOption.NamePart" (spec ()) constructor
+          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
-      let name' () = "descriptor.google.protobuf.UninterpretedOption"
+      let name () = ".google.protobuf.UninterpretedOption"
       type t = { name: NamePart.t list; identifier_value: string option; positive_int_value: int option; negative_int_value: int option; double_value: float option; string_value: bytes option; aggregate_value: string option }
       let make ?(name = []) ?identifier_value ?positive_int_value ?negative_int_value ?double_value ?string_value ?aggregate_value () = { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value }
       let merge = (fun t1 t2 -> {
@@ -2136,16 +2136,16 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.UninterpretedOption" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } -> serialize name identifier_value positive_int_value negative_int_value double_value string_value aggregate_value
       let from_json_exn =
         let constructor name identifier_value positive_int_value negative_int_value double_value string_value aggregate_value = { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.UninterpretedOption" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and SourceCodeInfo : sig
       module rec Location : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { path: int list; span: int list; leading_comments: string option; trailing_comments: string option; leading_detached_comments: string list }
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         val merge: t -> t -> t
@@ -2157,7 +2157,7 @@ end = struct
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = (Location.t list)
       val make: ?location:Location.t list -> unit -> t
       val merge: t -> t -> t
@@ -2170,7 +2170,7 @@ end = struct
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end = struct
       module rec Location : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { path: int list; span: int list; leading_comments: string option; trailing_comments: string option; leading_detached_comments: string list }
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         val merge: t -> t -> t
@@ -2182,7 +2182,7 @@ end = struct
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end = struct
-        let name' () = "descriptor.google.protobuf.SourceCodeInfo.Location"
+        let name () = ".google.protobuf.SourceCodeInfo.Location"
         type t = { path: int list; span: int list; leading_comments: string option; trailing_comments: string option; leading_detached_comments: string list }
         let make ?(path = []) ?(span = []) ?leading_comments ?trailing_comments ?(leading_detached_comments = []) () = { path; span; leading_comments; trailing_comments; leading_detached_comments }
         let merge = (fun t1 t2 -> {
@@ -2203,14 +2203,14 @@ end = struct
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
-          let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.SourceCodeInfo.Location" (spec ()) options in
+          let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { path; span; leading_comments; trailing_comments; leading_detached_comments } -> serialize path span leading_comments trailing_comments leading_detached_comments
         let from_json_exn =
           let constructor path span leading_comments trailing_comments leading_detached_comments = { path; span; leading_comments; trailing_comments; leading_detached_comments } in
-          Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.SourceCodeInfo.Location" (spec ()) constructor
+          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
-      let name' () = "descriptor.google.protobuf.SourceCodeInfo"
+      let name () = ".google.protobuf.SourceCodeInfo"
       type t = (Location.t list)
       let make ?(location = []) () = (location)
       let merge = (fun (t1_location) (t2_location) -> (Runtime'.Merge.merge Runtime'.Spec.( repeated ((1, "location", "location"), (message (module Location)), not_packed) ) t1_location t2_location))
@@ -2225,16 +2225,16 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.SourceCodeInfo" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun (location) -> serialize location
       let from_json_exn =
         let constructor location = (location) in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.SourceCodeInfo" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and GeneratedCodeInfo : sig
       module rec Annotation : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { path: int list; source_file: string option; begin': int option; end': int option }
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         val merge: t -> t -> t
@@ -2246,7 +2246,7 @@ end = struct
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end
-      val name': unit -> string
+      val name: unit -> string
       type t = (Annotation.t list)
       val make: ?annotation:Annotation.t list -> unit -> t
       val merge: t -> t -> t
@@ -2259,7 +2259,7 @@ end = struct
       val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
     end = struct
       module rec Annotation : sig
-        val name': unit -> string
+        val name: unit -> string
         type t = { path: int list; source_file: string option; begin': int option; end': int option }
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         val merge: t -> t -> t
@@ -2271,7 +2271,7 @@ end = struct
         val from_json_exn: Yojson.Basic.t -> t
         val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
       end = struct
-        let name' () = "descriptor.google.protobuf.GeneratedCodeInfo.Annotation"
+        let name () = ".google.protobuf.GeneratedCodeInfo.Annotation"
         type t = { path: int list; source_file: string option; begin': int option; end': int option }
         let make ?(path = []) ?source_file ?begin' ?end' () = { path; source_file; begin'; end' }
         let merge = (fun t1 t2 -> {
@@ -2291,14 +2291,14 @@ end = struct
           Runtime'.Deserialize.deserialize (spec ()) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
-          let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.GeneratedCodeInfo.Annotation" (spec ()) options in
+          let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { path; source_file; begin'; end' } -> serialize path source_file begin' end'
         let from_json_exn =
           let constructor path source_file begin' end' = { path; source_file; begin'; end' } in
-          Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.GeneratedCodeInfo.Annotation" (spec ()) constructor
+          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
-      let name' () = "descriptor.google.protobuf.GeneratedCodeInfo"
+      let name () = ".google.protobuf.GeneratedCodeInfo"
       type t = (Annotation.t list)
       let make ?(annotation = []) () = (annotation)
       let merge = (fun (t1_annotation) (t2_annotation) -> (Runtime'.Merge.merge Runtime'.Spec.( repeated ((1, "annotation", "annotation"), (message (module Annotation)), not_packed) ) t1_annotation t2_annotation))
@@ -2313,11 +2313,11 @@ end = struct
         Runtime'.Deserialize.deserialize (spec ()) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
-        let serialize = Runtime'.Serialize_json.serialize ~message_name:".google.protobuf.GeneratedCodeInfo" (spec ()) options in
+        let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun (annotation) -> serialize annotation
       let from_json_exn =
         let constructor annotation = (annotation) in
-        Runtime'.Deserialize_json.deserialize ~message_name:".google.protobuf.GeneratedCodeInfo" (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
   end
