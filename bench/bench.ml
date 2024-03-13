@@ -15,7 +15,7 @@ module type Plugin_impl = sig
   module M : Ocaml_protoc_plugin.Spec.Message
 end
 
-let make_tests (type v) (module Protoc: Protoc_impl) (module Plugin: Plugin_impl with type M.t = v) v_plugin =
+let make_tests name (type v) (module Protoc: Protoc_impl) (module Plugin: Plugin_impl with type M.t = v) v_plugin =
 
   (* Verify *)
   let verify_identity ~mode data =
@@ -45,7 +45,7 @@ let make_tests (type v) (module Protoc: Protoc_impl) (module Plugin: Plugin_impl
     | false ->
        failwith "Data not the same"
   in
-  printf "%-17s: %7d+%-7d(B) / %7d+%-7d(S) / %7d+%-7d(Sp) - %7d\n%!" (Plugin.M.name ())
+  printf "%-17s: %7d+%-7d(B) / %7d+%-7d(S) / %7d+%-7d(Sp) - %7d\n%!" name
     size_normal unused_normal size_speed unused_speed size_space unused_space (String.length data_protoc);
 
 
@@ -64,7 +64,7 @@ let make_tests (type v) (module Protoc: Protoc_impl) (module Plugin: Plugin_impl
         Test.make ~name:"Protoc" (Staged.stage @@ fun () -> Protoc.decode_pb_m (Pbrt.Decoder.of_string data_protoc))
       ]
   in
-  Test.make_grouped ~name:(Plugin.M.name ()) [test_encode; test_decode]
+  Test.make_grouped ~name [test_encode; test_decode]
 
 let make_int_tests vl =
   let open Ocaml_protoc_plugin in
@@ -189,17 +189,17 @@ let _ =
   let v_plugin = create_test_data ~depth:4 () in
   let v_plugin = Option.value_exn v_plugin in
   [
-    make_tests (module Protoc.Bench) (module Plugin.Bench) v_plugin;
-    make_tests (module Protoc.Int64) (module Plugin.Int64) 27;
-    make_tests (module Protoc.Float) (module Plugin.Float) 27.0001;
-    make_tests (module Protoc.String) (module Plugin.String) "Benchmark";
-    make_tests (module Protoc.Enum) (module Plugin.Enum) Plugin.Enum.Enum.ED;
-    make_tests (module Protoc.Empty) (module Plugin.Empty) ();
+    make_tests "bench" (module Protoc.Bench) (module Plugin.Bench) v_plugin;
+    make_tests "int64" (module Protoc.Int64) (module Plugin.Int64) 27;
+    make_tests "float" (module Protoc.Float) (module Plugin.Float) 27.0001;
+    make_tests "string" (module Protoc.String) (module Plugin.String) "Benchmark";
+    make_tests "enum" (module Protoc.Enum) (module Plugin.Enum) Plugin.Enum.Enum.ED;
+    make_tests "empty" (module Protoc.Empty) (module Plugin.Empty) ();
 
-    List.init 1000 ~f:(fun i -> i) |> make_tests (module Protoc.Int64_list) (module Plugin.Int64_list);
-    List.init 1000 ~f:(fun i -> Float.of_int i) |> make_tests (module Protoc.Float_list) (module Plugin.Float_list);
-    List.init 1000 ~f:(fun _ -> random_string ~len:20 ()) |> make_tests (module Protoc.String_list) (module Plugin.String_list);
-    List.init 1000 ~f:(fun i -> i+1, i * i+1) |> make_tests (module Protoc.Map) (module Plugin.Map);
+    List.init 1000 ~f:(fun i -> i) |> make_tests "int64 list" (module Protoc.Int64_list) (module Plugin.Int64_list);
+    List.init 1000 ~f:(fun i -> Float.of_int i) |> make_tests "float list" (module Protoc.Float_list) (module Plugin.Float_list);
+    List.init 1000 ~f:(fun _ -> random_string ~len:20 ()) |> make_tests "string list" (module Protoc.String_list) (module Plugin.String_list);
+    List.init 1000 ~f:(fun i -> i+1, i * i+1) |> make_tests "map<int64,int64>" (module Protoc.Map) (module Plugin.Map);
 
     (* random_list ~len:100 ~f:(fun () -> Plugin.Enum_list.Enum.ED) () |> make_tests (module Protoc.Enum_list) (module Plugin.Enum_list); *)
        (Bechamel.Test.make_grouped ~name:"Varint" @@ (make_int_tests (0xFFFF_FFFFL)))
