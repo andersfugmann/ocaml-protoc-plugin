@@ -15,10 +15,11 @@
     int32_as_int=true
     fixed_as_int=false
     singleton_record=false
+    prefix_output_with_package=false
 *)
 [@@@ocaml.alert "-protobuf"] (* Disable deprecation warnings for protobuf*)
 
-open Ocaml_protoc_plugin.Runtime [@@warning "-33"]
+module Runtime' = Ocaml_protoc_plugin [@@warning "-33"]
 (**/**)
 module Imported'modules = struct
   module Descriptor = Descriptor
@@ -235,12 +236,17 @@ end = struct
         let name () = ".google.protobuf.compiler.Version"
         type t = { major: int option; minor: int option; patch: int option; suffix: string option }
         let make ?major ?minor ?patch ?suffix () = { major; minor; patch; suffix }
-        let merge = (fun t1 t2 -> {
-          major = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "major", "major"), int32_int) ) t1.major t2.major);
-          minor = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "minor", "minor"), int32_int) ) t1.minor t2.minor);
-          patch = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "patch", "patch"), int32_int) ) t1.patch t2.patch);
-          suffix = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((4, "suffix", "suffix"), string) ) t1.suffix t2.suffix);
-           })
+        let merge =
+          let merge_major = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "major", "major"), int32_int) ) in
+          let merge_minor = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "minor", "minor"), int32_int) ) in
+          let merge_patch = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "patch", "patch"), int32_int) ) in
+          let merge_suffix = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((4, "suffix", "suffix"), string) ) in
+          fun t1 t2 -> {
+            major = (merge_major t1.major t2.major);
+            minor = (merge_minor t1.minor t2.minor);
+            patch = (merge_patch t1.patch t2.patch);
+            suffix = (merge_suffix t1.suffix t2.suffix);
+           }
         let spec () = Runtime'.Spec.( basic_opt ((1, "major", "major"), int32_int) ^:: basic_opt ((2, "minor", "minor"), int32_int) ^:: basic_opt ((3, "patch", "patch"), int32_int) ^:: basic_opt ((4, "suffix", "suffix"), string) ^:: nil )
         let to_proto' =
           let serialize = Runtime'.Serialize.serialize (spec ()) in
@@ -275,12 +281,17 @@ end = struct
         let name () = ".google.protobuf.compiler.CodeGeneratorRequest"
         type t = { file_to_generate: string list; parameter: string option; compiler_version: Version.t option; proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list }
         let make ?(file_to_generate = []) ?parameter ?compiler_version ?(proto_file = []) () = { file_to_generate; parameter; compiler_version; proto_file }
-        let merge = (fun t1 t2 -> {
-          file_to_generate = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((1, "file_to_generate", "fileToGenerate"), string, not_packed) ) t1.file_to_generate t2.file_to_generate);
-          parameter = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "parameter", "parameter"), string) ) t1.parameter t2.parameter);
-          compiler_version = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "compiler_version", "compilerVersion"), (message (module Version))) ) t1.compiler_version t2.compiler_version);
-          proto_file = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((15, "proto_file", "protoFile"), (message (module Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto)), not_packed) ) t1.proto_file t2.proto_file);
-           })
+        let merge =
+          let merge_file_to_generate = Runtime'.Merge.merge Runtime'.Spec.( repeated ((1, "file_to_generate", "fileToGenerate"), string, not_packed) ) in
+          let merge_parameter = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "parameter", "parameter"), string) ) in
+          let merge_compiler_version = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "compiler_version", "compilerVersion"), (message (module Version))) ) in
+          let merge_proto_file = Runtime'.Merge.merge Runtime'.Spec.( repeated ((15, "proto_file", "protoFile"), (message (module Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto)), not_packed) ) in
+          fun t1 t2 -> {
+            file_to_generate = (merge_file_to_generate t1.file_to_generate t2.file_to_generate);
+            parameter = (merge_parameter t1.parameter t2.parameter);
+            compiler_version = (merge_compiler_version t1.compiler_version t2.compiler_version);
+            proto_file = (merge_proto_file t1.proto_file t2.proto_file);
+           }
         let spec () = Runtime'.Spec.( repeated ((1, "file_to_generate", "fileToGenerate"), string, not_packed) ^:: basic_opt ((2, "parameter", "parameter"), string) ^:: basic_opt ((3, "compiler_version", "compilerVersion"), (message (module Version))) ^:: repeated ((15, "proto_file", "protoFile"), (message (module Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto)), not_packed) ^:: nil )
         let to_proto' =
           let serialize = Runtime'.Serialize.serialize (spec ()) in
@@ -378,12 +389,17 @@ end = struct
           let name () = ".google.protobuf.compiler.CodeGeneratorResponse.File"
           type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }
           let make ?name ?insertion_point ?content ?generated_code_info () = { name; insertion_point; content; generated_code_info }
-          let merge = (fun t1 t2 -> {
-            name = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ) t1.name t2.name);
-            insertion_point = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "insertion_point", "insertionPoint"), string) ) t1.insertion_point t2.insertion_point);
-            content = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((15, "content", "content"), string) ) t1.content t2.content);
-            generated_code_info = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((16, "generated_code_info", "generatedCodeInfo"), (message (module Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo))) ) t1.generated_code_info t2.generated_code_info);
-             })
+          let merge =
+            let merge_name = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ) in
+            let merge_insertion_point = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "insertion_point", "insertionPoint"), string) ) in
+            let merge_content = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((15, "content", "content"), string) ) in
+            let merge_generated_code_info = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((16, "generated_code_info", "generatedCodeInfo"), (message (module Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo))) ) in
+            fun t1 t2 -> {
+              name = (merge_name t1.name t2.name);
+              insertion_point = (merge_insertion_point t1.insertion_point t2.insertion_point);
+              content = (merge_content t1.content t2.content);
+              generated_code_info = (merge_generated_code_info t1.generated_code_info t2.generated_code_info);
+             }
           let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "insertion_point", "insertionPoint"), string) ^:: basic_opt ((15, "content", "content"), string) ^:: basic_opt ((16, "generated_code_info", "generatedCodeInfo"), (message (module Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo))) ^:: nil )
           let to_proto' =
             let serialize = Runtime'.Serialize.serialize (spec ()) in
@@ -405,11 +421,15 @@ end = struct
         let name () = ".google.protobuf.compiler.CodeGeneratorResponse"
         type t = { error: string option; supported_features: int option; file: File.t list }
         let make ?error ?supported_features ?(file = []) () = { error; supported_features; file }
-        let merge = (fun t1 t2 -> {
-          error = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "error", "error"), string) ) t1.error t2.error);
-          supported_features = (Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "supported_features", "supportedFeatures"), uint64_int) ) t1.supported_features t2.supported_features);
-          file = (Runtime'.Merge.merge Runtime'.Spec.( repeated ((15, "file", "file"), (message (module File)), not_packed) ) t1.file t2.file);
-           })
+        let merge =
+          let merge_error = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "error", "error"), string) ) in
+          let merge_supported_features = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "supported_features", "supportedFeatures"), uint64_int) ) in
+          let merge_file = Runtime'.Merge.merge Runtime'.Spec.( repeated ((15, "file", "file"), (message (module File)), not_packed) ) in
+          fun t1 t2 -> {
+            error = (merge_error t1.error t2.error);
+            supported_features = (merge_supported_features t1.supported_features t2.supported_features);
+            file = (merge_file t1.file t2.file);
+           }
         let spec () = Runtime'.Spec.( basic_opt ((1, "error", "error"), string) ^:: basic_opt ((2, "supported_features", "supportedFeatures"), uint64_int) ^:: repeated ((15, "file", "file"), (message (module File)), not_packed) ^:: nil )
         let to_proto' =
           let serialize = Runtime'.Serialize.serialize (spec ()) in

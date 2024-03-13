@@ -15,10 +15,11 @@
     int32_as_int=true
     fixed_as_int=false
     singleton_record=false
+    prefix_output_with_package=false
 *)
 [@@@ocaml.alert "-protobuf"] (* Disable deprecation warnings for protobuf*)
 
-open Ocaml_protoc_plugin.Runtime [@@warning "-33"]
+module Runtime' = Ocaml_protoc_plugin [@@warning "-33"]
 (**/**)
 module Imported'modules = struct
   module Descriptor = Descriptor
@@ -40,7 +41,9 @@ end = struct
   let name () = ".Options"
   type t = (bool)
   let make ?(mangle_names = false) () = (mangle_names)
-  let merge = (fun (t1_mangle_names) (t2_mangle_names) -> (Runtime'.Merge.merge Runtime'.Spec.( basic ((1, "mangle_names", "mangleNames"), bool, (false)) ) t1_mangle_names t2_mangle_names))
+  let merge =
+    let merge_mangle_names = Runtime'.Merge.merge Runtime'.Spec.( basic ((1, "mangle_names", "mangleNames"), bool, (false)) ) in
+    fun (t1_mangle_names) (t2_mangle_names) -> merge_mangle_names t1_mangle_names t2_mangle_names
   let spec () = Runtime'.Spec.( basic ((1, "mangle_names", "mangleNames"), bool, (false)) ^:: nil )
   let to_proto' =
     let serialize = Runtime'.Serialize.serialize (spec ()) in

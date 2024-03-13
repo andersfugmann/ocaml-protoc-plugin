@@ -370,7 +370,7 @@ let parse_proto_file ~params scope
   let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
   let implementation = Code.init () in
   emit_header implementation ~name ~syntax ~deprecated ~params;
-  Code.emit implementation `None "open Ocaml_protoc_plugin.Runtime [@@warning \"-33\"]";
+  Code.emit implementation `None "module Runtime' = Ocaml_protoc_plugin [@@warning \"-33\"]";
   List.iter ~f:(Code.emit implementation `None "open %s [@@warning \"-33\"]" ) params.opens;
 
   Code.emit implementation `None "(**/**)";
