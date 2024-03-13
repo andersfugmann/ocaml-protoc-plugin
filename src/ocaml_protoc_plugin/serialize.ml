@@ -162,7 +162,7 @@ let rec write: type a b. (a, b) compound -> Writer.t -> a -> unit = function
 let in_extension_ranges extension_ranges index =
   List.exists ~f:(fun (start, end') -> index >= start && index <= end') extension_ranges
 
-let rec serialize : type a. (a, Writer.t) compound_list -> Writer.t -> a = function
+let rec serialize: type a. (a, Writer.t) compound_list -> Writer.t -> a = function
   | Nil -> fun writer -> writer
   | Nil_ext extension_ranges ->
     fun writer extensions ->
