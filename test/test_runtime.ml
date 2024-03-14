@@ -5,7 +5,7 @@ type strategy = Fast | Full | Standard [@@deriving show]
 let strategy = ref Standard
 let set_stragegy s = strategy := s
 
-module Runtime' = struct
+module Ocaml_protoc_plugin = struct
   include Ocaml_protoc_plugin
   module Deserialize : module type of Deserialize = struct
     include Deserialize

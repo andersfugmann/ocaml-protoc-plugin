@@ -31,3 +31,6 @@ message M {
 message N {
   int64 i = 1;
 }
+
+message Empty {
+}

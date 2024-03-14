@@ -15,4 +15,5 @@
  (name verify_evaluation)
  (modules verify verify_evaluation)
  (libraries ocaml_protoc_plugin)
+ (instrumentation (backend bisect_ppx))
 )

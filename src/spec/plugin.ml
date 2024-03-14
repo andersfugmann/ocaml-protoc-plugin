@@ -19,8 +19,8 @@
 *)
 [@@@ocaml.alert "-protobuf"] (* Disable deprecation warnings for protobuf*)
 
-module Runtime' = Ocaml_protoc_plugin [@@warning "-33"]
 (**/**)
+module Runtime' = Ocaml_protoc_plugin [@@warning "-33"]
 module Imported'modules = struct
   module Descriptor = Descriptor
 end
