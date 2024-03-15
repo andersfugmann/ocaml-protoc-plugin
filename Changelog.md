@@ -1,4 +1,4 @@
-## 5.1.0: Unreleased
+##6.0.0: Unreleased
 - [x] Unify serialization and deserialization spec and optimize oneof
       handling
 - [x] Simplify types used in code generation to improve readaility
@@ -9,7 +9,7 @@
 string" which will only return the full protobuf name
 - [x] Add option to prefix generated files with their package name
 - [ ] Optimize merge functions by applying eager evaluation
-
+- [ ] Change signature of `to_proto'` to return unit and not a writer
 
 (Items with '*' is a breaking change)
 

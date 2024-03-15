@@ -37,4 +37,4 @@ let test_empty () =
 
 let _ = test_empty, test_full
 
-let () = test_empty ()
+let () = test_full ()

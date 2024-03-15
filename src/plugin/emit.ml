@@ -257,7 +257,7 @@ let rec emit_message ~params ~syntax ~scope
       Code.emit signature `None "type t = %s%s" type' params.annot;
       Code.emit signature `None "val make: %s" default_constructor_sig;
       Code.emit signature `None "val merge: t -> t -> t";
-      Code.emit signature `None "val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t";
+      Code.emit signature `None "val to_proto': Runtime'.Writer.t -> t -> unit";
       Code.emit signature `None "val to_proto: t -> Runtime'.Writer.t";
       Code.emit signature `None "val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result";
       Code.emit signature `None "val from_proto_exn: Runtime'.Reader.t -> t";
@@ -277,7 +277,7 @@ let rec emit_message ~params ~syntax ~scope
       Code.emit implementation `None "fun writer %s -> serialize writer %s" destructor (String.concat ~sep:" " args);
       Code.emit implementation `End "";
 
-      Code.emit implementation `None "let to_proto t = to_proto' (Runtime'.Writer.init ()) t";
+      Code.emit implementation `None "let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer";
 
       Code.emit implementation `Begin "let from_proto_exn =";
       Code.emit implementation `None "let constructor %s = %s in" (String.concat ~sep:" " args) destructor;

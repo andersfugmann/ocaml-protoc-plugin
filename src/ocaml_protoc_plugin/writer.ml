@@ -140,7 +140,7 @@ let write_length_delimited_f ~write_f v t =
     let offset = sentinel.offset in
     (* Ensure no writes to the sentinel *)
     sentinel.offset <- Int.max_int;
-    let (_ : t) = write_f t v in
+    let () = write_f t v in
     let size = size_data_added sentinel 0 t.data in
     let offset = write_varint_unboxed sentinel.buffer ~offset size in
     sentinel.offset <- offset;
@@ -150,7 +150,7 @@ let write_length_delimited_f ~write_f v t =
     let sentinel = ensure_capacity ~size:length_delimited_size_field_length t in
     let offset = sentinel.offset in
     sentinel.offset <- sentinel.offset + length_delimited_size_field_length;
-    let (_ : t) = write_f t v in
+    let () = write_f t v in
     let size = size_data_added sentinel (sentinel.offset - (offset + length_delimited_size_field_length)) t.data in
     let _ = write_delimited_field_length_fixed_size sentinel.buffer ~offset size in
     ()
@@ -159,7 +159,7 @@ let write_length_delimited_f ~write_f v t =
     let sentinel = ensure_capacity ~size:length_delimited_size_field_length t in
     let offset = sentinel.offset in
     sentinel.offset <- sentinel.offset + length_delimited_size_field_length;
-    let (_ : t) = write_f t v in
+    let () = write_f t v in
     let size = size_data_added sentinel (sentinel.offset - (offset + length_delimited_size_field_length)) t.data in
     let offset' = write_varint_unboxed sentinel.buffer ~offset size in
     (* Move data to avoid holes *)

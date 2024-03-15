@@ -31,7 +31,7 @@ module rec Google : sig
       type t = (FileDescriptorProto.t list)
       val make: ?file:FileDescriptorProto.t list -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -44,7 +44,7 @@ module rec Google : sig
       type t = { name: string option; package: string option; dependency: string list; message_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; service: ServiceDescriptorProto.t list; extension: FieldDescriptorProto.t list; options: FileOptions.t option; source_code_info: SourceCodeInfo.t option; public_dependency: int list; weak_dependency: int list; syntax: string option }
       val make: ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -58,7 +58,7 @@ module rec Google : sig
         type t = { start: int option; end': int option; options: ExtensionRangeOptions.t option }
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -71,7 +71,7 @@ module rec Google : sig
         type t = { start: int option; end': int option }
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -83,7 +83,7 @@ module rec Google : sig
       type t = { name: string option; field: FieldDescriptorProto.t list; nested_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; extension_range: ExtensionRange.t list; extension: FieldDescriptorProto.t list; options: MessageOptions.t option; oneof_decl: OneofDescriptorProto.t list; reserved_range: ReservedRange.t list; reserved_name: string list }
       val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -96,7 +96,7 @@ module rec Google : sig
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -127,7 +127,7 @@ module rec Google : sig
       type t = { name: string option; extendee: string option; number: int option; label: Label.t option; type': Type.t option; type_name: string option; default_value: string option; options: FieldOptions.t option; oneof_index: int option; json_name: string option; proto3_optional: bool option }
       val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -140,7 +140,7 @@ module rec Google : sig
       type t = { name: string option; options: OneofOptions.t option }
       val make: ?name:string -> ?options:OneofOptions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -154,7 +154,7 @@ module rec Google : sig
         type t = { start: int option; end': int option }
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -166,7 +166,7 @@ module rec Google : sig
       type t = { name: string option; value: EnumValueDescriptorProto.t list; options: EnumOptions.t option; reserved_range: EnumReservedRange.t list; reserved_name: string list }
       val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -179,7 +179,7 @@ module rec Google : sig
       type t = { name: string option; number: int option; options: EnumValueOptions.t option }
       val make: ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -192,7 +192,7 @@ module rec Google : sig
       type t = { name: string option; method': MethodDescriptorProto.t list; options: ServiceOptions.t option }
       val make: ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -205,7 +205,7 @@ module rec Google : sig
       type t = { name: string option; input_type: string option; output_type: string option; options: MethodOptions.t option; client_streaming: bool; server_streaming: bool }
       val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -227,7 +227,7 @@ module rec Google : sig
       type t = { java_package: string option; java_outer_classname: string option; optimize_for: OptimizeMode.t; java_multiple_files: bool; go_package: string option; cc_generic_services: bool; java_generic_services: bool; py_generic_services: bool; java_generate_equals_and_hash: bool option[@ocaml.alert protobuf "Deprecated global"]; deprecated: bool; java_string_check_utf8: bool; cc_enable_arenas: bool; objc_class_prefix: string option; csharp_namespace: string option; swift_prefix: string option; php_class_prefix: string option; php_namespace: string option; php_generic_services: bool; php_metadata_namespace: string option; ruby_package: string option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -240,7 +240,7 @@ module rec Google : sig
       type t = { message_set_wire_format: bool; no_standard_descriptor_accessor: bool; deprecated: bool; map_entry: bool option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -271,7 +271,7 @@ module rec Google : sig
       type t = { ctype: CType.t; packed: bool option; deprecated: bool; lazy': bool; jstype: JSType.t; weak: bool; unverified_lazy: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -284,7 +284,7 @@ module rec Google : sig
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -297,7 +297,7 @@ module rec Google : sig
       type t = { allow_alias: bool option; deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -310,7 +310,7 @@ module rec Google : sig
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -323,7 +323,7 @@ module rec Google : sig
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -345,7 +345,7 @@ module rec Google : sig
       type t = { deprecated: bool; idempotency_level: IdempotencyLevel.t; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -359,7 +359,7 @@ module rec Google : sig
         type t = { name_part: string; is_extension: bool }
         val make: name_part:string -> is_extension:bool -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -371,7 +371,7 @@ module rec Google : sig
       type t = { name: NamePart.t list; identifier_value: string option; positive_int_value: int option; negative_int_value: int option; double_value: float option; string_value: bytes option; aggregate_value: string option }
       val make: ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -385,7 +385,7 @@ module rec Google : sig
         type t = { path: int list; span: int list; leading_comments: string option; trailing_comments: string option; leading_detached_comments: string list }
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -397,7 +397,7 @@ module rec Google : sig
       type t = (Location.t list)
       val make: ?location:Location.t list -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -411,7 +411,7 @@ module rec Google : sig
         type t = { path: int list; source_file: string option; begin': int option; end': int option }
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -423,7 +423,7 @@ module rec Google : sig
       type t = (Annotation.t list)
       val make: ?annotation:Annotation.t list -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -439,7 +439,7 @@ end = struct
       type t = (FileDescriptorProto.t list)
       val make: ?file:FileDescriptorProto.t list -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -452,7 +452,7 @@ end = struct
       type t = { name: string option; package: string option; dependency: string list; message_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; service: ServiceDescriptorProto.t list; extension: FieldDescriptorProto.t list; options: FileOptions.t option; source_code_info: SourceCodeInfo.t option; public_dependency: int list; weak_dependency: int list; syntax: string option }
       val make: ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -466,7 +466,7 @@ end = struct
         type t = { start: int option; end': int option; options: ExtensionRangeOptions.t option }
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -479,7 +479,7 @@ end = struct
         type t = { start: int option; end': int option }
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -491,7 +491,7 @@ end = struct
       type t = { name: string option; field: FieldDescriptorProto.t list; nested_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; extension_range: ExtensionRange.t list; extension: FieldDescriptorProto.t list; options: MessageOptions.t option; oneof_decl: OneofDescriptorProto.t list; reserved_range: ReservedRange.t list; reserved_name: string list }
       val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -504,7 +504,7 @@ end = struct
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -535,7 +535,7 @@ end = struct
       type t = { name: string option; extendee: string option; number: int option; label: Label.t option; type': Type.t option; type_name: string option; default_value: string option; options: FieldOptions.t option; oneof_index: int option; json_name: string option; proto3_optional: bool option }
       val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -548,7 +548,7 @@ end = struct
       type t = { name: string option; options: OneofOptions.t option }
       val make: ?name:string -> ?options:OneofOptions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -562,7 +562,7 @@ end = struct
         type t = { start: int option; end': int option }
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -574,7 +574,7 @@ end = struct
       type t = { name: string option; value: EnumValueDescriptorProto.t list; options: EnumOptions.t option; reserved_range: EnumReservedRange.t list; reserved_name: string list }
       val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -587,7 +587,7 @@ end = struct
       type t = { name: string option; number: int option; options: EnumValueOptions.t option }
       val make: ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -600,7 +600,7 @@ end = struct
       type t = { name: string option; method': MethodDescriptorProto.t list; options: ServiceOptions.t option }
       val make: ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -613,7 +613,7 @@ end = struct
       type t = { name: string option; input_type: string option; output_type: string option; options: MethodOptions.t option; client_streaming: bool; server_streaming: bool }
       val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -635,7 +635,7 @@ end = struct
       type t = { java_package: string option; java_outer_classname: string option; optimize_for: OptimizeMode.t; java_multiple_files: bool; go_package: string option; cc_generic_services: bool; java_generic_services: bool; py_generic_services: bool; java_generate_equals_and_hash: bool option[@ocaml.alert protobuf "Deprecated global"]; deprecated: bool; java_string_check_utf8: bool; cc_enable_arenas: bool; objc_class_prefix: string option; csharp_namespace: string option; swift_prefix: string option; php_class_prefix: string option; php_namespace: string option; php_generic_services: bool; php_metadata_namespace: string option; ruby_package: string option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -648,7 +648,7 @@ end = struct
       type t = { message_set_wire_format: bool; no_standard_descriptor_accessor: bool; deprecated: bool; map_entry: bool option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -679,7 +679,7 @@ end = struct
       type t = { ctype: CType.t; packed: bool option; deprecated: bool; lazy': bool; jstype: JSType.t; weak: bool; unverified_lazy: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -692,7 +692,7 @@ end = struct
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -705,7 +705,7 @@ end = struct
       type t = { allow_alias: bool option; deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -718,7 +718,7 @@ end = struct
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -731,7 +731,7 @@ end = struct
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -753,7 +753,7 @@ end = struct
       type t = { deprecated: bool; idempotency_level: IdempotencyLevel.t; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -767,7 +767,7 @@ end = struct
         type t = { name_part: string; is_extension: bool }
         val make: name_part:string -> is_extension:bool -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -779,7 +779,7 @@ end = struct
       type t = { name: NamePart.t list; identifier_value: string option; positive_int_value: int option; negative_int_value: int option; double_value: float option; string_value: bytes option; aggregate_value: string option }
       val make: ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -793,7 +793,7 @@ end = struct
         type t = { path: int list; span: int list; leading_comments: string option; trailing_comments: string option; leading_detached_comments: string list }
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -805,7 +805,7 @@ end = struct
       type t = (Location.t list)
       val make: ?location:Location.t list -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -819,7 +819,7 @@ end = struct
         type t = { path: int list; source_file: string option; begin': int option; end': int option }
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -831,7 +831,7 @@ end = struct
       type t = (Annotation.t list)
       val make: ?annotation:Annotation.t list -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -845,7 +845,7 @@ end = struct
       type t = (FileDescriptorProto.t list)
       val make: ?file:FileDescriptorProto.t list -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -864,7 +864,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer (file) -> serialize writer file
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor file = (file) in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -882,7 +882,7 @@ end = struct
       type t = { name: string option; package: string option; dependency: string list; message_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; service: ServiceDescriptorProto.t list; extension: FieldDescriptorProto.t list; options: FileOptions.t option; source_code_info: SourceCodeInfo.t option; public_dependency: int list; weak_dependency: int list; syntax: string option }
       val make: ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -925,7 +925,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } -> serialize writer name package dependency message_type enum_type service extension options source_code_info public_dependency weak_dependency syntax
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name package dependency message_type enum_type service extension options source_code_info public_dependency weak_dependency syntax = { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -944,7 +944,7 @@ end = struct
         type t = { start: int option; end': int option; options: ExtensionRangeOptions.t option }
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -957,7 +957,7 @@ end = struct
         type t = { start: int option; end': int option }
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -969,7 +969,7 @@ end = struct
       type t = { name: string option; field: FieldDescriptorProto.t list; nested_type: DescriptorProto.t list; enum_type: EnumDescriptorProto.t list; extension_range: ExtensionRange.t list; extension: FieldDescriptorProto.t list; options: MessageOptions.t option; oneof_decl: OneofDescriptorProto.t list; reserved_range: ReservedRange.t list; reserved_name: string list }
       val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -982,7 +982,7 @@ end = struct
         type t = { start: int option; end': int option; options: ExtensionRangeOptions.t option }
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -1007,7 +1007,7 @@ end = struct
           let serialize = Runtime'.Serialize.serialize (spec ()) in
           fun writer { start; end'; options } -> serialize writer start end' options
 
-        let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+        let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor start end' options = { start; end'; options } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -1025,7 +1025,7 @@ end = struct
         type t = { start: int option; end': int option }
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -1048,7 +1048,7 @@ end = struct
           let serialize = Runtime'.Serialize.serialize (spec ()) in
           fun writer { start; end' } -> serialize writer start end'
 
-        let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+        let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor start end' = { start; end' } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -1092,7 +1092,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } -> serialize writer name field nested_type enum_type extension_range extension options oneof_decl reserved_range reserved_name
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name field nested_type enum_type extension_range extension options oneof_decl reserved_range reserved_name = { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -1110,7 +1110,7 @@ end = struct
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1132,7 +1132,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { uninterpreted_option; extensions' } -> serialize writer uninterpreted_option extensions'
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor uninterpreted_option extensions' = { uninterpreted_option; extensions' } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -1168,7 +1168,7 @@ end = struct
       type t = { name: string option; extendee: string option; number: int option; label: Label.t option; type': Type.t option; type_name: string option; default_value: string option; options: FieldOptions.t option; oneof_index: int option; json_name: string option; proto3_optional: bool option }
       val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1333,7 +1333,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } -> serialize writer name extendee number label type' type_name default_value options oneof_index json_name proto3_optional
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name extendee number label type' type_name default_value options oneof_index json_name proto3_optional = { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -1351,7 +1351,7 @@ end = struct
       type t = { name: string option; options: OneofOptions.t option }
       val make: ?name:string -> ?options:OneofOptions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1374,7 +1374,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; options } -> serialize writer name options
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name options = { name; options } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -1393,7 +1393,7 @@ end = struct
         type t = { start: int option; end': int option }
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -1405,7 +1405,7 @@ end = struct
       type t = { name: string option; value: EnumValueDescriptorProto.t list; options: EnumOptions.t option; reserved_range: EnumReservedRange.t list; reserved_name: string list }
       val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1418,7 +1418,7 @@ end = struct
         type t = { start: int option; end': int option }
         val make: ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -1441,7 +1441,7 @@ end = struct
           let serialize = Runtime'.Serialize.serialize (spec ()) in
           fun writer { start; end' } -> serialize writer start end'
 
-        let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+        let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor start end' = { start; end' } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -1475,7 +1475,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; value; options; reserved_range; reserved_name } -> serialize writer name value options reserved_range reserved_name
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name value options reserved_range reserved_name = { name; value; options; reserved_range; reserved_name } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -1493,7 +1493,7 @@ end = struct
       type t = { name: string option; number: int option; options: EnumValueOptions.t option }
       val make: ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1518,7 +1518,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; number; options } -> serialize writer name number options
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name number options = { name; number; options } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -1536,7 +1536,7 @@ end = struct
       type t = { name: string option; method': MethodDescriptorProto.t list; options: ServiceOptions.t option }
       val make: ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1561,7 +1561,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; method'; options } -> serialize writer name method' options
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name method' options = { name; method'; options } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -1579,7 +1579,7 @@ end = struct
       type t = { name: string option; input_type: string option; output_type: string option; options: MethodOptions.t option; client_streaming: bool; server_streaming: bool }
       val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1610,7 +1610,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; input_type; output_type; options; client_streaming; server_streaming } -> serialize writer name input_type output_type options client_streaming server_streaming
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name input_type output_type options client_streaming server_streaming = { name; input_type; output_type; options; client_streaming; server_streaming } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -1637,7 +1637,7 @@ end = struct
       type t = { java_package: string option; java_outer_classname: string option; optimize_for: OptimizeMode.t; java_multiple_files: bool; go_package: string option; cc_generic_services: bool; java_generic_services: bool; py_generic_services: bool; java_generate_equals_and_hash: bool option[@ocaml.alert protobuf "Deprecated global"]; deprecated: bool; java_string_check_utf8: bool; cc_enable_arenas: bool; objc_class_prefix: string option; csharp_namespace: string option; swift_prefix: string option; php_class_prefix: string option; php_namespace: string option; php_generic_services: bool; php_metadata_namespace: string option; ruby_package: string option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1731,7 +1731,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } -> serialize writer java_package java_outer_classname optimize_for java_multiple_files go_package cc_generic_services java_generic_services py_generic_services java_generate_equals_and_hash deprecated java_string_check_utf8 cc_enable_arenas objc_class_prefix csharp_namespace swift_prefix php_class_prefix php_namespace php_generic_services php_metadata_namespace ruby_package uninterpreted_option extensions'
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor java_package java_outer_classname optimize_for java_multiple_files go_package cc_generic_services java_generic_services py_generic_services java_generate_equals_and_hash deprecated java_string_check_utf8 cc_enable_arenas objc_class_prefix csharp_namespace swift_prefix php_class_prefix php_namespace php_generic_services php_metadata_namespace ruby_package uninterpreted_option extensions' = { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -1749,7 +1749,7 @@ end = struct
       type t = { message_set_wire_format: bool; no_standard_descriptor_accessor: bool; deprecated: bool; map_entry: bool option; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1779,7 +1779,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } -> serialize writer message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option extensions'
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option extensions' = { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -1815,7 +1815,7 @@ end = struct
       type t = { ctype: CType.t; packed: bool option; deprecated: bool; lazy': bool; jstype: JSType.t; weak: bool; unverified_lazy: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1915,7 +1915,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } -> serialize writer ctype packed deprecated lazy' jstype weak unverified_lazy uninterpreted_option extensions'
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor ctype packed deprecated lazy' jstype weak unverified_lazy uninterpreted_option extensions' = { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -1933,7 +1933,7 @@ end = struct
       type t = { uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1955,7 +1955,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { uninterpreted_option; extensions' } -> serialize writer uninterpreted_option extensions'
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor uninterpreted_option extensions' = { uninterpreted_option; extensions' } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -1973,7 +1973,7 @@ end = struct
       type t = { allow_alias: bool option; deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1999,7 +1999,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { allow_alias; deprecated; uninterpreted_option; extensions' } -> serialize writer allow_alias deprecated uninterpreted_option extensions'
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor allow_alias deprecated uninterpreted_option extensions' = { allow_alias; deprecated; uninterpreted_option; extensions' } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -2017,7 +2017,7 @@ end = struct
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2041,7 +2041,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { deprecated; uninterpreted_option; extensions' } -> serialize writer deprecated uninterpreted_option extensions'
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor deprecated uninterpreted_option extensions' = { deprecated; uninterpreted_option; extensions' } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -2059,7 +2059,7 @@ end = struct
       type t = { deprecated: bool; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2083,7 +2083,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { deprecated; uninterpreted_option; extensions' } -> serialize writer deprecated uninterpreted_option extensions'
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor deprecated uninterpreted_option extensions' = { deprecated; uninterpreted_option; extensions' } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -2110,7 +2110,7 @@ end = struct
       type t = { deprecated: bool; idempotency_level: IdempotencyLevel.t; uninterpreted_option: UninterpretedOption.t list; extensions': Runtime'.Extensions.t }
       val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2168,7 +2168,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { deprecated; idempotency_level; uninterpreted_option; extensions' } -> serialize writer deprecated idempotency_level uninterpreted_option extensions'
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor deprecated idempotency_level uninterpreted_option extensions' = { deprecated; idempotency_level; uninterpreted_option; extensions' } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -2187,7 +2187,7 @@ end = struct
         type t = { name_part: string; is_extension: bool }
         val make: name_part:string -> is_extension:bool -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -2199,7 +2199,7 @@ end = struct
       type t = { name: NamePart.t list; identifier_value: string option; positive_int_value: int option; negative_int_value: int option; double_value: float option; string_value: bytes option; aggregate_value: string option }
       val make: ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2212,7 +2212,7 @@ end = struct
         type t = { name_part: string; is_extension: bool }
         val make: name_part:string -> is_extension:bool -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -2235,7 +2235,7 @@ end = struct
           let serialize = Runtime'.Serialize.serialize (spec ()) in
           fun writer { name_part; is_extension } -> serialize writer name_part is_extension
 
-        let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+        let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor name_part is_extension = { name_part; is_extension } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -2273,7 +2273,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } -> serialize writer name identifier_value positive_int_value negative_int_value double_value string_value aggregate_value
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name identifier_value positive_int_value negative_int_value double_value string_value aggregate_value = { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -2292,7 +2292,7 @@ end = struct
         type t = { path: int list; span: int list; leading_comments: string option; trailing_comments: string option; leading_detached_comments: string list }
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -2304,7 +2304,7 @@ end = struct
       type t = (Location.t list)
       val make: ?location:Location.t list -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2317,7 +2317,7 @@ end = struct
         type t = { path: int list; span: int list; leading_comments: string option; trailing_comments: string option; leading_detached_comments: string list }
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -2346,7 +2346,7 @@ end = struct
           let serialize = Runtime'.Serialize.serialize (spec ()) in
           fun writer { path; span; leading_comments; trailing_comments; leading_detached_comments } -> serialize writer path span leading_comments trailing_comments leading_detached_comments
 
-        let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+        let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor path span leading_comments trailing_comments leading_detached_comments = { path; span; leading_comments; trailing_comments; leading_detached_comments } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -2370,7 +2370,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer (location) -> serialize writer location
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor location = (location) in
         Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -2389,7 +2389,7 @@ end = struct
         type t = { path: int list; source_file: string option; begin': int option; end': int option }
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -2401,7 +2401,7 @@ end = struct
       type t = (Annotation.t list)
       val make: ?annotation:Annotation.t list -> unit -> t
       val merge: t -> t -> t
-      val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+      val to_proto': Runtime'.Writer.t -> t -> unit
       val to_proto: t -> Runtime'.Writer.t
       val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2414,7 +2414,7 @@ end = struct
         type t = { path: int list; source_file: string option; begin': int option; end': int option }
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -2441,7 +2441,7 @@ end = struct
           let serialize = Runtime'.Serialize.serialize (spec ()) in
           fun writer { path; source_file; begin'; end' } -> serialize writer path source_file begin' end'
 
-        let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+        let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor path source_file begin' end' = { path; source_file; begin'; end' } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -2465,7 +2465,7 @@ end = struct
         let serialize = Runtime'.Serialize.serialize (spec ()) in
         fun writer (annotation) -> serialize writer annotation
 
-      let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+      let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor annotation = (annotation) in
         Runtime'.Deserialize.deserialize (spec ()) constructor

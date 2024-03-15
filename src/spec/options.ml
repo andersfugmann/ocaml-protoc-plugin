@@ -30,7 +30,7 @@ module rec Options : sig
   type t = (bool)
   val make: ?mangle_names:bool -> unit -> t
   val merge: t -> t -> t
-  val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+  val to_proto': Runtime'.Writer.t -> t -> unit
   val to_proto: t -> Runtime'.Writer.t
   val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
   val from_proto_exn: Runtime'.Reader.t -> t
@@ -49,7 +49,7 @@ end = struct
     let serialize = Runtime'.Serialize.serialize (spec ()) in
     fun writer (mangle_names) -> serialize writer mangle_names
 
-  let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+  let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
   let from_proto_exn =
     let constructor mangle_names = (mangle_names) in
     Runtime'.Deserialize.deserialize (spec ()) constructor

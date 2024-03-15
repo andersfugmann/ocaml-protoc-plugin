@@ -33,7 +33,7 @@ module rec Google : sig
         type t = { major: int option; minor: int option; patch: int option; suffix: string option }
         val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -46,7 +46,7 @@ module rec Google : sig
         type t = { file_to_generate: string list; parameter: string option; compiler_version: Version.t option; proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list }
         val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -69,7 +69,7 @@ module rec Google : sig
           type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }
           val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           val merge: t -> t -> t
-          val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+          val to_proto': Runtime'.Writer.t -> t -> unit
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
@@ -81,7 +81,7 @@ module rec Google : sig
         type t = { error: string option; supported_features: int option; file: File.t list }
         val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -99,7 +99,7 @@ end = struct
         type t = { major: int option; minor: int option; patch: int option; suffix: string option }
         val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -112,7 +112,7 @@ end = struct
         type t = { file_to_generate: string list; parameter: string option; compiler_version: Version.t option; proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list }
         val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -135,7 +135,7 @@ end = struct
           type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }
           val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           val merge: t -> t -> t
-          val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+          val to_proto': Runtime'.Writer.t -> t -> unit
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
@@ -147,7 +147,7 @@ end = struct
         type t = { error: string option; supported_features: int option; file: File.t list }
         val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -163,7 +163,7 @@ end = struct
         type t = { major: int option; minor: int option; patch: int option; suffix: string option }
         val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -176,7 +176,7 @@ end = struct
         type t = { file_to_generate: string list; parameter: string option; compiler_version: Version.t option; proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list }
         val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -199,7 +199,7 @@ end = struct
           type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }
           val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           val merge: t -> t -> t
-          val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+          val to_proto': Runtime'.Writer.t -> t -> unit
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
@@ -211,7 +211,7 @@ end = struct
         type t = { error: string option; supported_features: int option; file: File.t list }
         val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -225,7 +225,7 @@ end = struct
         type t = { major: int option; minor: int option; patch: int option; suffix: string option }
         val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -252,7 +252,7 @@ end = struct
           let serialize = Runtime'.Serialize.serialize (spec ()) in
           fun writer { major; minor; patch; suffix } -> serialize writer major minor patch suffix
 
-        let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+        let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor major minor patch suffix = { major; minor; patch; suffix } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -270,7 +270,7 @@ end = struct
         type t = { file_to_generate: string list; parameter: string option; compiler_version: Version.t option; proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list }
         val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -297,7 +297,7 @@ end = struct
           let serialize = Runtime'.Serialize.serialize (spec ()) in
           fun writer { file_to_generate; parameter; compiler_version; proto_file } -> serialize writer file_to_generate parameter compiler_version proto_file
 
-        let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+        let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor file_to_generate parameter compiler_version proto_file = { file_to_generate; parameter; compiler_version; proto_file } in
           Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -325,7 +325,7 @@ end = struct
           type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }
           val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           val merge: t -> t -> t
-          val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+          val to_proto': Runtime'.Writer.t -> t -> unit
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
@@ -337,7 +337,7 @@ end = struct
         type t = { error: string option; supported_features: int option; file: File.t list }
         val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
         val merge: t -> t -> t
-        val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+        val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -378,7 +378,7 @@ end = struct
           type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }
           val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           val merge: t -> t -> t
-          val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+          val to_proto': Runtime'.Writer.t -> t -> unit
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
@@ -405,7 +405,7 @@ end = struct
             let serialize = Runtime'.Serialize.serialize (spec ()) in
             fun writer { name; insertion_point; content; generated_code_info } -> serialize writer name insertion_point content generated_code_info
 
-          let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+          let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
           let from_proto_exn =
             let constructor name insertion_point content generated_code_info = { name; insertion_point; content; generated_code_info } in
             Runtime'.Deserialize.deserialize (spec ()) constructor
@@ -435,7 +435,7 @@ end = struct
           let serialize = Runtime'.Serialize.serialize (spec ()) in
           fun writer { error; supported_features; file } -> serialize writer error supported_features file
 
-        let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+        let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor error supported_features file = { error; supported_features; file } in
           Runtime'.Deserialize.deserialize (spec ()) constructor

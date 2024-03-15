@@ -23,7 +23,7 @@ let get: type a b. (a, b) Spec.compound -> t -> a = fun spec t ->
 
 let set: type a b. (a, b) Spec.compound -> t -> a -> t = fun spec t v ->
   let writer = Writer.init () in
-  let writer = Serialize.serialize Spec.(Cons (spec, Nil)) writer v in
+  Serialize.serialize Spec.(Cons (spec, Nil)) writer v;
   let index = index_of_spec spec in
   let fields =
     Writer.contents writer

@@ -48,42 +48,48 @@ let int_of_uint32 =
   | _ ->
     assert false
 
+let read_fixed64 ~f reader = Reader.read_fixed64 reader |> f
+let read_fixed32 ~f reader = Reader.read_fixed32 reader |> f
+let read_varint_unboxed ~f reader = Reader.read_varint_unboxed reader |> f
+let read_varint ~f reader = Reader.read_varint reader |> f
+
+let (@@) f g = fun v -> f v |> g
 
 let read_of_spec: type a b. (a, b) spec -> Field.field_type * (Reader.t -> a) = function
-  | Double -> Fixed64, fun reader -> Reader.read_fixed64 reader |> Int64.float_of_bits
-  | Float  -> Fixed32, fun reader -> Reader.read_fixed32 reader |> Int32.float_of_bits
-  | Int32 -> Varint, fun reader -> Reader.read_varint_unboxed reader |> Int32.of_int
+  | Double -> Fixed64, read_fixed64 ~f:Int64.float_of_bits
+  | Float  -> Fixed32, read_fixed32 ~f:Int32.float_of_bits
+  | Int32 -> Varint, read_varint_unboxed ~f:Int32.of_int
   | Int32_int -> Varint, Reader.read_varint_unboxed
   | Int64 -> Varint, Reader.read_varint
   | Int64_int -> Varint, Reader.read_varint_unboxed
-  | UInt32 -> Varint, fun reader -> Reader.read_varint_unboxed reader |> Int32.of_int
+  | UInt32 -> Varint, read_varint_unboxed ~f:Int32.of_int
   | UInt32_int -> Varint, Reader.read_varint_unboxed
   | UInt64 -> Varint, Reader.read_varint
   | UInt64_int -> Varint, Reader.read_varint_unboxed
-  | SInt32 -> Varint, fun reader -> Reader.read_varint_unboxed reader |> decode_zigzag_unboxed |> Int32.of_int
-  | SInt32_int -> Varint, fun reader -> Reader.read_varint_unboxed reader |> decode_zigzag_unboxed
-  | SInt64 -> Varint, fun reader -> Reader.read_varint reader |> decode_zigzag
-  | SInt64_int -> Varint, fun reader -> Reader.read_varint_unboxed reader |> decode_zigzag_unboxed
+  | SInt32 -> Varint, read_varint_unboxed ~f:(decode_zigzag_unboxed @@ Int32.of_int)
+  | SInt32_int -> Varint, read_varint_unboxed ~f:decode_zigzag_unboxed
+  | SInt64 -> Varint, read_varint ~f:decode_zigzag
+  | SInt64_int -> Varint, read_varint_unboxed ~f:decode_zigzag_unboxed
 
   | Fixed32 -> Fixed32, Reader.read_fixed32
-  | Fixed32_int -> Fixed32, fun reader -> Reader.read_fixed32 reader |> int_of_uint32
+  | Fixed32_int -> Fixed32, read_fixed32 ~f:int_of_uint32
   | SFixed32 -> Fixed32, Reader.read_fixed32
-  | SFixed32_int -> Fixed32, fun reader -> Reader.read_fixed32 reader |> Int32.to_int
+  | SFixed32_int -> Fixed32, read_fixed32 ~f:Int32.to_int
 
   | Fixed64 -> Fixed64, Reader.read_fixed64
-  | Fixed64_int -> Fixed64, fun reader -> Reader.read_fixed64 reader |> Int64.to_int
+  | Fixed64_int -> Fixed64, read_fixed64 ~f:Int64.to_int
   | SFixed64 -> Fixed64, Reader.read_fixed64
-  | SFixed64_int -> Fixed64, fun reader -> Reader.read_fixed64 reader |> Int64.to_int
+  | SFixed64_int -> Fixed64, read_fixed64 ~f:Int64.to_int
 
   | Bool -> Varint, fun reader -> Reader.read_varint_unboxed reader != 0
-  | Enum (module Enum) -> Varint, fun reader -> Reader.read_varint_unboxed reader |> Enum.from_int_exn
+  | Enum (module Enum) -> Varint, read_varint_unboxed ~f:Enum.from_int_exn
   | String -> Length_delimited, fun reader ->
     let Field.{ offset; length; data } = Reader.read_length_delimited reader in
     String.sub ~pos:offset ~len:length data
   | Bytes -> Length_delimited, fun reader ->
     let Field.{ offset; length; data } = Reader.read_length_delimited reader in
     let v = Bytes.create length in
-    Bytes.blit_string ~src:data ~src_pos:offset ~dst:v ~dst_pos:0 ~len:length;
+    Bytes.unsafe_blit_string ~src:data ~src_pos:offset ~dst:v ~dst_pos:0 ~len:length;
     v
   | Message (module Message) -> Length_delimited, fun reader ->
     let Field.{ offset; length; data } = Reader.read_length_delimited reader in
