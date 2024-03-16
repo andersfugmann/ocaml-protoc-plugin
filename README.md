@@ -16,6 +16,8 @@ The main features include:
 * Supports proto2 extensions
 * Builtin support for google well known types
 * Configurable annotations for all generated types
+* Json serialization and deserialization based on protobuf
+  specification
 
 ## Comparison with other OCaml protobuf handlers.
 
@@ -39,7 +41,6 @@ fields are not packed by default.
 [^3] `ocaml_protoc` will always transmit all fields that are not
 marked optional, and does not *strictly* comply to the protobuf
 specification.
-
 
 
 ## Types
