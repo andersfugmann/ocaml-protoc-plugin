@@ -257,7 +257,7 @@ let rec emit_message ~params ~syntax ~scope
       Code.emit signature `None "type t = %s%s" type' params.annot;
       Code.emit signature `None "val make: %s" default_constructor_sig;
       Code.emit signature `None "val merge: t -> t -> t";
-      Code.emit signature `None "val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t";
+      Code.emit signature `None "val to_proto': Runtime'.Writer.t -> t -> unit";
       Code.emit signature `None "val to_proto: t -> Runtime'.Writer.t";
       Code.emit signature `None "val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result";
       Code.emit signature `None "val from_proto_exn: Runtime'.Reader.t -> t";
@@ -277,7 +277,7 @@ let rec emit_message ~params ~syntax ~scope
       Code.emit implementation `None "fun writer %s -> serialize writer %s" destructor (String.concat ~sep:" " args);
       Code.emit implementation `End "";
 
-      Code.emit implementation `None "let to_proto t = to_proto' (Runtime'.Writer.init ()) t";
+      Code.emit implementation `None "let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer";
 
       Code.emit implementation `Begin "let from_proto_exn =";
       Code.emit implementation `None "let constructor %s = %s in" (String.concat ~sep:" " args) destructor;
@@ -370,10 +370,9 @@ let parse_proto_file ~params scope
   let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
   let implementation = Code.init () in
   emit_header implementation ~name ~syntax ~deprecated ~params;
-  Code.emit implementation `None "open Ocaml_protoc_plugin.Runtime [@@warning \"-33\"]";
   List.iter ~f:(Code.emit implementation `None "open %s [@@warning \"-33\"]" ) params.opens;
-
   Code.emit implementation `None "(**/**)";
+  Code.emit implementation `None "module Runtime' = Ocaml_protoc_plugin [@@warning \"-33\"]";
   Code.emit implementation `Begin "module %s = struct" Scope.import_module_name;
 
   List.iter ~f:(fun dependency ->

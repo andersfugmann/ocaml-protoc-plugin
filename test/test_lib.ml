@@ -19,7 +19,7 @@ end
 
 module type T = sig
   type t [@@deriving show, eq]
-  val to_proto' : Writer.t -> t -> Writer.t
+  val to_proto' : Writer.t -> t -> unit
   val to_proto : t -> Writer.t
   val from_proto : Reader.t -> t Result.t
   val name : unit -> string
@@ -62,7 +62,7 @@ let test_merge (type t) (module M : T with type t = t) (t: t) =
   let writer = Writer.init () in
   let _ =
     List.fold_left ~init:(writer, t) ~f:(fun (writer, expect) i ->
-      let writer = M.to_proto' writer t in
+      M.to_proto' writer t;
       let contents = Writer.contents writer |> Reader.create in
       let () =
         match M.from_proto contents with
@@ -168,9 +168,9 @@ let test_encode (type t) ?dump ?(debug_json=false) ?proto_file ?protoc_args (mod
     | _ -> ()
   in
   let data = M.to_proto expect |> Writer.contents in
-  let data_speed = M.to_proto' (Writer.init ~mode:Speed ()) expect |> Writer.contents in
-  let data_space = M.to_proto' (Writer.init ~mode:Space ()) expect |> Writer.contents in
-  let data_balanced = M.to_proto' (Writer.init ~mode:Balanced ()) expect |> Writer.contents in
+  let data_speed = let writer = Writer.init ~mode:Speed () in M.to_proto' writer expect; Writer.contents writer in
+  let data_space = let writer = Writer.init ~mode:Space () in M.to_proto' writer expect; Writer.contents writer in
+  let data_balanced = let writer = Writer.init ~mode:Balanced () in M.to_proto' writer expect; Writer.contents writer in
 
   let () =
     match dump with

@@ -246,9 +246,7 @@ let rec json_of_spec: type a b. Json_options.t -> (a, b) spec -> a -> Yojson.Bas
         f v |> map_enum_json
   end
   | Message (module Message) ->
-    (* Break cycle if there are mutually recursive messages *)
-    let to_json = Lazy.from_fun (fun () -> Message.to_json options) in
-    fun json -> (Lazy.force to_json) json
+    fun v -> Message.to_json options v
 
 and write: type a b. Json_options.t -> (a, b) compound -> a -> field list = fun options ->
   function
@@ -336,6 +334,8 @@ let serialize: type a. message_name:string -> Json_options.t -> (a, Yojson.Basic
   in
   inner
 
-let serialize: message_name:string -> ('a, Yojson.Basic.t) compound_list -> Json_options.t -> 'a =
-  fun ~message_name spec options ->
-    serialize ~message_name options spec []
+let serialize: type a. message_name:string -> (a, Yojson.Basic.t) compound_list -> Json_options.t -> a =
+  fun ~message_name spec ->
+  let arr = Array.init (Json_options.max_int + 1) ~f:(fun i -> Lazy.from_fun (fun () -> serialize ~message_name (Json_options.of_int i) spec [])) in
+  fun options ->
+    Lazy.force arr.(Json_options.to_int options)

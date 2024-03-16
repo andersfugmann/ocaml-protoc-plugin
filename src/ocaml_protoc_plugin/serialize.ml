@@ -31,8 +31,7 @@ let zigzag_encoding_unboxed v =
   in
   v
 
-let write_varint ~f v =
-  Writer.write_varint_value (f v)
+let write_varint ~f v = Writer.write_varint_value (f v)
 
 let write_varint_unboxed ~f v =
   Writer.write_varint_unboxed_value (f v)
@@ -41,35 +40,34 @@ let write_length_delimited_string ~f v =
   let v = f v in
   Writer.write_length_delimited_value ~data:v ~offset:0 ~len:(String.length v)
 
-let id x = x
 let (@@) a b = fun v -> b (a v)
 
 let write_value : type a b. (a, b) spec -> a -> Writer.t -> unit = function
   | Double -> write_fixed64 ~f:Int64.bits_of_float
   | Float -> write_fixed32 ~f:Int32.bits_of_float
-  | Fixed64 -> write_fixed64 ~f:id
-  | SFixed64 -> write_fixed64 ~f:id
+  | Fixed64 -> Writer.write_fixed64_value
+  | SFixed64 -> Writer.write_fixed64_value
   | Fixed64_int -> write_fixed64 ~f:Int64.of_int
   | SFixed64_int -> write_fixed64 ~f:Int64.of_int
-  | Fixed32 -> write_fixed32 ~f:id
-  | SFixed32 -> write_fixed32 ~f:id
+  | Fixed32 -> Writer.write_fixed32_value
+  | SFixed32 -> Writer.write_fixed32_value
   | Fixed32_int -> write_fixed32 ~f:Int32.of_int
   | SFixed32_int -> write_fixed32 ~f:Int32.of_int
-  | Int64 -> write_varint ~f:id
-  | UInt64 -> write_varint ~f:id
+  | Int64 -> Writer.write_varint_value
+  | UInt64 -> Writer.write_varint_value
   | SInt64 -> write_varint ~f:zigzag_encoding
   | Int32 -> write_varint_unboxed ~f:Int32.to_int
   | UInt32 -> write_varint_unboxed ~f:Int32.to_int
   | SInt32 -> write_varint_unboxed ~f:(Int32.to_int @@ zigzag_encoding_unboxed)
-  | Int64_int -> write_varint_unboxed ~f:id
-  | UInt64_int -> write_varint_unboxed ~f:id
-  | Int32_int -> write_varint_unboxed ~f:id
-  | UInt32_int -> write_varint_unboxed ~f:id
+  | Int64_int -> Writer.write_varint_unboxed_value
+  | UInt64_int -> Writer.write_varint_unboxed_value
+  | Int32_int -> Writer.write_varint_unboxed_value
+  | UInt32_int -> Writer.write_varint_unboxed_value
   | SInt64_int -> write_varint_unboxed ~f:zigzag_encoding_unboxed
   | SInt32_int -> write_varint_unboxed ~f:zigzag_encoding_unboxed
 
   | Bool -> write_varint_unboxed ~f:(function true -> 1 | false -> 0)
-  | String -> write_length_delimited_string ~f:id
+  | String -> fun v -> Writer.write_length_delimited_value ~data:v ~offset:0 ~len:(String.length v)
   | Bytes -> write_length_delimited_string ~f:Bytes.unsafe_to_string
   | Enum (module Enum) -> write_varint_unboxed ~f:Enum.to_int
   | Message (module Message) ->
@@ -98,7 +96,7 @@ let write_field: type a b. (a, b) spec -> int -> Writer.t -> a -> unit = fun spe
 let rec write: type a b. (a, b) compound -> Writer.t -> a -> unit = function
   | Repeated ((index, _, _), spec, Packed) -> begin
       let write_value = write_value spec in
-      let write_f writer vs = List.iter ~f:(fun v -> write_value v writer) vs; writer in
+      let write_f writer vs = List.iter ~f:(fun v -> write_value v writer) vs in
       let write_header = write_field_header String index in
       fun writer vs ->
         match vs with
@@ -118,7 +116,7 @@ let rec write: type a b. (a, b) compound -> Writer.t -> a -> unit = function
     let write_entry writer (key, value) =
       write_key writer key;
       write_value writer value;
-      writer
+      ()
     in
     let write = Writer.write_length_delimited_f ~write_f:write_entry in
     fun writer vs ->
@@ -162,15 +160,15 @@ let rec write: type a b. (a, b) compound -> Writer.t -> a -> unit = function
 let in_extension_ranges extension_ranges index =
   List.exists ~f:(fun (start, end') -> index >= start && index <= end') extension_ranges
 
-let rec serialize : type a. (a, Writer.t) compound_list -> Writer.t -> a = function
-  | Nil -> fun writer -> writer
+let rec serialize: type a. (a, unit) compound_list -> Writer.t -> a = function
+  | Nil -> fun _writer -> ()
   | Nil_ext extension_ranges ->
     fun writer extensions ->
       List.iter ~f:(function
         | (index, field) when in_extension_ranges extension_ranges index -> Writer.write_field writer index field
         | _ -> ()
       ) extensions;
-      writer
+      ()
   | Cons (compound, rest) ->
     let cont = serialize rest in
     let write = write compound in

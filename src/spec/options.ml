@@ -15,11 +15,12 @@
     int32_as_int=true
     fixed_as_int=false
     singleton_record=false
+    prefix_output_with_package=false
 *)
 [@@@ocaml.alert "-protobuf"] (* Disable deprecation warnings for protobuf*)
 
-open Ocaml_protoc_plugin.Runtime [@@warning "-33"]
 (**/**)
+module Runtime' = Ocaml_protoc_plugin [@@warning "-33"]
 module Imported'modules = struct
   module Descriptor = Descriptor
 end
@@ -29,7 +30,7 @@ module rec Options : sig
   type t = (bool)
   val make: ?mangle_names:bool -> unit -> t
   val merge: t -> t -> t
-  val to_proto': Runtime'.Writer.t -> t -> Runtime'.Writer.t
+  val to_proto': Runtime'.Writer.t -> t -> unit
   val to_proto: t -> Runtime'.Writer.t
   val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
   val from_proto_exn: Runtime'.Reader.t -> t
@@ -40,13 +41,15 @@ end = struct
   let name () = ".Options"
   type t = (bool)
   let make ?(mangle_names = false) () = (mangle_names)
-  let merge = (fun (t1_mangle_names) (t2_mangle_names) -> (Runtime'.Merge.merge Runtime'.Spec.( basic ((1, "mangle_names", "mangleNames"), bool, (false)) ) t1_mangle_names t2_mangle_names))
+  let merge =
+    let merge_mangle_names = Runtime'.Merge.merge Runtime'.Spec.( basic ((1, "mangle_names", "mangleNames"), bool, (false)) ) in
+    fun (t1_mangle_names) (t2_mangle_names) -> merge_mangle_names t1_mangle_names t2_mangle_names
   let spec () = Runtime'.Spec.( basic ((1, "mangle_names", "mangleNames"), bool, (false)) ^:: nil )
   let to_proto' =
     let serialize = Runtime'.Serialize.serialize (spec ()) in
     fun writer (mangle_names) -> serialize writer mangle_names
 
-  let to_proto t = to_proto' (Runtime'.Writer.init ()) t
+  let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
   let from_proto_exn =
     let constructor mangle_names = (mangle_names) in
     Runtime'.Deserialize.deserialize (spec ()) constructor

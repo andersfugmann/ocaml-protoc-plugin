@@ -25,7 +25,7 @@ val write_varint_value: int64 -> t -> unit
 val write_length_delimited_value: data:string -> offset:int -> len:int -> t -> unit
 val write_const_value: string -> t -> unit
 
-val write_length_delimited_f: write_f:(t -> 'a -> t) -> 'a -> t -> unit
+val write_length_delimited_f: write_f:(t -> 'a -> unit) -> 'a -> t -> unit
 val write_field : t -> int -> Field.t -> unit
 
 (** Construct a writer from a field list *)

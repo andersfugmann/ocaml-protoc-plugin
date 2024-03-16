@@ -19,7 +19,8 @@ let make_tests name (type v) (module Protoc: Protoc_impl) (module Plugin: Plugin
 
   (* Verify *)
   let verify_identity ~mode data =
-    let writer = Plugin.M.to_proto' (Ocaml_protoc_plugin.Writer.init ~mode ()) data in
+    let writer = Ocaml_protoc_plugin.Writer.init ~mode () in
+    Plugin.M.to_proto' writer data;
     let data' = Plugin.M.from_proto_exn (Ocaml_protoc_plugin.Reader.create (Ocaml_protoc_plugin.Writer.contents writer)) in
     let () = match (Poly.equal data data') with
       | true -> ()
@@ -32,7 +33,11 @@ let make_tests name (type v) (module Protoc: Protoc_impl) (module Plugin: Plugin
   let size_normal, unused_normal = verify_identity ~mode:Ocaml_protoc_plugin.Writer.Balanced v_plugin in
   let size_speed, unused_speed = verify_identity ~mode:Ocaml_protoc_plugin.Writer.Speed v_plugin in
   let size_space, unused_space = verify_identity ~mode:Ocaml_protoc_plugin.Writer.Space v_plugin in
-  let data_plugin = Plugin.M.to_proto' (Ocaml_protoc_plugin.Writer.init ()) v_plugin |> Ocaml_protoc_plugin.Writer.contents  in
+  let data_plugin =
+    let writer = Ocaml_protoc_plugin.Writer.init () in
+    Plugin.M.to_proto' writer v_plugin;
+    Ocaml_protoc_plugin.Writer.contents writer
+  in
   let v_plugin' = Plugin.M.from_proto_exn (Ocaml_protoc_plugin.Reader.create data_plugin) in
   assert (Poly.equal v_plugin v_plugin');
   let v_protoc = Protoc.decode_pb_m (Pbrt.Decoder.of_string data_plugin) in
@@ -152,61 +157,66 @@ let create_test_data ~depth () =
   in
   create_btree depth ()
 
+let use_perf = false
+let time=3.0
 let benchmark tests =
   let open Bechamel in
-  let instances = [ meassure ] in
-  let cfg = Benchmark.cfg ~compaction:false ~kde:(Some 1) ~quota:(Time.second 5.0) () in
+  let instances = [ if use_perf then Bechamel_perf.Instance.cpu_clock else meassure  ] in
+  let cfg = Benchmark.cfg ~compaction:false ~kde:(Some 1) ~quota:(Time.second time) () in
   Benchmark.all cfg instances tests
 
 let analyze results =
   let open Bechamel in
-  let ols = Analyze.ols ~bootstrap:5 ~r_square:true
-    ~predictors:[| Measure.run |] in
-  let results = Analyze.all ols meassure results in
-  Analyze.merge ols [ meassure ] [ results ]
+  let ransac = Analyze.ransac ~filter_outliers:true ~predictor:Measure.run in
+  let ols = Analyze.ols ~bootstrap:5 ~r_square:true ~predictors:[| Measure.run |] in
+  let results = Analyze.all ransac meassure results in
+  ignore (ransac, ols);
+  Analyze.merge ransac [ meassure ] [ results ]
 
-let print_bench_results results =
-  let open Bechamel in
-  let () = Bechamel_notty.Unit.add
-             meassure
-             (Measure.unit meassure)
-  in
-
-  let img (window, results) =
-    Bechamel_notty.Multiple.image_of_ols_results ~rect:window
-      ~predictor:Measure.run results
-  in
-
-  let open Notty_unix in
-
-  let window =
-    match winsize Unix.stdout with
-    | Some (w, h) -> { Bechamel_notty.w; h }
-    | None -> { Bechamel_notty.w= 80; h= 1; } in
-  img (window, results) |> eol |> output_image
+let print_results: (string, (string, Bechamel.Analyze.RANSAC.t) Stdlib.Hashtbl.t) Stdlib.Hashtbl.t -> unit = fun results ->
+  let module R = Bechamel.Analyze.RANSAC in
+  let open Stdlib in
+  Hashtbl.to_seq results |> List.of_seq |> List.sort (fun a b -> String.compare (fst a) (fst b))
+  |> List.iter (fun (key, data) ->
+    Hashtbl.to_seq data |> List.of_seq |> List.sort (fun a b -> String.compare (fst a) (fst b))
+    |> function
+    | [name, decode_plugin; _, decode_protoc; _, encode_plugin; _, encode_protoc] ->
+      let name = String.split_on_char '/' name |> List.hd in
+      printf "| %s/decode | %5.2f | %5.2f | %2.2f |\n" name (R.mean decode_plugin) (R.mean decode_protoc) ((R.mean decode_plugin)/.(R.mean decode_protoc));
+      printf "| %s/encode | %5.2f | %5.2f | %2.2f |\n" name (R.mean encode_plugin) (R.mean encode_protoc) ((R.mean encode_plugin)/.(R.mean encode_protoc));
+    | data ->
+      List.iter (fun (name, data) ->
+        printf "| %s | %5.2f | | |\n" name (R.mean data)
+      ) data
+  )
 
 let _ =
   let v_plugin = create_test_data ~depth:4 () in
   let v_plugin = Option.value_exn v_plugin in
-  [
-    make_tests "bench" (module Protoc.Bench) (module Plugin.Bench) v_plugin;
-    make_tests "int64" (module Protoc.Int64) (module Plugin.Int64) 27;
-    make_tests "float" (module Protoc.Float) (module Plugin.Float) 27.0001;
-    make_tests "string" (module Protoc.String) (module Plugin.String) "Benchmark";
-    make_tests "enum" (module Protoc.Enum) (module Plugin.Enum) Plugin.Enum.Enum.ED;
-    make_tests "empty" (module Protoc.Empty) (module Plugin.Empty) ();
+  let tests =
+    [
+      make_tests "bench" (module Protoc.Bench) (module Plugin.Bench) v_plugin;
+      make_tests "int64" (module Protoc.Int64) (module Plugin.Int64) 27;
+      make_tests "float" (module Protoc.Float) (module Plugin.Float) 27.0001;
+      make_tests "string" (module Protoc.String) (module Plugin.String) "Benchmark";
+      make_tests "enum" (module Protoc.Enum) (module Plugin.Enum) Plugin.Enum.Enum.ED;
+      make_tests "empty" (module Protoc.Empty) (module Plugin.Empty) ();
 
-    List.init 1000 ~f:(fun i -> i) |> make_tests "int64 list" (module Protoc.Int64_list) (module Plugin.Int64_list);
-    List.init 1000 ~f:(fun i -> Float.of_int i) |> make_tests "float list" (module Protoc.Float_list) (module Plugin.Float_list);
-    List.init 1000 ~f:(fun _ -> random_string ~len:20 ()) |> make_tests "string list" (module Protoc.String_list) (module Plugin.String_list);
-    List.init 1000 ~f:(fun i -> i+1, i * i+1) |> make_tests "map<int64,int64>" (module Protoc.Map) (module Plugin.Map);
+      List.init 1000 ~f:(fun i -> i) |> make_tests "int64 list" (module Protoc.Int64_list) (module Plugin.Int64_list);
+      List.init 1000 ~f:(fun i -> Float.of_int i) |> make_tests "float list" (module Protoc.Float_list) (module Plugin.Float_list);
+      List.init 1000 ~f:(fun _ -> random_string ~len:20 ()) |> make_tests "string list" (module Protoc.String_list) (module Plugin.String_list);
+      (* Proto plugin requires all fields to be present in a map *)
+      List.init 1000 ~f:(fun i -> i+1, i * i+1) |> make_tests "map<int64,int64>" (module Protoc.Map) (module Plugin.Map);
 
-    (* random_list ~len:100 ~f:(fun () -> Plugin.Enum_list.Enum.ED) () |> make_tests (module Protoc.Enum_list) (module Plugin.Enum_list); *)
-       (Bechamel.Test.make_grouped ~name:"Varint" @@ (make_int_tests (0xFFFF_FFFFL)))
-  ]
-  |> List.iter ~f:(fun test ->
+      (* random_list ~len:100 ~f:(fun () -> Plugin.Enum_list.Enum.ED) () |> make_tests (module Protoc.Enum_list) (module Plugin.Enum_list); *)
+      (Bechamel.Test.make_grouped ~name:"Varint" @@ (make_int_tests (0xFFFF_FFFFL)))
+    ]
+  in
+  printf "| Name | plugin | protoc | ratio |\n";
+  printf "|  --  |   --   |   --   |  --   |\n";
+  List.iter ~f:(fun test ->
     test
     |> benchmark
     |> analyze
-    |> print_bench_results
-  )
+    |> print_results
+  ) tests

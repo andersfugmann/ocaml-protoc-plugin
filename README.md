@@ -135,7 +135,7 @@ deserialization.
 Json serialization can be controlled using optional arguments:
 
 ```ocaml
-val to_json: Json_options.t -> (t -> Yojson.Basic.t)
+val to_json: Json_options.t -> t -> Yojson.Basic.t
 ```
 The options argument allows finer grained control over json
 serialization. The followin options are supported:
@@ -147,10 +147,10 @@ serialization. The followin options are supported:
 | `omit_default_values` | By default json will not serialize default values to reduce size. Setting to false will for all values to be emitted to the json file. | true |
 
 Json deserialization will accept json constructed with any combination
-of the values.
+of options.
 
-The json serialization and deserialization also adds support for
-special handling of the following types, and tries to follow the
+The json serialization and deserialization has support for
+special handling of the following types to follow the
 [protobuf
 specification](https://protobuf.dev/programming-guides/proto3/#json)
 as close as possible:
@@ -169,20 +169,7 @@ as close as possible:
 
 
 Json serialization and deserializaiton is not well optimized and
-should not be used in performance critical applications. For improved
-serialization speed, its possible to reuse the function returned after
-supplying json options. To examplify:
-
-```ocaml
-(** Serialize a list of messages into a json list *)
-let to_json: type a. (module Message : Spec.Message with type t = a)
-  -> a list -> Yojson.Basic.t =
-    (* Capture the result of applying the options. This will construct
-        the actual json serialization function with optimization applied *)
-    let to_json = Message.to_json (Json_options.default) in
-    `List (List.map ~f:to_json ts)
-```
-
+should not be used in performance critical applications.
 
 ### Older versions of protoc
 It seems that the `--ocaml_opt` flag may not be supported by older
