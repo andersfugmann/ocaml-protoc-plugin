@@ -89,7 +89,7 @@ let read_of_spec: type a b. (a, b) spec -> Field.field_type * (Reader.t -> a) = 
   | Bytes -> Length_delimited, fun reader ->
     let Field.{ offset; length; data } = Reader.read_length_delimited reader in
     let v = Bytes.create length in
-    Bytes.unsafe_blit_string ~src:data ~src_pos:offset ~dst:v ~dst_pos:0 ~len:length;
+    String.unsafe_blit ~src:data ~src_pos:offset ~dst:v ~dst_pos:0 ~len:length;
     v
   | Message (module Message) -> Length_delimited, fun reader ->
     let Field.{ offset; length; data } = Reader.read_length_delimited reader in
