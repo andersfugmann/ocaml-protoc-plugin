@@ -207,6 +207,7 @@ let _ =
     List.init 1000 ~f:(fun i -> i) |> make_tests "int64 list" (module Protoc.Int64_list) (module Plugin.Int64_list);
     List.init 1000 ~f:(fun i -> Float.of_int i) |> make_tests "float list" (module Protoc.Float_list) (module Plugin.Float_list);
     List.init 1000 ~f:(fun _ -> random_string ~len:20 ()) |> make_tests "string list" (module Protoc.String_list) (module Plugin.String_list);
+    (* Proto plugin requires all fields to be present in a map *)
     List.init 1000 ~f:(fun i -> i+1, i * i+1) |> make_tests "map<int64,int64>" (module Protoc.Map) (module Plugin.Map);
 
     (* random_list ~len:100 ~f:(fun () -> Plugin.Enum_list.Enum.ED) () |> make_tests (module Protoc.Enum_list) (module Plugin.Enum_list); *)
