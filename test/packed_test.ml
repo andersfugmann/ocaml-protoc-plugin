@@ -68,5 +68,11 @@ let%expect_test "Empty lists are not transmitted" =
   |> Printf.eprintf "Size packed %d\n";
   ();
   [%expect {|
+    Generated json not equal
+    Json: { "i": [] }
+    Ref:  {}
+    Generated json not equal
+    Json: { "i": [] }
+    Ref:  {}
     Size packed 0
     Size packed 0 |}]

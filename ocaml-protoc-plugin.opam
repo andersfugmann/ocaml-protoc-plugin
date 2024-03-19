@@ -24,7 +24,6 @@ depends: [
   "bisect_ppx" {with-test}
   "odoc" {with-doc}
   "conf-pkg-config" {build}
-  "ctypes-foreign" {with-test}
   "dune-configurator" {with-test}
   "yojson"
   "base64"

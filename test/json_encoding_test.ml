@@ -45,6 +45,7 @@ let%expect_test _ =
   [%expect {|
     timestamp {
     }
+    Generated json not equal
     Json: { "timestamp": "1970-01-01T00:00:00.000000000Z" }
     Ref:  { "timestamp": "1970-01-01T00:00:00Z" }
     timestamp {
@@ -56,6 +57,7 @@ let%expect_test _ =
     timestamp {
       seconds: 1709985346
     }
+    Generated json not equal
     Json: { "timestamp": "2024-03-09T11:55:46.000000000Z" }
     Ref:  { "timestamp": "2024-03-09T11:55:46Z" }
     timestamp {

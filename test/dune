@@ -24,18 +24,15 @@
 (library
  (name test)
  (enabled_if (and (<> %{architecture} x86_32) (<> %{architecture} arm32)))
- (libraries ocaml_protoc_plugin google_types_pp yojson ctypes-foreign)
- (inline_tests
-  (deps google_include)
-  (executable (link_flags -linkall -cclib -l:libtest_stubs.a -cclib -lprotobuf -cclib "-u protobuf2json")))
+ (libraries ocaml_protoc_plugin google_types_pp yojson)
+ (inline_tests (deps google_include))
  (modules :standard \ proto3_optional_test_opt)
- (preprocess
-  (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
-
+ (preprocess (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
  (foreign_stubs
   (language cxx)
   (names protobuf2json)
   (flags (:include c_flags.sexp) -fPIC))
+ (c_library_flags (-lprotobuf -lstdc++))
 )
 
 (rule

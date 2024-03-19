@@ -1,7 +1,7 @@
-// pkgconf --libs protobuf
-
-// g++ -o bpjson bpjson.cc `pkgconf --libs protobuf
-// ./bpjson <proto_file> <message type> < <binary data>
+/** Stub for reference implementation of
+    json -> protobuf
+    protobuf -> json
+*/
 
 #include <google/protobuf/util/type_resolver_util.h>
 #include <google/protobuf/util/json_util.h>
@@ -14,18 +14,20 @@
 #include <sstream>
 #include <filesystem>
 
-#include <string.h>
+#include <caml/mlvalues.h>
+#include <caml/alloc.h>
+#include <caml/fail.h>
+
 using namespace google::protobuf;
 
-
-util::TypeResolver * make_resolver(const char* include, const char* proto_file) {
+util::TypeResolver* make_resolver(const std::string include, const std::string proto_file) {
     auto source_tree = new compiler::DiskSourceTree();
     source_tree->MapPath("", ".");
     source_tree->MapPath("", include);
     source_tree->MapPath("/", include);
     auto importer = new compiler::Importer(source_tree, NULL);
 
-    if (proto_file[0] == 0) {
+    if (proto_file.size() == 0) {
         for(const auto& p : std::filesystem::directory_iterator(".")) {
             if(p.path().extension() == ".proto") {
                 auto * fd = importer->Import(p.path().filename());
@@ -41,20 +43,12 @@ std::string make_url(const char * type) {
     return std::string("type.googleapis.com/") + std::string(type);
 }
 
-char* status_to_string(const util::Status& status, const std::string& output_str) {
-    if (status.ok()) {
-        return strdup(output_str.c_str());
-    } else {
-        std::string s = status.ToString();
-        return strdup(s.c_str());
-    }
-}
+extern "C" CAMLprim value protobuf2json(value google_include_path, value proto_file, value type, value data) {
+    std::string protobuf_file = Is_some(proto_file) ? String_val(Some_val(proto_file)) : "";
+    std::string url = make_url(String_val(type));
+    auto resolver = make_resolver(String_val(google_include_path), protobuf_file);
 
-extern "C" char* protobuf2json(const char *google_include_path, const char* proto_file, const char* type, const void* in_data, int data_length) {
-    std::string url = make_url(type);
-    auto resolver = make_resolver(google_include_path, proto_file);
-
-    io::ArrayInputStream input(in_data, data_length);
+    io::ArrayInputStream input(String_val(data), caml_string_length(data));
     std::string output_str;
     io::StringOutputStream output(&output_str);
 
@@ -63,23 +57,32 @@ extern "C" char* protobuf2json(const char *google_include_path, const char* prot
     //options.always_print_primitive_fields = true;
     auto status = BinaryToJsonStream(
         resolver, url, &input, &output, options);
-    return status_to_string(status, output_str);
+
+    if (!status.ok()) {
+        std::string msg = status.ToString();
+        caml_invalid_argument(msg.c_str());
+    }
+    return caml_alloc_initialized_string(output_str.size(), output_str.c_str());
 }
 
-extern "C" char* json2protobuf(const char *google_include_path, const char* proto_file, const char* type, const void* in_data, int data_length) {
-    std::string url = make_url(type);
-    auto resolver = make_resolver(google_include_path, proto_file);
+extern "C" CAMLprim value json2protobuf(value google_include_path, value proto_file, value type, value data) {
+    std::string protobuf_file = Is_some(proto_file) ? String_val(Some_val(proto_file)) : "";
+    std::string url = make_url(String_val(type));
+    auto resolver = make_resolver(String_val(google_include_path), protobuf_file);
 
-    io::ArrayInputStream input(in_data, data_length);
+    io::ArrayInputStream input(String_val(data), caml_string_length(data));
     std::string output_str;
     io::StringOutputStream output(&output_str);
 
     util::JsonParseOptions options;
     options.ignore_unknown_fields = true;
-    //options.always_print_primitive_fields = true;
 
     auto status = JsonToBinaryStream(
         resolver, url, &input, &output, options);
-    return status_to_string(status, output_str);
-    // This function should return the length of the buffer also.
+
+    if (!status.ok()) {
+        std::string msg = status.ToString();
+        caml_invalid_argument(msg.c_str());
+    }
+    return caml_alloc_initialized_string(output_str.size(), output_str.c_str());
 }

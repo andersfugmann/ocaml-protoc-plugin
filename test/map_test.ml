@@ -89,6 +89,7 @@ let%expect_test _ =
       value: 3
     }
     Cannot deserialize reference json.
+    Generated json not equal
     Json: {
       "m": { "0": "10", "1": "1", "2": "2", "3": "3" },
       "n": { "0": 0, "1": 1, "2": 2, "3": 3 }
@@ -182,6 +183,7 @@ let%expect_test _ =
       }
     }
     Cannot deserialize reference json.
+    Generated json not equal
     Json: {
       "m": {
         "0": {},

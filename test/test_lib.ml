@@ -3,18 +3,22 @@ open Ocaml_protoc_plugin
 
 
 module Reference = struct
-  open Ctypes
-  open Foreign
   let google_include_path =
     let ch = open_in "google_include" in
     let include_path = input_line ch in
     close_in ch;
     include_path
 
-  (* extern "C" char* protobuf2json(const char *google_include_dir, const char* proto_file, const char* type, const char* in_data)  *)
-  let protobuf2json = foreign "protobuf2json" (string @-> string @-> string @-> string @-> int @-> returning string)
-  let to_json ~proto_file ~message_type data =
-    protobuf2json google_include_path proto_file message_type data (String.length data)
+  external protobuf2json : google_include_path:string -> ?proto_file:string -> message_type:string -> string -> string = "protobuf2json"
+  let to_json ?proto_file ~message_type data =
+    protobuf2json ~google_include_path ?proto_file ~message_type data
+    |> Yojson.Basic.from_string
+
+  external json2protobuf : google_include_path:string -> ?proto_file:string -> message_type:string -> string -> string = "json2protobuf"
+  let from_json ?proto_file ~message_type json =
+    let data = Yojson.Basic.to_string json in
+    json2protobuf ~google_include_path ?proto_file ~message_type data
+
 end
 
 module type T = sig
@@ -22,6 +26,7 @@ module type T = sig
   val to_proto' : Writer.t -> t -> unit
   val to_proto : t -> Writer.t
   val from_proto : Reader.t -> t Result.t
+  val from_proto_exn : Reader.t -> t
   val name : unit -> string
   val merge: t -> t -> t
   val to_json: Json_options.t -> t -> Yojson.Basic.t
@@ -76,31 +81,24 @@ let test_merge (type t) (module M : T with type t = t) (t: t) =
   in
   ()
 
-let test_json ~debug ?proto_file (type t) (module M : T with type t = t) (t: t) =
+let test_json ~debug ?(proto_file="") (type t) (module M : T with type t = t) (t: t) =
+  let message_type =
+    match M.name () |> String.split_on_char ~sep:'.' with
+    | _ :: tl ->
+      let message_type = String.concat ~sep:"." tl in
+      message_type
+    | _ -> failwith "Illegal name"
+  in
   ignore debug;
   let json_ref t =
-    let message_type =
-      (* Nice. We can get the name of the file. in which this is defined.  Wonder if there is a different way of doing that! *)
-      match M.name () |> String.split_on_char ~sep:'.' with
-      | _ :: tl ->
-        let message_type = String.concat ~sep:"." tl in
-        message_type
-      | _ -> failwith "Illegal name"
-    in
     let proto = M.to_proto t |> Writer.contents in
-    let proto_file = match proto_file with
-      | None -> ""
-      | Some proto_file -> proto_file
-    in
-    let json = Reference.to_json ~proto_file ~message_type proto in
     try
-      Yojson.Basic.from_string json
+      Reference.to_json ~proto_file ~message_type proto
     with
     | _ ->
-      Printf.printf "Unable to parse reference json:\n  '%s'\n" json;
+      Printf.printf "Unable to parse reference json";
       failwith "Could not parse reference json"
   in
-
   let test_json ?enum_names ?json_names ?omit_default_values t =
     let compare ~message t json =
       match (M.from_json_exn json = t) with
@@ -123,13 +121,24 @@ let test_json ~debug ?proto_file (type t) (module M : T with type t = t) (t: t) 
     t
   in
   (* Compare reference json *)
-  let () = try
+  let () =
+    try
       let json' = json_ref t in
       let t' = M.from_json_exn json' in
+      let json = M.to_json Json_options.default t in
+      let t'' =
+        Reference.from_json ~proto_file ~message_type json
+        |> Reader.create
+        |> M.from_proto_exn
+      in
       if t <> t' then Printf.printf "Cannot deserialize reference json.\n";
-      if t <> t' || debug then
+      if t <> t'' then Printf.printf "Cannot deserialize generated json.\n";
+      if (not (Yojson.Basic.equal json' json)) then
+        Printf.printf "Generated json not equal\n";
+
+      if (not (Yojson.Basic.equal json' json) || t <> t' || t <> t'' || debug) then
         Printf.printf "Json: %s\nRef:  %s\n"
-          (Yojson.Basic.pretty_to_string (M.to_json (Json_options.default) t))
+          (Yojson.Basic.pretty_to_string json)
           (Yojson.Basic.pretty_to_string json');
     with
     | exn -> Printf.printf "Cannot deserialize reference json\n  Error: %s\n" (Printexc.to_string exn);
