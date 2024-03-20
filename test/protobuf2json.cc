@@ -21,11 +21,17 @@
 #include "caml/memory.h"
 
 // Compatibility with ocaml <= 4.10
+#ifndef Val_none
+#define Val_none Val_int(0)
+#endif
 #ifndef Is_some
 #define Is_some(v) Is_block(v)
 #endif
 #ifndef Is_none
 #define Is_none(v) ((v) == Val_none)
+#endif
+#ifndef Some_val
+#define Some_val(v) Field(v, 0)
 #endif
 
 using namespace google::protobuf;
