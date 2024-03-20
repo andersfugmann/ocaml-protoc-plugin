@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+import "test_include_a/message.proto";
+package test_include_b;
+message M {
+  test_include_a.M m = 1;
+}

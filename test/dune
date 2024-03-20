@@ -88,6 +88,23 @@
        "--plugin=protoc-gen-ocaml=%{plugin}"
        "--ocaml_out=open=Google_types_pp;open=Test_runtime;prefix_output_with_package=true;annot=[@@deriving show { with_path = false }, eq]:." %{proto})))
 
+(rule
+ (targets
+   test_include_a_message.ml
+   test_include_b_message.ml
+ )
+ (deps
+  (:plugin ../src/plugin/protoc_gen_ocaml.exe)
+  (:proto
+    test_include_a/message.proto
+    test_include_b/message.proto
+  )
+ )
+ (action
+  (run protoc -I %{read-lines:google_include} -I .
+       "--plugin=protoc-gen-ocaml=%{plugin}"
+       "--ocaml_out=open=Google_types_pp;open=Test_runtime;prefix_output_with_package=true;annot=[@@deriving show { with_path = false }, eq]:." %{proto})))
+
 
 (rule
  (targets int_types_native.ml int_types_native_proto2.ml)

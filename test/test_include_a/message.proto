@@ -1,0 +1,4 @@
+syntax = "proto3";
+package test_include_a;
+
+message M { }
