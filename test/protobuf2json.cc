@@ -14,9 +14,19 @@
 #include <sstream>
 #include <filesystem>
 
-#include <caml/mlvalues.h>
-#include <caml/alloc.h>
-#include <caml/fail.h>
+#define CAML_NAME_SPACE
+#include "caml/mlvalues.h"
+#include "caml/alloc.h"
+#include "caml/fail.h"
+#include "caml/memory.h"
+
+// Compatibility with ocaml <= 4.10
+#ifndef Is_some
+#define Is_some(v) Is_block(v)
+#endif
+#ifndef Is_none
+#define Is_none(v) ((v) == Val_none)
+#endif
 
 using namespace google::protobuf;
 
@@ -44,6 +54,8 @@ std::string make_url(const char * type) {
 }
 
 extern "C" CAMLprim value protobuf2json(value google_include_path, value proto_file, value type, value data) {
+    CAMLparam4(google_include_path, proto_file, type, data);
+
     std::string protobuf_file = Is_some(proto_file) ? String_val(Some_val(proto_file)) : "";
     std::string url = make_url(String_val(type));
     auto resolver = make_resolver(String_val(google_include_path), protobuf_file);
@@ -62,10 +74,12 @@ extern "C" CAMLprim value protobuf2json(value google_include_path, value proto_f
         std::string msg = status.ToString();
         caml_invalid_argument(msg.c_str());
     }
-    return caml_alloc_initialized_string(output_str.size(), output_str.c_str());
+    CAMLreturn(caml_alloc_initialized_string(output_str.size(), output_str.c_str()));
 }
 
 extern "C" CAMLprim value json2protobuf(value google_include_path, value proto_file, value type, value data) {
+    CAMLparam4(google_include_path, proto_file, type, data);
+
     std::string protobuf_file = Is_some(proto_file) ? String_val(Some_val(proto_file)) : "";
     std::string url = make_url(String_val(type));
     auto resolver = make_resolver(String_val(google_include_path), protobuf_file);
@@ -84,5 +98,5 @@ extern "C" CAMLprim value json2protobuf(value google_include_path, value proto_f
         std::string msg = status.ToString();
         caml_invalid_argument(msg.c_str());
     }
-    return caml_alloc_initialized_string(output_str.size(), output_str.c_str());
+    CAMLreturn(caml_alloc_initialized_string(output_str.size(), output_str.c_str()));
 }
