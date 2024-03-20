@@ -43,4 +43,8 @@ The types generated aims to create ocaml idiomatic types;
 - all integer types are mapped to int by default (exact mapping is also possible)
 - all floating point types are mapped to float.
 - packages are mapped to nested modules
+
+The package aims to be a 100% compliant protobuf implementation.
+It also includes serializing to and from json (Yojson format) based on
+protobuf json specification
 """
