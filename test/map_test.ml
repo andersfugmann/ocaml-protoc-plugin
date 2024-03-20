@@ -4,7 +4,7 @@ let proto_file = "map.proto"
 
 let%expect_test _ =
   let module T = Map.Test in
-  let t = [ 1, "1"; 2, "2"; 3, "3"; 0, "1"; 1, ""; 0, "" ] in
+  let t = [ 1, "1"; 2, "2"; 3, "3"; 0, "1"; 4, "" ] in
   Test_lib.test_encode ~skip_json:true ~proto_file (module T) t;
   [%expect {|
     m {
@@ -12,16 +12,8 @@ let%expect_test _ =
       value: "1"
     }
     m {
-      key: 0
-      value: ""
-    }
-    m {
       key: 1
       value: "1"
-    }
-    m {
-      key: 1
-      value: ""
     }
     m {
       key: 2
@@ -30,6 +22,10 @@ let%expect_test _ =
     m {
       key: 3
       value: "3"
+    }
+    m {
+      key: 4
+      value: ""
     } |}]
 
 let%expect_test _ =
