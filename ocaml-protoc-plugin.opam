@@ -25,7 +25,7 @@ depends: [
   "odoc" {with-doc}
   "conf-pkg-config" {build}
   "dune-configurator" {with-test}
-  "yojson"
+  "yojson" {with-test}
   "base64"
   "ptime"
 ]

@@ -1,4 +1,5 @@
 (**/**)
+
 module Serialize = Serialize
 module Deserialize = Deserialize
 module Serialize_json = Serialize_json
@@ -8,6 +9,7 @@ module Field = Field
 module Merge = Merge
 (**/**)
 
+module Json = Json
 module Reader = Reader
 module Writer = Writer
 module Service = Service

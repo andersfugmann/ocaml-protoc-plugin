@@ -34,9 +34,9 @@ module rec Options : sig
   val to_proto: t -> Runtime'.Writer.t
   val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
   val from_proto_exn: Runtime'.Reader.t -> t
-  val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
-  val from_json_exn: Yojson.Basic.t -> t
-  val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
+  val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+  val from_json_exn: Runtime'.Json.t -> t
+  val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
 end = struct
   let name () = ".Options"
   type t = (bool)

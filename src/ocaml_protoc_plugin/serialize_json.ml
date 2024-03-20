@@ -3,9 +3,9 @@ open Spec
 
 (** Serialize to json as per https://protobuf.dev/programming-guides/proto3/#json-options *)
 let value_error type_name json =
-  Result.raise (`Wrong_field_type (type_name, Yojson.Basic.show json))
+  Result.raise (`Wrong_field_type (type_name, Json.to_string json))
 
-type field = string * Yojson.Basic.t
+type field = string * Json.t
 
 let int32_value v = `Int (Int32.to_int v)
 let int32_int_value v = `Int v
@@ -26,7 +26,7 @@ let key_to_string = function
   | `String s -> s
   | `Bool b -> string_of_bool b
   | `Int v -> string_of_int v
-  | json -> Result.raise (`Wrong_field_type ("map key", (Yojson.Basic.to_string json)))
+  | json -> Result.raise (`Wrong_field_type ("map key", (Json.to_string json)))
 
 let key ~json_names (_, name, json_name) =
   match json_names with
@@ -82,7 +82,7 @@ let duration_to_json json =
 let%expect_test "duration_to_json" =
   let test seconds nanos =
     let json = `Assoc ["seconds", `Int seconds; "nanos", `Int nanos] in
-    Printf.printf "%d.%d -> %s\n" seconds nanos (Yojson.Basic.to_string (duration_to_json json))
+    Printf.printf "%d.%d -> %s\n" seconds nanos (Json.to_string (duration_to_json json))
   in
   test 100 0;
   test (1000) (123456);
@@ -117,7 +117,7 @@ let timestamp_to_json json =
 let%expect_test "timestamp_to_json" =
   let test seconds nanos =
     let json = `Assoc ["seconds", `Int seconds; "nanos", `Int nanos] in
-    Printf.printf "%d.%d -> %s\n" seconds nanos (Yojson.Basic.to_string (timestamp_to_json json))
+    Printf.printf "%d.%d -> %s\n" seconds nanos (Json.to_string (timestamp_to_json json))
   in
   test 1709931283 0;
   test 1709931283 (1_000_000_002/2);
@@ -132,7 +132,7 @@ let%expect_test "timestamp_to_json" =
 
 let wrapper_to_json json = get_key ~f:(fun id -> id) ~default:`Null "value" json
 
-let map_enum_json: (module Enum) -> Yojson.Basic.t -> Yojson.Basic.t = fun (module Enum) ->
+let map_enum_json: (module Enum) -> Json.t -> Json.t = fun (module Enum) ->
   let name =
     Enum.name ()
     |> String.split_on_char ~sep:'.'
@@ -150,7 +150,7 @@ let map_enum_json: (module Enum) -> Yojson.Basic.t -> Yojson.Basic.t = fun (modu
 
 
 (* Convert already emitted json based on json mappings *)
-let map_message_json: name:string -> (Yojson.Basic.t -> Yojson.Basic.t) option = fun ~name ->
+let map_message_json: name:string -> (Json.t -> Json.t) option = fun ~name ->
   match name with
   | ".google.protobuf.Empty"  ->
     Some (fun json -> json)
@@ -204,7 +204,7 @@ let map_message_json: name:string -> (Yojson.Basic.t -> Yojson.Basic.t) option =
     Some map
   | _ -> None
 
-let rec json_of_spec: type a b. Json_options.t -> (a, b) spec -> a -> Yojson.Basic.t =
+let rec json_of_spec: type a b. Json_options.t -> (a, b) spec -> a -> Json.t =
   fun options -> function
   | Double -> float_value
   | Float -> float_value
@@ -315,13 +315,13 @@ and write: type a b. Json_options.t -> (a, b) compound -> a -> field list = fun 
         f v
     end
 
-let serialize: type a. message_name:string -> Json_options.t -> (a, Yojson.Basic.t) compound_list -> field list -> a = fun ~message_name options ->
+let serialize: type a. message_name:string -> Json_options.t -> (a, Json.t) compound_list -> field list -> a = fun ~message_name options ->
   let omit_default_values, map_result = match map_message_json ~name:message_name with
     | Some mapping -> false, fun json -> `Assoc (List.rev json) |> mapping
     | None -> options.omit_default_values, fun json -> `Assoc (List.rev json)
   in
   let options = { options with omit_default_values } in
-  let rec inner: type a. (a, Yojson.Basic.t) compound_list -> field list -> a =
+  let rec inner: type a. (a, Json.t) compound_list -> field list -> a =
     function
     | Nil -> map_result
     | Nil_ext _extension_ranges -> fun json _extensions -> map_result json
@@ -334,7 +334,7 @@ let serialize: type a. message_name:string -> Json_options.t -> (a, Yojson.Basic
   in
   inner
 
-let serialize: type a. message_name:string -> (a, Yojson.Basic.t) compound_list -> Json_options.t -> a =
+let serialize: type a. message_name:string -> (a, Json.t) compound_list -> Json_options.t -> a =
   fun ~message_name spec ->
   let arr = Array.init (Json_options.max_int + 1) ~f:(fun i -> Lazy.from_fun (fun () -> serialize ~message_name (Json_options.of_int i) spec [])) in
   fun options ->
