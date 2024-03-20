@@ -389,7 +389,7 @@ let parse_proto_file ~params scope
   Code.append implementation implementation';
   Code.emit implementation `None "";
 
-  let base_name = Filename.remove_extension name in
+  let base_name = Filename.basename name |> Filename.remove_extension in
   let output_file_name = match params.prefix_output_with_package with
     | false -> sprintf "%s.ml" base_name
     | true ->
@@ -402,4 +402,4 @@ let parse_proto_file ~params scope
       sprintf "%s_%s.ml" prefix base_name
   in
 
-  (output_file_name), implementation
+  output_file_name, implementation
