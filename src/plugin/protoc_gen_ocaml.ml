@@ -31,18 +31,18 @@ let write response =
 let parse_request Plugin.CodeGeneratorRequest.{file_to_generate = files_to_generate; parameter = parameters; proto_file = proto_files; compiler_version = _} =
   let params = Parameters.parse (Option.value ~default:"" parameters) in
   let target_proto_files = List.filter ~f:(fun Descriptor.FileDescriptorProto.{name; _} ->
-      List.mem ~set:files_to_generate (Option.value_exn name)
-    ) proto_files
+    List.mem ~set:files_to_generate (Option.value_exn name)
+  ) proto_files
   in
   let scope = Scope.init ~params proto_files in
   let result =
     List.map ~f:(fun (proto_file : Descriptor.FileDescriptorProto.t) ->
-        let scope = Scope.for_descriptor ~params scope proto_file in
-        Emit.parse_proto_file ~params scope proto_file
-      ) target_proto_files
+      let scope = Scope.for_descriptor ~params scope proto_file in
+      Emit.parse_proto_file ~params scope proto_file
+    ) target_proto_files
     |> List.map ~f:(fun (name, code) ->
-        (Filename.basename name, code)
-      )
+      (name, code)
+    )
   in
   (match params.debug with
    | true -> List.iter ~f:(fun (_, code) -> Printf.eprintf "%s\n%!" (Code.contents code)) result
