@@ -61,7 +61,7 @@ let duration_of_json json =
   (* must end with a 's' *)
 
   try
-    let s = match json with `String s -> s | json -> value_error "duration" json in
+    let s = to_string json in
     assert (String.get s (String.length s - 1) = 's');
     let sign, s = match String.get s 0 = '-' with
       | true -> (-1), String.sub s ~pos:1 ~len:(String.length s - 2)
