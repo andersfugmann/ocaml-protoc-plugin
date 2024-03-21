@@ -24,9 +24,9 @@ module type Message = sig
   val to_proto: t -> Writer.t
   val to_proto': Writer.t -> t -> unit
   val merge: t -> t -> t
-  val to_json: Json_options.t -> t -> Yojson.Basic.t
-  val from_json_exn: Yojson.Basic.t -> t
-  val from_json: Yojson.Basic.t -> t Result.t
+  val to_json: Json_options.t -> t -> Json.t
+  val from_json_exn: Json.t -> t
+  val from_json: Json.t -> t Result.t
 end
 
 module Make(T : T) = struct

@@ -3,7 +3,7 @@
  (public_name ocaml-protoc-plugin)
  (synopsis "Serialization and deserialization of protobuf types")
  (inline_tests)
- (libraries yojson base64 ptime)
+ (libraries base64 ptime)
  (preprocess (pps ppx_expect))
  (instrumentation (backend bisect_ppx))
 )

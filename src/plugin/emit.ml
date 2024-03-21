@@ -261,9 +261,9 @@ let rec emit_message ~params ~syntax ~scope
       Code.emit signature `None "val to_proto: t -> Runtime'.Writer.t";
       Code.emit signature `None "val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result";
       Code.emit signature `None "val from_proto_exn: Runtime'.Reader.t -> t";
-      Code.emit signature `None "val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t";
-      Code.emit signature `None "val from_json_exn: Yojson.Basic.t -> t";
-      Code.emit signature `None "val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result";
+      Code.emit signature `None "val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t";
+      Code.emit signature `None "val from_json_exn: Runtime'.Json.t -> t";
+      Code.emit signature `None "val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result";
 
       Code.emit implementation `None "let name () = \"%s\"" (Scope.get_proto_path scope);
       Code.emit implementation `None "type t = %s%s" type' params.annot;

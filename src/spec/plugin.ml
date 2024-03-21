@@ -37,9 +37,9 @@ module rec Google : sig
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
-        val from_json_exn: Yojson.Basic.t -> t
-        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        val from_json_exn: Runtime'.Json.t -> t
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
       end
       and CodeGeneratorRequest : sig
         val name: unit -> string
@@ -50,9 +50,9 @@ module rec Google : sig
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
-        val from_json_exn: Yojson.Basic.t -> t
-        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        val from_json_exn: Runtime'.Json.t -> t
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
       end
       and CodeGeneratorResponse : sig
         module rec Feature : sig
@@ -73,9 +73,9 @@ module rec Google : sig
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
-          val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
-          val from_json_exn: Yojson.Basic.t -> t
-          val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
+          val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+          val from_json_exn: Runtime'.Json.t -> t
+          val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
         end
         val name: unit -> string
         type t = { error: string option; supported_features: int option; file: File.t list }
@@ -85,9 +85,9 @@ module rec Google : sig
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
-        val from_json_exn: Yojson.Basic.t -> t
-        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        val from_json_exn: Runtime'.Json.t -> t
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
       end
     end
   end
@@ -103,9 +103,9 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
-        val from_json_exn: Yojson.Basic.t -> t
-        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        val from_json_exn: Runtime'.Json.t -> t
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
       end
       and CodeGeneratorRequest : sig
         val name: unit -> string
@@ -116,9 +116,9 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
-        val from_json_exn: Yojson.Basic.t -> t
-        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        val from_json_exn: Runtime'.Json.t -> t
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
       end
       and CodeGeneratorResponse : sig
         module rec Feature : sig
@@ -139,9 +139,9 @@ end = struct
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
-          val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
-          val from_json_exn: Yojson.Basic.t -> t
-          val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
+          val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+          val from_json_exn: Runtime'.Json.t -> t
+          val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
         end
         val name: unit -> string
         type t = { error: string option; supported_features: int option; file: File.t list }
@@ -151,9 +151,9 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
-        val from_json_exn: Yojson.Basic.t -> t
-        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        val from_json_exn: Runtime'.Json.t -> t
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
       end
     end
   end = struct
@@ -167,9 +167,9 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
-        val from_json_exn: Yojson.Basic.t -> t
-        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        val from_json_exn: Runtime'.Json.t -> t
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
       end
       and CodeGeneratorRequest : sig
         val name: unit -> string
@@ -180,9 +180,9 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
-        val from_json_exn: Yojson.Basic.t -> t
-        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        val from_json_exn: Runtime'.Json.t -> t
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
       end
       and CodeGeneratorResponse : sig
         module rec Feature : sig
@@ -203,9 +203,9 @@ end = struct
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
-          val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
-          val from_json_exn: Yojson.Basic.t -> t
-          val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
+          val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+          val from_json_exn: Runtime'.Json.t -> t
+          val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
         end
         val name: unit -> string
         type t = { error: string option; supported_features: int option; file: File.t list }
@@ -215,9 +215,9 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
-        val from_json_exn: Yojson.Basic.t -> t
-        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        val from_json_exn: Runtime'.Json.t -> t
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
       end
     end = struct
       module rec Version : sig
@@ -229,9 +229,9 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
-        val from_json_exn: Yojson.Basic.t -> t
-        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        val from_json_exn: Runtime'.Json.t -> t
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
       end = struct
         let name () = ".google.protobuf.compiler.Version"
         type t = { major: int option; minor: int option; patch: int option; suffix: string option }
@@ -274,9 +274,9 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
-        val from_json_exn: Yojson.Basic.t -> t
-        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        val from_json_exn: Runtime'.Json.t -> t
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
       end = struct
         let name () = ".google.protobuf.compiler.CodeGeneratorRequest"
         type t = { file_to_generate: string list; parameter: string option; compiler_version: Version.t option; proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list }
@@ -329,9 +329,9 @@ end = struct
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
-          val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
-          val from_json_exn: Yojson.Basic.t -> t
-          val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
+          val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+          val from_json_exn: Runtime'.Json.t -> t
+          val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
         end
         val name: unit -> string
         type t = { error: string option; supported_features: int option; file: File.t list }
@@ -341,9 +341,9 @@ end = struct
         val to_proto: t -> Runtime'.Writer.t
         val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
-        val from_json_exn: Yojson.Basic.t -> t
-        val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        val from_json_exn: Runtime'.Json.t -> t
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
       end = struct
         module rec Feature : sig
           type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
@@ -382,9 +382,9 @@ end = struct
           val to_proto: t -> Runtime'.Writer.t
           val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
-          val to_json: Runtime'.Json_options.t -> t -> Yojson.Basic.t
-          val from_json_exn: Yojson.Basic.t -> t
-          val from_json: Yojson.Basic.t -> (t, [> Runtime'.Result.error]) result
+          val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+          val from_json_exn: Runtime'.Json.t -> t
+          val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
         end = struct
           let name () = ".google.protobuf.compiler.CodeGeneratorResponse.File"
           type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }

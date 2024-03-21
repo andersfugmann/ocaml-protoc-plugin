@@ -3,10 +3,10 @@ open! StdLabels
 open Spec
 
 module FieldMap = Map.Make(String)
-type fields = Yojson.Basic.t FieldMap.t
+type fields = Json.t FieldMap.t
 
 let value_error type_name json =
-  Result.raise (`Wrong_field_type (type_name, Yojson.Basic.to_string json))
+  Result.raise (`Wrong_field_type (type_name, Json.to_string json))
 
 let to_int64 = function
   | `String s -> Int64.of_string s
@@ -21,7 +21,7 @@ let to_string = function
   | `String s -> s
   | json -> value_error "string" json
 let to_bytes json = to_string json |> Base64.decode_exn |> Bytes.of_string
-let to_enum: type a. (module Spec.Enum with type t = a) -> Yojson.Basic.t -> a = fun (module Enum) -> function
+let to_enum: type a. (module Spec.Enum with type t = a) -> Json.t -> a = fun (module Enum) -> function
   | `String enum -> Enum.from_string_exn enum
   | `Int enum -> Enum.from_int_exn enum
   | json -> value_error "enum" json
@@ -42,7 +42,7 @@ let to_list = function
   | `List l -> l
   | json -> value_error "list" json
 
-let read_map: type a b. read_key:(string -> a) -> read_value:(Yojson.Basic.t -> b) -> Yojson.Basic.t -> (a * b) list =
+let read_map: type a b. read_key:(string -> a) -> read_value:(Json.t -> b) -> Json.t -> (a * b) list =
   fun ~read_key ~read_value -> function
     | `Assoc entries ->
       List.map ~f:( fun (key, value) ->
@@ -61,7 +61,7 @@ let duration_of_json json =
   (* must end with a 's' *)
 
   try
-    let s = Yojson.Basic.Util.to_string json in
+    let s = to_string json in
     assert (String.get s (String.length s - 1) = 's');
     let sign, s = match String.get s 0 = '-' with
       | true -> (-1), String.sub s ~pos:1 ~len:(String.length s - 2)
@@ -189,7 +189,7 @@ let value_to_json json =
   `Assoc [value]
 
 
-let map_enum_json: (module Enum) -> Yojson.Basic.t -> Yojson.Basic.t = fun (module Enum) ->
+let map_enum_json: (module Enum) -> Json.t -> Json.t = fun (module Enum) ->
   let name =
     Enum.name ()
     |> String.split_on_char ~sep:'.'
@@ -205,7 +205,7 @@ let map_enum_json: (module Enum) -> Yojson.Basic.t -> Yojson.Basic.t = fun (modu
     map
   | _ -> fun json -> json
 
-let map_message_json: name:string -> Yojson.Basic.t -> Yojson.Basic.t = fun ~name ->
+let map_message_json: name:string -> Json.t -> Json.t = fun ~name ->
   match name with
   | ".google.protobuf.Empty" (* Already mapped as it should I think *) ->
     fun json -> json
@@ -272,7 +272,7 @@ let map_message_json: name:string -> Yojson.Basic.t -> Yojson.Basic.t = fun ~nam
     convert
   | _ -> fun json -> json
 
-let read_value: type a b. (a, b) spec -> Yojson.Basic.t -> a = function
+let read_value: type a b. (a, b) spec -> Json.t -> a = function
    | Double -> to_float
    | Float -> to_float
    | Int32 -> to_int32
@@ -402,7 +402,7 @@ let rec deserialize: type constr a. (constr, a) compound_list -> constr -> field
       cont (constr v) fields
 
 
-let deserialize: type constr a. message_name:string -> (constr, a) compound_list -> constr -> Yojson.Basic.t -> a =
+let deserialize: type constr a. message_name:string -> (constr, a) compound_list -> constr -> Json.t -> a =
   fun ~message_name spec constr ->
   let deserialize = deserialize spec constr in
   let map_message = map_message_json ~name:message_name in
