@@ -115,7 +115,7 @@ can generate the Ocaml code by running
 | int64\_as\_int       | Map \*int64 types to int instead of `int64`                     | `int64_as_int=false`         | true    |
 | int32\_as\_int       | Map \*int32 types to int instead of `int32`                     | `int32_as_int=false`         | true    |
 | fixed\_as\_int       | Map \*fixed\* types to `int`                                    | `fixed_as_int=true`          | false   |
-| singleton\_record    | Messages with only one field will be wrapped in a record        | `singleton_records=true`     | false   |
+| singleton\_record    | Messages with only one field will be wrapped in a record        | `singleton_record=true`      | false   |
 | prefix\_output\_with\_package | Emit files prefixed with their package name. This allows multiple protofiles of the same name with different package names to be used | `prefix_output_with_package=true` | false |
 
 Parameters are separated by `;`
