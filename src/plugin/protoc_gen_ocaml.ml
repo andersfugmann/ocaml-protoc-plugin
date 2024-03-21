@@ -51,11 +51,14 @@ let parse_request Plugin.CodeGeneratorRequest.{file_to_generate = files_to_gener
 
 let () =
   let request = read () in
-  let outputs = parse_request request in
-  let response_of_output (name, code) =
-    Plugin.CodeGeneratorResponse.File.make ~name ~content:(Code.contents code) ()
-  in
-  let response : Plugin.CodeGeneratorResponse.t =
-    Plugin.CodeGeneratorResponse.make ~supported_features:1 ~file:(List.map ~f:response_of_output outputs) ()
-  in
-  write response
+  try
+    let outputs = parse_request request in
+    let response_of_output (name, code) =
+      Plugin.CodeGeneratorResponse.File.make ~name ~content:(Code.contents code) ()
+    in
+    let response : Plugin.CodeGeneratorResponse.t =
+      Plugin.CodeGeneratorResponse.make ~supported_features:1 ~file:(List.map ~f:response_of_output outputs) ()
+    in
+    write response
+  with
+  | Failure message -> (Printf.eprintf "%s\n" message; exit 1)
