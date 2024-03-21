@@ -634,10 +634,10 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
     |> List.rev
   in
 
-  let t_as_tuple = List.length field_info < 2 &&
+  let t_as_tuple = List.length field_info = 0 || (List.length field_info < 2 &&
                    not has_extensions &&
                    params.singleton_record = false &&
-                   not is_cyclic
+                   not is_cyclic)
   in
   let has_deprecated_fields = List.exists ~f:(fun ({ type' = { deprecated; _ }; _ }: c) -> deprecated) ts in
 
