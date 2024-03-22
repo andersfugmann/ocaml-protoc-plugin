@@ -48,7 +48,6 @@ open Spec.Descriptor.Google.Protobuf
 type element = { module_name: string; (** The name of the module that holds the implementation (i.e. Ocaml module name of the generated ocaml file) *)
                  ocaml_name: string; (** Ocaml name of this type inside the module *)
                  cyclic: bool; (** True if the element contains cyclic references, in which case the type cannot be represented as a tuple *)
-                 file_name: string;
                }
 
 let import_module_name = "Imported'modules"
@@ -242,24 +241,16 @@ module Type_tree = struct
       )
 
   (** Create a type db: map proto-type -> { module_name, ocaml_name, is_cyclic } *)
-  let create_file_db ~prefix_module_names ~mangle cyclic_map { file_name; types; package } =
+  let create_file_db ~module_name ~mangle cyclic_map types =
     let mangle_f = match mangle with
       | true -> Names.to_snake_case
       | false -> fun x -> x
     in
-    let module_name =
-      let package = match prefix_module_names with
-        | false -> None
-        | true -> package
-      in
-      module_name_of_proto ?package file_name
-    in
-
     let add_names ~path ~ocaml_name map names =
       StringMap.fold ~init:map ~f:(fun ~key ~data map ->
           StringMap.add_uniq
             ~key:(path ^ "." ^ key)
-            ~data:{ module_name; ocaml_name = ocaml_name ^ "." ^ data; cyclic = false; file_name }
+            ~data:{ module_name; ocaml_name = ocaml_name ^ "." ^ data; cyclic = false }
             map
         ) names
     in
@@ -305,7 +296,7 @@ module Type_tree = struct
           |> add_names ~path ~ocaml_name map
         in
 
-        let map = StringMap.add_uniq ~key:path ~data:{ module_name; ocaml_name; cyclic; file_name } map in
+        let map = StringMap.add_uniq ~key:path ~data:{ module_name; ocaml_name; cyclic } map in
         traverse_types map path types
       in
       let name_map =
@@ -317,23 +308,35 @@ module Type_tree = struct
       List.fold_left ~init:map ~f:(fun map type_ -> map_type ~map ~name_map path type_) types
     in
 
-    let map = StringMap.singleton "" { ocaml_name = ""; module_name; cyclic = false; file_name } in
+    let map = StringMap.singleton "" { ocaml_name = ""; module_name; cyclic = false } in
     traverse_types map "" types
 
   let create_db ~prefix_module_names (files : FileDescriptorProto.t list) =
     let inner proto_file =
       let map = map_file proto_file in
+      let module_name =
+        let package = match prefix_module_names with
+          | false -> None
+          | true -> map.package
+        in
+        module_name_of_proto ?package map.file_name
+      in
       let cyclic_map = create_cyclic_map map in
-      let file_db = create_file_db ~prefix_module_names ~mangle:(has_mangle_option proto_file.options) cyclic_map map in
-      file_db
+      let file_db = create_file_db ~module_name ~mangle:(has_mangle_option proto_file.options) cyclic_map map.types in
+      (map.file_name, module_name), file_db
     in
-    List.map ~f:inner files
-    |> List.fold_left ~init:StringMap.empty ~f:(
-      StringMap.merge ~f:(fun _ a -> function
+
+    let names, maps = List.map ~f:inner files |> List.split in
+    let name_map = List.to_seq names |> StringMap.of_seq in
+    let file_map =
+      List.fold_left ~init:StringMap.empty ~f:(
+        StringMap.merge ~f:(fun _ a -> function
           | None -> a
           | b -> b
         )
-    )
+      ) maps
+    in
+    name_map, file_map
 end
 
 type t = { module_name: string;
@@ -341,6 +344,7 @@ type t = { module_name: string;
            proto_path: string list;
            type_db: element StringMap.t;
            ocaml_names: StringSet.t;
+           file_names: string StringMap.t; (** proto file -> ocaml module name *)
          }
 
 let dump_type_map type_map =
@@ -351,7 +355,7 @@ let dump_type_map type_map =
   Printf.eprintf "Type map end.\n%!"
 
 let init ~params files =
-  let type_db = Type_tree.create_db ~prefix_module_names:params.Parameters.prefix_output_with_package files in
+  let file_names, type_db = Type_tree.create_db ~prefix_module_names:params.Parameters.prefix_output_with_package files in
   let ocaml_names =
     StringMap.fold ~init:StringSet.empty
       ~f:(fun ~key:_ ~data:{ocaml_name; _} acc ->
@@ -362,8 +366,7 @@ let init ~params files =
   if dump_ocaml_names then
     StringSet.iter ~f:(Printf.eprintf "%s\n") ocaml_names;
 
-
-  { module_name = ""; proto_path = []; package_depth = 0; type_db; ocaml_names}
+  { module_name = ""; proto_path = []; package_depth = 0; type_db; ocaml_names; file_names }
 
 let for_descriptor ~params t FileDescriptorProto.{ name; package; _ } =
   let name = Option.value_exn ~message:"All file descriptors must have a name" name in
@@ -480,15 +483,8 @@ let get_package_name t =
   | _ -> None
 
 let get_module_name ~filename t =
-  let rec find_module_name filename xs =
-    match xs () with
-    | Seq.Nil -> failwith "Could not find name"
-    | Cons ((_, { file_name; module_name; _ }), _) when file_name = filename -> module_name
-    | Cons (_, xs) -> find_module_name filename xs
-  in
-
-  StringMap.to_seq t.type_db
-  |> find_module_name filename
+  StringMap.find_opt filename t.file_names
+  |> Option.value_exn ~message:(Printf.sprintf "Could not find proto file '%s'" filename)
 
 let is_cyclic t =
   let { cyclic; _ } = StringMap.find (get_proto_path t) t.type_db in
