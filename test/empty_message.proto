@@ -1,3 +1,17 @@
 syntax = "proto3";
 
 message Empty { }
+
+service MyService {
+  rpc CreateEntity (CreateEntityRequest) returns (CreateEntityResponse) {};
+}
+
+message CreateEntityRequest {
+  CreateEntity entity = 1;
+
+  message CreateEntity {
+    string name = 1;
+  }
+}
+
+message CreateEntityResponse { }

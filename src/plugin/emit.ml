@@ -96,9 +96,19 @@ let emit_service_type ~options scope ServiceDescriptorProto.{ name; method' = me
         | Some p -> p ^ "."
     in
     let input = Scope.get_scoped_name scope input_type in
-    let input_t = Scope.get_scoped_name scope ~postfix:"t" input_type in
     let output = Scope.get_scoped_name scope output_type in
-    let output_t = Scope.get_scoped_name scope ~postfix:"t" output_type in
+    let sig_t' =
+      sprintf "(module Runtime'.Spec.Message with type t = %s.t) * (module Runtime'.Spec.Message with type t = %s.t)" input output
+    in
+
+
+    Code.emit signature `Begin "module %s : sig" capitalized_name;
+    Code.emit signature `None "include Runtime'.Service.Rpc with type Request.t = %s.t and type Response.t = %s.t" input output;
+    Code.emit signature `None "module Request : Runtime'.Spec.Message with type t = %s.t and type make_t = %s.make_t" input input;
+    Code.emit signature `None "module Response : Runtime'.Spec.Message with type t = %s.t and type make_t = %s.make_t" output output;
+    Code.emit signature `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
+    Code.emit signature `None "val %s : %s" uncapitalized_name sig_t';
+
     Code.emit implementation `Begin "module %s = struct" capitalized_name;
     Code.emit implementation `None "let package_name = %s" (Option.value_map ~default:"None" ~f:(fun n -> sprintf "Some \"%s\"" n) package_name_opt);
     Code.emit implementation `None "let service_name = \"%s\"" service_name;
@@ -107,25 +117,10 @@ let emit_service_type ~options scope ServiceDescriptorProto.{ name; method' = me
     Code.emit implementation `None "module Request = %s" input;
     Code.emit implementation `None "module Response = %s" output;
     Code.emit implementation `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
-    let sig_t' =
-      sprintf "(module Runtime'.Service.Message with type t = %s) * (module Runtime'.Service.Message with type t = %s)" input_t output_t
-    in
     Code.emit implementation `Begin "let %s : %s = " uncapitalized_name sig_t';
-    Code.emit implementation `None "(module %s : Runtime'.Service.Message with type t = %s ), "
-      input
-      input_t;
-    Code.emit implementation `None "(module %s : Runtime'.Service.Message with type t = %s )"
-      output
-      output_t;
+    Code.emit implementation `None "(module %s : Runtime'.Spec.Message with type t = %s.t ), " input input;
+    Code.emit implementation `None "(module %s : Runtime'.Spec.Message with type t = %s.t )" output output;
     Code.emit implementation `End "";
-
-    Code.emit signature `Begin "module %s : sig" capitalized_name;
-    Code.emit signature `None "include Runtime'.Service.Rpc with type Request.t = %s and type Response.t = %s" input_t output_t;
-    Code.emit signature `None "module Request : module type of %s with type t = %s" input input_t;
-    Code.emit signature `None "module Response : module type of %s with type t = %s" output output_t;
-    Code.emit signature `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
-    Code.emit signature `None "val %s : %s" uncapitalized_name sig_t';
-    ()
   in
   let name = Option.value_exn ~message:"Service definitions must have a name" name in
   let deprecated = match service_options with Some { deprecated; _ } -> deprecated | None -> false in
@@ -255,7 +250,8 @@ let rec emit_message ~params ~syntax ~scope
       in
       Code.emit signature `None "val name: unit -> string";
       Code.emit signature `None "type t = %s%s" type' params.annot;
-      Code.emit signature `None "val make: %s" default_constructor_sig;
+      Code.emit signature `None "type make_t = %s" default_constructor_sig;
+      Code.emit signature `None "val make: make_t";
       Code.emit signature `None "val merge: t -> t -> t";
       Code.emit signature `None "val to_proto': Runtime'.Writer.t -> t -> unit";
       Code.emit signature `None "val to_proto: t -> Runtime'.Writer.t";
@@ -268,6 +264,7 @@ let rec emit_message ~params ~syntax ~scope
       Code.emit implementation `None "let name () = \"%s\"" (Scope.get_proto_path scope);
       Code.emit implementation `None "type t = %s%s" type' params.annot;
 
+      Code.emit implementation `None "type make_t = %s" default_constructor_sig;
       Code.emit implementation `None "let make %s" default_constructor_impl;
       Code.emit implementation `None "let merge = \n%s" merge_impl;
       Code.emit implementation `None "let spec () = %s" spec_str;
