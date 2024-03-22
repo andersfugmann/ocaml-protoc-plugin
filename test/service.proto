@@ -13,3 +13,21 @@ message Response {
 service String_of_int {
   rpc Call (Request) returns (Response);
 }
+
+service EntityService {
+  rpc CreateEntity (CreateEntityRequest) returns (CreateEntityResponse) {}
+}
+
+message CreateEntityRequest {
+  CreateEntity entity = 1;
+  int64 i = 2;
+
+  message CreateEntity {
+    string name = 1;
+  }
+}
+
+message CreateEntityResponse {
+  string name = 1;
+  int64 i = 2;
+}
