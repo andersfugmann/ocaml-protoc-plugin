@@ -1,20 +1,38 @@
-##6.0.0: Unreleased
-- [x] Unify serialization and deserialization spec and optimize oneof
-      handling
-- [x] Simplify types used in code generation to improve readaility
+## 6.0.0: Unreleased
+
+### New features
 - [x] Implement json serialization and deserialization (#5)
 - [x] Support special json mapping for google types (#9)
 - [x] Add deprecation annotations for deprecated fields, services etc (#8)
-- [x] *Replace "val name': unit -> string" with "val name: unit ->
-string" which will only return the full protobuf name
 - [x] Add option to prefix generated files with their package name
+
+### Bug fixes
+- [x] Fix file output name if files contains a '-'
+- [x] Resolve bug for Request/Response module aliases leading to
+generating uncompilable code. (#21)
+- [x] Fix codegen bug for messages with out fields and setting
+singleton_records = true (#20)
+
+### Misc changes
+- [x] Unify serialization and deserialization spec and optimize oneof
+      handling
+- [x] Simplify types used in code generation to improve readaility
+- [x] *Replace `val name': unit -> string` with `val name: unit ->
+string` which will only return the full protobuf name
 - [x] Optimize merge functions by applying eager evaluation
 - [x] Change signature of `to_proto'` to return unit and not a writer
-- [ ] Fix file output name if files contains a '-'
-- [ ] Resolve broken code for Request/Response module aliases when
-      message fields references nested message types.
 
-(Items with '*' is a breaking change)
+(`*` indicates breaking change)
+
+### Notes
+  `Message.name: unit -> string` has been renamed to `Message.name:
+  unit -> string`, and is now contains the fully qualified protobuf
+  message name. Before the name was the ocaml module name of the
+  message.
+
+  `Service.Message` signature has been deprecated and replaced with
+  `Spec.Message` signature. `Service.Message` is now an alias for
+  `Spec.Message` and will be removed in future releases.
 
 ## 5.0.0: 2024-02-24
 - [x] Fix service signature to be backward compatible
