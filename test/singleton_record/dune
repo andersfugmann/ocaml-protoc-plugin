@@ -1,17 +1,7 @@
-
-;; Determine if the compiler supports the --experimental_allow_proto3_optional flag.
-;; The output file will be non-empty if the flag is supported
-(subdir config
- (rule
- (target support_proto3_optional.conf)
- (action (with-accepted-exit-codes (or 0 1) (ignore-stderr (with-stdout-to %{target} (run protoc --experimental_allow_proto3_optional --version)))))))
-
-;; TODO. The name included3-dash.proto does not work
-
 (library
  (name singleton_record)
  (inline_tests)
- (libraries ocaml_protoc_plugin google_types)
+ (libraries ocaml_protoc_plugin google_types_singleton_record)
  (preprocess (pps ppx_expect))
 )
 
@@ -94,4 +84,4 @@
  (action
   (run protoc -I %{read-lines:../google_include} -I ..
        "--plugin=protoc-gen-ocaml=%{plugin}"
-       "--ocaml_out=open=Google_types;singleton_record=true;:." %{proto})))
+       "--ocaml_out=open=Google_types_singleton_record;singleton_record=true;:." %{proto})))

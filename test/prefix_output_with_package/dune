@@ -1,0 +1,87 @@
+(library
+ (name prefix_output_with_package)
+ (inline_tests)
+ (libraries ocaml_protoc_plugin google_types_prefixed)
+ (preprocess (pps ppx_expect))
+)
+
+(rule
+ (targets
+   deprecated.ml
+   empty_message.ml
+   empty.ml
+   enum_test_enum.ml
+   extensions_extensions.ml
+   importModuleName_subPackageName_name_clash2.ml
+   included2_included2.ml
+   include_included3_dash.ml
+   include_included.ml
+   include_include.ml
+   int_types_int_types.ml
+   int_types_native_int_types_native.ml
+   int_types_native_proto2_int_types_native_proto2.ml
+   json_test_json_encoding.ml
+   large.ml
+   mangle_names.ml
+   map_map.ml
+   merge_merge.ml
+   message_message.ml
+   nameClashMangle_name_clash_mangle.ml
+   name_clash_name_clash.ml
+   oneof_oneof.ml
+   options.ml
+   package_a_b_package.ml
+   packed_packed.ml
+   primitive_types_primitive_types.ml
+   proto2_proto2.ml
+   protocol_protocol.ml
+   protoc_plugin_test_basic.ml
+   recursive_recursive.ml
+   repeated_repeated.ml
+   service_empty_package.ml
+   service_p1_p2_p3_service.ml
+   serviceRpcClash_service_rpc_clash.ml
+   singleton_record_singleton_record.ml)
+ (deps
+  (:plugin ../../src/plugin/protoc_gen_ocaml.exe)
+  (:proto
+    ../basic.proto
+    ../deprecated.proto
+    ../empty_message.proto
+    ../empty.proto
+    ../enum.proto
+    ../extensions.proto
+    ../included2.proto
+    ../included.proto
+    ../included3-dash.proto
+    ../include.proto
+    ../int_types_native.proto
+    ../int_types_native_proto2.proto
+    ../int_types.proto
+    ../json_encoding.proto
+    ../large.proto
+    ../mangle_names.proto
+    ../map.proto
+    ../merge.proto
+    ../message.proto
+    ../name_clash2.proto
+    ../name_clash_mangle.proto
+    ../name_clash.proto
+    ../oneof.proto
+    ../options.proto
+    ../package.proto
+    ../packed.proto
+    ../primitive_types.proto
+    ../proto2.proto
+    ../protocol.proto
+    ../recursive.proto
+    ../repeated.proto
+    ../service_empty_package.proto
+    ../service.proto
+    ../service_rpc_clash.proto
+    ../singleton_record.proto)
+ )
+ (action
+  (run protoc -I %{read-lines:../google_include} -I ..
+       "--plugin=protoc-gen-ocaml=%{plugin}"
+       "--ocaml_out=open=Google_types_prefixed;prefix_output_with_package=true;:." %{proto})))
