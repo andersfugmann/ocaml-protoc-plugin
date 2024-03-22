@@ -8,8 +8,11 @@
 - [x] *Replace "val name': unit -> string" with "val name: unit ->
 string" which will only return the full protobuf name
 - [x] Add option to prefix generated files with their package name
-- [ ] Optimize merge functions by applying eager evaluation
-- [ ] Change signature of `to_proto'` to return unit and not a writer
+- [x] Optimize merge functions by applying eager evaluation
+- [x] Change signature of `to_proto'` to return unit and not a writer
+- [ ] Fix file output name if files contains a '-'
+- [ ] Resolve broken code for Request/Response module aliases when
+      message fields references nested message types.
 
 (Items with '*' is a breaking change)
 
