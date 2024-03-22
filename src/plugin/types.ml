@@ -634,13 +634,20 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
     |> List.rev
   in
 
-  let t_as_tuple = List.length field_info = 0 || (List.length field_info < 2 &&
-                   not has_extensions &&
-                   params.singleton_record = false &&
-                   not is_cyclic)
+  let t_as_tuple =
+    (* Must be a record if:
+       - there are more than one field
+       - the type is cyclic
+       - singleton_record option is not set
+       - the message does not define extensions
+    *)
+    let must_be_record =
+      List.length field_info > 1 || is_cyclic || params.singleton_record || has_extensions
+    in
+    (* Must be a tuple if there are no fields *)
+    List.length field_info = 0 || not must_be_record
   in
   let has_deprecated_fields = List.exists ~f:(fun ({ type' = { deprecated; _ }; _ }: c) -> deprecated) ts in
-
 
   let constructor_sig_arg = function
     | { name; type' = { name = type_name; modifier = Required; deprecated = _ }; _ } ->

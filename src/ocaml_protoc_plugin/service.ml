@@ -1,12 +1,8 @@
-module type Message = sig
-  type t
-  val from_proto: Reader.t -> t Result.t
-  val to_proto: t -> Writer.t
-end
+module type Message = Spec.Message [@@deprecated "Use Spec.Message"]
 
 module type Rpc = sig
-  module Request : Message
-  module Response : Message
+  module Request : Spec.Message
+  module Response : Spec.Message
 
   (** gRPC service name as defined by the gRPC http2 spec.
       see https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md#appendix-a---grpc-for-protobuf
@@ -24,11 +20,11 @@ module type Rpc = sig
 end
 
 let make_client_functions (type req) (type rep)
-    ((module Request : Message with type t = req),
-     (module Response : Message with type t = rep)) =
+    ((module Request : Spec.Message with type t = req),
+     (module Response : Spec.Message with type t = rep)) =
   Request.to_proto, Response.from_proto
 
 let make_service_functions (type req) (type rep)
-    ((module Request : Message with type t = req),
-    (module Response : Message with type t = rep)) =
+    ((module Request : Spec.Message with type t = req),
+    (module Response : Spec.Message with type t = rep)) =
   Request.from_proto, Response.to_proto

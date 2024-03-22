@@ -31,7 +31,8 @@ module rec Google : sig
       module rec Version : sig
         val name: unit -> string
         type t = { major: int option; minor: int option; patch: int option; suffix: string option }
-        val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
+        type make_t = ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
+        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
@@ -44,7 +45,8 @@ module rec Google : sig
       and CodeGeneratorRequest : sig
         val name: unit -> string
         type t = { file_to_generate: string list; parameter: string option; compiler_version: Version.t option; proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list }
-        val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
+        type make_t = ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
+        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
@@ -67,7 +69,8 @@ module rec Google : sig
         and File : sig
           val name: unit -> string
           type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }
-          val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
+          type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
+          val make: make_t
           val merge: t -> t -> t
           val to_proto': Runtime'.Writer.t -> t -> unit
           val to_proto: t -> Runtime'.Writer.t
@@ -79,7 +82,8 @@ module rec Google : sig
         end
         val name: unit -> string
         type t = { error: string option; supported_features: int option; file: File.t list }
-        val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
+        type make_t = ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
+        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
@@ -97,7 +101,8 @@ end = struct
       module rec Version : sig
         val name: unit -> string
         type t = { major: int option; minor: int option; patch: int option; suffix: string option }
-        val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
+        type make_t = ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
+        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
@@ -110,7 +115,8 @@ end = struct
       and CodeGeneratorRequest : sig
         val name: unit -> string
         type t = { file_to_generate: string list; parameter: string option; compiler_version: Version.t option; proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list }
-        val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
+        type make_t = ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
+        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
@@ -133,7 +139,8 @@ end = struct
         and File : sig
           val name: unit -> string
           type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }
-          val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
+          type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
+          val make: make_t
           val merge: t -> t -> t
           val to_proto': Runtime'.Writer.t -> t -> unit
           val to_proto: t -> Runtime'.Writer.t
@@ -145,7 +152,8 @@ end = struct
         end
         val name: unit -> string
         type t = { error: string option; supported_features: int option; file: File.t list }
-        val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
+        type make_t = ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
+        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
@@ -161,7 +169,8 @@ end = struct
       module rec Version : sig
         val name: unit -> string
         type t = { major: int option; minor: int option; patch: int option; suffix: string option }
-        val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
+        type make_t = ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
+        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
@@ -174,7 +183,8 @@ end = struct
       and CodeGeneratorRequest : sig
         val name: unit -> string
         type t = { file_to_generate: string list; parameter: string option; compiler_version: Version.t option; proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list }
-        val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
+        type make_t = ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
+        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
@@ -197,7 +207,8 @@ end = struct
         and File : sig
           val name: unit -> string
           type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }
-          val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
+          type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
+          val make: make_t
           val merge: t -> t -> t
           val to_proto': Runtime'.Writer.t -> t -> unit
           val to_proto: t -> Runtime'.Writer.t
@@ -209,7 +220,8 @@ end = struct
         end
         val name: unit -> string
         type t = { error: string option; supported_features: int option; file: File.t list }
-        val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
+        type make_t = ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
+        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
@@ -223,7 +235,8 @@ end = struct
       module rec Version : sig
         val name: unit -> string
         type t = { major: int option; minor: int option; patch: int option; suffix: string option }
-        val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
+        type make_t = ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
+        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
@@ -235,6 +248,7 @@ end = struct
       end = struct
         let name () = ".google.protobuf.compiler.Version"
         type t = { major: int option; minor: int option; patch: int option; suffix: string option }
+        type make_t = ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
         let make ?major ?minor ?patch ?suffix () = { major; minor; patch; suffix }
         let merge =
           let merge_major = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "major", "major"), int32_int) ) in
@@ -268,7 +282,8 @@ end = struct
       and CodeGeneratorRequest : sig
         val name: unit -> string
         type t = { file_to_generate: string list; parameter: string option; compiler_version: Version.t option; proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list }
-        val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
+        type make_t = ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
+        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
@@ -280,6 +295,7 @@ end = struct
       end = struct
         let name () = ".google.protobuf.compiler.CodeGeneratorRequest"
         type t = { file_to_generate: string list; parameter: string option; compiler_version: Version.t option; proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list }
+        type make_t = ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         let make ?(file_to_generate = []) ?parameter ?compiler_version ?(proto_file = []) () = { file_to_generate; parameter; compiler_version; proto_file }
         let merge =
           let merge_file_to_generate = Runtime'.Merge.merge Runtime'.Spec.( repeated ((1, "file_to_generate", "fileToGenerate"), string, not_packed) ) in
@@ -323,7 +339,8 @@ end = struct
         and File : sig
           val name: unit -> string
           type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }
-          val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
+          type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
+          val make: make_t
           val merge: t -> t -> t
           val to_proto': Runtime'.Writer.t -> t -> unit
           val to_proto: t -> Runtime'.Writer.t
@@ -335,7 +352,8 @@ end = struct
         end
         val name: unit -> string
         type t = { error: string option; supported_features: int option; file: File.t list }
-        val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
+        type make_t = ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
+        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val to_proto: t -> Runtime'.Writer.t
@@ -376,7 +394,8 @@ end = struct
         and File : sig
           val name: unit -> string
           type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }
-          val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
+          type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
+          val make: make_t
           val merge: t -> t -> t
           val to_proto': Runtime'.Writer.t -> t -> unit
           val to_proto: t -> Runtime'.Writer.t
@@ -388,6 +407,7 @@ end = struct
         end = struct
           let name () = ".google.protobuf.compiler.CodeGeneratorResponse.File"
           type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }
+          type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           let make ?name ?insertion_point ?content ?generated_code_info () = { name; insertion_point; content; generated_code_info }
           let merge =
             let merge_name = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ) in
@@ -420,6 +440,7 @@ end = struct
         end
         let name () = ".google.protobuf.compiler.CodeGeneratorResponse"
         type t = { error: string option; supported_features: int option; file: File.t list }
+        type make_t = ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
         let make ?error ?supported_features ?(file = []) () = { error; supported_features; file }
         let merge =
           let merge_error = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "error", "error"), string) ) in

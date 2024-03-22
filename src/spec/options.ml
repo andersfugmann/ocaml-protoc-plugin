@@ -28,7 +28,8 @@ end
 module rec Options : sig
   val name: unit -> string
   type t = (bool)
-  val make: ?mangle_names:bool -> unit -> t
+  type make_t = ?mangle_names:bool -> unit -> t
+  val make: make_t
   val merge: t -> t -> t
   val to_proto': Runtime'.Writer.t -> t -> unit
   val to_proto: t -> Runtime'.Writer.t
@@ -40,6 +41,7 @@ module rec Options : sig
 end = struct
   let name () = ".Options"
   type t = (bool)
+  type make_t = ?mangle_names:bool -> unit -> t
   let make ?(mangle_names = false) () = (mangle_names)
   let merge =
     let merge_mangle_names = Runtime'.Merge.merge Runtime'.Spec.( basic ((1, "mangle_names", "mangleNames"), bool, (false)) ) in
