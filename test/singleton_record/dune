@@ -45,7 +45,6 @@
     packed.ml
     primitive_types.ml
     proto2.ml
-    proto3_optional.ml
     protocol.ml
     recursive.ml
     repeated.ml
@@ -84,7 +83,6 @@
     ../packed.proto
     ../primitive_types.proto
     ../proto2.proto
-    ../proto3_optional.proto
     ../protocol.proto
     ../recursive.proto
     ../repeated.proto
