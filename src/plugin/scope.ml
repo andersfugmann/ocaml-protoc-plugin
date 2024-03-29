@@ -478,9 +478,9 @@ let get_name_exn t name =
   get_name t name
 
 let get_package_name t =
-  match t.proto_path with
-  | _ :: xs -> List.rev xs |> String.concat ~sep:"." |> Option.some
-  | _ -> None
+  match List.tl t.proto_path with
+  | [] -> None
+  | xs -> List.rev xs |> String.concat ~sep:"." |> Option.some
 
 let get_module_name ~filename t =
   StringMap.find_opt filename t.file_names
