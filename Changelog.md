@@ -12,6 +12,8 @@
 generating uncompilable code. (#21)
 - [x] Fix codegen bug for messages with out fields and setting
 singleton_records = true (#20)
+- [x] In Services, the package field is now correctly set to None if
+      the service if not defined in a package scope (#24)
 
 ### Misc changes
 - [x] Unify serialization and deserialization spec and optimize oneof
@@ -25,7 +27,7 @@ string` which will only return the full protobuf name
 (`*` indicates breaking change)
 
 ### Notes
-  `Message.name: unit -> string` has been renamed to `Message.name:
+  `Message.name': unit -> string` has been renamed to `Message.name:
   unit -> string`, and is now contains the fully qualified protobuf
   message name. Before the name was the ocaml module name of the
   message.
