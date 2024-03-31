@@ -128,17 +128,23 @@ protoc --plugin=protoc-gen-ocaml=../plugin/ocaml-protocol-plugin.exe --ocaml_out
 ```
 
 ### Json serialization and deserialization
-Ocaml-proto-plugin can serialize and deserialize to/from json, using
-`Yojson.Basic.t` type. Using the function `to_json`, `from_json` and
-`from_json_exn` simmilar to regular protobuffer serialization and
+Ocaml-proto-plugin can serialize and deserialize to/from
+json. Using the function `to_json`, `from_json` and
+`from_json_exn` similar to regular protobuffer serialization and
 deserialization.
 
 Json serialization can be controlled using optional arguments:
 
 ```ocaml
-val to_json: Json_options.t -> t -> Yojson.Basic.t
+val to_json: Json_options.t -> t -> Json.t
 ```
-The options argument allows finer grained control over json
+
+The `Json.t` type is identical to
+`Yojson.Basic.t`. ocaml-protoc-plugin does does not depend on `Yojson`
+to limit number of dependencies.
+
+
+The `options` argument allows finer grained control over json
 serialization. The followin options are supported:
 
 | argument  | comment  | default  |
@@ -173,13 +179,14 @@ Json serialization and deserializaiton is not well optimized and
 should not be used in performance critical applications.
 
 ### Older versions of protoc
-It seems that the `--ocaml_opt` flag may not be supported by older
-versions of the proto compiler. As an alternative, options can also be
+Some older versons of google protobuf compiler `protoc` does not
+support the `--ocaml_opt` flag. As an alternative, options can also be
 passed with the `--ocaml_out` flag:
 
 ```
 protoc --plugin=protoc-gen-ocaml=../plugin/ocaml.exe --ocaml_out=annot=debug;[@@deriving show { with_path = false }, eq]:. <file>.proto
 ```
+
 ## Mangle generated names
 Idiomatic protobuf names are somewhat alien to
 Ocaml. `Ocaml_protoc_plugin` has an option to mangle protobuf names
