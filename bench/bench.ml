@@ -2,7 +2,10 @@
 open Base
 open Stdio
 
+(*
 let meassure = Bechamel_perf.Instance.cpu_clock
+*)
+let meassure = Bechamel.Toolkit.Instance. monotonic_clock
 
 [@@@ocaml.warning "-32"]
 module type Protoc_impl = sig
@@ -74,12 +77,20 @@ let make_tests name (type v) (module Protoc: Protoc_impl) (module Plugin: Plugin
 let make_int_tests vl =
   let open Ocaml_protoc_plugin in
   let open Bechamel in
-  let make_test id group name ?reset f v =
+
+  let make_group name =
+    let name = Printf.sprintf "varint_%s(0x%08Lx)" name vl in
+    Bechamel.Test.make_grouped ~name
+  in
+
+  let make_test id name ?reset f v =
     let f = match reset with
       | None -> (fun () -> f v)
       | Some reset -> (fun () -> f (reset v))
     in
-    Test.make ~name:(Printf.sprintf "%s(0x%08Lx)/%s" group id name) (Staged.stage @@ f)
+    (* Reset is simple, but tests dont allow for this *)
+
+    Test.make ~name:(Printf.sprintf "%s(0x%08Lx)" name id) (Staged.stage @@ f)
   in
   let v = Int64.to_int_exn vl in
   let buffer = Bytes.create 10 in
@@ -92,18 +103,23 @@ let make_int_tests vl =
   let make_pbrt_reader =
     let encoder = Pbrt.Encoder.create () in
     Pbrt.Encoder.int64_as_varint vl encoder;
-    let buffer = Pbrt.Encoder.to_string encoder in
-    fun _ -> Pbrt.Decoder.of_string buffer
+    let buffer = Pbrt.Encoder.to_bytes encoder in
+    fun _ -> Pbrt.Decoder.of_bytes buffer
   in
   [
-      make_test vl "Read" "boxed" ~reset:(fun reader -> Reader.reset reader 0; reader) Reader.read_varint reader;
-      make_test vl "Read" "unboxed" ~reset:(fun reader -> Reader.reset reader 0; reader) Reader.read_varint_unboxed reader;
-      make_test vl "Read_pbrt" "boxed" ~reset:make_pbrt_reader (Pbrt.Decoder.int64_as_varint) (Pbrt.Decoder.of_string "") ;
-      make_test vl "Read_pbrt" "unboxed" ~reset:make_pbrt_reader (Pbrt.Decoder.int_as_varint) (Pbrt.Decoder.of_string "") ;
-      make_test vl "Write" "boxed" (Writer.write_varint buffer ~offset:0) vl;
-      make_test vl "Write" "unboxed" (Writer.write_varint_unboxed buffer ~offset:0) v;
-      make_test vl "Write_pbrt" "boxed" ~reset:(fun writer -> Pbrt.Encoder.reset writer; writer) (Pbrt.Encoder.int64_as_varint vl) pbrt_buf;
-      make_test vl "Write_pbrt" "unboxed" ~reset:(fun writer -> Pbrt.Encoder.reset writer; writer) (Pbrt.Encoder.int_as_varint v) pbrt_buf;
+    make_group "boxed" [
+      make_test vl "Read"  ~reset:(fun reader -> Reader.reset reader 0; reader) Reader.read_varint reader;
+      make_test vl "Read_pbrt" ~reset:make_pbrt_reader Pbrt.Decoder.int64_as_varint (Pbrt.Decoder.of_string "") ;
+      make_test vl "Write" (Writer.write_varint buffer ~offset:0) vl;
+      make_test vl "Write_pbrt" ~reset:(fun writer -> Pbrt.Encoder.reset writer; writer) (Pbrt.Encoder.int64_as_varint vl) pbrt_buf;
+
+    ];
+    make_group "unboxed" [
+      make_test vl "Read" ~reset:(fun reader -> Reader.reset reader 0; reader) Reader.read_varint_unboxed reader;
+      make_test vl "Read_pbrt" ~reset:make_pbrt_reader Pbrt.Decoder.int_as_varint (Pbrt.Decoder.of_string "") ;
+      make_test vl "Write" (Writer.write_varint_unboxed buffer ~offset:0) v;
+      make_test vl "Write_pbrt" ~reset:(fun writer -> Pbrt.Encoder.reset writer; writer) (Pbrt.Encoder.int_as_varint v) pbrt_buf;
+    ]
   ]
 
 let _ =
@@ -157,11 +173,10 @@ let create_test_data ~depth () =
   in
   create_btree depth ()
 
-let use_perf = false
-let time=3.0
+let time = 5.0
 let benchmark tests =
   let open Bechamel in
-  let instances = [ if use_perf then Bechamel_perf.Instance.cpu_clock else meassure  ] in
+  let instances = [ meassure ] in
   let cfg = Benchmark.cfg ~compaction:false ~kde:(Some 1) ~quota:(Time.second time) () in
   Benchmark.all cfg instances tests
 
@@ -182,11 +197,12 @@ let print_results: (string, (string, Bechamel.Analyze.RANSAC.t) Stdlib.Hashtbl.t
     |> function
     | [name, decode_plugin; _, decode_protoc; _, encode_plugin; _, encode_protoc] ->
       let name = String.split_on_char '/' name |> List.hd in
-      printf "| %s/decode | %5.2f | %5.2f | %2.2f |\n" name (R.mean decode_plugin) (R.mean decode_protoc) ((R.mean decode_plugin)/.(R.mean decode_protoc));
-      printf "| %s/encode | %5.2f | %5.2f | %2.2f |\n" name (R.mean encode_plugin) (R.mean encode_protoc) ((R.mean encode_plugin)/.(R.mean encode_protoc));
+      printf "| %20s/decode | %10.2f | %10.2f |  %2.2f |\n" name (R.mean decode_plugin) (R.mean decode_protoc) ((R.mean decode_plugin)/.(R.mean decode_protoc));
+      printf "| %20s/encode | %10.2f | %10.2f |  %2.2f |\n" name (R.mean encode_plugin) (R.mean encode_protoc) ((R.mean encode_plugin)/.(R.mean encode_protoc));
     | data ->
+      printf "New group\n";
       List.iter (fun (name, data) ->
-        printf "| %s | %5.2f | | |\n" name (R.mean data)
+        printf "| %30s | %8.2f | | |\n" name (R.mean data)
       ) data
   )
 
@@ -209,11 +225,10 @@ let _ =
       List.init 1000 ~f:(fun i -> i+1, i * i+1) |> make_tests "map<int64,int64>" (module Protoc.Map) (module Plugin.Map);
 
       (* random_list ~len:100 ~f:(fun () -> Plugin.Enum_list.Enum.ED) () |> make_tests (module Protoc.Enum_list) (module Plugin.Enum_list); *)
-      (Bechamel.Test.make_grouped ~name:"Varint" @@ (make_int_tests (0xFFFF_FFFFL)))
-    ]
+    ] @ make_int_tests (0xFFFF_FFFFL) @ make_int_tests (0xFFFF_FFFF_FFFF_FFFFL)
   in
-  printf "| Name | plugin | protoc | ratio |\n";
-  printf "|  --  |   --   |   --   |  --   |\n";
+  printf "|          Name               |   plugin   |   protoc   | ratio |\n";
+  printf "|           --                |     --     |     --     |  --   |\n";
   List.iter ~f:(fun test ->
     test
     |> benchmark

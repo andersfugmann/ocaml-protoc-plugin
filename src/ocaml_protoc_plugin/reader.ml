@@ -46,7 +46,7 @@ let read_varint t =
       inner acc (Int.add bit 7)
     | false -> acc
   in
-  inner 0L 0[@@unrolled 10]
+  inner 0L 0
 
 let read_varint_unboxed t = read_varint t |> Int64.to_int
 

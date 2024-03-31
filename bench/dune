@@ -1,7 +1,7 @@
 (executable
  (name        bench)
  (modules :standard \ verify verify_evaluation)
- (libraries   protoc plugin bechamel bechamel-notty notty.unix bechamel-perf base stdio))
+ (libraries   protoc plugin bechamel base stdio))
 
 (rule
  (targets verify.ml)
