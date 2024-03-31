@@ -457,31 +457,39 @@ More examples can be found under
 ocaml-protoc-plugin has been optimized for speec, and is comparable [ocaml-protoc](https://github.com/mransan/ocaml-protoc)
 
 Numbers below shows benchmark comparing encoding and decoding speed to
-`ocaml-protoc`. The benchmark is run with flambda settings: `-O3 -unbox-closures
--remove-unused-arguments -rounds 3 -inline 100.00 -inline-max-depth 3
--inline-max-unroll 3`. Benchmarks are made on a Intel i5, i5-5257U CPU
-@ 2.70GHz, using ocaml switch `5.1.1+flambda`
+`ocaml-protoc`. The benchmark is run with flambda settings: `-O3 -unbox-closures -unboxed-types -remove-unused-arguments -rounds 4 -inline 100.00 -inline-max-depth 5 -inline-max-unroll 5 -unsafe`. Benchmarks are made on a Intel i5, i5-5257U CPU
+@ 2.70GHz, using ocaml switch `ocaml-option-flambda.1,ocaml-variants.5.2.0~beta1+options`
 
-| name | ocaml-protoc-plugin | ocaml-protoc | ratio |
-|  --  |          --         |       --     |  --   |
-| bench.M/Decode | 146619.1443 ns/run | 143509.5405 ns/run | 1.021 |
-| bench.M/Encode | 119456.6236 ns/run | 161231.8065 ns/run | .740 |
-| int64.M/Decode | 25.8114 ns/run | 26.1589 ns/run | .986 |
-| int64.M/Encode | 57.3628 ns/run | 36.3365 ns/run | 1.578 |
-| float.M/Decode | 27.1202 ns/run | 25.8015 ns/run | 1.051 |
-| float.M/Encode | 58.9275 ns/run | 35.1229 ns/run | 1.677 |
-| string.M/Decode | 46.2468 ns/run | 41.0179 ns/run | 1.127 |
-| string.M/Encode | 80.5362 ns/run | 49.1781 ns/run | 1.637 |
-| enum.M/Decode | 28.3250 ns/run | 28.4345 ns/run | .996 |
-| enum.M/Encode | 61.7117 ns/run | 38.5143 ns/run | 1.602 |
-| empty.M/Decode | 11.0939 ns/run | 9.1665 ns/run | 1.210 |
-| empty.M/Encode | 8.4814 ns/run | 24.2034 ns/run | .350 |
-| int64_list.M/Decode | 15025.3175 ns/run | 15060.5859 ns/run | .997 |
-| int64_list.M/Encode | 10457.3438 ns/run | 11916.0341 ns/run | .877 |
-| float_list.M/Decode | 13918.2012 ns/run | 12857.0192 ns/run | 1.082 |
-| float_list.M/Encode | 8757.9816 ns/run | 12542.1849 ns/run | .698 |
-| string_list.M/Decode | 47648.7843 ns/run | 38610.4188 ns/run | 1.234 |
-| string_list.M/Encode | 40314.6457 ns/run | 34202.1095 ns/run | 1.178 |
+|          Test               |   plugin ns/run   |   protoc ns/run  | ratio |
+|           --                |     --     |     --     |  --   |
+|                bench/decode |  151046.64 |  146006.25 |  1.03 |
+|                bench/encode |  113419.40 |  162761.03 |  0.70 |
+|                int64/decode |      24.27 |      22.04 |  1.10 |
+|                int64/encode |      42.98 |      42.50 |  1.01 |
+|                float/decode |      24.09 |      23.59 |  1.02 |
+|                float/encode |      44.96 |      33.30 |  1.35 |
+|               string/decode |      42.76 |      38.35 |  1.11 |
+|               string/encode |      94.54 |      52.77 |  1.79 |
+|                 enum/decode |      26.44 |      25.47 |  1.04 |
+|                 enum/encode |      75.54 |      32.69 |  2.31 |
+|                empty/decode |       7.42 |       5.32 |  1.39 |
+|                empty/encode |       5.63 |      43.40 |  0.13 |
+|           int64 list/decode |   15060.06 |   14977.46 |  1.01 |
+|           int64 list/encode |   10132.74 |   11871.89 |  0.85 |
+|           float list/decode |   14221.61 |   13123.94 |  1.08 |
+|           float list/encode |    8596.24 |   12644.59 |  0.68 |
+|          string list/decode |   45024.73 |   57261.46 |  0.79 |
+|          string list/encode |   39081.08 |   51495.56 |  0.76 |
+|     map<int64,int64>/decode |   81572.19 |   91668.48 |  0.89 |
+|     map<int64,int64>/encode |   92840.01 |   49106.69 |  1.89 |
+| varint_boxed(0xffffffff)/decode |      19.25 |      24.17 |  0.80 |
+| varint_boxed(0xffffffff)/encode |       4.22 |      14.84 |  0.28 |
+| varint_unboxed(0xffffffff)/decode |      19.48 |      22.94 |  0.85 |
+| varint_unboxed(0xffffffff)/encode |       3.22 |      15.16 |  0.21 |
+| varint_boxed(0xffffffffffffffff)/decode |      36.33 |      41.21 |  0.88 |
+| varint_boxed(0xffffffffffffffff)/encode |      15.30 |      19.18 |  0.80 |
+| varint_unboxed(0xffffffffffffffff)/decode |      35.67 |      39.70 |  0.90 |
+| varint_unboxed(0xffffffffffffffff)/encode |       7.17 |      21.06 |  0.34 |
 
 # Acknowledgements
 This work is based on
