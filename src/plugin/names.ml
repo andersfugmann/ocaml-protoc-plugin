@@ -58,3 +58,13 @@ let module_name ?(mangle_f=(fun x -> x)) name =
 
 let poly_constructor_name ?(mangle_f=(fun x -> x)) name =
   "`" ^ (mangle_f name |> String.capitalize_ascii)
+
+let has_mangle_option options =
+  match options with
+  | None -> false
+  | Some options ->
+    Spec.Options.Ocaml_options.get options
+    |> Ocaml_protoc_plugin.Result.get ~msg:"Could not parse ocaml-protoc-plugin option id 1074"
+    |> function
+    | Some v -> v
+    | None -> false

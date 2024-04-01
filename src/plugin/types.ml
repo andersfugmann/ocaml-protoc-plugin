@@ -6,6 +6,7 @@ open StdLabels
    This will ensure that the plugin will only construct valid types,
    so that changes to the spec will require changes here also.
 *)
+
 open Spec.Descriptor.Google.Protobuf
 
 type type_modifier =

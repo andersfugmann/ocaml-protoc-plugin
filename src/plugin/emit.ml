@@ -14,7 +14,6 @@ type module' = {
   deprecated : bool;
 }
 
-(* Enums are not mangled - Maybe they should be lowercased though. *)
 let emit_enum_type ~scope ~params
     EnumDescriptorProto.{name; value = values; options = options; reserved_range = _; reserved_name = _}
   : module' =
@@ -77,7 +76,7 @@ let emit_enum_type ~scope ~params
 let emit_service_type ~options scope ServiceDescriptorProto.{ name; method' = methods; options = service_options; _ } =
   let emit_method signature implementation local_scope scope service_name MethodDescriptorProto.{ name; input_type; output_type; options = method_options; _} =
     let name = Option.value_exn name in
-    let mangle_f = match Scope.has_mangle_option options with
+    let mangle_f = match Names.has_mangle_option options with
       | false -> fun id -> id
       | true -> Names.to_snake_case
     in
@@ -351,8 +350,9 @@ let parse_proto_file ~params scope
     FileDescriptorProto.{ name = proto_name; package; dependency = dependencies; public_dependency = _;
                           weak_dependency = _; message_type = message_types;
                           enum_type = enum_types; service = services; extension;
-                          options; source_code_info = _; syntax; }
+                          options; source_code_info; syntax; }
   =
+  let _ = source_code_info in
   let proto_name = Option.value_exn ~message:"All files must have a name" proto_name in
   let syntax = match syntax with
     | None | Some "proto2" -> `Proto2

@@ -12,9 +12,6 @@ val for_descriptor: params:Parameters.t -> t -> Spec.Descriptor.Google.Protobuf.
 (** Push an identifier to the current scope *)
 val push : t -> string -> t
 
-(** Get the module name of a proto file *)
-val module_name_of_proto: ?package:string -> string -> string
-
 (** The import module name - Must be globally unique *)
 val import_module_name: string
 
@@ -32,9 +29,6 @@ val get_package_name : t -> string option
 
 (** Tell if the type pointed to by the current scope is part of a cycle. *)
 val is_cyclic: t -> bool
-
-(** Test is the options specify name mangling *)
-val has_mangle_option: Spec.Descriptor.Google.Protobuf.FileOptions.t option -> bool
 
 (** Get stringified version of the current proto path *)
 val get_proto_path: t -> string
