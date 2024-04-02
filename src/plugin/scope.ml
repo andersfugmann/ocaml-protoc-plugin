@@ -136,6 +136,8 @@ let get_scoped_name ?postfix t name =
   in
 
   match postfix, type_name with
+  | postfix, _ when get_proto_path t = name ->
+    Option.value ~default:"This" postfix
   | Some postfix, "" -> postfix
   | None, "" -> this_module_alias
   | None, type_name -> type_name

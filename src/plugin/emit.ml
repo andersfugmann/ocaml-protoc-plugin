@@ -156,6 +156,7 @@ let emit_extension ~scope ~params field =
   Code.emit signature `None "val get: %s -> (%s, [> Runtime'.Result.error]) result" extendee_type c.typestr;
   Code.emit signature `None "val set: %s -> %s -> %s" extendee_type c.typestr extendee_type;
 
+  Code.emit implementation `None "module This = %s" module_name;
   Code.emit implementation `None "type t = %s %s" c.typestr params.annot;
   Code.emit implementation `None "let get_exn extendee = Runtime'.Extensions.get Runtime'.Spec.(%s) (extendee.%s)" c.spec_str extendee_field ;
   Code.emit implementation `None "let get extendee = Runtime'.Result.catch (fun () -> get_exn extendee)";

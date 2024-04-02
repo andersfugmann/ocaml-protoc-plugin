@@ -1,4 +1,5 @@
 open StdLabels
+open !MoreLabels
 open Spec.Descriptor.Google.Protobuf
 
 open Utils
@@ -18,6 +19,12 @@ type element = { module_name: string; (** The name of the module that holds the 
 
 type file = { file_name: string; types: t list; package: string option }
 
+let map_elements ~f ~comment_db ~path tpe elements =
+  List.mapi ~f:(fun index element ->
+    let path = (tpe, index) :: path in
+    f ~comment_db ~path element
+  ) elements
+
 let module_name_of_proto ?package file =
   Filename.chop_extension file
   |> Filename.basename
@@ -30,16 +37,17 @@ let module_name_of_proto ?package file =
   |> String.map ~f:(function '-' | '.' -> '_' | c -> c)
 
 
-let map_enum EnumDescriptorProto.{ name; value = values; _ } =
+let map_enum ~comment_db:_ ~path:_ EnumDescriptorProto.{ name; value = values; _ } =
   let name = Option.value_exn ~message:"All enums must have a name" name in
   let enum_names =
     List.map ~f:(fun EnumValueDescriptorProto.{ name; _ } ->
       Option.value_exn ~message:"All enum values must have a name" name
     ) values
   in
+  (* So this just returns all the enum names. For each enum name, we should add documentation *)
   { name; types = []; depends = []; fields = [], []; enum_names; service_names = [] }
 
-let map_service ServiceDescriptorProto.{ name; method' = methods; _ } =
+let map_service  ~comment_db:_ ~path:_ ServiceDescriptorProto.{ name; method' = methods; _ } =
   let name = Option.value_exn ~message:"All enums must have a name" name in
   let service_names =
     List.map ~f:(fun MethodDescriptorProto.{ name; _ } ->
@@ -48,7 +56,7 @@ let map_service ServiceDescriptorProto.{ name; method' = methods; _ } =
   in
   { name; types = []; depends = []; fields = [], []; enum_names = []; service_names}
 
-let map_extension FieldDescriptorProto.{ name; _ } =
+let map_extension  ~comment_db:_ ~path:_ FieldDescriptorProto.{ name; _ } =
   let name = Option.value_exn ~message:"All enums must have a name" name in
   { name; types = []; depends = []; fields = [], []; enum_names = []; service_names = []}
 
@@ -68,7 +76,7 @@ let split_oneof_fields fields =
   group [] ~eq:(fun a b -> field_number_of_field a = field_number_of_field b) fields
 
 
-let rec map_message DescriptorProto.{ name; field = fields; nested_type = nested_types; enum_type = enums; oneof_decl = oneof_decls; extension = extensions; _} : t =
+let rec map_message ~comment_db ~path DescriptorProto.{ name; field = fields; nested_type = nested_types; enum_type = enums; oneof_decl = oneof_decls; extension = extensions; _} : t =
   let name = Option.value_exn ~message:"All messages must have a name" name in
   let depends =
     List.fold_left ~init:[] ~f:(fun acc -> function
@@ -79,9 +87,16 @@ let rec map_message DescriptorProto.{ name; field = fields; nested_type = nested
       | _ -> acc
     ) fields
   in
-  let enums = List.map ~f:map_enum enums in
-  let extensions = List.map ~f:map_extension extensions in
-  let nested_types = List.map ~f:map_message nested_types in
+  let enums =
+    map_elements ~f:map_enum ~comment_db ~path Comment_db.Message enums
+  in
+  let extensions =
+    map_elements ~f:map_extension ~comment_db ~path Comment_db.Message extensions
+  in
+  (* Need the full context. So we need to append more here, or strip the comment_db *)
+  let nested_types =
+    map_elements ~f:map_message ~comment_db ~path Comment_db.Message nested_types
+  in
   let types = List.sort ~cmp:compare (enums @ extensions @ nested_types) in
   let fields =
     let field_name FieldDescriptorProto.{ name; _} =
@@ -104,11 +119,16 @@ let rec map_message DescriptorProto.{ name; field = fields; nested_type = nested
   in
   { name; types; depends; fields; enum_names = []; service_names = [] }
 
-let map_file FileDescriptorProto.{ name; message_type = messages; package; enum_type = enums; service = services; extension = extensions; _ } =
-  let messages = List.map ~f:map_message messages in
-  let enums = List.map ~f:map_enum enums in
-  let services = List.map ~f:map_service services in
-  let extensions = List.map ~f:map_extension extensions in
+let map_file FileDescriptorProto.{ name; message_type = messages; package; enum_type = enums; service = services; extension = extensions; source_code_info; _ } =
+  (* Create a map of the documentation comments *)
+  (* And just dump it here *)
+  let comment_db = Comment_db.make source_code_info in
+  let map_elements = map_elements ~comment_db ~path:[] Comment_db.File in
+
+  let messages = map_elements ~f:map_message messages in
+  let enums = map_elements ~f:map_enum enums in
+  let services =  map_elements ~f:map_service services in
+  let extensions =  map_elements ~f:map_extension extensions in
   let types = enums @ messages @ services @ extensions in
   let file_name = Option.value_exn ~message:"File descriptor must have a name" name in
   let packages = Option.value_map ~default:[] ~f:(String.split_on_char ~sep:'.') package in

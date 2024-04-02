@@ -251,7 +251,7 @@ let spec_of_enum ~scope type_name default =
       default_value
     | None ->
       (* We could just get the default from the module *)
-      sprintf "(%s.from_int_exn 0)" (Scope.get_scoped_name scope type_name);
+      (Scope.get_scoped_name scope ~postfix:"from_int_exn 0" type_name);
       (* Scope.get_scoped_enum_name scope type_name *)
   in
   Enum { type'; module_name; default }
