@@ -178,6 +178,7 @@ let emit_sub dest ~is_implementation ~is_first {module_name; signature; implemen
     | false -> ()
     | true ->
       Code.emit dest `EndBegin "end = struct ";
+      Code.emit dest `None "module %s = %s" Scope.this_module_alias module_name;
       Code.append dest implementation
   in
   Code.emit dest `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
@@ -203,9 +204,7 @@ let find_map_type ~scope field nested_types =
     ) nested_types
   | _ -> None
 
-(* Emit a message plus all its subtypes.
-   Why is this not being called recursively, but rather calling sub functions which never returns
-*)
+(* Emit a message plus all its subtypes. *)
 let rec emit_message ~params ~syntax ~scope
     DescriptorProto.{ name; field = fields; extension = extensions;
                       nested_type = nested_types; enum_type = enum_types;

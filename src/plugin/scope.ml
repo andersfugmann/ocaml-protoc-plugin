@@ -4,6 +4,7 @@ open MoreLabels
 open Utils
 
 let dump_ocaml_names = false
+let dump_type_tree = false
 
 
 (* Extend functionality such that under import_module_name the module names is prefixed with package names *)
@@ -31,7 +32,7 @@ end
 open Spec.Descriptor.Google.Protobuf
 
 let import_module_name = "Imported'modules"
-
+let this_module_alias = "This'_"
 
 type t = { module_name: string;
            package_depth: int;
@@ -51,6 +52,8 @@ let init ~params files =
   in
   if dump_ocaml_names then
     StringSet.iter ~f:(Printf.eprintf "%s\n") ocaml_names;
+  if dump_type_tree then
+    StringMap.iter ~f:(fun ~key ~data:Type_tree.{module_name; ocaml_name; _} -> Printf.eprintf "%s: %s - %s\n" key module_name ocaml_name) type_db;
 
   { module_name = ""; proto_path = []; package_depth = 0; type_db; ocaml_names; file_names }
 
@@ -82,74 +85,59 @@ let get_scoped_name ?postfix t name =
     inner (n, l)
   in
 
-  (* Resolve name in the current context and return the fully qualified module name,
-     iff exists *)
-  let resolve t name =
-    let rec lookup name = function
-      | path ->
-        begin
-          let path_str = String.concat ~sep:"." (name :: path |> List.rev) in
-          match StringSet.mem path_str t.ocaml_names with
-          | false -> begin
-              match path with
-              | [] -> None
-              | _ :: ps -> lookup name ps
-            end
-          | true -> Some path_str
-        end
-    in
-    let Type_tree.{ ocaml_name = ocaml_path; _ } =
-      StringMap.find (get_proto_path t) t.type_db
-    in
-    let path = match String.equal "" ocaml_path with
-      | false -> String.split_on_char ~sep:'.' ocaml_path |> List.rev
-      | true -> []
-    in
-    lookup name path
-  in
-
   let name = Option.value_exn ~message:"Does not contain a name" name in
   let Type_tree.{ ocaml_name; module_name; _ } = StringMap.find name t.type_db in
 
-  (* Lookup a fully qualified name in the current scope.
-     Returns the shortest name for the type in the current scope *)
-  let rec lookup postfix_length = function
-    | p :: ps ->
-      begin
-        let expect = String.concat ~sep:"." (List.rev (p :: ps)) in
-        let resolve_res = resolve t p in
-        match resolve_res with
-        | Some path when String.equal path expect ->
-          let how_many = postfix_length in
-          let ocaml_name =
-            String.split_on_char ~sep:'.' ocaml_name
-            |> List.rev
-            |> take how_many
-            |> List.rev
-            |> String.concat ~sep:"."
-          in
-          ocaml_name
-        | _ ->
-          lookup (postfix_length + 1) ps
-      end
-    | [] ->
-      failwith_f "Unable to reference '%s'. This is due to a limitation in the Ocaml mappings. To work around this limitation make sure to use a unique package name" name
-  in
+  (* If the name to be found is in another module, then stop looking *)
   let type_name =
-    match String.equal module_name t.module_name with
-    | true ->
-      let names =
-        String.split_on_char ~sep:'.' ocaml_name
-        |> List.rev
+    (* Printf.eprintf "Current scope: %s. Look for %s\n" (String.concat ~sep:"." (List.rev t.proto_path)) name; *)
+    let rec resolve path_rev module_name =
+      let path = "" :: List.rev_append path_rev module_name |> String.concat ~sep:"." in
+      (* Printf.eprintf "%s" path; *)
+      match StringMap.mem path t.type_db with
+      | true ->
+        (* Printf.eprintf " -> Some %s\n" path; *)
+        Some path
+      | false -> begin
+          match path_rev with
+          | [] ->
+            (* Printf.eprintf " -> None\n"; *)
+            None
+          | _ :: ps ->
+            (* Printf.eprintf " -> "; *)
+            resolve ps module_name
+        end
+    in
+    (* We are looking for 'name' *)
+    let search name =
+      let paths = String.split_on_char ~sep:'.' name |> List.rev in
+      let rec inner path paths =
+        (* Printf.eprintf "Resolve: "; *)
+        let p = resolve t.proto_path path in
+        match p with
+        | Some path' when path' = name ->
+          (* Found! *)
+          String.split_on_char ~sep:'.' ocaml_name
+          |> List.rev
+          |> take (List.length path)
+          |> List.rev
+          |> String.concat ~sep:"."
+
+        | _  -> begin match paths with
+          | p :: paths -> inner (p :: path) paths
+          | [] -> failwith_f "Unable to reference '%s'. This is due to a limitation in the Ocaml mappings. To work around this limitation make sure to use a unique package name" name
+        end
       in
-      lookup 1 names
-    | false ->
-      Printf.sprintf "%s.%s.%s" import_module_name module_name ocaml_name
+      inner [] paths
+    in
+    match t.module_name = module_name with
+    | true-> search name
+    | false -> Printf.sprintf "%s.%s.%s" import_module_name module_name ocaml_name
   in
 
   match postfix, type_name with
   | Some postfix, "" -> postfix
-  | None, "" -> failwith "Empty type cannot be referenced"
+  | None, "" -> this_module_alias
   | None, type_name -> type_name
   | Some postfix, type_name -> Printf.sprintf "%s.%s" type_name postfix
 
