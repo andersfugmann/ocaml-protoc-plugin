@@ -64,28 +64,22 @@ let map_comments comments =
   comments
   |> List.map ~f:(trim_end ~char:'\n')
   |> String.concat ~sep:"\n\n"
+  |> String.to_seq
+  |> Seq.map (function
+    | '{' | '}' | '[' | ']' | '@' | '\\' as ch -> Printf.sprintf "\\%c" ch
+    | ch -> Printf.sprintf "%c" ch
+  )
+  |> List.of_seq
+  |> String.concat ~sep:""
 
-
-let emit_comment ?(id="") t =
-  let emit_comment str =
-    String.to_seq str
-    |> Seq.map (function
-      | '{' | '}' | '[' | ']' | '@' as ch -> Printf.sprintf "\\%c" ch
-      | ch -> Printf.sprintf "%c" ch
-    )
-    |> List.of_seq
-    |> String.concat ~sep:""
-    |> emit t `None "%s"
-  in
-
-  function
+let emit_comment ?(id="") t = function
   | [] -> ()
   | comments ->
     emit t `None "";
     emit t `Begin "(** %s" id;
     map_comments comments
     |> String.split_on_char ~sep:'\n'
-    |> List.iter ~f:emit_comment;
+    |> List.iter ~f:(emit t `None "%s");
     emit t `End "*)";
     ()
 
@@ -107,7 +101,7 @@ let append_comments ~comments str =
   | [] -> str
   | comments ->
     let comment = map_comments comments in
-    Printf.sprintf "%s (** %s *)" str (String.trim comment)
+    Printf.sprintf "%s (** %s *) " str (String.trim comment)
 
 let contents t =
   List.map ~f:(Printf.sprintf "%s") (List.rev t.code)

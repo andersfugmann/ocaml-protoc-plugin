@@ -630,8 +630,8 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
   let has_extensions = match extension_ranges with [] -> false | _ -> true in
 
   let field_info =
-    List.rev_map ~f:(fun { name; type'; _} -> (Scope.get_name scope name, (string_of_type type', type'.deprecated)) ) ts
-    |> prepend ~cond:has_extensions ("extensions'", ("Runtime'.Extensions.t", false))
+    List.rev_map ~f:(fun { name; type'; _} -> (Scope.get_name scope name, (string_of_type type', type'.deprecated, name)) ) ts
+    |> prepend ~cond:has_extensions ("extensions'", ("Runtime'.Extensions.t", false, ""))
     |> List.rev
   in
 
@@ -684,7 +684,7 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
     | true -> "unit"
     | false ->
       List.map ~f:snd field_info
-      |> List.map ~f:fst
+      |> List.map ~f:(fun (fst, _, _) -> fst)
       |> String.concat ~sep:" * "
       |> sprintf "(%s)"
       |> Code.append_deprecaton_if ~deprecated:has_deprecated_fields `Item
@@ -693,11 +693,13 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
   let type' = match t_as_tuple || field_info = [] with
     | true -> tuple_type
     | false ->
-      List.map ~f:(fun (name, (type', deprecated)) ->
+      List.map ~f:(fun (name, (type', deprecated, proto_name)) ->
         sprintf "%s: %s" name type'
         |> Code.append_deprecaton_if ~deprecated `Attribute
+        |> sprintf "%s; "
+        |> Code.append_comments ~comments:(Scope.get_comments ~name:proto_name scope)
       ) field_info
-      |> String.concat ~sep:"; "
+      |> String.concat ~sep:""
       |> sprintf "{ %s }"
   in
 
