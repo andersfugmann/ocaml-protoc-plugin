@@ -12,6 +12,7 @@ type module' = {
   signature : Code.t;
   implementation : Code.t;
   deprecated : bool;
+  comments : string list;
 }
 
 let emit_enum_type ~scope ~params
@@ -29,6 +30,7 @@ let emit_enum_type ~scope ~params
        let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
        Scope.get_name_exn scope name
        |> Code.append_deprecaton_if `Attribute ~deprecated
+       |> Code.append_comments ~comments:(Scope.get_comments ?name scope)
      ) values
      |> String.concat ~sep:" | "
     )
@@ -71,7 +73,8 @@ let emit_enum_type ~scope ~params
   Code.emit implementation `None "| s -> Runtime'.Result.raise (`Unknown_enum_name s)";
   Code.emit implementation `End "";
 
-  { module_name; signature; implementation; deprecated }
+  let comments = Scope.get_comments scope in
+  { module_name; signature; implementation; deprecated; comments }
 
 let emit_service_type ~options scope ServiceDescriptorProto.{ name; method' = methods; options = service_options; _ } =
   let emit_method signature implementation local_scope scope service_name MethodDescriptorProto.{ name; input_type; output_type; options = method_options; _} =
@@ -100,7 +103,7 @@ let emit_service_type ~options scope ServiceDescriptorProto.{ name; method' = me
       sprintf "(module Runtime'.Spec.Message with type t = %s.t) * (module Runtime'.Spec.Message with type t = %s.t)" input output
     in
 
-
+    Code.emit_comment ~id:"method" signature (Scope.get_comments scope);
     Code.emit signature `Begin "module %s : sig" capitalized_name;
     Code.emit signature `None "include Runtime'.Service.Rpc with type Request.t = %s.t and type Response.t = %s.t" input output;
     Code.emit signature `None "module Request : Runtime'.Spec.Message with type t = %s.t and type make_t = %s.make_t" input input;
@@ -126,6 +129,7 @@ let emit_service_type ~options scope ServiceDescriptorProto.{ name; method' = me
 
   let signature = Code.init () in
   let implementation = Code.init () in
+  Code.emit_comment ~id:"service" signature (Scope.get_comments scope);
   Code.emit signature `Begin "module %s : sig" (Scope.get_name scope name);
   Code.emit implementation `Begin "module %s = struct" (Scope.get_name scope name);
   let local_scope = Scope.Local.init () in
@@ -164,10 +168,13 @@ let emit_extension ~scope ~params field =
   Code.emit implementation `None "let extensions' = Runtime'.Extensions.set Runtime'.Spec.(%s) (extendee.%s) t in" c.spec_str extendee_field;
   Code.emit implementation `None "{ extendee with %s = extensions' } [@@warning \"-23\"]" extendee_field;
   Code.emit implementation `End "";
-  { module_name; signature; implementation; deprecated }
+
+  let comments = Scope.get_comments scope in
+  { module_name; signature; implementation; deprecated; comments }
 
 (** Emit the nested types. *)
-let emit_sub dest ~is_implementation ~is_first {module_name; signature; implementation; deprecated} =
+let emit_sub dest ~is_implementation ~is_first { module_name; signature; implementation; deprecated; comments } =
+  if not is_implementation then Code.emit_comment ~id:"sub message" dest comments;
   let () =
     match is_first with
     | true -> Code.emit dest `Begin "module rec %s : sig" module_name
@@ -247,6 +254,7 @@ let rec emit_message ~params ~syntax ~scope
                   default_constructor_sig; default_constructor_impl; merge_impl } =
         Types.make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
       in
+      (* Emit comments in the signature. We assume this is immediatly after the module decl*)
       Code.emit signature `None "val name: unit -> string";
       Code.emit signature `None "type t = %s%s" type' params.annot;
       Code.emit signature `None "type make_t = %s" default_constructor_sig;
@@ -288,11 +296,12 @@ let rec emit_message ~params ~syntax ~scope
       Code.emit implementation `End "let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)";
     | None -> ()
   in
-  { module_name; signature; implementation; deprecated }
+  let comments = Scope.get_comments scope in
+  { module_name; signature; implementation; deprecated; comments }
 
 let rec wrap_packages ~params ~syntax ~options scope message_type services = function
   | [] ->
-    let { module_name = _; implementation; signature; deprecated = _ } = emit_message ~params ~syntax ~scope message_type in
+    let { module_name = _; implementation; signature; deprecated = _; comments = _ } = emit_message ~params ~syntax ~scope message_type in
     List.iter ~f:(fun service ->
       let signature', implementation' = emit_service_type ~options scope service in
       Code.append implementation implementation';
