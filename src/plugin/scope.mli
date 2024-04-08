@@ -38,3 +38,6 @@ val get_proto_path: t -> string
 
 (** Return the mapped module name for a protobuf file *)
 val get_module_name: filename:string -> t -> string
+
+(** Get comments for a given proto identifier (path) *)
+val get_comments: ?name:string -> t -> string list

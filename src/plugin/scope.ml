@@ -146,3 +146,12 @@ let get_module_name ~filename t =
 let is_cyclic t =
   let Type_tree.{ cyclic; _ } = StringMap.find (get_proto_path t) t.type_db in
   cyclic
+
+
+let get_comments ?name t =
+  let path =
+    let path = get_proto_path t in
+    Option.value_map ~default:path ~f:(fun name -> Printf.sprintf "%s.%s" path name) name
+  in
+  StringMap.find_opt path t.type_db
+  |> Option.value_map ~default:[] ~f:(fun Type_tree.{ comments; _ } -> comments)
