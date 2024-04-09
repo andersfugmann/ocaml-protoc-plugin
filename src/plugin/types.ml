@@ -680,27 +680,41 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
   in
 
   let tuple_type =
+    let comments =
+      List.filter_map ~f:(fun (name, (_, _, _proto_name)) ->
+        let comment_lines =
+          Scope.get_comments scope ~name:name
+          |> Code.map_comments
+        in
+        match (String.concat ~sep:"\n" comment_lines |> String.trim) with
+        | "" -> None
+        | comment -> sprintf "@param %s %s" name comment |> Option.some
+      ) field_info
+      |> String.concat ~sep:"\n\n"
+      |> function "" -> "" | comment -> sprintf "\n(**\n%s\n*)\n" comment
+    in
+
     match field_info = [] with
     | true -> "unit"
     | false ->
-      List.map ~f:snd field_info
-      |> List.map ~f:(fun (fst, _, _) -> fst)
+      List.map field_info ~f:(fun (_, (type_, _, _proto_name)) -> type_ )
       |> String.concat ~sep:" * "
       |> sprintf "(%s)"
       |> Code.append_deprecaton_if ~deprecated:has_deprecated_fields `Item
+      |> fun s -> sprintf "%s%s" s comments
   in
 
   let type' = match t_as_tuple || field_info = [] with
     | true -> tuple_type
     | false ->
       List.map ~f:(fun (name, (type', deprecated, proto_name)) ->
-        sprintf "%s: %s" name type'
+        sprintf "\t%s: %s" name type'
         |> Code.append_deprecaton_if ~deprecated `Attribute
-        |> sprintf "%s; "
-        |> Code.append_comments ~comments:(Scope.get_comments ~name:proto_name scope)
+        |> sprintf "%s;"
+        |> Code.append_comments ~deprecated ~comments:(Scope.get_comments ~name:proto_name scope)
       ) field_info
-      |> String.concat ~sep:""
-      |> sprintf "{ %s }"
+      |> String.concat ~sep:"\n"
+      |> sprintf "{\n%s\n}"
   in
 
   (* a b c *)

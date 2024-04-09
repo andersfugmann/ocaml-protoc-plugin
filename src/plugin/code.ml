@@ -30,18 +30,14 @@ let trim_end ~char s =
 
 let emit t indent fmt =
   let prepend s =
-    match String.split_on_char ~sep:'\n' s with
-    | line :: lines ->
+    String.split_on_char ~sep:'\n' s
+    |> List.iter ~f:(fun line ->
       (* Replace tabs with indent *)
       let line =
         "" :: String.split_on_char ~sep:'\t' line
         |> String.concat ~sep:t.indent
       in
-      t.code <- (trim_end ~char:' ' line) :: t.code;
-      incr t;
-      List.iter lines ~f:(fun line -> t.code <- (trim_end ~char:' ' (t.indent ^ line)) :: t.code);
-      decr t;
-    | [] -> ()
+      t.code <- (trim_end ~char:' ' line) :: t.code);
   in
   let emit s =
     match indent with
@@ -71,17 +67,8 @@ let map_comments comments =
   )
   |> List.of_seq
   |> String.concat ~sep:""
+  |> String.split_on_char ~sep:'\n'
 
-let emit_comment ?(id="") t = function
-  | [] -> ()
-  | comments ->
-    emit t `None "";
-    emit t `Begin "(** %s" id;
-    map_comments comments
-    |> String.split_on_char ~sep:'\n'
-    |> List.iter ~f:(emit t `None "%s");
-    emit t `End "*)";
-    ()
 
 let append t code = List.iter ~f:(emit t `None "%s") (code.code |> List.rev)
 
@@ -96,12 +83,38 @@ let append_deprecaton_if ~deprecated level str =
     in
     Printf.sprintf "%s[%socaml.alert protobuf \"Deprecated global\"]" str level
 
-let append_comments ~comments str =
-  match comments with
-  | [] -> str
+let deprecated_comment = "@deprecated deprecated in proto file"
+
+let append_comments ?(deprecated=false) ~comments str =
+  let comment_str =
+    map_comments comments
+    |> String.concat ~sep:"\n"
+    |> String.trim
+  in
+  match comments, deprecated with
+  | [], false -> str
+  | [], true -> Printf.sprintf "%s(** %s *)" str deprecated_comment
+  | _, false ->
+    Printf.sprintf "%s(** %s *)" str comment_str
+  | _, true ->
+    Printf.sprintf "%s(** %s\n%s *)" str comment_str deprecated_comment
+
+let emit_comment ?(deprecated=false) ~(position:[`Leading | `Trailing]) t = function
+  | [] when not deprecated -> ()
   | comments ->
-    let comment = map_comments comments in
-    Printf.sprintf "%s (** %s *) " str (String.trim comment)
+    if position = `Leading then emit t `None "";
+    let comments = map_comments comments in
+    let () =
+      match comments with
+      | [ comment ] when not deprecated -> emit t `None "(** %s *)" (String.trim comment)
+      | comments ->
+        emit t `Begin "(**";
+        List.iter ~f:(emit t `None "%s") comments;
+        if deprecated then emit t `None "%s" deprecated_comment;
+        emit t `End "*)";
+    in
+    (* if position = `Trailing then emit t `None ""; (* Dont think this is needed *) *)
+    ()
 
 let contents t =
   List.map ~f:(Printf.sprintf "%s") (List.rev t.code)

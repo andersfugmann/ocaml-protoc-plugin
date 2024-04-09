@@ -26,6 +26,11 @@ end
 (**/**)
 module rec Google : sig
   module rec Protobuf : sig
+
+    (**
+       The protocol compiler can output a FileDescriptorSet containing the .proto
+       files it parses.
+    *)
     module rec FileDescriptorSet : sig
       val name: unit -> string
       type t = (FileDescriptorProto.t list)

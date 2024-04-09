@@ -25,16 +25,19 @@ let emit_enum_type ~scope ~params
   let implementation = Code.init () in
   let scope = Scope.push scope name in
   let t = Code.init () in
-  Code.emit t `None "type t = %s %s"
-    (List.map ~f:(fun EnumValueDescriptorProto.{name; options; _} ->
-       let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
-       Scope.get_name_exn scope name
-       |> Code.append_deprecaton_if `Attribute ~deprecated
-       |> Code.append_comments ~comments:(Scope.get_comments ?name scope)
-     ) values
-     |> String.concat ~sep:" | "
-    )
-    params.Parameters.annot;
+  Code.emit t `Begin "type t = ";
+
+  List.iter ~f:(fun EnumValueDescriptorProto.{name; options; _} ->
+    let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
+    let enum_name =
+      Scope.get_name_exn scope name
+      |> Code.append_deprecaton_if `Attribute ~deprecated
+    in
+    Code.emit t `None "| %s" enum_name;
+    Code.emit_comment ~deprecated ~position:`Trailing t (Scope.get_comments ?name scope)
+  ) values;
+  Code.emit t `End "%s" params.Parameters.annot;
+
   Code.append signature t;
   Code.append implementation t;
   Code.emit signature `None "val name: unit -> string";
@@ -103,7 +106,7 @@ let emit_service_type ~options scope ServiceDescriptorProto.{ name; method' = me
       sprintf "(module Runtime'.Spec.Message with type t = %s.t) * (module Runtime'.Spec.Message with type t = %s.t)" input output
     in
 
-    Code.emit_comment ~id:"method" signature (Scope.get_comments scope);
+    Code.emit_comment ~position:`Leading signature (Scope.get_comments scope);
     Code.emit signature `Begin "module %s : sig" capitalized_name;
     Code.emit signature `None "include Runtime'.Service.Rpc with type Request.t = %s.t and type Response.t = %s.t" input output;
     Code.emit signature `None "module Request : Runtime'.Spec.Message with type t = %s.t and type make_t = %s.make_t" input input;
@@ -129,7 +132,7 @@ let emit_service_type ~options scope ServiceDescriptorProto.{ name; method' = me
 
   let signature = Code.init () in
   let implementation = Code.init () in
-  Code.emit_comment ~id:"service" signature (Scope.get_comments scope);
+  Code.emit_comment ~position:`Leading signature (Scope.get_comments scope);
   Code.emit signature `Begin "module %s : sig" (Scope.get_name scope name);
   Code.emit implementation `Begin "module %s = struct" (Scope.get_name scope name);
   let local_scope = Scope.Local.init () in
@@ -174,7 +177,7 @@ let emit_extension ~scope ~params field =
 
 (** Emit the nested types. *)
 let emit_sub dest ~is_implementation ~is_first { module_name; signature; implementation; deprecated; comments } =
-  if not is_implementation then Code.emit_comment ~id:"sub message" dest comments;
+  if not is_implementation then Code.emit_comment ~position:`Leading dest comments;
   let () =
     match is_first with
     | true -> Code.emit dest `Begin "module rec %s : sig" module_name
