@@ -41,11 +41,15 @@ let emit_enum_type ~scope ~params
   Code.append signature t;
   Code.append implementation t;
   Code.emit signature `None "val name: unit -> string";
+  Code.emit signature `None "(** Fully qualified protobuf name of this enum *)\n";
+  Code.emit signature `None "(**/**)";
   Code.emit signature `None "val to_int: t -> int";
   Code.emit signature `None "val from_int: int -> t Runtime'.Result.t";
   Code.emit signature `None "val from_int_exn: int -> t";
   Code.emit signature `None "val to_string: t -> string";
   Code.emit signature `None "val from_string_exn: string -> t";
+  Code.emit signature `None "(**/**)";
+
 
   Code.emit implementation `None "let name () = \"%s\"" (Scope.get_proto_path scope);
   Code.emit implementation `Begin "let to_int = function";
@@ -110,7 +114,10 @@ let emit_service_type ~options scope ServiceDescriptorProto.{ name; method' = me
     Code.emit signature `Begin "module %s : sig" capitalized_name;
     Code.emit signature `None "include Runtime'.Service.Rpc with type Request.t = %s.t and type Response.t = %s.t" input output;
     Code.emit signature `None "module Request : Runtime'.Spec.Message with type t = %s.t and type make_t = %s.make_t" input input;
+    Code.emit signature `None "(** Module alias for the request message for this method call *)\n";
+
     Code.emit signature `None "module Response : Runtime'.Spec.Message with type t = %s.t and type make_t = %s.make_t" output output;
+    Code.emit signature `None "(** Module alias for the response message for this method call *)\n";
     Code.emit signature `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
     Code.emit signature `None "val %s : %s" uncapitalized_name sig_t';
 
@@ -257,19 +264,30 @@ let rec emit_message ~params ~syntax ~scope
                   default_constructor_sig; default_constructor_impl; merge_impl } =
         Types.make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
       in
-      (* Emit comments in the signature. We assume this is immediatly after the module decl*)
-      Code.emit signature `None "val name: unit -> string";
       Code.emit signature `None "type t = %s%s" type' params.annot;
       Code.emit signature `None "type make_t = %s" default_constructor_sig;
       Code.emit signature `None "val make: make_t";
+      Code.emit signature `None "(** Helper function to generate a message using default values *)\n";
+
+      Code.emit signature `None "val to_proto: t -> Runtime'.Writer.t";
+      Code.emit signature `None "(** Serialize the message to binary format *)\n";
+
+      Code.emit signature `None "val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result";
+      Code.emit signature `None "(** Deserialize from binary format *)\n";
+      Code.emit signature `None "val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t";
+      Code.emit signature `None "(** Serialize to Json (compatible with Yojson.Basic.t) *)\n";
+      Code.emit signature `None "val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result";
+      Code.emit signature `None "(** Deserialize from Json (compatible with Yojson.Basic.t) *)\n";
+
+      Code.emit signature `None "val name: unit -> string";
+      Code.emit signature `None "(** Fully qualified protobuf name of this message *)\n";
+
+      Code.emit signature `None "(**/**)";
       Code.emit signature `None "val merge: t -> t -> t";
       Code.emit signature `None "val to_proto': Runtime'.Writer.t -> t -> unit";
-      Code.emit signature `None "val to_proto: t -> Runtime'.Writer.t";
-      Code.emit signature `None "val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result";
       Code.emit signature `None "val from_proto_exn: Runtime'.Reader.t -> t";
-      Code.emit signature `None "val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t";
       Code.emit signature `None "val from_json_exn: Runtime'.Json.t -> t";
-      Code.emit signature `None "val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result";
+      Code.emit signature `None "(**/**)";
 
       Code.emit implementation `None "let name () = \"%s\"" (Scope.get_proto_path scope);
       Code.emit implementation `None "type t = %s%s" type' params.annot;
