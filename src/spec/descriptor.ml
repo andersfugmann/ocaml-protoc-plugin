@@ -33,8 +33,7 @@ module rec Google : sig
     *)
     module rec FileDescriptorSet : sig
       type t = (FileDescriptorProto.t list)
-      type make_t = ?file:FileDescriptorProto.t list -> unit -> t
-      val make: make_t
+      val make: ?file:FileDescriptorProto.t list -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -53,6 +52,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?file:FileDescriptorProto.t list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -81,8 +81,7 @@ module rec Google : sig
       syntax: string option;(** The syntax of the proto file.
        The supported values are "proto2" and "proto3". *)
       }
-      type make_t = ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -101,6 +100,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -116,8 +116,7 @@ module rec Google : sig
         end': int option;(** Exclusive. *)
         options: ExtensionRangeOptions.t option;
         }
-        type make_t = ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
-        val make: make_t
+        val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -136,6 +135,7 @@ module rec Google : sig
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -153,8 +153,7 @@ module rec Google : sig
         start: int option;(** Inclusive. *)
         end': int option;(** Exclusive. *)
         }
-        type make_t = ?start:int -> ?end':int -> unit -> t
-        val make: make_t
+        val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -173,6 +172,7 @@ module rec Google : sig
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -192,8 +192,7 @@ module rec Google : sig
       reserved_name: string list;(** Reserved field names, which may not be used by fields in the same message.
        A given name may only be reserved once. *)
       }
-      type make_t = ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -212,6 +211,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -223,8 +223,7 @@ module rec Google : sig
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -243,6 +242,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -370,8 +370,7 @@ module rec Google : sig
        Proto2 optional fields do not set this flag, because they already indicate
        optional with `LABEL_OPTIONAL`. *)
       }
-      type make_t = ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -390,6 +389,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -403,8 +403,7 @@ module rec Google : sig
       name: string option;
       options: OneofOptions.t option;
       }
-      type make_t = ?name:string -> ?options:OneofOptions.t -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?options:OneofOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -423,6 +422,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?options:OneofOptions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -446,8 +446,7 @@ module rec Google : sig
         start: int option;(** Inclusive. *)
         end': int option;(** Inclusive. *)
         }
-        type make_t = ?start:int -> ?end':int -> unit -> t
-        val make: make_t
+        val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -466,6 +465,7 @@ module rec Google : sig
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -482,8 +482,7 @@ module rec Google : sig
       reserved_name: string list;(** Reserved enum value names, which may not be reused. A given name may only
        be reserved once. *)
       }
-      type make_t = ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -502,6 +501,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -516,8 +516,7 @@ module rec Google : sig
       number: int option;
       options: EnumValueOptions.t option;
       }
-      type make_t = ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -536,6 +535,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -550,8 +550,7 @@ module rec Google : sig
       method': MethodDescriptorProto.t list;
       options: ServiceOptions.t option;
       }
-      type make_t = ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -570,6 +569,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -588,8 +588,7 @@ module rec Google : sig
       client_streaming: bool;(** Identifies if client streams multiple client messages *)
       server_streaming: bool;(** Identifies if server streams multiple server messages *)
       }
-      type make_t = ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -608,6 +607,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -713,8 +713,7 @@ module rec Google : sig
        See the documentation for the "Options" section above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -733,6 +732,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -790,8 +790,7 @@ module rec Google : sig
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -810,6 +809,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -918,8 +918,7 @@ module rec Google : sig
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -938,6 +937,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -949,8 +949,7 @@ module rec Google : sig
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -969,6 +968,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -986,8 +986,7 @@ module rec Google : sig
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -1006,6 +1005,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1021,8 +1021,7 @@ module rec Google : sig
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -1041,6 +1040,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1056,8 +1056,7 @@ module rec Google : sig
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -1076,6 +1075,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1117,8 +1117,7 @@ module rec Google : sig
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -1137,6 +1136,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1166,8 +1166,7 @@ module rec Google : sig
         name_part: string;
         is_extension: bool;
         }
-        type make_t = name_part:string -> is_extension:bool -> unit -> t
-        val make: make_t
+        val make: name_part:string -> is_extension:bool -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -1186,6 +1185,7 @@ module rec Google : sig
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = name_part:string -> is_extension:bool -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -1202,8 +1202,7 @@ module rec Google : sig
       string_value: bytes option;
       aggregate_value: string option;
       }
-      type make_t = ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
-      val make: make_t
+      val make: ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -1222,6 +1221,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1314,8 +1314,7 @@ module rec Google : sig
         trailing_comments: string option;
         leading_detached_comments: string list;
         }
-        type make_t = ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
-        val make: make_t
+        val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -1334,6 +1333,7 @@ module rec Google : sig
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -1387,8 +1387,7 @@ module rec Google : sig
          be recorded in the future.
       *)
 
-      type make_t = ?location:Location.t list -> unit -> t
-      val make: make_t
+      val make: ?location:Location.t list -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -1407,6 +1406,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?location:Location.t list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1431,8 +1431,7 @@ module rec Google : sig
          relates to the identified offset. The end offset should be one past
          the last relevant byte (so the length of the text = end - begin). *)
         }
-        type make_t = ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
-        val make: make_t
+        val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -1451,6 +1450,7 @@ module rec Google : sig
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -1463,8 +1463,7 @@ module rec Google : sig
        of its generating .proto file.
       *)
 
-      type make_t = ?annotation:Annotation.t list -> unit -> t
-      val make: make_t
+      val make: ?annotation:Annotation.t list -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -1483,6 +1482,7 @@ module rec Google : sig
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?annotation:Annotation.t list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1499,8 +1499,7 @@ end = struct
     *)
     module rec FileDescriptorSet : sig
       type t = (FileDescriptorProto.t list)
-      type make_t = ?file:FileDescriptorProto.t list -> unit -> t
-      val make: make_t
+      val make: ?file:FileDescriptorProto.t list -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -1519,6 +1518,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?file:FileDescriptorProto.t list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1547,8 +1547,7 @@ end = struct
       syntax: string option;(** The syntax of the proto file.
        The supported values are "proto2" and "proto3". *)
       }
-      type make_t = ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -1567,6 +1566,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1582,8 +1582,7 @@ end = struct
         end': int option;(** Exclusive. *)
         options: ExtensionRangeOptions.t option;
         }
-        type make_t = ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
-        val make: make_t
+        val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -1602,6 +1601,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -1619,8 +1619,7 @@ end = struct
         start: int option;(** Inclusive. *)
         end': int option;(** Exclusive. *)
         }
-        type make_t = ?start:int -> ?end':int -> unit -> t
-        val make: make_t
+        val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -1639,6 +1638,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -1658,8 +1658,7 @@ end = struct
       reserved_name: string list;(** Reserved field names, which may not be used by fields in the same message.
        A given name may only be reserved once. *)
       }
-      type make_t = ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -1678,6 +1677,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1689,8 +1689,7 @@ end = struct
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -1709,6 +1708,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1836,8 +1836,7 @@ end = struct
        Proto2 optional fields do not set this flag, because they already indicate
        optional with `LABEL_OPTIONAL`. *)
       }
-      type make_t = ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -1856,6 +1855,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1869,8 +1869,7 @@ end = struct
       name: string option;
       options: OneofOptions.t option;
       }
-      type make_t = ?name:string -> ?options:OneofOptions.t -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?options:OneofOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -1889,6 +1888,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?options:OneofOptions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1912,8 +1912,7 @@ end = struct
         start: int option;(** Inclusive. *)
         end': int option;(** Inclusive. *)
         }
-        type make_t = ?start:int -> ?end':int -> unit -> t
-        val make: make_t
+        val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -1932,6 +1931,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -1948,8 +1948,7 @@ end = struct
       reserved_name: string list;(** Reserved enum value names, which may not be reused. A given name may only
        be reserved once. *)
       }
-      type make_t = ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -1968,6 +1967,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -1982,8 +1982,7 @@ end = struct
       number: int option;
       options: EnumValueOptions.t option;
       }
-      type make_t = ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -2002,6 +2001,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2016,8 +2016,7 @@ end = struct
       method': MethodDescriptorProto.t list;
       options: ServiceOptions.t option;
       }
-      type make_t = ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -2036,6 +2035,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2054,8 +2054,7 @@ end = struct
       client_streaming: bool;(** Identifies if client streams multiple client messages *)
       server_streaming: bool;(** Identifies if server streams multiple server messages *)
       }
-      type make_t = ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -2074,6 +2073,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2179,8 +2179,7 @@ end = struct
        See the documentation for the "Options" section above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -2199,6 +2198,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2256,8 +2256,7 @@ end = struct
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -2276,6 +2275,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2384,8 +2384,7 @@ end = struct
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -2404,6 +2403,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2415,8 +2415,7 @@ end = struct
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -2435,6 +2434,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2452,8 +2452,7 @@ end = struct
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -2472,6 +2471,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2487,8 +2487,7 @@ end = struct
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -2507,6 +2506,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2522,8 +2522,7 @@ end = struct
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -2542,6 +2541,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2583,8 +2583,7 @@ end = struct
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -2603,6 +2602,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2632,8 +2632,7 @@ end = struct
         name_part: string;
         is_extension: bool;
         }
-        type make_t = name_part:string -> is_extension:bool -> unit -> t
-        val make: make_t
+        val make: name_part:string -> is_extension:bool -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -2652,6 +2651,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = name_part:string -> is_extension:bool -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -2668,8 +2668,7 @@ end = struct
       string_value: bytes option;
       aggregate_value: string option;
       }
-      type make_t = ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
-      val make: make_t
+      val make: ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -2688,6 +2687,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2780,8 +2780,7 @@ end = struct
         trailing_comments: string option;
         leading_detached_comments: string list;
         }
-        type make_t = ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
-        val make: make_t
+        val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -2800,6 +2799,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -2853,8 +2853,7 @@ end = struct
          be recorded in the future.
       *)
 
-      type make_t = ?location:Location.t list -> unit -> t
-      val make: make_t
+      val make: ?location:Location.t list -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -2873,6 +2872,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?location:Location.t list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2897,8 +2897,7 @@ end = struct
          relates to the identified offset. The end offset should be one past
          the last relevant byte (so the length of the text = end - begin). *)
         }
-        type make_t = ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
-        val make: make_t
+        val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -2917,6 +2916,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -2929,8 +2929,7 @@ end = struct
        of its generating .proto file.
       *)
 
-      type make_t = ?annotation:Annotation.t list -> unit -> t
-      val make: make_t
+      val make: ?annotation:Annotation.t list -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -2949,6 +2948,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?annotation:Annotation.t list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -2958,8 +2958,7 @@ end = struct
   end = struct
     module rec FileDescriptorSet : sig
       type t = (FileDescriptorProto.t list)
-      type make_t = ?file:FileDescriptorProto.t list -> unit -> t
-      val make: make_t
+      val make: ?file:FileDescriptorProto.t list -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -2978,6 +2977,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?file:FileDescriptorProto.t list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -3030,8 +3030,7 @@ end = struct
       syntax: string option;(** The syntax of the proto file.
        The supported values are "proto2" and "proto3". *)
       }
-      type make_t = ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -3050,6 +3049,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -3131,8 +3131,7 @@ end = struct
         end': int option;(** Exclusive. *)
         options: ExtensionRangeOptions.t option;
         }
-        type make_t = ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
-        val make: make_t
+        val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -3151,6 +3150,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -3168,8 +3168,7 @@ end = struct
         start: int option;(** Inclusive. *)
         end': int option;(** Exclusive. *)
         }
-        type make_t = ?start:int -> ?end':int -> unit -> t
-        val make: make_t
+        val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -3188,6 +3187,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -3207,8 +3207,7 @@ end = struct
       reserved_name: string list;(** Reserved field names, which may not be used by fields in the same message.
        A given name may only be reserved once. *)
       }
-      type make_t = ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -3227,6 +3226,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -3240,8 +3240,7 @@ end = struct
         end': int option;(** Exclusive. *)
         options: ExtensionRangeOptions.t option;
         }
-        type make_t = ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
-        val make: make_t
+        val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -3260,6 +3259,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -3307,8 +3307,7 @@ end = struct
         start: int option;(** Inclusive. *)
         end': int option;(** Exclusive. *)
         }
-        type make_t = ?start:int -> ?end':int -> unit -> t
-        val make: make_t
+        val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -3327,6 +3326,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -3428,8 +3428,7 @@ end = struct
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -3448,6 +3447,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -3605,8 +3605,7 @@ end = struct
        Proto2 optional fields do not set this flag, because they already indicate
        optional with `LABEL_OPTIONAL`. *)
       }
-      type make_t = ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -3625,6 +3624,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -3955,8 +3955,7 @@ end = struct
       name: string option;
       options: OneofOptions.t option;
       }
-      type make_t = ?name:string -> ?options:OneofOptions.t -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?options:OneofOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -3975,6 +3974,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?options:OneofOptions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -4029,8 +4029,7 @@ end = struct
         start: int option;(** Inclusive. *)
         end': int option;(** Inclusive. *)
         }
-        type make_t = ?start:int -> ?end':int -> unit -> t
-        val make: make_t
+        val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -4049,6 +4048,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -4065,8 +4065,7 @@ end = struct
       reserved_name: string list;(** Reserved enum value names, which may not be reused. A given name may only
        be reserved once. *)
       }
-      type make_t = ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -4085,6 +4084,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -4097,8 +4097,7 @@ end = struct
         start: int option;(** Inclusive. *)
         end': int option;(** Inclusive. *)
         }
-        type make_t = ?start:int -> ?end':int -> unit -> t
-        val make: make_t
+        val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -4117,6 +4116,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?start:int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -4206,8 +4206,7 @@ end = struct
       number: int option;
       options: EnumValueOptions.t option;
       }
-      type make_t = ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -4226,6 +4225,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -4274,8 +4274,7 @@ end = struct
       method': MethodDescriptorProto.t list;
       options: ServiceOptions.t option;
       }
-      type make_t = ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -4294,6 +4293,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -4346,8 +4346,7 @@ end = struct
       client_streaming: bool;(** Identifies if client streams multiple client messages *)
       server_streaming: bool;(** Identifies if server streams multiple server messages *)
       }
-      type make_t = ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
-      val make: make_t
+      val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -4366,6 +4365,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -4517,8 +4517,7 @@ end = struct
        See the documentation for the "Options" section above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -4537,6 +4536,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -4793,8 +4793,7 @@ end = struct
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -4813,6 +4812,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -5007,8 +5007,7 @@ end = struct
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -5027,6 +5026,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -5241,8 +5241,7 @@ end = struct
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -5261,6 +5260,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -5310,8 +5310,7 @@ end = struct
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -5330,6 +5329,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -5387,8 +5387,7 @@ end = struct
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -5407,6 +5406,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -5460,8 +5460,7 @@ end = struct
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -5480,6 +5479,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -5559,8 +5559,7 @@ end = struct
       uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
       extensions': Runtime'.Extensions.t;
       }
-      type make_t = ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
-      val make: make_t
+      val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -5579,6 +5578,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -5689,8 +5689,7 @@ end = struct
         name_part: string;
         is_extension: bool;
         }
-        type make_t = name_part:string -> is_extension:bool -> unit -> t
-        val make: make_t
+        val make: name_part:string -> is_extension:bool -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -5709,6 +5708,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = name_part:string -> is_extension:bool -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -5725,8 +5725,7 @@ end = struct
       string_value: bytes option;
       aggregate_value: string option;
       }
-      type make_t = ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
-      val make: make_t
+      val make: ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -5745,6 +5744,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -5757,8 +5757,7 @@ end = struct
         name_part: string;
         is_extension: bool;
         }
-        type make_t = name_part:string -> is_extension:bool -> unit -> t
-        val make: make_t
+        val make: name_part:string -> is_extension:bool -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -5777,6 +5776,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = name_part:string -> is_extension:bool -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -5945,8 +5945,7 @@ end = struct
         trailing_comments: string option;
         leading_detached_comments: string list;
         }
-        type make_t = ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
-        val make: make_t
+        val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -5965,6 +5964,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -6018,8 +6018,7 @@ end = struct
          be recorded in the future.
       *)
 
-      type make_t = ?location:Location.t list -> unit -> t
-      val make: make_t
+      val make: ?location:Location.t list -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -6038,6 +6037,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?location:Location.t list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -6125,8 +6125,7 @@ end = struct
         trailing_comments: string option;
         leading_detached_comments: string list;
         }
-        type make_t = ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
-        val make: make_t
+        val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -6145,6 +6144,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -6348,8 +6348,7 @@ end = struct
          relates to the identified offset. The end offset should be one past
          the last relevant byte (so the length of the text = end - begin). *)
         }
-        type make_t = ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
-        val make: make_t
+        val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -6368,6 +6367,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -6380,8 +6380,7 @@ end = struct
        of its generating .proto file.
       *)
 
-      type make_t = ?annotation:Annotation.t list -> unit -> t
-      val make: make_t
+      val make: ?annotation:Annotation.t list -> unit -> t
       (** Helper function to generate a message using default values *)
 
       val to_proto: t -> Runtime'.Writer.t
@@ -6400,6 +6399,7 @@ end = struct
       (** Fully qualified protobuf name of this message *)
 
       (**/**)
+      type make_t = ?annotation:Annotation.t list -> unit -> t
       val merge: t -> t -> t
       val to_proto': Runtime'.Writer.t -> t -> unit
       val from_proto_exn: Runtime'.Reader.t -> t
@@ -6418,8 +6418,7 @@ end = struct
          relates to the identified offset. The end offset should be one past
          the last relevant byte (so the length of the text = end - begin). *)
         }
-        type make_t = ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
-        val make: make_t
+        val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -6438,6 +6437,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t

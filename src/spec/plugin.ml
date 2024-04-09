@@ -38,8 +38,7 @@ module rec Google : sig
         suffix: string option;(** A suffix for alpha, beta or rc release, e.g., "alpha-1", "rc2". It should
          be empty for mainline stable releases. *)
         }
-        type make_t = ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
-        val make: make_t
+        val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -58,6 +57,7 @@ module rec Google : sig
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -88,8 +88,7 @@ module rec Google : sig
          Type names of fields and extensions in the FileDescriptorProto are always
          fully qualified. *)
         }
-        type make_t = ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
-        val make: make_t
+        val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -108,6 +107,7 @@ module rec Google : sig
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -192,8 +192,7 @@ module rec Google : sig
            point is used, this information will be appropriately offset and inserted
            into the code generation metadata for the generated files. *)
           }
-          type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
-          val make: make_t
+          val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           (** Helper function to generate a message using default values *)
 
           val to_proto: t -> Runtime'.Writer.t
@@ -212,6 +211,7 @@ module rec Google : sig
           (** Fully qualified protobuf name of this message *)
 
           (**/**)
+          type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           val merge: t -> t -> t
           val to_proto': Runtime'.Writer.t -> t -> unit
           val from_proto_exn: Runtime'.Reader.t -> t
@@ -231,8 +231,7 @@ module rec Google : sig
          This is a bitwise "or" of values from the Feature enum. *)
         file: File.t list;
         }
-        type make_t = ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
-        val make: make_t
+        val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -251,6 +250,7 @@ module rec Google : sig
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -272,8 +272,7 @@ end = struct
         suffix: string option;(** A suffix for alpha, beta or rc release, e.g., "alpha-1", "rc2". It should
          be empty for mainline stable releases. *)
         }
-        type make_t = ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
-        val make: make_t
+        val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -292,6 +291,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -322,8 +322,7 @@ end = struct
          Type names of fields and extensions in the FileDescriptorProto are always
          fully qualified. *)
         }
-        type make_t = ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
-        val make: make_t
+        val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -342,6 +341,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -426,8 +426,7 @@ end = struct
            point is used, this information will be appropriately offset and inserted
            into the code generation metadata for the generated files. *)
           }
-          type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
-          val make: make_t
+          val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           (** Helper function to generate a message using default values *)
 
           val to_proto: t -> Runtime'.Writer.t
@@ -446,6 +445,7 @@ end = struct
           (** Fully qualified protobuf name of this message *)
 
           (**/**)
+          type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           val merge: t -> t -> t
           val to_proto': Runtime'.Writer.t -> t -> unit
           val from_proto_exn: Runtime'.Reader.t -> t
@@ -465,8 +465,7 @@ end = struct
          This is a bitwise "or" of values from the Feature enum. *)
         file: File.t list;
         }
-        type make_t = ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
-        val make: make_t
+        val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -485,6 +484,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -504,8 +504,7 @@ end = struct
         suffix: string option;(** A suffix for alpha, beta or rc release, e.g., "alpha-1", "rc2". It should
          be empty for mainline stable releases. *)
         }
-        type make_t = ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
-        val make: make_t
+        val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -524,6 +523,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -554,8 +554,7 @@ end = struct
          Type names of fields and extensions in the FileDescriptorProto are always
          fully qualified. *)
         }
-        type make_t = ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
-        val make: make_t
+        val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -574,6 +573,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -658,8 +658,7 @@ end = struct
            point is used, this information will be appropriately offset and inserted
            into the code generation metadata for the generated files. *)
           }
-          type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
-          val make: make_t
+          val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           (** Helper function to generate a message using default values *)
 
           val to_proto: t -> Runtime'.Writer.t
@@ -678,6 +677,7 @@ end = struct
           (** Fully qualified protobuf name of this message *)
 
           (**/**)
+          type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           val merge: t -> t -> t
           val to_proto': Runtime'.Writer.t -> t -> unit
           val from_proto_exn: Runtime'.Reader.t -> t
@@ -697,8 +697,7 @@ end = struct
          This is a bitwise "or" of values from the Feature enum. *)
         file: File.t list;
         }
-        type make_t = ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
-        val make: make_t
+        val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -717,6 +716,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -732,8 +732,7 @@ end = struct
         suffix: string option;(** A suffix for alpha, beta or rc release, e.g., "alpha-1", "rc2". It should
          be empty for mainline stable releases. *)
         }
-        type make_t = ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
-        val make: make_t
+        val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -752,6 +751,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -820,8 +820,7 @@ end = struct
          Type names of fields and extensions in the FileDescriptorProto are always
          fully qualified. *)
         }
-        type make_t = ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
-        val make: make_t
+        val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -840,6 +839,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -976,8 +976,7 @@ end = struct
            point is used, this information will be appropriately offset and inserted
            into the code generation metadata for the generated files. *)
           }
-          type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
-          val make: make_t
+          val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           (** Helper function to generate a message using default values *)
 
           val to_proto: t -> Runtime'.Writer.t
@@ -996,6 +995,7 @@ end = struct
           (** Fully qualified protobuf name of this message *)
 
           (**/**)
+          type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           val merge: t -> t -> t
           val to_proto': Runtime'.Writer.t -> t -> unit
           val from_proto_exn: Runtime'.Reader.t -> t
@@ -1015,8 +1015,7 @@ end = struct
          This is a bitwise "or" of values from the Feature enum. *)
         file: File.t list;
         }
-        type make_t = ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
-        val make: make_t
+        val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
         (** Helper function to generate a message using default values *)
 
         val to_proto: t -> Runtime'.Writer.t
@@ -1035,6 +1034,7 @@ end = struct
         (** Fully qualified protobuf name of this message *)
 
         (**/**)
+        type make_t = ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
         val from_proto_exn: Runtime'.Reader.t -> t
@@ -1136,8 +1136,7 @@ end = struct
            point is used, this information will be appropriately offset and inserted
            into the code generation metadata for the generated files. *)
           }
-          type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
-          val make: make_t
+          val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           (** Helper function to generate a message using default values *)
 
           val to_proto: t -> Runtime'.Writer.t
@@ -1156,6 +1155,7 @@ end = struct
           (** Fully qualified protobuf name of this message *)
 
           (**/**)
+          type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           val merge: t -> t -> t
           val to_proto': Runtime'.Writer.t -> t -> unit
           val from_proto_exn: Runtime'.Reader.t -> t

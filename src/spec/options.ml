@@ -27,8 +27,7 @@ end
 (**/**)
 module rec Options : sig
   type t = (bool)
-  type make_t = ?mangle_names:bool -> unit -> t
-  val make: make_t
+  val make: ?mangle_names:bool -> unit -> t
   (** Helper function to generate a message using default values *)
 
   val to_proto: t -> Runtime'.Writer.t
@@ -47,6 +46,7 @@ module rec Options : sig
   (** Fully qualified protobuf name of this message *)
 
   (**/**)
+  type make_t = ?mangle_names:bool -> unit -> t
   val merge: t -> t -> t
   val to_proto': Runtime'.Writer.t -> t -> unit
   val from_proto_exn: Runtime'.Reader.t -> t
