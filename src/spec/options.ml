@@ -26,26 +26,41 @@ module Imported'modules = struct
 end
 (**/**)
 module rec Options : sig
-  val name: unit -> string
   type t = (bool)
   type make_t = ?mangle_names:bool -> unit -> t
   val make: make_t
+  (** Helper function to generate a message using default values *)
+
+  val to_proto: t -> Runtime'.Writer.t
+  (** Serialize the message to binary format *)
+
+  val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
+  (** Deserialize from binary format *)
+
+  val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+  (** Serialize to Json (compatible with Yojson.Basic.t) *)
+
+  val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+  (** Deserialize from Json (compatible with Yojson.Basic.t) *)
+
+  val name: unit -> string
+  (** Fully qualified protobuf name of this message *)
+
+  (**/**)
   val merge: t -> t -> t
   val to_proto': Runtime'.Writer.t -> t -> unit
-  val to_proto: t -> Runtime'.Writer.t
-  val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
   val from_proto_exn: Runtime'.Reader.t -> t
-  val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
   val from_json_exn: Runtime'.Json.t -> t
-  val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+  (**/**)
 end = struct
+  module This'_ = Options
   let name () = ".Options"
   type t = (bool)
   type make_t = ?mangle_names:bool -> unit -> t
   let make ?(mangle_names = false) () = (mangle_names)
   let merge =
-    let merge_mangle_names = Runtime'.Merge.merge Runtime'.Spec.( basic ((1, "mangle_names", "mangleNames"), bool, (false)) ) in
-    fun (t1_mangle_names) (t2_mangle_names) -> merge_mangle_names t1_mangle_names t2_mangle_names
+  let merge_mangle_names = Runtime'.Merge.merge Runtime'.Spec.( basic ((1, "mangle_names", "mangleNames"), bool, (false)) ) in
+  fun (t1_mangle_names) (t2_mangle_names) -> merge_mangle_names t1_mangle_names t2_mangle_names
   let spec () = Runtime'.Spec.( basic ((1, "mangle_names", "mangleNames"), bool, (false)) ^:: nil )
   let to_proto' =
     let serialize = Runtime'.Serialize.serialize (spec ()) in
@@ -70,6 +85,8 @@ and Ocaml_options : sig
   val get: Imported'modules.Descriptor.Google.Protobuf.FileOptions.t -> (Options.t option, [> Runtime'.Result.error]) result
   val set: Imported'modules.Descriptor.Google.Protobuf.FileOptions.t -> Options.t option -> Imported'modules.Descriptor.Google.Protobuf.FileOptions.t
 end = struct
+  module This'_ = Ocaml_options
+  module This = Ocaml_options
   type t = Options.t option
   let get_exn extendee = Runtime'.Extensions.get Runtime'.Spec.(basic_opt ((1074, "ocaml_options", "ocamlOptions"), (message (module Options)))) (extendee.Imported'modules.Descriptor.Google.Protobuf.FileOptions.extensions')
   let get extendee = Runtime'.Result.catch (fun () -> get_exn extendee)
