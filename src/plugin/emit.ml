@@ -265,8 +265,7 @@ let rec emit_message ~params ~syntax ~scope
         Types.make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
       in
       Code.emit signature `None "type t = %s%s" type' params.annot;
-      Code.emit signature `None "type make_t = %s" default_constructor_sig;
-      Code.emit signature `None "val make: make_t";
+      Code.emit signature `None "val make: %s" default_constructor_sig;
       Code.emit signature `None "(** Helper function to generate a message using default values *)\n";
 
       Code.emit signature `None "val to_proto: t -> Runtime'.Writer.t";
@@ -283,6 +282,7 @@ let rec emit_message ~params ~syntax ~scope
       Code.emit signature `None "(** Fully qualified protobuf name of this message *)\n";
 
       Code.emit signature `None "(**/**)";
+      Code.emit signature `None "type make_t = %s" default_constructor_sig;
       Code.emit signature `None "val merge: t -> t -> t";
       Code.emit signature `None "val to_proto': Runtime'.Writer.t -> t -> unit";
       Code.emit signature `None "val from_proto_exn: Runtime'.Reader.t -> t";
