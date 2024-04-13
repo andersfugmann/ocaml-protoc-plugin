@@ -1,4 +1,4 @@
-## 6.0.0: Unreleased
+## 6.0.0: 2014-04-13
 
 ### New features
 - [x] Implement json serialization and deserialization (#5)
