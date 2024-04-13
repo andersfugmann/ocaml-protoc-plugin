@@ -50,11 +50,15 @@ let group ~f lines =
   in
   inner [] [] false lines
 
+let starts_with_regex ~regex str =
+  let regex = Str.regexp ("^" ^ regex) in
+  Str.string_match regex str 0
+
 (** Merge groups when the list groups ends with a line that starts with a '-' *)
 let rec merge_list_groups = function
   | (false, l1) :: (true, l2) :: xs ->
     begin match List.rev l1 with
-    | s :: _ when String.starts_with ~prefix:" -" s ->
+    | s :: _ when starts_with_regex ~regex:"[ ]*- " s ->
       (false, l1 @ l2) :: merge_list_groups xs
     | _ -> (false, l1) :: (true, l2) :: merge_list_groups xs
     end
@@ -87,7 +91,7 @@ let map_comments comments =
   |> String.concat ~sep:"\n\n"
   |> String.split_on_char ~sep:'\n'
   |> List.map ~f:(trim_end ~chars:" \n\t")
-  |> group ~f:(String.starts_with ~prefix:"  ")
+  |> group ~f:(fun s -> String.starts_with ~prefix:"  " s && not (starts_with_regex ~regex:"[ ]*- " s))
   |> merge_list_groups
   |> List.map ~f:(function
     | (false, lines) ->
@@ -148,7 +152,7 @@ let append_deprecaton_if ~deprecated level str =
       | `Item -> "@@"
       | `Floating -> "@@@"
     in
-    Printf.sprintf "%s[%socaml.alert protobuf \"Deprecated global\"]" str level
+    Printf.sprintf "%s[%socaml.alert protobuf \"Marked as deprecated in the .proto file\"]" str level
 
 let append_comments ~comments str =
   let comment_str =
