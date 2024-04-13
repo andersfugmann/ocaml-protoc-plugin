@@ -7,9 +7,13 @@ let failwith_f fmt =
 module String = struct
   include String
 
+  let starts_with ~prefix s =
+    let regex = Str.regexp ("^" ^ Str.quote prefix) in
+    Str.string_match regex s 0
+
   let trim_end ~chars s =
-    let chars = String.to_seq chars |> List.of_seq in
-    let len = String.length s in
+    let chars = to_seq chars |> List.of_seq in
+    let len = length s in
     let rcount s =
       let rec inner = function
         | 0 -> len
@@ -20,7 +24,7 @@ module String = struct
     in
     match rcount s with
     | 0 -> s
-    | n -> String.sub ~pos:0 ~len:(String.length s - n) s
+    | n -> sub ~pos:0 ~len:(length s - n) s
 
   let starts_with_regex ~regex str =
     let regex = Str.regexp ("^" ^ regex) in
@@ -44,9 +48,9 @@ module List = struct
 
   let group ~f lines =
     let prepend acc group last =
-      let acc = match List.is_empty group with
+      let acc = match is_empty group with
         | true -> acc
-        | false -> (last, List.rev group) :: acc
+        | false -> (last, rev group) :: acc
       in
       acc
     in
@@ -55,7 +59,7 @@ module List = struct
         inner acc (x :: group) last xs
       | x :: xs ->
         inner (prepend acc group last) [x] (not last) xs
-      | [] -> List.rev (prepend acc group last)
+      | [] -> rev (prepend acc group last)
     in
     inner [] [] false lines
 
