@@ -1,4 +1,6 @@
-open StdLabels
+open !StdLabels
+open !MoreLabels
+open !Utils
 
 type t = {
   mutable indent : string;
@@ -13,34 +15,71 @@ let decr t =
     t.indent <- String.sub ~pos:0 ~len:(String.length t.indent - 2) t.indent
   | false -> failwith "Cannot decr indentation level at this point"
 
-let emit t indent fmt =
-  let trim_end ~char s =
-    let len = String.length s in
-    let rcount s =
-      let rec inner = function
-        | 0 -> len
-        | n when s.[n - 1] = char -> inner (n - 1)
-        | n -> len - n
+(** Merge groups when the list groups ends with a line that starts with a '-' *)
+let rec merge_list_groups = function
+  | (false, l1) :: (true, l2) :: xs ->
+    begin match List.rev l1 with
+    | s :: _ when String.starts_with_regex ~regex:"[ ]*- " s ->
+      (false, l1 @ l2) :: merge_list_groups xs
+    | _ -> (false, l1) :: (true, l2) :: merge_list_groups xs
+    end
+  | x :: xs ->
+    x :: merge_list_groups xs
+  | [] -> []
+
+let remove_trailing_empty_lines lines =
+  lines
+  |> List.rev
+  |> List.drop_while ~f:((=) "")
+  |> List.rev
+
+let escape_comment s =
+  String.to_seq s
+  |> Seq.map (function
+    | '{' | '}' | '[' | ']' | '@' | '\\' as ch -> Printf.sprintf "\\%c" ch
+    | ch -> Printf.sprintf "%c" ch
+  )
+  |> List.of_seq
+  |> String.concat ~sep:""
+
+
+let map_comments comments =
+  comments
+  |> String.concat ~sep:"\n\n"
+  |> String.split_on_char ~sep:'\n'
+  |> List.map ~f:(String.trim_end ~chars:" \n\t")
+  |> List.group ~f:(fun s -> String.starts_with ~prefix:"  " s && not (String.starts_with_regex ~regex:"[ ]*- " s))
+  |> merge_list_groups
+  |> List.map ~f:(function
+    | (false, lines) ->
+      lines
+      |> List.map ~f:String.trim
+      |> remove_trailing_empty_lines
+      |> List.map ~f:escape_comment
+    | (true, lines) ->
+      let lines =
+        lines
+        |> List.map ~f:(String.replace ~substring:"v}" ~f:(fun _ -> "v\\}"))
+        |> remove_trailing_empty_lines
       in
-      inner len
-    in
-    match rcount s with
-    | 0 -> s
-    | n -> String.sub ~pos:0 ~len:(String.length s - n) s
-  in
+      (* TODO: Remove indentation *)
+      "{v" :: lines @ ["v}"]
+  )
+  |> List.flatten
+  |> List.rev
+  |> List.drop_while ~f:(fun x -> x = "")
+  |> List.rev
+
+let emit t indent fmt =
   let prepend s =
-    match String.split_on_char ~sep:'\n' s with
-    | line :: lines ->
+    String.split_on_char ~sep:'\n' s
+    |> List.iter ~f:(fun line ->
       (* Replace tabs with indent *)
       let line =
         "" :: String.split_on_char ~sep:'\t' line
         |> String.concat ~sep:t.indent
       in
-      t.code <- (trim_end ~char:' ' line) :: t.code;
-      incr t;
-      List.iter lines ~f:(fun line -> t.code <- (trim_end ~char:' ' (t.indent ^ line)) :: t.code);
-      decr t;
-    | [] -> ()
+      t.code <- (String.trim_end ~chars:" " line) :: t.code);
   in
   let emit s =
     match indent with
@@ -70,7 +109,34 @@ let append_deprecaton_if ~deprecated level str =
       | `Item -> "@@"
       | `Floating -> "@@@"
     in
-    Printf.sprintf "%s[%socaml.alert protobuf \"Deprecated global\"]" str level
+    Printf.sprintf "%s[%socaml.alert protobuf \"Marked as deprecated in the .proto file\"]" str level
+
+let append_comments ~comments str =
+  let comment_str =
+    map_comments comments
+    |> String.concat ~sep:"\n"
+    |> String.trim
+  in
+  match List.is_empty comments with
+  | true -> str
+  | false ->
+    Printf.sprintf "%s(** %s *)" str comment_str
+
+let emit_comment ~(position:[`Leading | `Trailing]) t = function
+  | [] -> ()
+  | comments ->
+    if position = `Leading then emit t `None "";
+    let comments = map_comments comments in
+    let () =
+      match comments with
+      | [ comment ] -> emit t `None "(** %s *)" (String.trim comment)
+      | comments ->
+        emit t `Begin "(**";
+        List.iter ~f:(emit t `None "%s") comments;
+        emit t `End "*)";
+    in
+    (* if position = `Trailing then emit t `None ""; (* Dont think this is needed *) *)
+    ()
 
 let contents t =
   List.map ~f:(Printf.sprintf "%s") (List.rev t.code)

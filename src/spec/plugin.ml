@@ -28,239 +28,770 @@ end
 module rec Google : sig
   module rec Protobuf : sig
     module rec Compiler : sig
+
+      (** The version number of protocol compiler. *)
       module rec Version : sig
+        type t = {
+        major: int option;
+        minor: int option;
+        patch: int option;
+        suffix: string option;(** A suffix for alpha, beta or rc release, e.g., "alpha-1", "rc2". It should
+        be empty for mainline stable releases. *)
+        }
+        val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
+        (** Helper function to generate a message using default values *)
+
+        val to_proto: t -> Runtime'.Writer.t
+        (** Serialize the message to binary format *)
+
+        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from binary format *)
+
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        (** Serialize to Json (compatible with Yojson.Basic.t) *)
+
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from Json (compatible with Yojson.Basic.t) *)
+
         val name: unit -> string
-        type t = { major: int option; minor: int option; patch: int option; suffix: string option }
+        (** Fully qualified protobuf name of this message *)
+
+        (**/**)
         type make_t = ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
-        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
-        val to_proto: t -> Runtime'.Writer.t
-        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
         val from_json_exn: Runtime'.Json.t -> t
-        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (**/**)
       end
+
+      (** An encoded CodeGeneratorRequest is written to the plugin's stdin. *)
       and CodeGeneratorRequest : sig
+        type t = {
+        file_to_generate: string list;(** The .proto files that were explicitly listed on the command-line.  The
+        code generator should generate code only for these files.  Each file's
+        descriptor will be included in proto_file, below. *)
+        parameter: string option;(** The generator parameter passed on the command-line. *)
+        compiler_version: Version.t option;(** The version number of protocol compiler. *)
+        proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list;(** FileDescriptorProtos for all files in files_to_generate and everything
+        they import.  The files will appear in topological order, so each file
+        appears before any file that imports it.
+
+        protoc guarantees that all proto_files will be written after
+        the fields above, even though this is not technically guaranteed by the
+        protobuf wire format.  This theoretically could allow a plugin to stream
+        in the FileDescriptorProtos and handle them one by one rather than read
+        the entire set into memory at once.  However, as of this writing, this
+        is not similarly optimized on protoc's end -- it will store all fields in
+        memory at once before sending them to the plugin.
+
+        Type names of fields and extensions in the FileDescriptorProto are always
+        fully qualified. *)
+        }
+        val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
+        (** Helper function to generate a message using default values *)
+
+        val to_proto: t -> Runtime'.Writer.t
+        (** Serialize the message to binary format *)
+
+        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from binary format *)
+
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        (** Serialize to Json (compatible with Yojson.Basic.t) *)
+
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from Json (compatible with Yojson.Basic.t) *)
+
         val name: unit -> string
-        type t = { file_to_generate: string list; parameter: string option; compiler_version: Version.t option; proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list }
+        (** Fully qualified protobuf name of this message *)
+
+        (**/**)
         type make_t = ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
-        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
-        val to_proto: t -> Runtime'.Writer.t
-        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
         val from_json_exn: Runtime'.Json.t -> t
-        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (**/**)
       end
+
+      (** The plugin writes an encoded CodeGeneratorResponse to stdout. *)
       and CodeGeneratorResponse : sig
+
+        (** Sync with code_generator.h. *)
         module rec Feature : sig
-          type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
+          type t =
+            | FEATURE_NONE
+            | FEATURE_PROTO3_OPTIONAL
+
           val name: unit -> string
+          (** Fully qualified protobuf name of this enum *)
+
+          (**/**)
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
           val to_string: t -> string
           val from_string_exn: string -> t
+          (**/**)
         end
+
+        (** Represents a single generated file. *)
         and File : sig
+          type t = {
+          name: string option;(** The file name, relative to the output directory.  The name must not
+          contain "." or ".." components and must be relative, not be absolute (so,
+          the file cannot lie outside the output directory).  "/" must be used as
+          the path separator, not "\\".
+
+          If the name is omitted, the content will be appended to the previous
+          file.  This allows the generator to break large files into small chunks,
+          and allows the generated text to be streamed back to protoc so that large
+          files need not reside completely in memory at one time.  Note that as of
+          this writing protoc does not optimize for this -- it will read the entire
+          CodeGeneratorResponse before writing files to disk. *)
+          insertion_point: string option;(** If non-empty, indicates that the named file should already exist, and the
+          content here is to be inserted into that file at a defined insertion
+          point.  This feature allows a code generator to extend the output
+          produced by another code generator.  The original generator may provide
+          insertion points by placing special annotations in the file that look
+          like:
+          {v
+             @@protoc_insertion_point(NAME)
+          v}
+          The annotation can have arbitrary text before and after it on the line,
+          which allows it to be placed in a comment.  NAME should be replaced with
+          an identifier naming the point -- this is what other generators will use
+          as the insertion_point.  Code inserted at this point will be placed
+          immediately above the line containing the insertion point (thus multiple
+          insertions to the same point will come out in the order they were added).
+          The double-\@ is intended to make it unlikely that the generated code
+          could contain things that look like insertion points by accident.
+
+          For example, the C++ code generator places the following line in the
+          .pb.h files that it generates:
+          {v
+             // @@protoc_insertion_point(namespace_scope)
+          v}
+          This line appears within the scope of the file's package namespace, but
+          outside of any particular class.  Another plugin can then specify the
+          insertion_point "namespace_scope" to generate additional classes or
+          other declarations that should be placed in this scope.
+
+          Note that if the line containing the insertion point begins with
+          whitespace, the same whitespace will be added to every line of the
+          inserted text.  This is useful for languages like Python, where
+          indentation matters.  In these languages, the insertion point comment
+          should be indented the same amount as any inserted code will need to be
+          in order to work correctly in that context.
+
+          The code generator that generates the initial file and the one which
+          inserts into it must both run as part of a single invocation of protoc.
+          Code generators are executed in the order in which they appear on the
+          command line.
+
+          If |insertion_point| is present, |name| must also be present. *)
+          content: string option;(** The file contents. *)
+          generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option;(** Information describing the file content being inserted. If an insertion
+          point is used, this information will be appropriately offset and inserted
+          into the code generation metadata for the generated files. *)
+          }
+          val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
+          (** Helper function to generate a message using default values *)
+
+          val to_proto: t -> Runtime'.Writer.t
+          (** Serialize the message to binary format *)
+
+          val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
+          (** Deserialize from binary format *)
+
+          val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+          (** Serialize to Json (compatible with Yojson.Basic.t) *)
+
+          val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+          (** Deserialize from Json (compatible with Yojson.Basic.t) *)
+
           val name: unit -> string
-          type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }
+          (** Fully qualified protobuf name of this message *)
+
+          (**/**)
           type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
-          val make: make_t
           val merge: t -> t -> t
           val to_proto': Runtime'.Writer.t -> t -> unit
-          val to_proto: t -> Runtime'.Writer.t
-          val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
-          val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
           val from_json_exn: Runtime'.Json.t -> t
-          val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+          (**/**)
         end
+        type t = {
+        error: string option;(** Error message.  If non-empty, code generation failed.  The plugin process
+        should exit with status code zero even if it reports an error in this way.
+
+        This should be used to indicate errors in .proto files which prevent the
+        code generator from generating correct code.  Errors which indicate a
+        problem in protoc itself -- such as the input CodeGeneratorRequest being
+        unparseable -- should be reported by writing a message to stderr and
+        exiting with a non-zero status code. *)
+        supported_features: int option;(** A bitmask of supported features that the code generator supports.
+        This is a bitwise "or" of values from the Feature enum. *)
+        file: File.t list;
+        }
+        val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
+        (** Helper function to generate a message using default values *)
+
+        val to_proto: t -> Runtime'.Writer.t
+        (** Serialize the message to binary format *)
+
+        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from binary format *)
+
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        (** Serialize to Json (compatible with Yojson.Basic.t) *)
+
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from Json (compatible with Yojson.Basic.t) *)
+
         val name: unit -> string
-        type t = { error: string option; supported_features: int option; file: File.t list }
+        (** Fully qualified protobuf name of this message *)
+
+        (**/**)
         type make_t = ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
-        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
-        val to_proto: t -> Runtime'.Writer.t
-        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
         val from_json_exn: Runtime'.Json.t -> t
-        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (**/**)
       end
     end
   end
 end = struct
   module rec Protobuf : sig
     module rec Compiler : sig
+
+      (** The version number of protocol compiler. *)
       module rec Version : sig
+        type t = {
+        major: int option;
+        minor: int option;
+        patch: int option;
+        suffix: string option;(** A suffix for alpha, beta or rc release, e.g., "alpha-1", "rc2". It should
+        be empty for mainline stable releases. *)
+        }
+        val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
+        (** Helper function to generate a message using default values *)
+
+        val to_proto: t -> Runtime'.Writer.t
+        (** Serialize the message to binary format *)
+
+        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from binary format *)
+
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        (** Serialize to Json (compatible with Yojson.Basic.t) *)
+
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from Json (compatible with Yojson.Basic.t) *)
+
         val name: unit -> string
-        type t = { major: int option; minor: int option; patch: int option; suffix: string option }
+        (** Fully qualified protobuf name of this message *)
+
+        (**/**)
         type make_t = ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
-        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
-        val to_proto: t -> Runtime'.Writer.t
-        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
         val from_json_exn: Runtime'.Json.t -> t
-        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (**/**)
       end
+
+      (** An encoded CodeGeneratorRequest is written to the plugin's stdin. *)
       and CodeGeneratorRequest : sig
+        type t = {
+        file_to_generate: string list;(** The .proto files that were explicitly listed on the command-line.  The
+        code generator should generate code only for these files.  Each file's
+        descriptor will be included in proto_file, below. *)
+        parameter: string option;(** The generator parameter passed on the command-line. *)
+        compiler_version: Version.t option;(** The version number of protocol compiler. *)
+        proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list;(** FileDescriptorProtos for all files in files_to_generate and everything
+        they import.  The files will appear in topological order, so each file
+        appears before any file that imports it.
+
+        protoc guarantees that all proto_files will be written after
+        the fields above, even though this is not technically guaranteed by the
+        protobuf wire format.  This theoretically could allow a plugin to stream
+        in the FileDescriptorProtos and handle them one by one rather than read
+        the entire set into memory at once.  However, as of this writing, this
+        is not similarly optimized on protoc's end -- it will store all fields in
+        memory at once before sending them to the plugin.
+
+        Type names of fields and extensions in the FileDescriptorProto are always
+        fully qualified. *)
+        }
+        val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
+        (** Helper function to generate a message using default values *)
+
+        val to_proto: t -> Runtime'.Writer.t
+        (** Serialize the message to binary format *)
+
+        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from binary format *)
+
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        (** Serialize to Json (compatible with Yojson.Basic.t) *)
+
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from Json (compatible with Yojson.Basic.t) *)
+
         val name: unit -> string
-        type t = { file_to_generate: string list; parameter: string option; compiler_version: Version.t option; proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list }
+        (** Fully qualified protobuf name of this message *)
+
+        (**/**)
         type make_t = ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
-        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
-        val to_proto: t -> Runtime'.Writer.t
-        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
         val from_json_exn: Runtime'.Json.t -> t
-        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (**/**)
       end
+
+      (** The plugin writes an encoded CodeGeneratorResponse to stdout. *)
       and CodeGeneratorResponse : sig
+
+        (** Sync with code_generator.h. *)
         module rec Feature : sig
-          type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
+          type t =
+            | FEATURE_NONE
+            | FEATURE_PROTO3_OPTIONAL
+
           val name: unit -> string
+          (** Fully qualified protobuf name of this enum *)
+
+          (**/**)
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
           val to_string: t -> string
           val from_string_exn: string -> t
+          (**/**)
         end
+
+        (** Represents a single generated file. *)
         and File : sig
+          type t = {
+          name: string option;(** The file name, relative to the output directory.  The name must not
+          contain "." or ".." components and must be relative, not be absolute (so,
+          the file cannot lie outside the output directory).  "/" must be used as
+          the path separator, not "\\".
+
+          If the name is omitted, the content will be appended to the previous
+          file.  This allows the generator to break large files into small chunks,
+          and allows the generated text to be streamed back to protoc so that large
+          files need not reside completely in memory at one time.  Note that as of
+          this writing protoc does not optimize for this -- it will read the entire
+          CodeGeneratorResponse before writing files to disk. *)
+          insertion_point: string option;(** If non-empty, indicates that the named file should already exist, and the
+          content here is to be inserted into that file at a defined insertion
+          point.  This feature allows a code generator to extend the output
+          produced by another code generator.  The original generator may provide
+          insertion points by placing special annotations in the file that look
+          like:
+          {v
+             @@protoc_insertion_point(NAME)
+          v}
+          The annotation can have arbitrary text before and after it on the line,
+          which allows it to be placed in a comment.  NAME should be replaced with
+          an identifier naming the point -- this is what other generators will use
+          as the insertion_point.  Code inserted at this point will be placed
+          immediately above the line containing the insertion point (thus multiple
+          insertions to the same point will come out in the order they were added).
+          The double-\@ is intended to make it unlikely that the generated code
+          could contain things that look like insertion points by accident.
+
+          For example, the C++ code generator places the following line in the
+          .pb.h files that it generates:
+          {v
+             // @@protoc_insertion_point(namespace_scope)
+          v}
+          This line appears within the scope of the file's package namespace, but
+          outside of any particular class.  Another plugin can then specify the
+          insertion_point "namespace_scope" to generate additional classes or
+          other declarations that should be placed in this scope.
+
+          Note that if the line containing the insertion point begins with
+          whitespace, the same whitespace will be added to every line of the
+          inserted text.  This is useful for languages like Python, where
+          indentation matters.  In these languages, the insertion point comment
+          should be indented the same amount as any inserted code will need to be
+          in order to work correctly in that context.
+
+          The code generator that generates the initial file and the one which
+          inserts into it must both run as part of a single invocation of protoc.
+          Code generators are executed in the order in which they appear on the
+          command line.
+
+          If |insertion_point| is present, |name| must also be present. *)
+          content: string option;(** The file contents. *)
+          generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option;(** Information describing the file content being inserted. If an insertion
+          point is used, this information will be appropriately offset and inserted
+          into the code generation metadata for the generated files. *)
+          }
+          val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
+          (** Helper function to generate a message using default values *)
+
+          val to_proto: t -> Runtime'.Writer.t
+          (** Serialize the message to binary format *)
+
+          val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
+          (** Deserialize from binary format *)
+
+          val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+          (** Serialize to Json (compatible with Yojson.Basic.t) *)
+
+          val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+          (** Deserialize from Json (compatible with Yojson.Basic.t) *)
+
           val name: unit -> string
-          type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }
+          (** Fully qualified protobuf name of this message *)
+
+          (**/**)
           type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
-          val make: make_t
           val merge: t -> t -> t
           val to_proto': Runtime'.Writer.t -> t -> unit
-          val to_proto: t -> Runtime'.Writer.t
-          val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
-          val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
           val from_json_exn: Runtime'.Json.t -> t
-          val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+          (**/**)
         end
+        type t = {
+        error: string option;(** Error message.  If non-empty, code generation failed.  The plugin process
+        should exit with status code zero even if it reports an error in this way.
+
+        This should be used to indicate errors in .proto files which prevent the
+        code generator from generating correct code.  Errors which indicate a
+        problem in protoc itself -- such as the input CodeGeneratorRequest being
+        unparseable -- should be reported by writing a message to stderr and
+        exiting with a non-zero status code. *)
+        supported_features: int option;(** A bitmask of supported features that the code generator supports.
+        This is a bitwise "or" of values from the Feature enum. *)
+        file: File.t list;
+        }
+        val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
+        (** Helper function to generate a message using default values *)
+
+        val to_proto: t -> Runtime'.Writer.t
+        (** Serialize the message to binary format *)
+
+        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from binary format *)
+
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        (** Serialize to Json (compatible with Yojson.Basic.t) *)
+
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from Json (compatible with Yojson.Basic.t) *)
+
         val name: unit -> string
-        type t = { error: string option; supported_features: int option; file: File.t list }
+        (** Fully qualified protobuf name of this message *)
+
+        (**/**)
         type make_t = ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
-        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
-        val to_proto: t -> Runtime'.Writer.t
-        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
         val from_json_exn: Runtime'.Json.t -> t
-        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (**/**)
       end
     end
   end = struct
     module rec Compiler : sig
+
+      (** The version number of protocol compiler. *)
       module rec Version : sig
+        type t = {
+        major: int option;
+        minor: int option;
+        patch: int option;
+        suffix: string option;(** A suffix for alpha, beta or rc release, e.g., "alpha-1", "rc2". It should
+        be empty for mainline stable releases. *)
+        }
+        val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
+        (** Helper function to generate a message using default values *)
+
+        val to_proto: t -> Runtime'.Writer.t
+        (** Serialize the message to binary format *)
+
+        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from binary format *)
+
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        (** Serialize to Json (compatible with Yojson.Basic.t) *)
+
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from Json (compatible with Yojson.Basic.t) *)
+
         val name: unit -> string
-        type t = { major: int option; minor: int option; patch: int option; suffix: string option }
+        (** Fully qualified protobuf name of this message *)
+
+        (**/**)
         type make_t = ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
-        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
-        val to_proto: t -> Runtime'.Writer.t
-        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
         val from_json_exn: Runtime'.Json.t -> t
-        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (**/**)
       end
+
+      (** An encoded CodeGeneratorRequest is written to the plugin's stdin. *)
       and CodeGeneratorRequest : sig
+        type t = {
+        file_to_generate: string list;(** The .proto files that were explicitly listed on the command-line.  The
+        code generator should generate code only for these files.  Each file's
+        descriptor will be included in proto_file, below. *)
+        parameter: string option;(** The generator parameter passed on the command-line. *)
+        compiler_version: Version.t option;(** The version number of protocol compiler. *)
+        proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list;(** FileDescriptorProtos for all files in files_to_generate and everything
+        they import.  The files will appear in topological order, so each file
+        appears before any file that imports it.
+
+        protoc guarantees that all proto_files will be written after
+        the fields above, even though this is not technically guaranteed by the
+        protobuf wire format.  This theoretically could allow a plugin to stream
+        in the FileDescriptorProtos and handle them one by one rather than read
+        the entire set into memory at once.  However, as of this writing, this
+        is not similarly optimized on protoc's end -- it will store all fields in
+        memory at once before sending them to the plugin.
+
+        Type names of fields and extensions in the FileDescriptorProto are always
+        fully qualified. *)
+        }
+        val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
+        (** Helper function to generate a message using default values *)
+
+        val to_proto: t -> Runtime'.Writer.t
+        (** Serialize the message to binary format *)
+
+        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from binary format *)
+
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        (** Serialize to Json (compatible with Yojson.Basic.t) *)
+
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from Json (compatible with Yojson.Basic.t) *)
+
         val name: unit -> string
-        type t = { file_to_generate: string list; parameter: string option; compiler_version: Version.t option; proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list }
+        (** Fully qualified protobuf name of this message *)
+
+        (**/**)
         type make_t = ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
-        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
-        val to_proto: t -> Runtime'.Writer.t
-        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
         val from_json_exn: Runtime'.Json.t -> t
-        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (**/**)
       end
+
+      (** The plugin writes an encoded CodeGeneratorResponse to stdout. *)
       and CodeGeneratorResponse : sig
+
+        (** Sync with code_generator.h. *)
         module rec Feature : sig
-          type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
+          type t =
+            | FEATURE_NONE
+            | FEATURE_PROTO3_OPTIONAL
+
           val name: unit -> string
+          (** Fully qualified protobuf name of this enum *)
+
+          (**/**)
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
           val to_string: t -> string
           val from_string_exn: string -> t
+          (**/**)
         end
+
+        (** Represents a single generated file. *)
         and File : sig
+          type t = {
+          name: string option;(** The file name, relative to the output directory.  The name must not
+          contain "." or ".." components and must be relative, not be absolute (so,
+          the file cannot lie outside the output directory).  "/" must be used as
+          the path separator, not "\\".
+
+          If the name is omitted, the content will be appended to the previous
+          file.  This allows the generator to break large files into small chunks,
+          and allows the generated text to be streamed back to protoc so that large
+          files need not reside completely in memory at one time.  Note that as of
+          this writing protoc does not optimize for this -- it will read the entire
+          CodeGeneratorResponse before writing files to disk. *)
+          insertion_point: string option;(** If non-empty, indicates that the named file should already exist, and the
+          content here is to be inserted into that file at a defined insertion
+          point.  This feature allows a code generator to extend the output
+          produced by another code generator.  The original generator may provide
+          insertion points by placing special annotations in the file that look
+          like:
+          {v
+             @@protoc_insertion_point(NAME)
+          v}
+          The annotation can have arbitrary text before and after it on the line,
+          which allows it to be placed in a comment.  NAME should be replaced with
+          an identifier naming the point -- this is what other generators will use
+          as the insertion_point.  Code inserted at this point will be placed
+          immediately above the line containing the insertion point (thus multiple
+          insertions to the same point will come out in the order they were added).
+          The double-\@ is intended to make it unlikely that the generated code
+          could contain things that look like insertion points by accident.
+
+          For example, the C++ code generator places the following line in the
+          .pb.h files that it generates:
+          {v
+             // @@protoc_insertion_point(namespace_scope)
+          v}
+          This line appears within the scope of the file's package namespace, but
+          outside of any particular class.  Another plugin can then specify the
+          insertion_point "namespace_scope" to generate additional classes or
+          other declarations that should be placed in this scope.
+
+          Note that if the line containing the insertion point begins with
+          whitespace, the same whitespace will be added to every line of the
+          inserted text.  This is useful for languages like Python, where
+          indentation matters.  In these languages, the insertion point comment
+          should be indented the same amount as any inserted code will need to be
+          in order to work correctly in that context.
+
+          The code generator that generates the initial file and the one which
+          inserts into it must both run as part of a single invocation of protoc.
+          Code generators are executed in the order in which they appear on the
+          command line.
+
+          If |insertion_point| is present, |name| must also be present. *)
+          content: string option;(** The file contents. *)
+          generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option;(** Information describing the file content being inserted. If an insertion
+          point is used, this information will be appropriately offset and inserted
+          into the code generation metadata for the generated files. *)
+          }
+          val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
+          (** Helper function to generate a message using default values *)
+
+          val to_proto: t -> Runtime'.Writer.t
+          (** Serialize the message to binary format *)
+
+          val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
+          (** Deserialize from binary format *)
+
+          val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+          (** Serialize to Json (compatible with Yojson.Basic.t) *)
+
+          val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+          (** Deserialize from Json (compatible with Yojson.Basic.t) *)
+
           val name: unit -> string
-          type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }
+          (** Fully qualified protobuf name of this message *)
+
+          (**/**)
           type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
-          val make: make_t
           val merge: t -> t -> t
           val to_proto': Runtime'.Writer.t -> t -> unit
-          val to_proto: t -> Runtime'.Writer.t
-          val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
-          val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
           val from_json_exn: Runtime'.Json.t -> t
-          val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+          (**/**)
         end
+        type t = {
+        error: string option;(** Error message.  If non-empty, code generation failed.  The plugin process
+        should exit with status code zero even if it reports an error in this way.
+
+        This should be used to indicate errors in .proto files which prevent the
+        code generator from generating correct code.  Errors which indicate a
+        problem in protoc itself -- such as the input CodeGeneratorRequest being
+        unparseable -- should be reported by writing a message to stderr and
+        exiting with a non-zero status code. *)
+        supported_features: int option;(** A bitmask of supported features that the code generator supports.
+        This is a bitwise "or" of values from the Feature enum. *)
+        file: File.t list;
+        }
+        val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
+        (** Helper function to generate a message using default values *)
+
+        val to_proto: t -> Runtime'.Writer.t
+        (** Serialize the message to binary format *)
+
+        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from binary format *)
+
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        (** Serialize to Json (compatible with Yojson.Basic.t) *)
+
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from Json (compatible with Yojson.Basic.t) *)
+
         val name: unit -> string
-        type t = { error: string option; supported_features: int option; file: File.t list }
+        (** Fully qualified protobuf name of this message *)
+
+        (**/**)
         type make_t = ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
-        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
-        val to_proto: t -> Runtime'.Writer.t
-        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
         val from_json_exn: Runtime'.Json.t -> t
-        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (**/**)
       end
     end = struct
       module rec Version : sig
+        type t = {
+        major: int option;
+        minor: int option;
+        patch: int option;
+        suffix: string option;(** A suffix for alpha, beta or rc release, e.g., "alpha-1", "rc2". It should
+        be empty for mainline stable releases. *)
+        }
+        val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
+        (** Helper function to generate a message using default values *)
+
+        val to_proto: t -> Runtime'.Writer.t
+        (** Serialize the message to binary format *)
+
+        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from binary format *)
+
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        (** Serialize to Json (compatible with Yojson.Basic.t) *)
+
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from Json (compatible with Yojson.Basic.t) *)
+
         val name: unit -> string
-        type t = { major: int option; minor: int option; patch: int option; suffix: string option }
+        (** Fully qualified protobuf name of this message *)
+
+        (**/**)
         type make_t = ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
-        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
-        val to_proto: t -> Runtime'.Writer.t
-        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
         val from_json_exn: Runtime'.Json.t -> t
-        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (**/**)
       end = struct
+        module This'_ = Version
         let name () = ".google.protobuf.compiler.Version"
-        type t = { major: int option; minor: int option; patch: int option; suffix: string option }
+        type t = {
+        major: int option;
+        minor: int option;
+        patch: int option;
+        suffix: string option;(** A suffix for alpha, beta or rc release, e.g., "alpha-1", "rc2". It should
+        be empty for mainline stable releases. *)
+        }
         type make_t = ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
         let make ?major ?minor ?patch ?suffix () = { major; minor; patch; suffix }
         let merge =
-          let merge_major = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "major", "major"), int32_int) ) in
-          let merge_minor = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "minor", "minor"), int32_int) ) in
-          let merge_patch = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "patch", "patch"), int32_int) ) in
-          let merge_suffix = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((4, "suffix", "suffix"), string) ) in
-          fun t1 t2 -> {
-            major = (merge_major t1.major t2.major);
-            minor = (merge_minor t1.minor t2.minor);
-            patch = (merge_patch t1.patch t2.patch);
-            suffix = (merge_suffix t1.suffix t2.suffix);
-           }
+        let merge_major = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "major", "major"), int32_int) ) in
+        let merge_minor = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "minor", "minor"), int32_int) ) in
+        let merge_patch = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "patch", "patch"), int32_int) ) in
+        let merge_suffix = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((4, "suffix", "suffix"), string) ) in
+        fun t1 t2 -> {
+        major = (merge_major t1.major t2.major);
+        minor = (merge_minor t1.minor t2.minor);
+        patch = (merge_patch t1.patch t2.patch);
+        suffix = (merge_suffix t1.suffix t2.suffix);
+         }
         let spec () = Runtime'.Spec.( basic_opt ((1, "major", "major"), int32_int) ^:: basic_opt ((2, "minor", "minor"), int32_int) ^:: basic_opt ((3, "patch", "patch"), int32_int) ^:: basic_opt ((4, "suffix", "suffix"), string) ^:: nil )
         let to_proto' =
           let serialize = Runtime'.Serialize.serialize (spec ()) in
@@ -280,34 +811,89 @@ end = struct
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       and CodeGeneratorRequest : sig
+        type t = {
+        file_to_generate: string list;(** The .proto files that were explicitly listed on the command-line.  The
+        code generator should generate code only for these files.  Each file's
+        descriptor will be included in proto_file, below. *)
+        parameter: string option;(** The generator parameter passed on the command-line. *)
+        compiler_version: Version.t option;(** The version number of protocol compiler. *)
+        proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list;(** FileDescriptorProtos for all files in files_to_generate and everything
+        they import.  The files will appear in topological order, so each file
+        appears before any file that imports it.
+
+        protoc guarantees that all proto_files will be written after
+        the fields above, even though this is not technically guaranteed by the
+        protobuf wire format.  This theoretically could allow a plugin to stream
+        in the FileDescriptorProtos and handle them one by one rather than read
+        the entire set into memory at once.  However, as of this writing, this
+        is not similarly optimized on protoc's end -- it will store all fields in
+        memory at once before sending them to the plugin.
+
+        Type names of fields and extensions in the FileDescriptorProto are always
+        fully qualified. *)
+        }
+        val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
+        (** Helper function to generate a message using default values *)
+
+        val to_proto: t -> Runtime'.Writer.t
+        (** Serialize the message to binary format *)
+
+        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from binary format *)
+
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        (** Serialize to Json (compatible with Yojson.Basic.t) *)
+
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from Json (compatible with Yojson.Basic.t) *)
+
         val name: unit -> string
-        type t = { file_to_generate: string list; parameter: string option; compiler_version: Version.t option; proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list }
+        (** Fully qualified protobuf name of this message *)
+
+        (**/**)
         type make_t = ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
-        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
-        val to_proto: t -> Runtime'.Writer.t
-        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
         val from_json_exn: Runtime'.Json.t -> t
-        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (**/**)
       end = struct
+        module This'_ = CodeGeneratorRequest
         let name () = ".google.protobuf.compiler.CodeGeneratorRequest"
-        type t = { file_to_generate: string list; parameter: string option; compiler_version: Version.t option; proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list }
+        type t = {
+        file_to_generate: string list;(** The .proto files that were explicitly listed on the command-line.  The
+        code generator should generate code only for these files.  Each file's
+        descriptor will be included in proto_file, below. *)
+        parameter: string option;(** The generator parameter passed on the command-line. *)
+        compiler_version: Version.t option;(** The version number of protocol compiler. *)
+        proto_file: Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list;(** FileDescriptorProtos for all files in files_to_generate and everything
+        they import.  The files will appear in topological order, so each file
+        appears before any file that imports it.
+
+        protoc guarantees that all proto_files will be written after
+        the fields above, even though this is not technically guaranteed by the
+        protobuf wire format.  This theoretically could allow a plugin to stream
+        in the FileDescriptorProtos and handle them one by one rather than read
+        the entire set into memory at once.  However, as of this writing, this
+        is not similarly optimized on protoc's end -- it will store all fields in
+        memory at once before sending them to the plugin.
+
+        Type names of fields and extensions in the FileDescriptorProto are always
+        fully qualified. *)
+        }
         type make_t = ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         let make ?(file_to_generate = []) ?parameter ?compiler_version ?(proto_file = []) () = { file_to_generate; parameter; compiler_version; proto_file }
         let merge =
-          let merge_file_to_generate = Runtime'.Merge.merge Runtime'.Spec.( repeated ((1, "file_to_generate", "fileToGenerate"), string, not_packed) ) in
-          let merge_parameter = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "parameter", "parameter"), string) ) in
-          let merge_compiler_version = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "compiler_version", "compilerVersion"), (message (module Version))) ) in
-          let merge_proto_file = Runtime'.Merge.merge Runtime'.Spec.( repeated ((15, "proto_file", "protoFile"), (message (module Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto)), not_packed) ) in
-          fun t1 t2 -> {
-            file_to_generate = (merge_file_to_generate t1.file_to_generate t2.file_to_generate);
-            parameter = (merge_parameter t1.parameter t2.parameter);
-            compiler_version = (merge_compiler_version t1.compiler_version t2.compiler_version);
-            proto_file = (merge_proto_file t1.proto_file t2.proto_file);
-           }
+        let merge_file_to_generate = Runtime'.Merge.merge Runtime'.Spec.( repeated ((1, "file_to_generate", "fileToGenerate"), string, not_packed) ) in
+        let merge_parameter = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "parameter", "parameter"), string) ) in
+        let merge_compiler_version = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "compiler_version", "compilerVersion"), (message (module Version))) ) in
+        let merge_proto_file = Runtime'.Merge.merge Runtime'.Spec.( repeated ((15, "proto_file", "protoFile"), (message (module Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto)), not_packed) ) in
+        fun t1 t2 -> {
+        file_to_generate = (merge_file_to_generate t1.file_to_generate t2.file_to_generate);
+        parameter = (merge_parameter t1.parameter t2.parameter);
+        compiler_version = (merge_compiler_version t1.compiler_version t2.compiler_version);
+        proto_file = (merge_proto_file t1.proto_file t2.proto_file);
+         }
         let spec () = Runtime'.Spec.( repeated ((1, "file_to_generate", "fileToGenerate"), string, not_packed) ^:: basic_opt ((2, "parameter", "parameter"), string) ^:: basic_opt ((3, "compiler_version", "compilerVersion"), (message (module Version))) ^:: repeated ((15, "proto_file", "protoFile"), (message (module Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto)), not_packed) ^:: nil )
         let to_proto' =
           let serialize = Runtime'.Serialize.serialize (spec ()) in
@@ -327,52 +913,172 @@ end = struct
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       and CodeGeneratorResponse : sig
+
+        (** Sync with code_generator.h. *)
         module rec Feature : sig
-          type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
+          type t =
+            | FEATURE_NONE
+            | FEATURE_PROTO3_OPTIONAL
+
           val name: unit -> string
+          (** Fully qualified protobuf name of this enum *)
+
+          (**/**)
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
           val to_string: t -> string
           val from_string_exn: string -> t
+          (**/**)
         end
+
+        (** Represents a single generated file. *)
         and File : sig
+          type t = {
+          name: string option;(** The file name, relative to the output directory.  The name must not
+          contain "." or ".." components and must be relative, not be absolute (so,
+          the file cannot lie outside the output directory).  "/" must be used as
+          the path separator, not "\\".
+
+          If the name is omitted, the content will be appended to the previous
+          file.  This allows the generator to break large files into small chunks,
+          and allows the generated text to be streamed back to protoc so that large
+          files need not reside completely in memory at one time.  Note that as of
+          this writing protoc does not optimize for this -- it will read the entire
+          CodeGeneratorResponse before writing files to disk. *)
+          insertion_point: string option;(** If non-empty, indicates that the named file should already exist, and the
+          content here is to be inserted into that file at a defined insertion
+          point.  This feature allows a code generator to extend the output
+          produced by another code generator.  The original generator may provide
+          insertion points by placing special annotations in the file that look
+          like:
+          {v
+             @@protoc_insertion_point(NAME)
+          v}
+          The annotation can have arbitrary text before and after it on the line,
+          which allows it to be placed in a comment.  NAME should be replaced with
+          an identifier naming the point -- this is what other generators will use
+          as the insertion_point.  Code inserted at this point will be placed
+          immediately above the line containing the insertion point (thus multiple
+          insertions to the same point will come out in the order they were added).
+          The double-\@ is intended to make it unlikely that the generated code
+          could contain things that look like insertion points by accident.
+
+          For example, the C++ code generator places the following line in the
+          .pb.h files that it generates:
+          {v
+             // @@protoc_insertion_point(namespace_scope)
+          v}
+          This line appears within the scope of the file's package namespace, but
+          outside of any particular class.  Another plugin can then specify the
+          insertion_point "namespace_scope" to generate additional classes or
+          other declarations that should be placed in this scope.
+
+          Note that if the line containing the insertion point begins with
+          whitespace, the same whitespace will be added to every line of the
+          inserted text.  This is useful for languages like Python, where
+          indentation matters.  In these languages, the insertion point comment
+          should be indented the same amount as any inserted code will need to be
+          in order to work correctly in that context.
+
+          The code generator that generates the initial file and the one which
+          inserts into it must both run as part of a single invocation of protoc.
+          Code generators are executed in the order in which they appear on the
+          command line.
+
+          If |insertion_point| is present, |name| must also be present. *)
+          content: string option;(** The file contents. *)
+          generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option;(** Information describing the file content being inserted. If an insertion
+          point is used, this information will be appropriately offset and inserted
+          into the code generation metadata for the generated files. *)
+          }
+          val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
+          (** Helper function to generate a message using default values *)
+
+          val to_proto: t -> Runtime'.Writer.t
+          (** Serialize the message to binary format *)
+
+          val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
+          (** Deserialize from binary format *)
+
+          val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+          (** Serialize to Json (compatible with Yojson.Basic.t) *)
+
+          val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+          (** Deserialize from Json (compatible with Yojson.Basic.t) *)
+
           val name: unit -> string
-          type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }
+          (** Fully qualified protobuf name of this message *)
+
+          (**/**)
           type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
-          val make: make_t
           val merge: t -> t -> t
           val to_proto': Runtime'.Writer.t -> t -> unit
-          val to_proto: t -> Runtime'.Writer.t
-          val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
-          val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
           val from_json_exn: Runtime'.Json.t -> t
-          val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+          (**/**)
         end
+        type t = {
+        error: string option;(** Error message.  If non-empty, code generation failed.  The plugin process
+        should exit with status code zero even if it reports an error in this way.
+
+        This should be used to indicate errors in .proto files which prevent the
+        code generator from generating correct code.  Errors which indicate a
+        problem in protoc itself -- such as the input CodeGeneratorRequest being
+        unparseable -- should be reported by writing a message to stderr and
+        exiting with a non-zero status code. *)
+        supported_features: int option;(** A bitmask of supported features that the code generator supports.
+        This is a bitwise "or" of values from the Feature enum. *)
+        file: File.t list;
+        }
+        val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
+        (** Helper function to generate a message using default values *)
+
+        val to_proto: t -> Runtime'.Writer.t
+        (** Serialize the message to binary format *)
+
+        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from binary format *)
+
+        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+        (** Serialize to Json (compatible with Yojson.Basic.t) *)
+
+        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (** Deserialize from Json (compatible with Yojson.Basic.t) *)
+
         val name: unit -> string
-        type t = { error: string option; supported_features: int option; file: File.t list }
+        (** Fully qualified protobuf name of this message *)
+
+        (**/**)
         type make_t = ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
-        val make: make_t
         val merge: t -> t -> t
         val to_proto': Runtime'.Writer.t -> t -> unit
-        val to_proto: t -> Runtime'.Writer.t
-        val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
         val from_proto_exn: Runtime'.Reader.t -> t
-        val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
         val from_json_exn: Runtime'.Json.t -> t
-        val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+        (**/**)
       end = struct
+        module This'_ = CodeGeneratorResponse
         module rec Feature : sig
-          type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
+          type t =
+            | FEATURE_NONE
+            | FEATURE_PROTO3_OPTIONAL
+
           val name: unit -> string
+          (** Fully qualified protobuf name of this enum *)
+
+          (**/**)
           val to_int: t -> int
           val from_int: int -> t Runtime'.Result.t
           val from_int_exn: int -> t
           val to_string: t -> string
           val from_string_exn: string -> t
+          (**/**)
         end = struct
-          type t = FEATURE_NONE | FEATURE_PROTO3_OPTIONAL
+          module This'_ = Feature
+          type t =
+            | FEATURE_NONE
+            | FEATURE_PROTO3_OPTIONAL
+
           let name () = ".google.protobuf.compiler.CodeGeneratorResponse.Feature"
           let to_int = function
             | FEATURE_NONE -> 0
@@ -392,34 +1098,163 @@ end = struct
 
         end
         and File : sig
+          type t = {
+          name: string option;(** The file name, relative to the output directory.  The name must not
+          contain "." or ".." components and must be relative, not be absolute (so,
+          the file cannot lie outside the output directory).  "/" must be used as
+          the path separator, not "\\".
+
+          If the name is omitted, the content will be appended to the previous
+          file.  This allows the generator to break large files into small chunks,
+          and allows the generated text to be streamed back to protoc so that large
+          files need not reside completely in memory at one time.  Note that as of
+          this writing protoc does not optimize for this -- it will read the entire
+          CodeGeneratorResponse before writing files to disk. *)
+          insertion_point: string option;(** If non-empty, indicates that the named file should already exist, and the
+          content here is to be inserted into that file at a defined insertion
+          point.  This feature allows a code generator to extend the output
+          produced by another code generator.  The original generator may provide
+          insertion points by placing special annotations in the file that look
+          like:
+          {v
+             @@protoc_insertion_point(NAME)
+          v}
+          The annotation can have arbitrary text before and after it on the line,
+          which allows it to be placed in a comment.  NAME should be replaced with
+          an identifier naming the point -- this is what other generators will use
+          as the insertion_point.  Code inserted at this point will be placed
+          immediately above the line containing the insertion point (thus multiple
+          insertions to the same point will come out in the order they were added).
+          The double-\@ is intended to make it unlikely that the generated code
+          could contain things that look like insertion points by accident.
+
+          For example, the C++ code generator places the following line in the
+          .pb.h files that it generates:
+          {v
+             // @@protoc_insertion_point(namespace_scope)
+          v}
+          This line appears within the scope of the file's package namespace, but
+          outside of any particular class.  Another plugin can then specify the
+          insertion_point "namespace_scope" to generate additional classes or
+          other declarations that should be placed in this scope.
+
+          Note that if the line containing the insertion point begins with
+          whitespace, the same whitespace will be added to every line of the
+          inserted text.  This is useful for languages like Python, where
+          indentation matters.  In these languages, the insertion point comment
+          should be indented the same amount as any inserted code will need to be
+          in order to work correctly in that context.
+
+          The code generator that generates the initial file and the one which
+          inserts into it must both run as part of a single invocation of protoc.
+          Code generators are executed in the order in which they appear on the
+          command line.
+
+          If |insertion_point| is present, |name| must also be present. *)
+          content: string option;(** The file contents. *)
+          generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option;(** Information describing the file content being inserted. If an insertion
+          point is used, this information will be appropriately offset and inserted
+          into the code generation metadata for the generated files. *)
+          }
+          val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
+          (** Helper function to generate a message using default values *)
+
+          val to_proto: t -> Runtime'.Writer.t
+          (** Serialize the message to binary format *)
+
+          val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
+          (** Deserialize from binary format *)
+
+          val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
+          (** Serialize to Json (compatible with Yojson.Basic.t) *)
+
+          val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+          (** Deserialize from Json (compatible with Yojson.Basic.t) *)
+
           val name: unit -> string
-          type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }
+          (** Fully qualified protobuf name of this message *)
+
+          (**/**)
           type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
-          val make: make_t
           val merge: t -> t -> t
           val to_proto': Runtime'.Writer.t -> t -> unit
-          val to_proto: t -> Runtime'.Writer.t
-          val from_proto: Runtime'.Reader.t -> (t, [> Runtime'.Result.error]) result
           val from_proto_exn: Runtime'.Reader.t -> t
-          val to_json: Runtime'.Json_options.t -> t -> Runtime'.Json.t
           val from_json_exn: Runtime'.Json.t -> t
-          val from_json: Runtime'.Json.t -> (t, [> Runtime'.Result.error]) result
+          (**/**)
         end = struct
+          module This'_ = File
           let name () = ".google.protobuf.compiler.CodeGeneratorResponse.File"
-          type t = { name: string option; insertion_point: string option; content: string option; generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option }
+          type t = {
+          name: string option;(** The file name, relative to the output directory.  The name must not
+          contain "." or ".." components and must be relative, not be absolute (so,
+          the file cannot lie outside the output directory).  "/" must be used as
+          the path separator, not "\\".
+
+          If the name is omitted, the content will be appended to the previous
+          file.  This allows the generator to break large files into small chunks,
+          and allows the generated text to be streamed back to protoc so that large
+          files need not reside completely in memory at one time.  Note that as of
+          this writing protoc does not optimize for this -- it will read the entire
+          CodeGeneratorResponse before writing files to disk. *)
+          insertion_point: string option;(** If non-empty, indicates that the named file should already exist, and the
+          content here is to be inserted into that file at a defined insertion
+          point.  This feature allows a code generator to extend the output
+          produced by another code generator.  The original generator may provide
+          insertion points by placing special annotations in the file that look
+          like:
+          {v
+             @@protoc_insertion_point(NAME)
+          v}
+          The annotation can have arbitrary text before and after it on the line,
+          which allows it to be placed in a comment.  NAME should be replaced with
+          an identifier naming the point -- this is what other generators will use
+          as the insertion_point.  Code inserted at this point will be placed
+          immediately above the line containing the insertion point (thus multiple
+          insertions to the same point will come out in the order they were added).
+          The double-\@ is intended to make it unlikely that the generated code
+          could contain things that look like insertion points by accident.
+
+          For example, the C++ code generator places the following line in the
+          .pb.h files that it generates:
+          {v
+             // @@protoc_insertion_point(namespace_scope)
+          v}
+          This line appears within the scope of the file's package namespace, but
+          outside of any particular class.  Another plugin can then specify the
+          insertion_point "namespace_scope" to generate additional classes or
+          other declarations that should be placed in this scope.
+
+          Note that if the line containing the insertion point begins with
+          whitespace, the same whitespace will be added to every line of the
+          inserted text.  This is useful for languages like Python, where
+          indentation matters.  In these languages, the insertion point comment
+          should be indented the same amount as any inserted code will need to be
+          in order to work correctly in that context.
+
+          The code generator that generates the initial file and the one which
+          inserts into it must both run as part of a single invocation of protoc.
+          Code generators are executed in the order in which they appear on the
+          command line.
+
+          If |insertion_point| is present, |name| must also be present. *)
+          content: string option;(** The file contents. *)
+          generated_code_info: Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option;(** Information describing the file content being inserted. If an insertion
+          point is used, this information will be appropriately offset and inserted
+          into the code generation metadata for the generated files. *)
+          }
           type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           let make ?name ?insertion_point ?content ?generated_code_info () = { name; insertion_point; content; generated_code_info }
           let merge =
-            let merge_name = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ) in
-            let merge_insertion_point = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "insertion_point", "insertionPoint"), string) ) in
-            let merge_content = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((15, "content", "content"), string) ) in
-            let merge_generated_code_info = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((16, "generated_code_info", "generatedCodeInfo"), (message (module Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo))) ) in
-            fun t1 t2 -> {
-              name = (merge_name t1.name t2.name);
-              insertion_point = (merge_insertion_point t1.insertion_point t2.insertion_point);
-              content = (merge_content t1.content t2.content);
-              generated_code_info = (merge_generated_code_info t1.generated_code_info t2.generated_code_info);
-             }
+          let merge_name = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ) in
+          let merge_insertion_point = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "insertion_point", "insertionPoint"), string) ) in
+          let merge_content = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((15, "content", "content"), string) ) in
+          let merge_generated_code_info = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((16, "generated_code_info", "generatedCodeInfo"), (message (module Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo))) ) in
+          fun t1 t2 -> {
+          name = (merge_name t1.name t2.name);
+          insertion_point = (merge_insertion_point t1.insertion_point t2.insertion_point);
+          content = (merge_content t1.content t2.content);
+          generated_code_info = (merge_generated_code_info t1.generated_code_info t2.generated_code_info);
+           }
           let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "insertion_point", "insertionPoint"), string) ^:: basic_opt ((15, "content", "content"), string) ^:: basic_opt ((16, "generated_code_info", "generatedCodeInfo"), (message (module Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo))) ^:: nil )
           let to_proto' =
             let serialize = Runtime'.Serialize.serialize (spec ()) in
@@ -439,18 +1274,30 @@ end = struct
           let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
         end
         let name () = ".google.protobuf.compiler.CodeGeneratorResponse"
-        type t = { error: string option; supported_features: int option; file: File.t list }
+        type t = {
+        error: string option;(** Error message.  If non-empty, code generation failed.  The plugin process
+        should exit with status code zero even if it reports an error in this way.
+
+        This should be used to indicate errors in .proto files which prevent the
+        code generator from generating correct code.  Errors which indicate a
+        problem in protoc itself -- such as the input CodeGeneratorRequest being
+        unparseable -- should be reported by writing a message to stderr and
+        exiting with a non-zero status code. *)
+        supported_features: int option;(** A bitmask of supported features that the code generator supports.
+        This is a bitwise "or" of values from the Feature enum. *)
+        file: File.t list;
+        }
         type make_t = ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
         let make ?error ?supported_features ?(file = []) () = { error; supported_features; file }
         let merge =
-          let merge_error = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "error", "error"), string) ) in
-          let merge_supported_features = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "supported_features", "supportedFeatures"), uint64_int) ) in
-          let merge_file = Runtime'.Merge.merge Runtime'.Spec.( repeated ((15, "file", "file"), (message (module File)), not_packed) ) in
-          fun t1 t2 -> {
-            error = (merge_error t1.error t2.error);
-            supported_features = (merge_supported_features t1.supported_features t2.supported_features);
-            file = (merge_file t1.file t2.file);
-           }
+        let merge_error = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "error", "error"), string) ) in
+        let merge_supported_features = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "supported_features", "supportedFeatures"), uint64_int) ) in
+        let merge_file = Runtime'.Merge.merge Runtime'.Spec.( repeated ((15, "file", "file"), (message (module File)), not_packed) ) in
+        fun t1 t2 -> {
+        error = (merge_error t1.error t2.error);
+        supported_features = (merge_supported_features t1.supported_features t2.supported_features);
+        file = (merge_file t1.file t2.file);
+         }
         let spec () = Runtime'.Spec.( basic_opt ((1, "error", "error"), string) ^:: basic_opt ((2, "supported_features", "supportedFeatures"), uint64_int) ^:: repeated ((15, "file", "file"), (message (module File)), not_packed) ^:: nil )
         let to_proto' =
           let serialize = Runtime'.Serialize.serialize (spec ()) in

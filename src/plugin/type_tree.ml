@@ -1,7 +1,9 @@
-open StdLabels
+open !StdLabels
+open !MoreLabels
+open !Utils
+
 open Spec.Descriptor.Google.Protobuf
 
-open Utils
 
 type t = { name: string;
            types: t list;
@@ -14,9 +16,16 @@ type t = { name: string;
 type element = { module_name: string; (** The name of the module that holds the implementation (i.e. Ocaml module name of the generated ocaml file) *)
                  ocaml_name: string; (** Ocaml name of this type inside the module *)
                  cyclic: bool; (** True if the element contains cyclic references, in which case the type cannot be represented as a tuple *)
+                 comments: string list;
                }
 
 type file = { file_name: string; types: t list; package: string option }
+
+let map_elements ~f ~comment_db ~path tpe elements =
+  List.mapi ~f:(fun index element ->
+    let path = (tpe, index) :: path in
+    f ~comment_db ~path element
+  ) elements
 
 let module_name_of_proto ?package file =
   Filename.chop_extension file
@@ -37,6 +46,7 @@ let map_enum EnumDescriptorProto.{ name; value = values; _ } =
       Option.value_exn ~message:"All enum values must have a name" name
     ) values
   in
+  (* So this just returns all the enum names. For each enum name, we should add documentation *)
   { name; types = []; depends = []; fields = [], []; enum_names; service_names = [] }
 
 let map_service ServiceDescriptorProto.{ name; method' = methods; _ } =
@@ -79,9 +89,16 @@ let rec map_message DescriptorProto.{ name; field = fields; nested_type = nested
       | _ -> acc
     ) fields
   in
-  let enums = List.map ~f:map_enum enums in
-  let extensions = List.map ~f:map_extension extensions in
-  let nested_types = List.map ~f:map_message nested_types in
+  let enums =
+    List.map ~f:map_enum enums
+  in
+  let extensions =
+    List.map ~f:map_extension extensions
+  in
+  (* Need the full context. So we need to append more here, or strip the comment_db *)
+  let nested_types =
+    List.map ~f:map_message nested_types
+  in
   let types = List.sort ~cmp:compare (enums @ extensions @ nested_types) in
   let fields =
     let field_name FieldDescriptorProto.{ name; _} =
@@ -104,7 +121,8 @@ let rec map_message DescriptorProto.{ name; field = fields; nested_type = nested
   in
   { name; types; depends; fields; enum_names = []; service_names = [] }
 
-let map_file FileDescriptorProto.{ name; message_type = messages; package; enum_type = enums; service = services; extension = extensions; _ } =
+let map_file filedescriptor =
+  let FileDescriptorProto.{ name; message_type = messages; package; enum_type = enums; service = services; extension = extensions; _ } = filedescriptor in
   let messages = List.map ~f:map_message messages in
   let enums = List.map ~f:map_enum enums in
   let services = List.map ~f:map_service services in
@@ -115,7 +133,7 @@ let map_file FileDescriptorProto.{ name; message_type = messages; package; enum_
 
   let types = List.fold_right ~init:types ~f:(fun name types ->
     [ { name; types; depends = []; fields = [], []; enum_names = []; service_names = [] } ]) packages in
-
+  (* What is a t list? *)
   { file_name; types; package }
 
 let create_cyclic_map { file_name = _; types; package = _ } =
@@ -192,11 +210,12 @@ let create_file_db ~module_name ~mangle cyclic_map types =
     | true -> Names.to_snake_case
     | false -> fun x -> x
   in
+
   let add_names ~path ~ocaml_name map names =
     StringMap.fold ~init:map ~f:(fun ~key ~data map ->
       StringMap.add_uniq
         ~key:(path ^ "." ^ key)
-        ~data:{ module_name; ocaml_name = ocaml_name ^ "." ^ data; cyclic = false }
+        ~data:{ module_name; ocaml_name = ocaml_name ^ "." ^ data; cyclic = false; comments = []; }
         map
     ) names
   in
@@ -242,7 +261,7 @@ let create_file_db ~module_name ~mangle cyclic_map types =
         |> add_names ~path ~ocaml_name map
       in
 
-      let map = StringMap.add_uniq ~key:path ~data:{ module_name; ocaml_name; cyclic } map in
+      let map = StringMap.add_uniq ~key:path ~data:{ module_name; ocaml_name; cyclic; comments = [] } map in
       traverse_types map path types
     in
     let name_map =
@@ -254,11 +273,12 @@ let create_file_db ~module_name ~mangle cyclic_map types =
     List.fold_left ~init:map ~f:(fun map type_ -> map_type ~map ~name_map path type_) types
   in
 
-  let map = StringMap.singleton "" { ocaml_name = ""; module_name; cyclic = false } in
+  let map = StringMap.singleton "" { ocaml_name = ""; module_name; cyclic = false; comments = [] } in
   traverse_types map "" types
 
 let create_db ~prefix_module_names (files : FileDescriptorProto.t list) =
   let inner proto_file =
+    let comment_db = Comment_db.make proto_file in
     let map = map_file proto_file in
     let module_name =
       let package = match prefix_module_names with
@@ -268,7 +288,16 @@ let create_db ~prefix_module_names (files : FileDescriptorProto.t list) =
       module_name_of_proto ?package map.file_name
     in
     let cyclic_map = create_cyclic_map map in
-    let file_db = create_file_db ~module_name ~mangle:(Names.has_mangle_option proto_file.options) cyclic_map map.types in
+    let file_db =
+      create_file_db ~module_name ~mangle:(Names.has_mangle_option proto_file.options) cyclic_map map.types
+      |> StringMap.mapi ~f:(fun name element ->
+        match StringMap.find_opt name comment_db with
+        | None -> element
+        | Some Comment_db.{ leading; trailing; _ } ->
+          let comments = List.filter_map ~f:(fun x -> x) [leading; trailing] in
+          { element with comments }
+      )
+    in
     (map.file_name, module_name), file_db
   in
 

@@ -11,7 +11,7 @@ type t = [
   | `List of t list
 ]
 
-let rec to_string = function
+let rec to_string: t -> string = function
   | `Null -> "null"
   | `Bool b -> string_of_bool b
   | `Int i -> string_of_int i

@@ -5,6 +5,7 @@
 - [x] Support special json mapping for google types (#9)
 - [x] Add deprecation annotations for deprecated fields, services etc (#8)
 - [x] Add option to prefix generated files with their package name
+- [x] Copy documentation from proto files into generated ocaml bindings
 
 ### Bug fixes
 - [x] Fix file output name if files contains a '-'

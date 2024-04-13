@@ -1,7 +1,6 @@
-open StdLabels
-open MoreLabels
-
-open Utils
+open !StdLabels
+open !MoreLabels
+open !Utils
 
 let dump_ocaml_names = false
 let dump_type_tree = false
@@ -88,58 +87,41 @@ let get_scoped_name ?postfix t name =
   let name = Option.value_exn ~message:"Does not contain a name" name in
   let Type_tree.{ ocaml_name; module_name; _ } = StringMap.find name t.type_db in
 
-  (* If the name to be found is in another module, then stop looking *)
-  let type_name =
-    (* Printf.eprintf "Current scope: %s. Look for %s\n" (String.concat ~sep:"." (List.rev t.proto_path)) name; *)
-    let rec resolve path_rev module_name =
-      let path = "" :: List.rev_append path_rev module_name |> String.concat ~sep:"." in
-      (* Printf.eprintf "%s" path; *)
-      match StringMap.mem path t.type_db with
-      | true ->
-        (* Printf.eprintf " -> Some %s\n" path; *)
-        Some path
-      | false -> begin
-          match path_rev with
-          | [] ->
-            (* Printf.eprintf " -> None\n"; *)
-            None
-          | _ :: ps ->
-            (* Printf.eprintf " -> "; *)
-            resolve ps module_name
-        end
-    in
-    (* We are looking for 'name' *)
-    let search name =
-      let paths = String.split_on_char ~sep:'.' name |> List.rev in
-      let rec inner path paths =
-        (* Printf.eprintf "Resolve: "; *)
-        let p = resolve t.proto_path path in
-        match p with
-        | Some path' when path' = name ->
-          (* Found! *)
-          String.split_on_char ~sep:'.' ocaml_name
-          |> List.rev
-          |> take (List.length path)
-          |> List.rev
-          |> String.concat ~sep:"."
-
-        | _  -> begin match paths with
-          | p :: paths -> inner (p :: path) paths
-          | [] -> failwith_f "Unable to reference '%s'. This is due to a limitation in the Ocaml mappings. To work around this limitation make sure to use a unique package name" name
-        end
-      in
-      inner [] paths
-    in
-    match t.module_name = module_name with
-    | true-> search name
-    | false -> Printf.sprintf "%s.%s.%s" import_module_name module_name ocaml_name
+  let rec resolve path_rev module_name =
+    let path = "" :: List.rev_append path_rev module_name |> String.concat ~sep:"." in
+    match StringMap.mem path t.type_db, path_rev with
+    | true, _ ->  Some path
+    | false, [] -> None
+    | false, _ :: ps -> resolve ps module_name
   in
-
+  let search name =
+    let paths = String.split_on_char ~sep:'.' name |> List.rev in
+    let rec inner path paths =
+      let p = resolve t.proto_path path in
+      match p, paths with
+      | Some path', _ when path' = name ->
+        String.split_on_char ~sep:'.' ocaml_name
+        |> List.rev
+        |> take (List.length path)
+        |> List.rev
+        |> String.concat ~sep:"."
+        |> Option.some
+      | _, p :: paths -> inner (p :: path) paths
+      | _, [] -> None
+    in
+    inner [] paths
+  in
+  let type_name =
+    match t.module_name = module_name with
+    | true -> search name
+    | false -> Printf.sprintf "%s.%s.%s" import_module_name module_name ocaml_name |> Option.some
+  in
   match postfix, type_name with
-  | Some postfix, "" -> postfix
-  | None, "" -> this_module_alias
-  | None, type_name -> type_name
-  | Some postfix, type_name -> Printf.sprintf "%s.%s" type_name postfix
+  | Some postfix, Some "" -> postfix
+  | None, Some "" -> this_module_alias
+  | None, Some type_name -> type_name
+  | Some postfix, Some type_name -> Printf.sprintf "%s.%s" type_name postfix
+  | _, None -> failwith_f "Unable to reference '%s'. This is due to a limitation in the Ocaml mappings. To work around this limitation make sure to use a unique package name" name
 
 let get_name t name =
   let path = Printf.sprintf "%s.%s" (get_proto_path t) name in
@@ -163,3 +145,12 @@ let get_module_name ~filename t =
 let is_cyclic t =
   let Type_tree.{ cyclic; _ } = StringMap.find (get_proto_path t) t.type_db in
   cyclic
+
+
+let get_comments ?name t =
+  let path =
+    let path = get_proto_path t in
+    Option.value_map ~default:path ~f:(fun name -> Printf.sprintf "%s.%s" path name) name
+  in
+  StringMap.find_opt path t.type_db
+  |> Option.value_map ~default:[] ~f:(fun Type_tree.{ comments; _ } -> comments)
