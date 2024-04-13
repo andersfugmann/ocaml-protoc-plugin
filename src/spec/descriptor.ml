@@ -923,14 +923,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor file = (file) in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun (file) -> serialize file
       let from_json_exn =
         let constructor file = (file) in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and FileDescriptorProto : sig
@@ -986,14 +986,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name package dependency message_type enum_type service extension options source_code_info public_dependency weak_dependency syntax = { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } -> serialize name package dependency message_type enum_type service extension options source_code_info public_dependency weak_dependency syntax
       let from_json_exn =
         let constructor name package dependency message_type enum_type service extension options source_code_info public_dependency weak_dependency syntax = { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and DescriptorProto : sig
@@ -1073,14 +1073,14 @@ end = struct
         let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor start end' options = { start; end'; options } in
-          Runtime'.Deserialize.deserialize (spec ()) constructor
+          Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
           let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { start; end'; options } -> serialize start end' options
         let from_json_exn =
           let constructor start end' options = { start; end'; options } in
-          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       and ReservedRange : sig
@@ -1116,14 +1116,14 @@ end = struct
         let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor start end' = { start; end' } in
-          Runtime'.Deserialize.deserialize (spec ()) constructor
+          Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
           let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { start; end' } -> serialize start end'
         let from_json_exn =
           let constructor start end' = { start; end' } in
-          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       let name () = ".google.protobuf.DescriptorProto"
@@ -1161,14 +1161,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name field nested_type enum_type extension_range extension options oneof_decl reserved_range reserved_name = { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } -> serialize name field nested_type enum_type extension_range extension options oneof_decl reserved_range reserved_name
       let from_json_exn =
         let constructor name field nested_type enum_type extension_range extension options oneof_decl reserved_range reserved_name = { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and ExtensionRangeOptions : sig
@@ -1203,14 +1203,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor uninterpreted_option extensions' = { uninterpreted_option; extensions' } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { uninterpreted_option; extensions' } -> serialize uninterpreted_option extensions'
       let from_json_exn =
         let constructor uninterpreted_option extensions' = { uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and FieldDescriptorProto : sig
@@ -1406,14 +1406,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name extendee number label type' type_name default_value options oneof_index json_name proto3_optional = { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } -> serialize name extendee number label type' type_name default_value options oneof_index json_name proto3_optional
       let from_json_exn =
         let constructor name extendee number label type' type_name default_value options oneof_index json_name proto3_optional = { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and OneofDescriptorProto : sig
@@ -1449,14 +1449,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name options = { name; options } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; options } -> serialize name options
       let from_json_exn =
         let constructor name options = { name; options } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and EnumDescriptorProto : sig
@@ -1520,14 +1520,14 @@ end = struct
         let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor start end' = { start; end' } in
-          Runtime'.Deserialize.deserialize (spec ()) constructor
+          Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
           let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { start; end' } -> serialize start end'
         let from_json_exn =
           let constructor start end' = { start; end' } in
-          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       let name () = ".google.protobuf.EnumDescriptorProto"
@@ -1555,14 +1555,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name value options reserved_range reserved_name = { name; value; options; reserved_range; reserved_name } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; value; options; reserved_range; reserved_name } -> serialize name value options reserved_range reserved_name
       let from_json_exn =
         let constructor name value options reserved_range reserved_name = { name; value; options; reserved_range; reserved_name } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and EnumValueDescriptorProto : sig
@@ -1600,14 +1600,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name number options = { name; number; options } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; number; options } -> serialize name number options
       let from_json_exn =
         let constructor name number options = { name; number; options } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and ServiceDescriptorProto : sig
@@ -1645,14 +1645,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name method' options = { name; method'; options } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; method'; options } -> serialize name method' options
       let from_json_exn =
         let constructor name method' options = { name; method'; options } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and MethodDescriptorProto : sig
@@ -1696,14 +1696,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name input_type output_type options client_streaming server_streaming = { name; input_type; output_type; options; client_streaming; server_streaming } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; input_type; output_type; options; client_streaming; server_streaming } -> serialize name input_type output_type options client_streaming server_streaming
       let from_json_exn =
         let constructor name input_type output_type options client_streaming server_streaming = { name; input_type; output_type; options; client_streaming; server_streaming } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and FileOptions : sig
@@ -1819,14 +1819,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor java_package java_outer_classname optimize_for java_multiple_files go_package cc_generic_services java_generic_services py_generic_services java_generate_equals_and_hash deprecated java_string_check_utf8 cc_enable_arenas objc_class_prefix csharp_namespace swift_prefix php_class_prefix php_namespace php_generic_services php_metadata_namespace ruby_package uninterpreted_option extensions' = { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } -> serialize java_package java_outer_classname optimize_for java_multiple_files go_package cc_generic_services java_generic_services py_generic_services java_generate_equals_and_hash deprecated java_string_check_utf8 cc_enable_arenas objc_class_prefix csharp_namespace swift_prefix php_class_prefix php_namespace php_generic_services php_metadata_namespace ruby_package uninterpreted_option extensions'
       let from_json_exn =
         let constructor java_package java_outer_classname optimize_for java_multiple_files go_package cc_generic_services java_generic_services py_generic_services java_generate_equals_and_hash deprecated java_string_check_utf8 cc_enable_arenas objc_class_prefix csharp_namespace swift_prefix php_class_prefix php_namespace php_generic_services php_metadata_namespace ruby_package uninterpreted_option extensions' = { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and MessageOptions : sig
@@ -1869,14 +1869,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option extensions' = { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } -> serialize message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option extensions'
       let from_json_exn =
         let constructor message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option extensions' = { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and FieldOptions : sig
@@ -2007,14 +2007,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor ctype packed deprecated lazy' jstype weak unverified_lazy uninterpreted_option extensions' = { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } -> serialize ctype packed deprecated lazy' jstype weak unverified_lazy uninterpreted_option extensions'
       let from_json_exn =
         let constructor ctype packed deprecated lazy' jstype weak unverified_lazy uninterpreted_option extensions' = { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and OneofOptions : sig
@@ -2049,14 +2049,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor uninterpreted_option extensions' = { uninterpreted_option; extensions' } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { uninterpreted_option; extensions' } -> serialize uninterpreted_option extensions'
       let from_json_exn =
         let constructor uninterpreted_option extensions' = { uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and EnumOptions : sig
@@ -2095,14 +2095,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor allow_alias deprecated uninterpreted_option extensions' = { allow_alias; deprecated; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { allow_alias; deprecated; uninterpreted_option; extensions' } -> serialize allow_alias deprecated uninterpreted_option extensions'
       let from_json_exn =
         let constructor allow_alias deprecated uninterpreted_option extensions' = { allow_alias; deprecated; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and EnumValueOptions : sig
@@ -2139,14 +2139,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor deprecated uninterpreted_option extensions' = { deprecated; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { deprecated; uninterpreted_option; extensions' } -> serialize deprecated uninterpreted_option extensions'
       let from_json_exn =
         let constructor deprecated uninterpreted_option extensions' = { deprecated; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and ServiceOptions : sig
@@ -2183,14 +2183,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor deprecated uninterpreted_option extensions' = { deprecated; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { deprecated; uninterpreted_option; extensions' } -> serialize deprecated uninterpreted_option extensions'
       let from_json_exn =
         let constructor deprecated uninterpreted_option extensions' = { deprecated; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and MethodOptions : sig
@@ -2270,14 +2270,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor deprecated idempotency_level uninterpreted_option extensions' = { deprecated; idempotency_level; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { deprecated; idempotency_level; uninterpreted_option; extensions' } -> serialize deprecated idempotency_level uninterpreted_option extensions'
       let from_json_exn =
         let constructor deprecated idempotency_level uninterpreted_option extensions' = { deprecated; idempotency_level; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and UninterpretedOption : sig
@@ -2341,14 +2341,14 @@ end = struct
         let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor name_part is_extension = { name_part; is_extension } in
-          Runtime'.Deserialize.deserialize (spec ()) constructor
+          Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
           let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { name_part; is_extension } -> serialize name_part is_extension
         let from_json_exn =
           let constructor name_part is_extension = { name_part; is_extension } in
-          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       let name () = ".google.protobuf.UninterpretedOption"
@@ -2380,14 +2380,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name identifier_value positive_int_value negative_int_value double_value string_value aggregate_value = { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } -> serialize name identifier_value positive_int_value negative_int_value double_value string_value aggregate_value
       let from_json_exn =
         let constructor name identifier_value positive_int_value negative_int_value double_value string_value aggregate_value = { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and SourceCodeInfo : sig
@@ -2457,14 +2457,14 @@ end = struct
         let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor path span leading_comments trailing_comments leading_detached_comments = { path; span; leading_comments; trailing_comments; leading_detached_comments } in
-          Runtime'.Deserialize.deserialize (spec ()) constructor
+          Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
           let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { path; span; leading_comments; trailing_comments; leading_detached_comments } -> serialize path span leading_comments trailing_comments leading_detached_comments
         let from_json_exn =
           let constructor path span leading_comments trailing_comments leading_detached_comments = { path; span; leading_comments; trailing_comments; leading_detached_comments } in
-          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       let name () = ".google.protobuf.SourceCodeInfo"
@@ -2482,14 +2482,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor location = (location) in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun (location) -> serialize location
       let from_json_exn =
         let constructor location = (location) in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and GeneratedCodeInfo : sig
@@ -2557,14 +2557,14 @@ end = struct
         let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor path source_file begin' end' = { path; source_file; begin'; end' } in
-          Runtime'.Deserialize.deserialize (spec ()) constructor
+          Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
           let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { path; source_file; begin'; end' } -> serialize path source_file begin' end'
         let from_json_exn =
           let constructor path source_file begin' end' = { path; source_file; begin'; end' } in
-          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       let name () = ".google.protobuf.GeneratedCodeInfo"
@@ -2582,14 +2582,14 @@ end = struct
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor annotation = (annotation) in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun (annotation) -> serialize annotation
       let from_json_exn =
         let constructor annotation = (annotation) in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
   end

@@ -402,13 +402,13 @@ let rec deserialize: type constr a. (constr, a) compound_list -> constr -> field
       cont (constr v) fields
 
 
-let deserialize: type constr a. message_name:string -> (constr, a) compound_list -> constr -> Json.t -> a =
+let deserialize: type constr a. message_name:string -> (constr, a) compound_list lazy_t -> constr -> Json.t -> a =
   fun ~message_name spec constr ->
-  let deserialize = deserialize spec constr in
+  let deserialize = lazy (deserialize (Lazy.force spec) constr) in
   let map_message = map_message_json ~name:message_name in
   fun json -> match map_message json with
     | `Assoc fields ->
       fields
       |> List.fold_left ~f:(fun map (key, value) -> FieldMap.add key value map) ~init:FieldMap.empty
-      |> deserialize
+      |> Lazy.force deserialize
     | json -> value_error "message" json

@@ -305,10 +305,12 @@ let deserialize_fast: type constr a. extension_ranges -> (constr, a) value_list 
   let next_field = Reader.next_field_header reader in
   read_values extension_ranges next_field reader constr [] values
 
-let deserialize: type constr a. (constr, a) compound_list -> constr -> Reader.t -> a = fun spec constr ->
-  let extension_ranges = extension_ranges spec in
-  let values = make_values spec in
+let deserialize: type constr a. (constr, a) compound_list lazy_t -> constr -> Reader.t -> a = fun spec constr ->
+  let extension_ranges = lazy (extension_ranges (Lazy.force spec)) in
+  let values = lazy (make_values (Lazy.force spec)) in
   fun reader ->
+    let extension_ranges = Lazy.force extension_ranges in
+    let values = Lazy.force values in
     let offset = Reader.offset reader in
     try
       deserialize_fast extension_ranges values constr reader
@@ -317,12 +319,12 @@ let deserialize: type constr a. (constr, a) compound_list -> constr -> Reader.t 
       Reader.reset reader offset;
       deserialize_full extension_ranges values constr reader
 
-let deserialize_full: type constr a. (constr, a) compound_list -> constr -> Reader.t -> a = fun spec constr ->
-  let extension_ranges = extension_ranges spec in
-  let values = make_values spec in
-  fun reader -> deserialize_full extension_ranges values constr reader
+let deserialize_full: type constr a. (constr, a) compound_list lazy_t -> constr -> Reader.t -> a = fun spec constr ->
+  let extension_ranges = lazy (extension_ranges (Lazy.force spec)) in
+  let values = lazy (make_values (Lazy.force spec)) in
+  fun reader -> deserialize_full (Lazy.force extension_ranges) (Lazy.force values) constr reader
 
-let deserialize_fast: type constr a. (constr, a) compound_list -> constr -> Reader.t -> a = fun spec constr ->
-  let extension_ranges = extension_ranges spec in
-  let values = make_values spec in
-  fun reader -> deserialize_fast extension_ranges values constr reader
+let deserialize_fast: type constr a. (constr, a) compound_list lazy_t -> constr -> Reader.t -> a = fun spec constr ->
+  let extension_ranges = lazy (extension_ranges (Lazy.force spec)) in
+  let values = lazy (make_values (Lazy.force spec)) in
+  fun reader -> deserialize_fast (Lazy.force extension_ranges) (Lazy.force values) constr reader

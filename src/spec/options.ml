@@ -54,14 +54,14 @@ end = struct
   let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
   let from_proto_exn =
     let constructor mangle_names = (mangle_names) in
-    Runtime'.Deserialize.deserialize (spec ()) constructor
+    Runtime'.Deserialize.deserialize (lazy (spec ())) constructor
   let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
   let to_json options =
     let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
     fun (mangle_names) -> serialize mangle_names
   let from_json_exn =
     let constructor mangle_names = (mangle_names) in
-    Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+    Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (lazy (spec ())) constructor
   let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
 end
 and Ocaml_options : sig

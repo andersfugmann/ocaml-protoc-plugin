@@ -19,7 +19,7 @@ let index_of_spec: type a b. (a, b) Spec.compound -> int = function
 let get: type a b. (a, b) Spec.compound -> t -> a = fun spec t ->
   let writer = Writer.of_list t in
   let reader = Writer.contents writer |> Reader.create in
-  Deserialize.deserialize Spec.(Cons (spec, Nil)) (fun a -> a) reader
+  Deserialize.deserialize (lazy Spec.(Cons (spec, Nil))) (fun a -> a) reader
 
 let set: type a b. (a, b) Spec.compound -> t -> a -> t = fun spec t v ->
   let writer = Writer.init () in

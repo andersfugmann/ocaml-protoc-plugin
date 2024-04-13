@@ -1,4 +1,4 @@
-val deserialize: message_name:string -> ('constr, 'a) Spec.compound_list -> 'constr -> Json.t -> 'a
+val deserialize: message_name:string -> ('constr, 'a) Spec.compound_list lazy_t -> 'constr -> Json.t -> 'a
 
 (**)
 val to_int64: Json.t -> int64
