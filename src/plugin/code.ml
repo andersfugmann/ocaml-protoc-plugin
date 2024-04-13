@@ -15,12 +15,12 @@ let decr t =
   | false -> failwith "Cannot decr indentation level at this point"
 
 let trim_end ~chars s =
-  let chars = String.to_seq chars in
+  let chars = String.to_seq chars |> List.of_seq in
   let len = String.length s in
   let rcount s =
     let rec inner = function
       | 0 -> len
-      | n when Seq.exists (fun x -> x = s.[n - 1]) chars -> inner (n - 1)
+      | n when List.mem s.[n - 1] ~set:chars -> inner (n - 1)
       | n -> len - n
     in
     inner len
