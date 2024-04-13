@@ -1,7 +1,6 @@
-open StdLabels
-open MoreLabels
-
-open Utils
+open !StdLabels
+open !MoreLabels
+open !Utils
 
 let dump_ocaml_names = false
 let dump_type_tree = false

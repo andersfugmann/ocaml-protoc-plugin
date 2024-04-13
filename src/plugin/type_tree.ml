@@ -1,8 +1,9 @@
-open StdLabels
+open !StdLabels
 open !MoreLabels
+open !Utils
+
 open Spec.Descriptor.Google.Protobuf
 
-open Utils
 
 type t = { name: string;
            types: t list;
