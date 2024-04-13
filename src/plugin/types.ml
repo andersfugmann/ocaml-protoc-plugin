@@ -679,7 +679,9 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
       |> sprintf "{ %s }"
   in
 
+  (* Only add comments if the arity of the tuple is > 1. *)
   let tuple_type =
+    let arity = List.length field_info in
     let comments =
       List.filter_map ~f:(fun (name, (_, _, _proto_name)) ->
         let comment_lines =
@@ -688,7 +690,8 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
         in
         match (String.concat ~sep:"\n" comment_lines |> String.trim) with
         | "" -> None
-        | comment -> sprintf "@param %s %s" name comment |> Option.some
+        | comment when arity > 1 -> sprintf "@param %s %s" name comment |> Option.some
+        | comment -> comment |> Option.some
       ) field_info
       |> String.concat ~sep:"\n\n"
       |> function "" -> "" | comment -> sprintf "\n(**\n%s\n*)\n" comment
@@ -711,7 +714,7 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
         sprintf "\t%s: %s" name type'
         |> Code.append_deprecaton_if ~deprecated `Attribute
         |> sprintf "%s;"
-        |> Code.append_comments ~deprecated ~comments:(Scope.get_comments ~name:proto_name scope)
+        |> Code.append_comments ~comments:(Scope.get_comments ~name:proto_name scope)
       ) field_info
       |> String.concat ~sep:"\n"
       |> sprintf "{\n%s\n}"

@@ -34,7 +34,7 @@ let emit_enum_type ~scope ~params
       |> Code.append_deprecaton_if `Attribute ~deprecated
     in
     Code.emit t `None "| %s" enum_name;
-    Code.emit_comment ~deprecated ~position:`Trailing t (Scope.get_comments ?name scope)
+    Code.emit_comment ~position:`Trailing t (Scope.get_comments ?name scope)
   ) values;
   Code.emit t `End "%s" params.Parameters.annot;
 

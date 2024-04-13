@@ -14,12 +14,13 @@ let decr t =
     t.indent <- String.sub ~pos:0 ~len:(String.length t.indent - 2) t.indent
   | false -> failwith "Cannot decr indentation level at this point"
 
-let trim_end ~char s =
+let trim_end ~chars s =
+  let chars = String.to_seq chars in
   let len = String.length s in
   let rcount s =
     let rec inner = function
       | 0 -> len
-      | n when s.[n - 1] = char -> inner (n - 1)
+      | n when Seq.exists (fun x -> x = s.[n - 1]) chars -> inner (n - 1)
       | n -> len - n
     in
     inner len
@@ -27,6 +28,86 @@ let trim_end ~char s =
   match rcount s with
   | 0 -> s
   | n -> String.sub ~pos:0 ~len:(String.length s - n) s
+
+let rec drop_while ~f = function
+  | x :: xs when f x -> drop_while ~f xs
+  | xs -> xs
+
+let group ~f lines =
+  let prepend acc group last =
+    let acc = match List.is_empty group with
+      | true -> acc
+      | false -> (last, List.rev group) :: acc
+    in
+    acc
+  in
+  let rec inner acc group last = function
+    | x :: xs when f x = last || x = "" ->
+      inner acc (x :: group) last xs
+    | x :: xs ->
+      inner (prepend acc group last) [x] (not last) xs
+    | [] -> List.rev (prepend acc group last)
+  in
+  inner [] [] false lines
+
+(** Merge groups when the list groups ends with a line that starts with a '-' *)
+let rec merge_list_groups = function
+  | (false, l1) :: (true, l2) :: xs ->
+    begin match List.rev l1 with
+    | s :: _ when String.starts_with ~prefix:" -" s ->
+      (false, l1 @ l2) :: merge_list_groups xs
+    | _ -> (false, l1) :: (true, l2) :: merge_list_groups xs
+    end
+  | x :: xs ->
+    x :: merge_list_groups xs
+  | [] -> []
+
+let replace ~substring ~f =
+  let regexp = Str.regexp (Str.quote substring) in
+  Str.global_substitute regexp f
+
+let remove_trailing_empty_lines lines =
+  lines
+  |> List.rev
+  |> drop_while ~f:((=) "")
+  |> List.rev
+
+let escape_comment s =
+  String.to_seq s
+  |> Seq.map (function
+    | '{' | '}' | '[' | ']' | '@' | '\\' as ch -> Printf.sprintf "\\%c" ch
+    | ch -> Printf.sprintf "%c" ch
+  )
+  |> List.of_seq
+  |> String.concat ~sep:""
+
+
+let map_comments comments =
+  comments
+  |> String.concat ~sep:"\n\n"
+  |> String.split_on_char ~sep:'\n'
+  |> List.map ~f:(trim_end ~chars:" \n\t")
+  |> group ~f:(String.starts_with ~prefix:"  ")
+  |> merge_list_groups
+  |> List.map ~f:(function
+    | (false, lines) ->
+      lines
+      |> List.map ~f:String.trim
+      |> remove_trailing_empty_lines
+      |> List.map ~f:escape_comment
+    | (true, lines) ->
+      let lines =
+        lines
+        |> List.map ~f:(replace ~substring:"v}" ~f:(fun _ -> "v\\}"))
+        |> remove_trailing_empty_lines
+      in
+      (* TODO: Remove indentation *)
+      "{v" :: lines @ ["v}"]
+  )
+  |> List.flatten
+  |> List.rev
+  |> drop_while ~f:(fun x -> x = "")
+  |> List.rev
 
 let emit t indent fmt =
   let prepend s =
@@ -37,7 +118,7 @@ let emit t indent fmt =
         "" :: String.split_on_char ~sep:'\t' line
         |> String.concat ~sep:t.indent
       in
-      t.code <- (trim_end ~char:' ' line) :: t.code);
+      t.code <- (trim_end ~chars:" " line) :: t.code);
   in
   let emit s =
     match indent with
@@ -56,20 +137,6 @@ let emit t indent fmt =
   in
   Printf.ksprintf emit fmt
 
-let map_comments comments =
-  comments
-  |> List.map ~f:(trim_end ~char:'\n')
-  |> String.concat ~sep:"\n\n"
-  |> String.to_seq
-  |> Seq.map (function
-    | '{' | '}' | '[' | ']' | '@' | '\\' as ch -> Printf.sprintf "\\%c" ch
-    | ch -> Printf.sprintf "%c" ch
-  )
-  |> List.of_seq
-  |> String.concat ~sep:""
-  |> String.split_on_char ~sep:'\n'
-
-
 let append t code = List.iter ~f:(emit t `None "%s") (code.code |> List.rev)
 
 let append_deprecaton_if ~deprecated level str =
@@ -83,34 +150,28 @@ let append_deprecaton_if ~deprecated level str =
     in
     Printf.sprintf "%s[%socaml.alert protobuf \"Deprecated global\"]" str level
 
-let deprecated_comment = "@deprecated deprecated in proto file"
-
-let append_comments ?(deprecated=false) ~comments str =
+let append_comments ~comments str =
   let comment_str =
     map_comments comments
     |> String.concat ~sep:"\n"
     |> String.trim
   in
-  match comments, deprecated with
-  | [], false -> str
-  | [], true -> Printf.sprintf "%s(** %s *)" str deprecated_comment
-  | _, false ->
+  match List.is_empty comments with
+  | true -> str
+  | false ->
     Printf.sprintf "%s(** %s *)" str comment_str
-  | _, true ->
-    Printf.sprintf "%s(** %s\n%s *)" str comment_str deprecated_comment
 
-let emit_comment ?(deprecated=false) ~(position:[`Leading | `Trailing]) t = function
-  | [] when not deprecated -> ()
+let emit_comment ~(position:[`Leading | `Trailing]) t = function
+  | [] -> ()
   | comments ->
     if position = `Leading then emit t `None "";
     let comments = map_comments comments in
     let () =
       match comments with
-      | [ comment ] when not deprecated -> emit t `None "(** %s *)" (String.trim comment)
+      | [ comment ] -> emit t `None "(** %s *)" (String.trim comment)
       | comments ->
         emit t `Begin "(**";
         List.iter ~f:(emit t `None "%s") comments;
-        if deprecated then emit t `None "%s" deprecated_comment;
         emit t `End "*)";
     in
     (* if position = `Trailing then emit t `None ""; (* Dont think this is needed *) *)
