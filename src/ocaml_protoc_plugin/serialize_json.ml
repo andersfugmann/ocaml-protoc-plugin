@@ -116,13 +116,13 @@ let timestamp_to_json json =
 
 let%expect_test "timestamp_to_json" =
   let test seconds nanos =
-    let json = `Assoc ["seconds", `Int seconds; "nanos", `Int nanos] in
-    Printf.printf "%d.%d -> %s\n" seconds nanos (Json.to_string (timestamp_to_json json))
+    let json = `Assoc ["seconds", `String seconds; "nanos", `Int nanos] in
+    Printf.printf "%s.%d -> %s\n" seconds nanos (Json.to_string (timestamp_to_json json))
   in
-  test 1709931283 0;
-  test 1709931283 (1_000_000_002/2);
-  test 1709931283 1_000_000_000;
-  test 0 1;
+  test "1709931283" 0;
+  test "1709931283" (1_000_000_002/2);
+  test "1709931283" 1_000_000_000;
+  test "0" 1;
   ();
   [%expect {|
     1709931283.0 -> "2024-03-08T20:54:43.000000000Z"
