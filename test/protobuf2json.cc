@@ -13,7 +13,7 @@
 #include <ostream>
 #include <sstream>
 
-// Uncomment, to lookup the protobuf file in the filesystem when no protobuf file is specified
+// Uncomment to parse all protofile rather than specifying one explicitly
 //#define USE_FILESYSTEM
 
 #ifdef USE_FILESYSTEM
@@ -57,7 +57,7 @@ util::TypeResolver* make_resolver(const std::string include, const std::string p
             }
         }
 #else
-        caml_failwith("No protofile specified");
+        caml_invalid_argument("No protofile specified");
 #endif
     } else {
         auto * fd = importer->Import(proto_file);
