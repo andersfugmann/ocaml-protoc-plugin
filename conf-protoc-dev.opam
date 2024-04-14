@@ -5,7 +5,6 @@ license: "BSD-3-Clause"
 homepage: "https://developers.google.com/protocol-buffers/"
 bug-reports: "https://github.com/protocolbuffers/protobuf/issues"
 dev-repo: "git+https://github.com/protocolbuffers/protobuf.git"
-build: [ make ]
 
 depends: [
   "conf-pkg-config"
