@@ -56,7 +56,7 @@ let%expect_test _ =
   Printf.printf "Elements: %d\n" (elements (Some t));
   Printf.printf "Depth: %d\n" (depth (Some t));
 
-  Test_lib.test_encode ~skip_json:true (module T) t;
+  Test_lib.test_encode (module T) t;
   [%expect {|
     Elements: 10001
     Depth: 200 |}]

@@ -12,7 +12,13 @@
 #include <string>
 #include <ostream>
 #include <sstream>
+
+// Uncomment, to lookup the protobuf file in the filesystem when no protobuf file is specified
+//#define USE_FILESYSTEM
+
+#ifdef USE_FILESYSTEM
 #include <filesystem>
+#endif
 
 #define CAML_NAME_SPACE
 #include "caml/mlvalues.h"
@@ -44,11 +50,15 @@ util::TypeResolver* make_resolver(const std::string include, const std::string p
     auto importer = new compiler::Importer(source_tree, NULL);
 
     if (proto_file.size() == 0) {
+#ifdef USE_FILESYSTEM
         for(const auto& p : std::filesystem::directory_iterator(".")) {
             if(p.path().extension() == ".proto") {
                 auto * fd = importer->Import(p.path().filename());
             }
         }
+#else
+        caml_failwith("No protofile specified");
+#endif
     } else {
         auto * fd = importer->Import(proto_file);
     }

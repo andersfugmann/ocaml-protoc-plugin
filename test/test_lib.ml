@@ -81,7 +81,7 @@ let test_merge (type t) (module M : T with type t = t) (t: t) =
   in
   ()
 
-let test_json ~debug ?(proto_file="") (type t) (module M : T with type t = t) (t: t) =
+let test_json ~debug ~proto_file (type t) (module M : T with type t = t) (t: t) =
   let message_type =
     match M.name () |> String.split_on_char ~sep:'.' with
     | _ :: tl ->
@@ -96,7 +96,6 @@ let test_json ~debug ?(proto_file="") (type t) (module M : T with type t = t) (t
       Reference.to_json ~proto_file ~message_type proto
     with
     | _ ->
-      Printf.printf "Unable to parse reference json";
       failwith "Could not parse reference json"
   in
   let test_json ?enum_names ?json_names ?omit_default_values t =
@@ -116,7 +115,7 @@ let test_json ~debug ?(proto_file="") (type t) (module M : T with type t = t) (t
         let options = Json_options.make ?enum_names ?json_names ?omit_default_values () in
         let json = M.to_json options t in
         compare ~message:"Ocaml proto plugin" t json
-      with | exn -> Printf.printf "Cannot serialize to json\n  Error: %s\n" (Printexc.to_string exn)
+      with | exn -> Printf.printf "Error: %s\n" (Printexc.to_string exn)
     in
     t
   in
@@ -186,7 +185,8 @@ let test_encode (type t) ?dump ?(debug_json=false) ?proto_file ?protoc_args (mod
     | Some _ -> hexlify data
     | None -> ()
   in
-  let () = match proto_file with
+  let () =
+    match proto_file with
     | Some proto_file ->
       let typename = M.name () in
       let typename = String.sub typename ~pos:1 ~len:(String.length typename - 1) in
@@ -201,5 +201,7 @@ let test_encode (type t) ?dump ?(debug_json=false) ?proto_file ?protoc_args (mod
   test_decode (module M) Test_runtime.Fast expect data;
   test_decode (module M) Test_runtime.Full expect data;
   test_merge (module M) expect;
-  if (not skip_json) then test_json ~debug:debug_json (module M) expect;
-  ()
+  match skip_json, proto_file with
+  | false, Some proto_file ->
+    test_json ~proto_file ~debug:debug_json (module M) expect;
+  | _ -> ()
