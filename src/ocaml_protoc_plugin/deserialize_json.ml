@@ -53,7 +53,10 @@ let read_map: type a b. read_key:(string -> a) -> read_value:(Json.t -> b) -> Js
     | json -> value_error "map_entry" json
 
 (** What a strange encoding.
-    Durations less than one second are represented with a 0 seconds field and a positive or negative nanos field. For durations of one second or more, a non-zero value for the nanos field must be of the same sign as the seconds field.
+    Durations less than one second are represented with a 0 seconds
+    field and a positive or negative nanos field. For durations of one
+    second or more, a non-zero value for the nanos field must be of
+    the same sign as the seconds field.
 *)
 let duration_of_json json =
   (* Capture the signedness of the duration, and apply to both seconds and nanos *)
@@ -116,8 +119,8 @@ let timestamp_of_json = function
       | Ok (t, _, _) -> t
       | Error _e -> value_error "google.protobuf.duration" (`String timestamp)
     in
-    let seconds = Ptime.to_float_s t |> Float.to_int in
-    let nanos = Ptime.frac_s t |> Ptime.Span.to_float_s |> Float.mul 1_000_000_000.0 |> Float.to_int in
+    let seconds = Ptime.to_float_s t |> Int64.of_float in
+    let nanos = Ptime.frac_s t |> Ptime.Span.to_float_s |> Float.mul 1_000_000_000.0 |> Int64.of_float in
     (seconds, nanos)
   | json -> value_error "google.protobuf.timestamp" json
 
@@ -125,7 +128,7 @@ let%expect_test "google.protobuf.Timestamp" =
   let test str =
     try
       let (s, n) = timestamp_of_json (`String str) in
-      Printf.printf "D: %s -> %d.%09ds\n" str s n
+      Printf.printf "D: %s -> %Ld.%09Lds\n" str s n
     with
     | Result.Error e -> Printf.printf "Error parsing %s: %s\n" str (Result.show_error e)
   in
@@ -220,7 +223,14 @@ let map_message_json: name:string -> Json.t -> Json.t = fun ~name ->
   | ".google.protobuf.Timestamp" ->
     let convert json =
       let (seconds, nanos) = timestamp_of_json json in
-      `Assoc [ "seconds", `Int seconds; "nanos", `Int nanos ]
+      match Sys.int_size < 63 with
+      | true ->
+        `Assoc [ "seconds", `String (Int64.to_string seconds);
+                 "nanos", `String (Int64.to_string nanos) ]
+      | false ->
+        `Assoc [ "seconds", `Int (Int64.to_int seconds);
+                 "nanos", `Int (Int64.to_int nanos) ]
+
     in
     convert
   (* Wrapper types - google/protobuf/wrappers.proto *)

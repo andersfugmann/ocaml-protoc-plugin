@@ -96,10 +96,10 @@ let%expect_test "duration_to_json" =
 let timestamp_to_json json =
   let open Stdlib in
   let open StdLabels in
-  let seconds = get_key "seconds" ~f:Deserialize_json.to_int ~default:0 json in
-  let nanos = get_key "nanos" ~f:Deserialize_json.to_int ~default:0 json in
-  let s1 = Ptime.Span.of_int_s seconds in
-  let s2 = Ptime.Span.of_float_s (float nanos /. 1_000_000_000.0) |> Option.get in
+  let seconds = get_key "seconds" ~f:Deserialize_json.to_int64 ~default:0L json in
+  let nanos = get_key "nanos" ~f:Deserialize_json.to_int64 ~default:0L json in
+  let s1 = Ptime.Span.of_float_s (Int64.to_float seconds) |> Option.get in
+  let s2 = Ptime.Span.of_float_s (Int64.to_float nanos /. 1_000_000_000.0) |> Option.get in
   let t =
     Ptime.Span.add s1 s2
     |> Ptime.of_span
