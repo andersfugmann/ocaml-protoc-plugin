@@ -32,7 +32,7 @@
   (language cxx)
   (names protobuf2json)
   (flags (:include c_flags.sexp) -fPIC))
- (c_library_flags (-lprotobuf -lstdc++))
+ (c_library_flags (:standard (:include c_library_flags.sexp)))
 )
 
 (rule
