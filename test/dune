@@ -25,7 +25,11 @@
  (name test)
  (enabled_if (and (<> %{architecture} x86_32) (<> %{architecture} arm32)))
  (libraries ocaml_protoc_plugin google_types_pp yojson)
- (inline_tests (deps google_include))
+ (inline_tests
+  (deps
+    google_include
+    (glob_files *.proto)
+  ))
  (modules :standard \ proto3_optional_test_opt)
  (preprocess (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
  (foreign_stubs
