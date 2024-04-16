@@ -34,10 +34,8 @@ let import_module_name = "Imported'modules"
 let this_module_alias = "This'_"
 
 type t = { module_name: string;
-           package_depth: int;
            proto_path: string list;
            type_db: Type_tree.element StringMap.t;
-           ocaml_names: StringSet.t;
            file_names: string StringMap.t; (** proto file -> ocaml module name *)
          }
 
@@ -54,7 +52,7 @@ let init ~params files =
   if dump_type_tree then
     StringMap.iter ~f:(fun ~key ~data:Type_tree.{module_name; ocaml_name; _} -> Printf.eprintf "%s: %s - %s\n" key module_name ocaml_name) type_db;
 
-  { module_name = ""; proto_path = []; package_depth = 0; type_db; ocaml_names; file_names }
+  { module_name = ""; proto_path = []; type_db; file_names }
 
 let for_descriptor ~params t FileDescriptorProto.{ name; package; _ } =
   let name = Option.value_exn ~message:"All file descriptors must have a name" name in
@@ -65,8 +63,7 @@ let for_descriptor ~params t FileDescriptorProto.{ name; package; _ } =
     in
     Type_tree.module_name_of_proto ?package name
   in
-  let package_depth = Option.value_map ~default:0 ~f:(fun p -> String.split_on_char ~sep:'.' p |> List.length) package in
-  { t with package_depth; module_name; proto_path = [] }
+  { t with module_name; proto_path = [] }
 
 let get_proto_path t =
   "" :: (List.rev t.proto_path) |> String.concat ~sep:"."
