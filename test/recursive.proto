@@ -61,3 +61,14 @@ message Recursive1 {
   .recursive.Recursive1.Recursive.A r3 = 3;
   .recursive.Recursive1.Recursive.B r4 = 4;
 }
+
+message Recursive_map {
+  map<uint64, Recursive_map> m = 1;
+}
+
+message Recursive2 {
+  message X {
+    Recursive2 x = 1;
+  }
+  X x = 1;
+}

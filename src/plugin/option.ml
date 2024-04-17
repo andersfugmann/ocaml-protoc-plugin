@@ -27,4 +27,10 @@ let bind ~f = function
 
 let some v = Some v
 
+let is_some = function
+  | Some _ -> true
+  | None -> false
+
+let is_none v = not (is_some v)
+
 let none = None

@@ -1,4 +1,6 @@
-open StdLabels
+open !StdLabels
+open !MoreLabels
+open !Utils
 
 type char_type = Lower | Upper | Neither
 
@@ -50,11 +52,15 @@ let field_name ?(mangle_f=(fun x -> x)) field_name =
   | name when is_reserved name -> name ^ "'"
   | name -> name
 
+let method_name = field_name
+
 let module_name ?(mangle_f=(fun x -> x)) name =
   let name = mangle_f name in
   match name.[0] with
   | '_' -> "P" ^ name
   | _ -> String.capitalize_ascii name
+
+let constructor_name = module_name
 
 let poly_constructor_name ?(mangle_f=(fun x -> x)) name =
   "`" ^ (mangle_f name |> String.capitalize_ascii)
@@ -68,3 +74,47 @@ let has_mangle_option options =
     |> function
     | Some v -> v
     | None -> false
+
+(** Create a map: proto_name -> ocaml_name.
+    Mapping is done in multiple passes to prioritize which mapping wins in case of name clashes
+*)
+let create_name_map ~standard_f ~mangle_f names =
+  let rec uniq_name names ocaml_name =
+    match List.assoc_opt ocaml_name names with
+    | None -> ocaml_name
+    | Some _ -> uniq_name names (ocaml_name ^ "'")
+  in
+  let names =
+    List.map ~f:(fun name ->
+      let mangle_name = mangle_f name in
+      let standard_name = standard_f name in
+      (name, mangle_name, standard_name)
+    ) names
+  in
+  let standard_name_map =
+    let inject ~f map =
+      List.fold_left ~init:map ~f:(fun map (name, mangled_name, standard_name) ->
+        match f name mangled_name standard_name with
+        | true when StringMap.mem mangled_name map -> map
+        | true -> StringMap.add ~key:mangled_name ~data:name map
+        | false -> map
+      ) names
+    in
+    StringMap.empty
+    |> inject ~f:(fun name mangled_name _standard_name -> String.equal mangled_name name)
+    |> inject ~f:(fun _name mangled_name standard_name -> String.equal mangled_name standard_name)
+    |> inject ~f:(fun name mangled_name _standard_name -> String.equal (String.lowercase_ascii mangled_name) (String.lowercase_ascii name))
+    |> inject ~f:(fun _name mangled_name standard_name -> String.equal (String.lowercase_ascii mangled_name) (String.lowercase_ascii standard_name))
+  in
+  List.fold_left ~init:[] ~f:(fun names (proto_name, ocaml_name, _) ->
+    let ocaml_name =
+      match StringMap.find_opt ocaml_name standard_name_map with
+      | Some name when String.equal name proto_name -> ocaml_name
+      | Some _ -> ocaml_name ^ "'"
+      | None -> ocaml_name
+    in
+    (uniq_name names ocaml_name, proto_name) :: names
+  ) names
+  |> List.fold_left ~init:StringMap.empty ~f:(fun map (ocaml_name, proto_name) ->
+    StringMap.add ~key:proto_name ~data:ocaml_name map
+  )

@@ -59,7 +59,7 @@ let map_service ServiceDescriptorProto.{ name; method' = methods; _ } =
   { name; types = []; depends = []; fields = [], []; enum_names = []; service_names}
 
 let map_extension FieldDescriptorProto.{ name; _ } =
-  let name = Option.value_exn ~message:"All enums must have a name" name in
+  let name = Option.value_exn ~message:"All fields must have a name" name in
   { name; types = []; depends = []; fields = [], []; enum_names = []; service_names = []}
 
 let split_oneof_fields fields =
@@ -160,50 +160,6 @@ let create_cyclic_map { file_name = _; types; package = _ } =
   let map = List.fold_left ~init:StringMap.empty ~f:(traverse "") types in
   StringMap.mapi ~f:(fun name _ -> is_cyclic map name) map
 
-(** Create a map: proto_name -> ocaml_name.
-    Mapping is done in multiple passes to prioritize which mapping wins in case of name clashes
-*)
-let create_name_map ~standard_f ~mangle_f names =
-  let rec uniq_name names ocaml_name =
-    match List.assoc_opt ocaml_name names with
-    | None -> ocaml_name
-    | Some _ -> uniq_name names (ocaml_name ^ "'")
-  in
-  let names =
-    List.map ~f:(fun name ->
-      let mangle_name = mangle_f name in
-      let standard_name = standard_f name in
-      (name, mangle_name, standard_name)
-    ) names
-  in
-  let standard_name_map =
-    let inject ~f map =
-      List.fold_left ~init:map ~f:(fun map (name, mangled_name, standard_name) ->
-        match f name mangled_name standard_name with
-        | true when StringMap.mem mangled_name map -> map
-        | true -> StringMap.add ~key:mangled_name ~data:name map
-        | false -> map
-      ) names
-    in
-    StringMap.empty
-    |> inject ~f:(fun name mangled_name _standard_name -> String.equal mangled_name name)
-    |> inject ~f:(fun _name mangled_name standard_name -> String.equal mangled_name standard_name)
-    |> inject ~f:(fun name mangled_name _standard_name -> String.equal (String.lowercase_ascii mangled_name) (String.lowercase_ascii name))
-    |> inject ~f:(fun _name mangled_name standard_name -> String.equal (String.lowercase_ascii mangled_name) (String.lowercase_ascii standard_name))
-  in
-  List.fold_left ~init:[] ~f:(fun names (proto_name, ocaml_name, _) ->
-    let ocaml_name =
-      match StringMap.find_opt ocaml_name standard_name_map with
-      | Some name when String.equal name proto_name -> ocaml_name
-      | Some _ -> ocaml_name ^ "'"
-      | None -> ocaml_name
-    in
-    (uniq_name names ocaml_name, proto_name) :: names
-  ) names
-  |> List.fold_left ~init:StringMap.empty ~f:(fun map (ocaml_name, proto_name) ->
-    StringMap.add ~key:proto_name ~data:ocaml_name map
-  )
-
 (** Create a type db: map proto-type -> { module_name, ocaml_name, is_cyclic } *)
 let create_file_db ~module_name ~mangle cyclic_map types =
   let mangle_f = match mangle with
@@ -231,7 +187,7 @@ let create_file_db ~module_name ~mangle cyclic_map types =
       let path = path ^ "." ^ name in
       let cyclic = StringMap.find path cyclic_map in
       let map =
-        create_name_map
+        Names.create_name_map
           ~standard_f:(Names.field_name ~mangle_f:(fun x -> x))
           ~mangle_f:(Names.field_name ~mangle_f)
           plain_fields
@@ -239,7 +195,7 @@ let create_file_db ~module_name ~mangle cyclic_map types =
       in
       let map =
         List.fold_left ~init:map ~f:(fun map fields ->
-          create_name_map
+          Names.create_name_map
             ~standard_f:(Names.poly_constructor_name ~mangle_f:(fun x -> x))
             ~mangle_f:(Names.poly_constructor_name ~mangle_f)
             fields
@@ -247,14 +203,14 @@ let create_file_db ~module_name ~mangle cyclic_map types =
         ) oneof_fields
       in
       let map =
-        create_name_map
+        Names.create_name_map
           ~standard_f:(Names.module_name ~mangle_f:(fun x -> x))
           ~mangle_f:(Names.module_name ~mangle_f)
           enum_names
         |> add_names ~path ~ocaml_name map
       in
       let map =
-        create_name_map
+        Names.create_name_map
           ~standard_f:(Names.field_name ~mangle_f:(fun x -> x))
           ~mangle_f:(Names.field_name ~mangle_f)
           service_names
@@ -266,7 +222,7 @@ let create_file_db ~module_name ~mangle cyclic_map types =
     in
     let name_map =
       List.map ~f:(fun { name; _ } -> name) types
-      |> create_name_map
+      |> Names.create_name_map
            ~standard_f:(Names.module_name ~mangle_f:(fun x -> x))
            ~mangle_f:(Names.module_name ~mangle_f)
     in
@@ -277,6 +233,7 @@ let create_file_db ~module_name ~mangle cyclic_map types =
   traverse_types map "" types
 
 let create_db ~prefix_module_names (files : FileDescriptorProto.t list) =
+  let _ = Type_map.init ~prefix_module_names files in
   let inner proto_file =
     let comment_db = Comment_db.make proto_file in
     let map = map_file proto_file in
