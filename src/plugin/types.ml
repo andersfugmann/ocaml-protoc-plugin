@@ -616,7 +616,8 @@ let append ?(cond=true) elm l = match cond with
   | true -> l @ [elm]
   | false -> l
 
-let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls =
+let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~comment_db ~fields oneof_decls =
+  let proto_path = Scope.get_proto_path scope in
   let fields = sort_fields fields in
   let ts =
     split_oneof_decl fields oneof_decls
@@ -683,9 +684,9 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
   let tuple_type =
     let arity = List.length field_info in
     let comments =
-      List.filter_map ~f:(fun (name, (_, _, _proto_name)) ->
+      List.filter_map ~f:(fun (name, (_, _, proto_name)) ->
         let comment_lines =
-          Scope.get_comments scope ~name:name
+          Comment_db.get_field_comments comment_db ~proto_path:proto_path ~name:proto_name
           |> Code.map_comments
         in
         match (String.concat ~sep:"\n" comment_lines |> String.trim) with
@@ -714,7 +715,8 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~fields oneof_decls
         sprintf "\t%s: %s" name type'
         |> Code.append_deprecaton_if ~deprecated `Attribute
         |> sprintf "%s;"
-        |> Code.append_comments ~comments:(Scope.get_comments ~name:proto_name scope)
+        |> Code.append_comments
+             ~comments:(Comment_db.get_field_comments comment_db ~proto_path ~name:proto_name)
       ) field_info
       |> String.concat ~sep:"\n"
       |> sprintf "{\n%s\n}"

@@ -1,6 +1,9 @@
-open StdLabels
-open MoreLabels
+open !StdLabels
+open !MoreLabels
+open !Utils
 open Spec.Descriptor.Google.Protobuf
+
+(** Module to lookup comments for various elements in a proto file *)
 
 type element =
   | Message | Field
@@ -47,7 +50,7 @@ let element_of_int ~context = function
 
 type path = (element * int) list
 
-let string_of_path path =
+let _string_of_path path =
   List.map ~f:(fun (e, i) ->
     let e_str = string_of_element e in
     Printf.sprintf "(%s, %d)" e_str i
@@ -55,14 +58,13 @@ let string_of_path path =
   |> String.concat ~sep:"; "
   |> Printf.sprintf "[ %s ]"
 
-
 type comment = string option
 type comments = { leading: comment; trailing: comment; detatched: string list }
 
 module Code_info_map = Map.Make(struct type t = path let compare = compare end)
 type code_info_map = comments Code_info_map.t
 
-type t = comments Utils.StringMap.t
+type t = comments StringMap.t
 
 let make_code_info_map: SourceCodeInfo.t option -> code_info_map = fun source_code_info ->
   let source_code_info = Option.value ~default:[] source_code_info in
@@ -145,13 +147,58 @@ let traverse FileDescriptorProto.{ package; enum_type; service; extension; messa
   (enums @ services @ messages @ extensions )
   |> List.map ~f:(fun (path, name) -> path, Printf.sprintf "%s.%s" package name)
 
+let type_prefix path = List.rev path |> List.hd |> fst |> string_of_element
+
+let unhandled = ref StringSet.empty
 
 (** Traverse the full filedescriptor proto to construct proto_name -> comments mapping *)
-let make: FileDescriptorProto.t -> t = fun filedescriptor ->
+let init: FileDescriptorProto.t -> t = fun filedescriptor ->
   let code_info_map = make_code_info_map filedescriptor.source_code_info in
-  traverse filedescriptor
-  |> List.fold_left ~init:Utils.StringMap.empty ~f:(fun t (path, name) ->
-    match Code_info_map.find_opt path code_info_map with
-    | Some comments -> Utils.StringMap.add ~key:name ~data:comments t
-    | None -> t
-  )
+  let db =
+    traverse filedescriptor
+    |> List.fold_left ~init:StringMap.empty ~f:(fun t (path, name) ->
+      match Code_info_map.find_opt path code_info_map with
+      | Some comments ->
+        let prefix = type_prefix path in
+        StringMap.add ~key:(Printf.sprintf "%s:%s" prefix name) ~data:comments t
+      | None -> t
+    )
+  in
+  (* Dump all unfetched keys *)
+  StringSet.iter ~f:(Printf.eprintf "Unhandled: %s\n") !unhandled;
+  unhandled := StringMap.fold ~init:StringSet.empty ~f:(fun ~key ~data:_ set -> StringSet.add key set) db;
+  Printf.eprintf "*** process %s\n" (Option.value_exn filedescriptor.name);
+  db
+
+
+(** Accessors *)
+
+let get_comments: element_type:element -> proto_path:string -> ?name:string -> t -> string list =
+  fun ~element_type ~proto_path ?name t ->
+  let key =
+    let key = Printf.sprintf "%s:%s" (string_of_element element_type) proto_path in
+    match name with
+    | Some name -> Printf.sprintf "%s.%s" key name
+    | None -> key
+  in
+  unhandled := StringSet.remove key !unhandled;
+  StringMap.find_opt key t
+  |> Option.map ~f:( fun { leading; trailing; _} -> [leading; trailing])
+  (*|> (fun x -> match x with
+    | None -> Printf.eprintf "Not Found: %s\n" key; x
+    | Some _ -> Printf.eprintf "Found: %s\n" key; x)
+  *)
+  |> Option.value ~default:[]
+  |> List.filter_map ~f:(fun x -> x)
+
+
+let get_message_comments = get_comments ~element_type:Message
+let get_field_comments = get_comments ~element_type:Field
+let get_enum_comments = get_comments ~element_type:Enum
+let get_enum_value_comments = get_comments ~element_type:Enum_value
+let get_oneof_comments = get_comments ~element_type:Oneof
+let get_service_comments =get_comments ~element_type:Service
+let get_method_comments = get_comments ~element_type:Method
+let get_extension_comments = get_comments ~element_type:Extension
+let get_file_comments = get_comments ~element_type:File ~proto_path:"." ?name:None
+let get_option_comments = get_comments ~element_type:Option

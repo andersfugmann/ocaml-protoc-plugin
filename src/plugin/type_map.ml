@@ -1,4 +1,5 @@
 (** Module to create mapping between proto names 'X.Y.Z' to ocaml names *)
+
 open !StdLabels
 open !MoreLabels
 open !Utils
@@ -6,9 +7,8 @@ open Spec.Descriptor.Google.Protobuf
 
 (* TODO:
    - Map extensions also.
-   - Understand proto3_optional flags
-   - Better understanding of cyclic definitions.
-   - Annotate messages that are maps
+   - Understand proto3_optional flags (Used to map oneof fields for some reason)
+   - Packages should be mapped also, so they can be named correctly
 *)
 let sprintf = Printf.sprintf
 
@@ -24,6 +24,7 @@ type element_type =
   | Message of { is_map: bool; fields: (entry * field) list }
   | Enum of entry list
   | Service of entry list
+  | Package
 
 
 (* The map has: proto_type -> ocaml_module * ocaml_name * element_type *)
@@ -34,7 +35,7 @@ type element = {
   element_type: element_type;
 }
 
-type t = element StringMap.t
+type t = { map: element StringMap.t; cyclic_set: StringSet.t }
 
 let module_name_of_proto ?package proto_file =
   Filename.chop_extension proto_file
@@ -57,12 +58,6 @@ let add_scope ~proto_name ~ocaml_name { proto_path; ocaml_path; module_name } =
   in
   { proto_path; ocaml_path; module_name }
 
-let create_name_map: mangle_f:(string -> string) -> f:(?mangle_f:(string -> string) -> string -> string) -> string list -> string StringMap.t = fun ~mangle_f ~f names ->
-  Names.create_name_map
-    ~standard_f:(f ~mangle_f:(fun x -> x))
-    ~mangle_f:(f ~mangle_f)
-    names
-
 let element_of_message ~mangle_f ~(scope:scope) fields oneof_decls options =
   let is_map = match options with
     | Some MessageOptions.{ map_entry = Some true; _ } -> true
@@ -73,7 +68,7 @@ let element_of_message ~mangle_f ~(scope:scope) fields oneof_decls options =
   let field_name_map =
     let plain_field_names = List.filter_map ~f:(fun field -> field.FieldDescriptorProto.name) plain_fields in
     let oneof_names = List.filter_map ~f:(fun field -> field.OneofDescriptorProto.name) oneof_decls in
-    create_name_map ~mangle_f ~f:Names.field_name (plain_field_names @ oneof_names)
+    Names.create_ocaml_mapping ~mangle_f ~name_f:Names.field_name (plain_field_names @ oneof_names)
   in
   let oneofs =
     List.mapi ~f:(fun i OneofDescriptorProto.{ name; _ } ->
@@ -87,9 +82,7 @@ let element_of_message ~mangle_f ~(scope:scope) fields oneof_decls options =
       in
       let oneof_name_map =
         List.filter_map ~f:(fun field -> field.FieldDescriptorProto.name) oneof_fields
-        |> Names.create_name_map
-             ~standard_f:(Names.poly_constructor_name ~mangle_f:(fun x -> x))
-             ~mangle_f:(Names.poly_constructor_name ~mangle_f)
+        |> Names.create_ocaml_mapping ~mangle_f ~name_f:Names.poly_constructor_name
       in
       let oneofs =
         List.map ~f:(fun FieldDescriptorProto.{ name; type_name; type'; _ } ->
@@ -127,7 +120,7 @@ let element_of_message ~mangle_f ~(scope:scope) fields oneof_decls options =
 let element_of_enum ~mangle_f ~scope EnumDescriptorProto.{ value; _ } =
   (* We need the name to come from parent. I.e. though the scope. *)
   let names = List.filter_map ~f:(fun EnumValueDescriptorProto.{ name; _ } -> name) value in
-  let name_map = create_name_map ~mangle_f ~f:Names.constructor_name names in
+  let name_map = Names.create_ocaml_mapping ~mangle_f ~name_f:Names.constructor_name names in
   let constructors =
     List.map ~f:(fun name ->
       { name; ocaml_name = StringMap.find name name_map }
@@ -142,7 +135,7 @@ let element_of_enum ~mangle_f ~scope EnumDescriptorProto.{ value; _ } =
 let element_of_service ~mangle_f ~scope ServiceDescriptorProto.{ method'; _ } =
   let name_map =
     List.filter_map ~f:(fun MethodDescriptorProto.{ name; _ } -> name) method'
-    |> create_name_map ~mangle_f ~f:Names.module_name
+    |> Names.create_ocaml_mapping ~mangle_f ~name_f:Names.module_name
   in
   let entries =
     List.map ~f:(fun MethodDescriptorProto.{ name; _ } ->
@@ -163,7 +156,7 @@ let rec traverse_message ~mangle_f ~scope map services DescriptorProto.{ field; 
     let message_names = List.filter_map ~f:(fun f -> f.DescriptorProto.name) nested_type in
     let enum_names = List.filter_map ~f:(fun e -> e.EnumDescriptorProto.name) enum_type in
     let service_names = List.filter_map ~f:(fun s -> s.ServiceDescriptorProto.name) services in
-    create_name_map ~mangle_f ~f:Names.module_name (message_names @ enum_names @ service_names)
+    Names.create_ocaml_mapping ~mangle_f ~name_f:Names.module_name (message_names @ enum_names @ service_names)
   in
   (* Scope contains this element *)
   let message_element = element_of_message ~mangle_f ~scope field oneof_decl options in
@@ -213,26 +206,26 @@ let traverse_file ~prefix_module_names map FileDescriptorProto.{ name; message_t
     in
     module_name_of_proto ?package name
   in
-  (* Scope should be the fully qualified ocaml name as well as the mapped ocaml name *)
-  let scope =
-    let proto_path, ocaml_path =
-      match package with
-      | Some package ->
-        let ocaml_path =
-          String.split_on_char ~sep:'.' package
-          |> List.map ~f:(Names.module_name ~mangle_f)
-          |> String.concat ~sep:"."
-        in
-        "." ^ package, ocaml_path
-      | None -> "", ""
-    in
-    { proto_path; ocaml_path; module_name }
+  let default_scope = { proto_path = ""; ocaml_path = ""; module_name } in
+  let scope, map =
+    match package with
+    | None -> default_scope, map
+    | Some package ->
+      List.fold_left
+        ~init:(default_scope, map)
+        ~f:(
+          fun (scope, map) package ->
+            let ocaml_name = package |> mangle_f |> Names.module_name in
+            let scope = add_scope ~proto_name:package ~ocaml_name scope in
+            (* Add the name to the map *)
+            let map = StringMap.add ~key:package ~data:{ ocaml_name; module_name; element_type = Package } map in
+            (scope, map)
+        )
+        (String.split_on_char ~sep:'.' package)
   in
-
   (* Mimic a message. *)
   let message = DescriptorProto.make ~nested_type:messages ~enum_type:enums ~extension:extensions () in
   let map = traverse_message ~mangle_f map ~scope services message in
-
   map
 
 (** Construct a set of proto_names (types) that are cyclic *)
@@ -278,6 +271,7 @@ let init ~prefix_module_names (files : FileDescriptorProto.t list) =
   let map = List.fold_left ~init:StringMap.empty ~f:(traverse_file ~prefix_module_names) files in
   (* Dump the map, as a test *)
   let cyclic_set = create_cyclic_set map in
+  (*
   StringMap.iter ~f:(fun ~key ~data:{ module_name; ocaml_name; element_type } ->
     let element_str = match element_type with
       | Message { is_map; fields; _ } ->
@@ -293,14 +287,58 @@ let init ~prefix_module_names (files : FileDescriptorProto.t list) =
     | true -> Printf.eprintf "Cyclic: %s -> %s.%s : %s\n" key module_name ocaml_name element_str
     | false -> ()
   ) map;
-  (* StringMap.iter ~f:(fun ~key ~data:{ module_name; ocaml_name; element_type } ->
+  StringMap.iter ~f:(fun ~key ~data:{ module_name; ocaml_name; element_type } ->
     match element_type with
     | Message { is_map = true; _ } -> Printf.eprintf "Map: %s -> %s#%s\n" key module_name ocaml_name
     | _ -> ()
-     ) map;
+   ) map;
   *)
 
-  map
+  { map; cyclic_set }
 
+(* The type map returns complete Ocaml names for modules. *)
 
-(* We need to create access function for name mappings here *)
+(** [is_recursive t x] returns true if the message x is recursive and needs to be wrapped in a constructor *)
+let is_recursive { cyclic_set; _ } proto_name = StringSet.mem proto_name cyclic_set
+
+(* Get the name of a message *)
+let get_message { map; _ } proto_name =
+  match StringMap.find_opt proto_name map with
+  | Some { module_name; ocaml_name; element_type = Message _ } -> (module_name, ocaml_name)
+  | Some _ -> failwith_f "%s is not a message" proto_name
+  | None -> failwith_f "%s not found" proto_name
+
+(** Get the ocaml name of a field in a message *)
+let get_message_field { map; _ } proto_name field_name =
+  match StringMap.find_opt proto_name map with
+  | None -> failwith_f "message %s not found" proto_name
+  | Some { element_type = Message { fields; _ }; _ } ->
+    let field =
+      List.find_map ~f:(function
+        | { name; ocaml_name }, _ when field_name = name -> Some ocaml_name
+        | _ -> None
+      ) fields
+    in
+    let name =
+      match field with
+      | Some name -> name
+      | None -> failwith_f "Field %s not found for message %s" field_name proto_name
+    in
+    name
+  | _ -> failwith_f "%s is not a message" proto_name
+(*
+(** Get the name of a poly_constructor for a given field name in a oneof *)
+let get_message_oneof_field t proto_name oneof_name field_name = ()
+
+(** Get the name of an enum *)
+let get_enum t proto_name = ()
+
+(** Get the name of an enum value (constructor) for a enum *)
+let get_enum_value t proto_name enum_name = ()
+
+(** Get the module name for a service *)
+let get_service t proto_name = ()
+
+(** Get the ocaml method name for a method in a service *)
+let get_service_method t proto_name method_name = ()
+*)

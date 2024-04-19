@@ -187,33 +187,21 @@ let create_file_db ~module_name ~mangle cyclic_map types =
       let path = path ^ "." ^ name in
       let cyclic = StringMap.find path cyclic_map in
       let map =
-        Names.create_name_map
-          ~standard_f:(Names.field_name ~mangle_f:(fun x -> x))
-          ~mangle_f:(Names.field_name ~mangle_f)
-          plain_fields
+        Names.create_ocaml_mapping ~mangle_f ~name_f:Names.field_name plain_fields
         |> add_names ~path ~ocaml_name map
       in
       let map =
         List.fold_left ~init:map ~f:(fun map fields ->
-          Names.create_name_map
-            ~standard_f:(Names.poly_constructor_name ~mangle_f:(fun x -> x))
-            ~mangle_f:(Names.poly_constructor_name ~mangle_f)
-            fields
+          Names.create_ocaml_mapping ~mangle_f ~name_f:Names.poly_constructor_name fields
           |> add_names ~path ~ocaml_name map
         ) oneof_fields
       in
       let map =
-        Names.create_name_map
-          ~standard_f:(Names.module_name ~mangle_f:(fun x -> x))
-          ~mangle_f:(Names.module_name ~mangle_f)
-          enum_names
+        Names.create_ocaml_mapping ~mangle_f ~name_f:Names.module_name enum_names
         |> add_names ~path ~ocaml_name map
       in
       let map =
-        Names.create_name_map
-          ~standard_f:(Names.field_name ~mangle_f:(fun x -> x))
-          ~mangle_f:(Names.field_name ~mangle_f)
-          service_names
+        Names.create_ocaml_mapping ~mangle_f ~name_f:Names.field_name service_names
         |> add_names ~path ~ocaml_name map
       in
 
@@ -222,9 +210,7 @@ let create_file_db ~module_name ~mangle cyclic_map types =
     in
     let name_map =
       List.map ~f:(fun { name; _ } -> name) types
-      |> Names.create_name_map
-           ~standard_f:(Names.module_name ~mangle_f:(fun x -> x))
-           ~mangle_f:(Names.module_name ~mangle_f)
+      |> Names.create_ocaml_mapping ~mangle_f ~name_f:Names.module_name
     in
     List.fold_left ~init:map ~f:(fun map type_ -> map_type ~map ~name_map path type_) types
   in
@@ -235,7 +221,6 @@ let create_file_db ~module_name ~mangle cyclic_map types =
 let create_db ~prefix_module_names (files : FileDescriptorProto.t list) =
   let _ = Type_map.init ~prefix_module_names files in
   let inner proto_file =
-    let comment_db = Comment_db.make proto_file in
     let map = map_file proto_file in
     let module_name =
       let package = match prefix_module_names with
@@ -247,12 +232,8 @@ let create_db ~prefix_module_names (files : FileDescriptorProto.t list) =
     let cyclic_map = create_cyclic_map map in
     let file_db =
       create_file_db ~module_name ~mangle:(Names.has_mangle_option proto_file.options) cyclic_map map.types
-      |> StringMap.mapi ~f:(fun name element ->
-        match StringMap.find_opt name comment_db with
-        | None -> element
-        | Some Comment_db.{ leading; trailing; _ } ->
-          let comments = List.filter_map ~f:(fun x -> x) [leading; trailing] in
-          { element with comments }
+      |> StringMap.mapi ~f:(fun _name element ->
+        { element with comments = [] }
       )
     in
     (map.file_name, module_name), file_db

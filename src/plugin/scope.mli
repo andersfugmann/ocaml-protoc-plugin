@@ -40,4 +40,4 @@ val get_proto_path: t -> string
 val get_module_name: filename:string -> t -> string
 
 (** Get comments for a given proto identifier (path) *)
-val get_comments: ?name:string -> t -> string list
+val get_comments_: ?name:string -> t -> string list

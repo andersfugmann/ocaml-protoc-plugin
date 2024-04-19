@@ -38,7 +38,7 @@ let parse_request Plugin.CodeGeneratorRequest.{file_to_generate = files_to_gener
   let result =
     List.map ~f:(fun (proto_file : Descriptor.FileDescriptorProto.t) ->
       let scope = Scope.for_descriptor ~params scope proto_file in
-      Emit.parse_proto_file ~params scope proto_file
+      Emit.parse_proto_file ~params ~scope proto_file
     ) target_proto_files
     |> List.map ~f:(fun (name, code) ->
       (name, code)

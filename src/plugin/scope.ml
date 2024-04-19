@@ -144,7 +144,7 @@ let is_cyclic t =
   cyclic
 
 
-let get_comments ?name t =
+let get_comments_ ?name t =
   let path =
     let path = get_proto_path t in
     Option.value_map ~default:path ~f:(fun name -> Printf.sprintf "%s.%s" path name) name

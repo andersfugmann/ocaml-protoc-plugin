@@ -47,23 +47,20 @@ let to_snake_case ident =
   |> String.lowercase_ascii
   |> String.capitalize_ascii
 
-let field_name ?(mangle_f=(fun x -> x)) field_name =
-  match String.uncapitalize_ascii (mangle_f field_name) with
-  | name when is_reserved name -> name ^ "'"
-  | name -> name
+let field_name field_name =
+  String.uncapitalize_ascii field_name
 
 let method_name = field_name
 
-let module_name ?(mangle_f=(fun x -> x)) name =
-  let name = mangle_f name in
+let module_name name =
   match name.[0] with
   | '_' -> "P" ^ name
   | _ -> String.capitalize_ascii name
 
 let constructor_name = module_name
 
-let poly_constructor_name ?(mangle_f=(fun x -> x)) name =
-  "`" ^ (mangle_f name |> String.capitalize_ascii)
+let poly_constructor_name name =
+  "`" ^ String.capitalize_ascii name
 
 let has_mangle_option options =
   match options with
