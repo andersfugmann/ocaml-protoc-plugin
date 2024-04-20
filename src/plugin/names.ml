@@ -57,6 +57,17 @@ let module_name name =
   | '_' -> "P" ^ name
   | _ -> String.capitalize_ascii name
 
+let module_name_of_proto ?package proto_file =
+  Filename.chop_extension proto_file
+  |> Filename.basename
+  |> (
+    match package with
+    | Some package -> Printf.sprintf "%s_%s" package
+    | None -> fun s -> s
+  )
+  |> String.capitalize_ascii
+  |> String.map ~f:(function '-' | '.' -> '_' | c -> c)
+
 let constructor_name = module_name
 
 let poly_constructor_name name =

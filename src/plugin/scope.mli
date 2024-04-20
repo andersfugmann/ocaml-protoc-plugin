@@ -20,6 +20,7 @@ val this_module_alias: string
 
 (** Get the ocaml name of the given proto type name, based on the current scope *)
 val get_scoped_name : ?postfix:string -> t -> string option -> string
+val get_scoped_name_type_db: ?postfix:string -> t -> Type_db.t -> string option -> string
 
 (** Get the ocaml name of the given proto type name, based on the current scope *)
 val get_name : t -> string -> string
@@ -34,7 +35,7 @@ val get_package_name : t -> string option
 val is_cyclic: t -> bool
 
 (** Get stringified version of the current proto path *)
-val get_proto_path: t -> string
+val get_proto_path: ?name:string -> t -> string
 
 (** Return the mapped module name for a protobuf file *)
 val get_module_name: filename:string -> t -> string

@@ -3,6 +3,8 @@ open !MoreLabels
 open !Utils
 open Spec.Descriptor.Google.Protobuf
 
+let debug=false
+
 (** Module to lookup comments for various elements in a proto file *)
 
 type element =
@@ -165,9 +167,11 @@ let init: FileDescriptorProto.t -> t = fun filedescriptor ->
     )
   in
   (* Dump all unfetched keys *)
-  StringSet.iter ~f:(Printf.eprintf "Unhandled: %s\n") !unhandled;
-  unhandled := StringMap.fold ~init:StringSet.empty ~f:(fun ~key ~data:_ set -> StringSet.add key set) db;
-  Printf.eprintf "*** process %s\n" (Option.value_exn filedescriptor.name);
+  if debug then begin
+    StringSet.iter ~f:(Printf.eprintf "Unhandled: %s\n") !unhandled;
+    unhandled := StringMap.fold ~init:StringSet.empty ~f:(fun ~key ~data:_ set -> StringSet.add key set) db;
+    Printf.eprintf "*** process %s\n" (Option.value_exn filedescriptor.name)
+  end;
   db
 
 
@@ -181,7 +185,7 @@ let get_comments: element_type:element -> proto_path:string -> ?name:string -> t
     | Some name -> Printf.sprintf "%s.%s" key name
     | None -> key
   in
-  unhandled := StringSet.remove key !unhandled;
+  if debug then unhandled := StringSet.remove key !unhandled;
   StringMap.find_opt key t
   |> Option.map ~f:( fun { leading; trailing; _} -> [leading; trailing])
   (*|> (fun x -> match x with

@@ -15,29 +15,29 @@ type module' = {
   comments : string list;
 }
 
-let emit_enum_type ~scope ~params ~comment_db
+let emit_enum_type ~scope ~params ~type_db ~comment_db
     EnumDescriptorProto.{name; value = values; options = options; reserved_range = _; reserved_name = _}
   : module' =
   let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
-  let name = Option.value_exn ~message:"Enums must have a name" name in
-  let module_name = Scope.get_name scope name in
+  let enum_name = Option.value_exn ~message:"Enums must have a name" name in
+  let proto_path = Scope.get_proto_path scope in
+  let module_name = Type_db.get_enum_name type_db ~proto_path enum_name in
   let signature = Code.init () in
   let implementation = Code.init () in
-  let proto_path = Scope.get_proto_path scope in
-  let scope = Scope.push scope name in
   let t = Code.init () in
   Code.emit t `Begin "type t = ";
 
   List.iter ~f:(fun EnumValueDescriptorProto.{ name; options; _ } ->
+    let name = Option.value_exn ~message:"Enum values must have a name" name in
     let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
-    let proto_path = Scope.get_proto_path scope in
+    let enum_proto_path = Printf.sprintf "%s.%s" proto_path enum_name in
     let enum_name =
-      Scope.get_name_exn scope name
+      Type_db.get_enum_value type_db ~proto_path enum_name name
       |> Code.append_deprecaton_if `Attribute ~deprecated
     in
     Code.emit t `None "| %s" enum_name;
     Code.emit_comment ~position:`Trailing t
-      (Comment_db.get_enum_value_comments comment_db ~proto_path ?name)
+      (Comment_db.get_enum_value_comments comment_db ~proto_path:enum_proto_path ~name)
   ) values;
   Code.emit t `End "%s" params.Parameters.annot;
 
@@ -53,68 +53,68 @@ let emit_enum_type ~scope ~params ~comment_db
   Code.emit signature `None "val from_string_exn: string -> t";
   Code.emit signature `None "(**/**)";
 
-
-  Code.emit implementation `None "let name () = \"%s\"" (Scope.get_proto_path scope);
+  Code.emit implementation `None "let name () = \"%s.%s\"" proto_path enum_name;
   Code.emit implementation `Begin "let to_int = function";
   List.iter ~f:(fun EnumValueDescriptorProto.{name; number; _} ->
-    Code.emit implementation `None "| %s -> %d" (Scope.get_name_exn scope name) (Option.value_exn number)
+    let name = Option.value_exn ~message:"Enum values must have a name" name in
+    let ocaml_name = Type_db.get_enum_value type_db ~proto_path enum_name name in
+    Code.emit implementation `None "| %s -> %d" ocaml_name (Option.value_exn number)
   ) values;
   Code.emit implementation `EndBegin "let from_int_exn = function";
-  let _ =
-    List.fold_left ~init:IntSet.empty ~f:(fun seen EnumValueDescriptorProto.{name; number; _} ->
-        let idx = (Option.value_exn ~message:"All enum descriptions must have a value" number) in
-        match IntSet.mem idx seen with
-        | true -> seen
-        | false ->
-          Code.emit implementation `None "| %d -> %s" idx (Scope.get_name_exn scope name);
-          IntSet.add idx seen
-      ) values
-  in
+  List.fold_left ~init:IntSet.empty ~f:(fun seen EnumValueDescriptorProto.{name; number; _} ->
+    let name = Option.value_exn ~message:"Enum values must have a name" name in
+    let ocaml_name = Type_db.get_enum_value type_db ~proto_path enum_name name in
+    let idx = (Option.value_exn ~message:"All enum descriptions must have a value" number) in
+    match IntSet.mem idx seen with
+    | true -> seen
+    | false ->
+      Code.emit implementation `None "| %d -> %s" idx ocaml_name;
+      IntSet.add idx seen
+  ) values |> ignore;
   Code.emit implementation `None "| n -> Runtime'.Result.raise (`Unknown_enum_value n)";
   Code.emit implementation `End "let from_int e = Runtime'.Result.catch (fun () -> from_int_exn e)";
   Code.emit implementation `Begin "let to_string = function";
   List.iter ~f:(fun EnumValueDescriptorProto.{name; _} ->
-    Code.emit implementation `None "| %s -> \"%s\"" (Scope.get_name_exn scope name) (Option.value_exn name)
+    let name = Option.value_exn ~message:"Enum values must have a name" name in
+    let ocaml_name = Type_db.get_enum_value type_db ~proto_path enum_name name in
+    Code.emit implementation `None "| %s -> \"%s\"" ocaml_name name
   ) values;
   Code.emit implementation `EndBegin "let from_string_exn = function";
   List.iter ~f:(fun EnumValueDescriptorProto.{name; _} ->
-    Code.emit implementation `None "| \"%s\" -> %s" (Option.value_exn name) (Scope.get_name_exn scope name)
+    let name = Option.value_exn ~message:"Enum values must have a name" name in
+    let ocaml_name = Type_db.get_enum_value type_db ~proto_path enum_name name in
+    Code.emit implementation `None "| \"%s\" -> %s" name ocaml_name
   ) values;
   Code.emit implementation `None "| s -> Runtime'.Result.raise (`Unknown_enum_name s)";
   Code.emit implementation `End "";
 
-  let comments = Comment_db.get_enum_comments comment_db ~proto_path ~name in
+  let comments = Comment_db.get_enum_comments comment_db ~proto_path ~name:enum_name in
   { module_name; signature; implementation; deprecated; comments }
 
-let emit_service_type ~options ~scope ~comment_db ServiceDescriptorProto.{ name; method' = methods; options = service_options; _ } =
-  let emit_method signature implementation local_scope scope service_name MethodDescriptorProto.{ name; input_type; output_type; options = method_options; _} =
-    let name = Option.value_exn name in
-    let mangle_f = match Names.has_mangle_option options with
-      | false -> fun id -> id
-      | true -> Names.to_snake_case
-    in
+let emit_service_type ~scope ~comment_db ~type_db ServiceDescriptorProto.{ name; method' = methods; options = service_options; _ } =
+  let proto_path = Scope.get_proto_path scope in
+
+  let emit_method ~type_db ~scope signature implementation service_name MethodDescriptorProto.{ name; input_type; output_type; options = method_options; _} =
+
+    let name = Option.value_exn ~message:"Methods must have a name" name in
+    let method_name = Type_db.get_service_method type_db ~proto_path ~service_name name in
+    let proto_path = Scope.get_proto_path scope in
     let deprecated = match method_options with Some { deprecated; _ } -> deprecated | None -> false in
-
-    let uncapitalized_name = mangle_f name |> String.uncapitalize_ascii |> Scope.Local.get_unique_name local_scope in
-    (* To keep symmetry, only ensure that lowercased names are unique
-       so that the upper case names are aswell.  We should remove this
-       mapping if/when we deprecate the old API *)
-    let capitalized_name = String.capitalize_ascii uncapitalized_name in
-
-    let package_name_opt = Scope.get_package_name scope in
-    let package_name =
-      match package_name_opt with
-        | None -> ""
-        | Some p -> p ^ "."
+    let package_names =
+      String.split_on_char ~sep:'.' proto_path
+      |> List.tl
+      |> List.rev
+      |> List.tl
+      |> List.rev
     in
+
     let input = Scope.get_scoped_name scope input_type in
     let output = Scope.get_scoped_name scope output_type in
     let sig_t' =
       sprintf "(module Runtime'.Spec.Message with type t = %s.t) * (module Runtime'.Spec.Message with type t = %s.t)" input output
     in
-    let proto_path = Scope.get_proto_path scope in
     Code.emit_comment ~position:`Leading signature (Comment_db.get_message_comments comment_db ~proto_path ~name);
-    Code.emit signature `Begin "module %s : sig" capitalized_name;
+    Code.emit signature `Begin "module %s : sig" (String.capitalize_ascii method_name);
     Code.emit signature `None "include Runtime'.Service.Rpc with type Request.t = %s.t and type Response.t = %s.t" input output;
     Code.emit signature `None "module Request : Runtime'.Spec.Message with type t = %s.t and type make_t = %s.make_t" input input;
     Code.emit signature `None "(** Module alias for the request message for this method call *)\n";
@@ -122,17 +122,18 @@ let emit_service_type ~options ~scope ~comment_db ServiceDescriptorProto.{ name;
     Code.emit signature `None "module Response : Runtime'.Spec.Message with type t = %s.t and type make_t = %s.make_t" output output;
     Code.emit signature `None "(** Module alias for the response message for this method call *)\n";
     Code.emit signature `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
-    Code.emit signature `None "val %s : %s" uncapitalized_name sig_t';
+    Code.emit signature `None "val %s : %s" method_name sig_t';
 
-    Code.emit implementation `Begin "module %s = struct" capitalized_name;
-    Code.emit implementation `None "let package_name = %s" (Option.value_map ~default:"None" ~f:(fun n -> sprintf "Some \"%s\"" n) package_name_opt);
+    Code.emit implementation `Begin "module %s = struct" (String.capitalize_ascii method_name);
+    Code.emit implementation `None "let package_name = %s"
+      (match package_names with [] -> "None" | package_names -> String.concat ~sep:"." package_names |> Printf.sprintf "Some \"%s\"");
     Code.emit implementation `None "let service_name = \"%s\"" service_name;
     Code.emit implementation `None "let method_name = \"%s\"" name;
-    Code.emit implementation `None "let name = \"/%s%s/%s\"" package_name service_name name;
+    Code.emit implementation `None "let name = \"/%s/%s\"" (String.concat ~sep:"." (package_names @ [service_name])) name;
     Code.emit implementation `None "module Request = %s" input;
     Code.emit implementation `None "module Response = %s" output;
     Code.emit implementation `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
-    Code.emit implementation `Begin "let %s : %s = " uncapitalized_name sig_t';
+    Code.emit implementation `Begin "let %s : %s = " method_name sig_t';
     Code.emit implementation `None "(module %s : Runtime'.Spec.Message with type t = %s.t ), " input input;
     Code.emit implementation `None "(module %s : Runtime'.Spec.Message with type t = %s.t )" output output;
     Code.emit implementation `End "";
@@ -141,29 +142,30 @@ let emit_service_type ~options ~scope ~comment_db ServiceDescriptorProto.{ name;
   let deprecated = match service_options with Some { deprecated; _ } -> deprecated | None -> false in
 
   let proto_path = Scope.get_proto_path scope in
+  let ocaml_service_name = Type_db.get_service type_db ~proto_path name in
   let signature = Code.init () in
   let implementation = Code.init () in
   Code.emit_comment ~position:`Leading signature (Comment_db.get_service_comments comment_db ~proto_path ~name);
-  Code.emit signature `Begin "module %s : sig" (Scope.get_name scope name);
-  Code.emit implementation `Begin "module %s = struct" (Scope.get_name scope name);
-  let local_scope = Scope.Local.init () in
+  Code.emit signature `Begin "module %s : sig" ocaml_service_name;
+  Code.emit implementation `Begin "module %s = struct" ocaml_service_name;
 
-  List.iter ~f:(emit_method signature implementation local_scope (Scope.push scope name) name) methods;
+  List.iter ~f:(emit_method ~scope:(Scope.push scope name) ~type_db signature implementation name) methods;
   Code.emit signature `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
   Code.emit implementation `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
   signature, implementation
 
-let emit_extension ~scope ~params ~comment_db field =
+let emit_extension ~scope ~params ~comment_db ~type_db field =
   let FieldDescriptorProto.{ name; extendee; options; _ } = field in
   let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
   let name = Option.value_exn ~message:"Extensions must have a name" name in
   let module_name = (Scope.get_name scope name) in
+  let proto_path = Scope.get_proto_path scope in
   let extendee_type = Scope.get_scoped_name scope ~postfix:"t" extendee in
   let extendee_field = Scope.get_scoped_name scope ~postfix:"extensions'" extendee in
   (* Get spec and type *)
   let c =
     let params = Parameters.{params with singleton_record = false} in
-    Types.spec_of_field ~params ~syntax:`Proto2 ~scope ~map_type:None field
+    Types.spec_of_field ~params ~syntax:`Proto2 ~scope ~type_db ~map_type:None field
   in
   let signature = Code.init () in
   let implementation = Code.init () in
@@ -183,7 +185,7 @@ let emit_extension ~scope ~params ~comment_db field =
   Code.emit implementation `None "{ extendee with %s = extensions' } [@@warning \"-23\"]" extendee_field;
   Code.emit implementation `End "";
 
-  let comments = Comment_db.get_extension_comments comment_db ~proto_path:(Scope.get_proto_path scope) ~name in
+  let comments = Comment_db.get_extension_comments comment_db ~proto_path ~name in
   { module_name; signature; implementation; deprecated; comments }
 
 (** Emit the nested types. *)
@@ -214,20 +216,8 @@ let rec emit_nested_types ~syntax ~signature ~implementation ?(is_first = true) 
     emit_sub ~is_implementation:true implementation ~is_first sub;
     emit_nested_types ~syntax ~signature ~implementation ~is_first:false subs
 
-(** Test if the field referenced is a map type *)
-let find_map_type ~scope field nested_types =
-  match field with
-  | FieldDescriptorProto.{ type' = Some TYPE_MESSAGE; label = Some Label.LABEL_REPEATED; type_name = Some type_name; _} ->
-    let current_path = Scope.get_proto_path scope ^ "." in
-    List.find_opt ~f:(function
-      | DescriptorProto.{ name = Some name; options = Some { map_entry = Some true; _ }; _ } ->
-        String.equal (current_path ^ name) type_name
-      | _ -> false
-    ) nested_types
-  | _ -> None
-
 (* Emit a message plus all its subtypes. *)
-let rec emit_message ~params ~syntax ~scope ~comment_db
+let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
     DescriptorProto.{ name; field = fields; extension = extensions;
                       nested_type = nested_types; enum_type = enum_types;
                       extension_range = extension_ranges; oneof_decl = oneof_decls;
@@ -248,14 +238,19 @@ let rec emit_message ~params ~syntax ~scope ~comment_db
     match name with
     | None -> "", scope
     | Some name ->
-      let module_name = Scope.get_name scope name in
+      let module_name = Type_db.get_message_name type_db ~proto_path:(Scope.get_proto_path scope) name in
       module_name, Scope.push scope name
   in
-  (* Filter map types *)
-  let nested_types_no_map = List.filter ~f:(function DescriptorProto.{ options = Some { map_entry = Some true; _ }; _ } -> false | _ -> true) nested_types in
-  List.map ~f:(emit_enum_type ~scope ~comment_db~params) enum_types
-  @ List.map ~f:(emit_message ~scope ~comment_db~params ~syntax) nested_types_no_map
-  @ List.map ~f:(emit_extension ~scope ~comment_db ~params) extensions
+  (* Filter out map types, as no code is needed for these *)
+  let nested_types_no_map =
+    List.filter ~f:(function
+      | DescriptorProto.{ options = Some { map_entry = Some true; _ }; _ } -> false
+      | _ -> true
+    ) nested_types
+  in
+  List.map ~f:(emit_enum_type ~scope ~comment_db ~type_db ~params) enum_types
+  @ List.map ~f:(emit_message ~scope ~comment_db ~type_db ~params ~syntax ) nested_types_no_map
+  @ List.map ~f:(emit_extension ~scope ~comment_db ~type_db ~params) extensions
   |> emit_nested_types ~syntax ~signature ~implementation;
 
   let () =
@@ -263,10 +258,15 @@ let rec emit_message ~params ~syntax ~scope ~comment_db
     | Some _name ->
       let is_cyclic = Scope.is_cyclic scope in
       (* Map fields to denote if they are map types *)
-      let fields = List.map ~f:(fun field -> field, find_map_type ~scope field nested_types) fields in
+      let fields =
+        List.map ~f:(function
+          | FieldDescriptorProto.{ type' = Some TYPE_MESSAGE; type_name = Some type_name; _ } as field -> field, Type_db.get_map_type type_db type_name
+          | field -> field, None
+        ) fields
+      in
       let Types.{ type'; destructor; args; spec_str;
                   default_constructor_sig; default_constructor_impl; merge_impl } =
-        Types.make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~comment_db ~fields oneof_decls
+        Types.make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~type_db ~comment_db ~fields oneof_decls
       in
       Code.emit signature `None "type t = %s%s" type' params.annot;
       Code.emit signature `None "val make: %s" default_constructor_sig;
@@ -324,11 +324,12 @@ let rec emit_message ~params ~syntax ~scope ~comment_db
   let comments = Comment_db.get_message_comments comment_db ~proto_path:(Scope.get_proto_path scope) in
   { module_name; signature; implementation; deprecated; comments }
 
-let rec wrap_packages ~params ~syntax ~options ~comment_db ~scope message_type services = function
+let rec wrap_packages ~params ~syntax ~options ~comment_db ~type_db ~scope message_type services = function
   | [] ->
-    let { module_name = _; implementation; signature; deprecated = _; comments = _ } = emit_message ~params ~syntax ~scope ~comment_db message_type in
+    let { module_name = _; implementation; signature; deprecated = _; comments = _ } =
+      emit_message ~params ~syntax ~scope ~comment_db ~type_db message_type in
     List.iter ~f:(fun service ->
-      let signature', implementation' = emit_service_type ~options ~scope ~comment_db service in
+      let signature', implementation' = emit_service_type ~scope ~type_db ~comment_db service in
       Code.append implementation implementation';
       Code.append signature signature';
       ()
@@ -338,13 +339,13 @@ let rec wrap_packages ~params ~syntax ~options ~comment_db ~scope message_type s
   | package :: packages ->
     let signature = Code.init () in
     let implementation = Code.init () in
-    let package_name = Scope.get_name scope package in
+    let proto_path = Scope.get_proto_path scope in
+    let package_name = Type_db.get_package_name type_db ~proto_path package in
     let scope = Scope.push scope package in
 
     let signature', implementation' =
-      wrap_packages ~params ~syntax ~options ~scope ~comment_db message_type services packages
+      wrap_packages ~params ~syntax ~options ~scope ~type_db ~comment_db message_type services packages
     in
-
     Code.emit implementation `Begin "module rec %s : sig" package_name;
     Code.append implementation signature';
     Code.emit implementation `EndBegin "end = struct";
@@ -355,6 +356,7 @@ let rec wrap_packages ~params ~syntax ~options ~comment_db ~scope message_type s
     Code.emit signature `End "end";
 
     signature, implementation
+
 
 let emit_header implementation ~proto_name ~syntax ~deprecated ~params =
   Code.emit implementation `None "(********************************************************)";
@@ -380,7 +382,7 @@ let emit_header implementation ~proto_name ~syntax ~deprecated ~params =
   Code.emit implementation `None "%s" (Code.append_deprecaton_if ~deprecated `Floating "");
   ()
 
-let parse_proto_file ~params ~scope filedescriptorproto =
+let parse_proto_file ~params ~scope ~type_db filedescriptorproto =
   let FileDescriptorProto.{ name = proto_name; package; dependency = dependencies;
                             public_dependency = _;
                             weak_dependency = _; message_type = message_types;
@@ -401,6 +403,7 @@ let parse_proto_file ~params ~scope filedescriptorproto =
   in
   let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
   let implementation = Code.init () in
+
   emit_header implementation ~proto_name ~syntax ~deprecated ~params;
   List.iter ~f:(Code.emit implementation `None "open %s [@@warning \"-33\"]" ) params.opens;
   Code.emit implementation `None "(**/**)";
@@ -408,21 +411,22 @@ let parse_proto_file ~params ~scope filedescriptorproto =
   Code.emit implementation `Begin "module %s = struct" Scope.import_module_name;
 
   List.iter ~f:(fun dependency ->
-    let module_name = Scope.get_module_name ~filename:dependency scope in
+    (* Ahh. We need this in the type_db! *)
+    let module_name = Type_db.get_module_name type_db dependency in
     Code.emit implementation `None "module %s = %s" module_name module_name;
   ) dependencies;
   Code.emit implementation `End "end";
   Code.emit implementation `None "(**/**)";
 
   let _signature', implementation' =
-    wrap_packages ~params ~syntax ~options ~scope ~comment_db message_type services (Option.value_map ~default:[] ~f:(String.split_on_char ~sep:'.') package)
+    wrap_packages ~params ~syntax ~options ~scope ~type_db ~comment_db message_type services (Option.value_map ~default:[] ~f:(String.split_on_char ~sep:'.') package)
   in
 
   Code.append implementation implementation';
   Code.emit implementation `None "";
 
   let output_file_name =
-    Scope.get_module_name scope ~filename:proto_name
+    Type_db.get_module_name type_db proto_name
     |> String.uncapitalize_ascii
     |> Printf.sprintf "%s.ml"
   in

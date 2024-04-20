@@ -84,7 +84,7 @@ let%expect_test _ =
       key: 3
       value: 3
     }
-    Cannot deserialize reference json.
+    Deserialized json does not match.
     Generated json not equal
     Json: {
       "m": { "0": "10", "1": "1", "2": "2", "3": "3" },
@@ -178,7 +178,7 @@ let%expect_test _ =
       value {
       }
     }
-    Cannot deserialize reference json.
+    Deserialized json does not match.
     Generated json not equal
     Json: {
       "m": {

@@ -219,7 +219,6 @@ let create_file_db ~module_name ~mangle cyclic_map types =
   traverse_types map "" types
 
 let create_db ~prefix_module_names (files : FileDescriptorProto.t list) =
-  let _ = Type_map.init ~prefix_module_names files in
   let inner proto_file =
     let map = map_file proto_file in
     let module_name =
