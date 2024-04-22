@@ -87,8 +87,8 @@ let has_mangle_option options =
     [mangle_f] is a generic mangle function
     [name_f] is a function to convert a name into the ocaml required type (E.g. capitalize or adding a '`')
 *)
-let create_ocaml_mapping: ?mangle_f:(string -> string) -> name_f:(string -> string) -> string list -> string StringMap.t =
-  fun ?(mangle_f=(fun x -> x)) ~name_f proto_names ->
+let create_ocaml_mapping: ?name_map:string StringMap.t -> ?mangle_f:(string -> string) -> name_f:(string -> string) -> string list -> string StringMap.t =
+  fun ?(name_map=StringMap.empty) ?(mangle_f=(fun x -> x)) ~name_f proto_names ->
 
   let rec make_uniq seen name =
     match StringSet.mem name seen with
@@ -135,15 +135,16 @@ let create_ocaml_mapping: ?mangle_f:(string -> string) -> name_f:(string -> stri
      If the name in preferred_names is used (preallocated) for another proto name, then append a "'"
      All names are guaranteed to be uniq.
   *)
+  let seen = StringMap.fold ~init:StringSet.empty name_map ~f:(fun ~key:_ ~data seen -> StringSet.add data seen) in
   let (name_map, _seen) =
-    List.fold_left ~init:(StringMap.empty, StringSet.empty) ~f:(fun (map, seen) (proto_name, mangled_name, _) ->
+    List.fold_left ~init:(name_map, seen) ~f:(fun (name_map, seen) (proto_name, mangled_name, _) ->
       let ocaml_name = match StringMap.find_opt mangled_name preferred_names with
         | None -> mangled_name
         | Some proto_name' when proto_name' = proto_name -> mangled_name
         | Some _ -> mangled_name ^ "'"
       in
       let ocaml_name = make_uniq seen ocaml_name in
-      let map = StringMap.add ~key:proto_name ~data:ocaml_name map in
+      let map = StringMap.add ~key:proto_name ~data:ocaml_name name_map in
       let seen = StringSet.add ocaml_name seen in
       (map, seen)
     ) expanded_names

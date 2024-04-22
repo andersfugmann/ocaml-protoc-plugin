@@ -21,7 +21,7 @@ let emit_enum_type ~scope ~params ~type_db ~comment_db
   let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
   let enum_name = Option.value_exn ~message:"Enums must have a name" name in
   let proto_path = Scope.get_proto_path scope in
-  let module_name = Type_db.get_enum_name type_db ~proto_path enum_name in
+  let module_name = Type_db.get_enum_name type_db ~proto_path ~name:enum_name () in
   let signature = Code.init () in
   let implementation = Code.init () in
   let t = Code.init () in
@@ -32,7 +32,7 @@ let emit_enum_type ~scope ~params ~type_db ~comment_db
     let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
     let enum_proto_path = Printf.sprintf "%s.%s" proto_path enum_name in
     let enum_name =
-      Type_db.get_enum_value type_db ~proto_path enum_name name
+      Type_db.get_enum_value type_db ~proto_path ~enum_name name
       |> Code.append_deprecaton_if `Attribute ~deprecated
     in
     Code.emit t `None "| %s" enum_name;
@@ -57,13 +57,13 @@ let emit_enum_type ~scope ~params ~type_db ~comment_db
   Code.emit implementation `Begin "let to_int = function";
   List.iter ~f:(fun EnumValueDescriptorProto.{name; number; _} ->
     let name = Option.value_exn ~message:"Enum values must have a name" name in
-    let ocaml_name = Type_db.get_enum_value type_db ~proto_path enum_name name in
+    let ocaml_name = Type_db.get_enum_value type_db ~proto_path ~enum_name name in
     Code.emit implementation `None "| %s -> %d" ocaml_name (Option.value_exn number)
   ) values;
   Code.emit implementation `EndBegin "let from_int_exn = function";
   List.fold_left ~init:IntSet.empty ~f:(fun seen EnumValueDescriptorProto.{name; number; _} ->
     let name = Option.value_exn ~message:"Enum values must have a name" name in
-    let ocaml_name = Type_db.get_enum_value type_db ~proto_path enum_name name in
+    let ocaml_name = Type_db.get_enum_value type_db ~proto_path ~enum_name name in
     let idx = (Option.value_exn ~message:"All enum descriptions must have a value" number) in
     match IntSet.mem idx seen with
     | true -> seen
@@ -76,13 +76,13 @@ let emit_enum_type ~scope ~params ~type_db ~comment_db
   Code.emit implementation `Begin "let to_string = function";
   List.iter ~f:(fun EnumValueDescriptorProto.{name; _} ->
     let name = Option.value_exn ~message:"Enum values must have a name" name in
-    let ocaml_name = Type_db.get_enum_value type_db ~proto_path enum_name name in
+    let ocaml_name = Type_db.get_enum_value type_db ~proto_path ~enum_name name in
     Code.emit implementation `None "| %s -> \"%s\"" ocaml_name name
   ) values;
   Code.emit implementation `EndBegin "let from_string_exn = function";
   List.iter ~f:(fun EnumValueDescriptorProto.{name; _} ->
     let name = Option.value_exn ~message:"Enum values must have a name" name in
-    let ocaml_name = Type_db.get_enum_value type_db ~proto_path enum_name name in
+    let ocaml_name = Type_db.get_enum_value type_db ~proto_path ~enum_name name in
     Code.emit implementation `None "| \"%s\" -> %s" name ocaml_name
   ) values;
   Code.emit implementation `None "| s -> Runtime'.Result.raise (`Unknown_enum_name s)";
@@ -108,8 +108,8 @@ let emit_service_type ~scope ~comment_db ~type_db ServiceDescriptorProto.{ name;
       |> List.rev
     in
 
-    let input = Scope.get_scoped_name scope input_type in
-    let output = Scope.get_scoped_name scope output_type in
+    let input = Scope.get_scoped_name_type_db scope type_db input_type in
+    let output = Scope.get_scoped_name_type_db scope type_db output_type in
     let sig_t' =
       sprintf "(module Runtime'.Spec.Message with type t = %s.t) * (module Runtime'.Spec.Message with type t = %s.t)" input output
     in
@@ -158,10 +158,11 @@ let emit_extension ~scope ~params ~comment_db ~type_db field =
   let FieldDescriptorProto.{ name; extendee; options; _ } = field in
   let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
   let name = Option.value_exn ~message:"Extensions must have a name" name in
-  let module_name = (Scope.get_name scope name) in
   let proto_path = Scope.get_proto_path scope in
-  let extendee_type = Scope.get_scoped_name scope ~postfix:"t" extendee in
-  let extendee_field = Scope.get_scoped_name scope ~postfix:"extensions'" extendee in
+  let module_name = Type_db.get_extension type_db ~proto_path name in
+
+  let extendee_type = Scope.get_scoped_name_type_db scope type_db ~postfix:"t" extendee in
+  let extendee_field = Scope.get_scoped_name_type_db scope type_db ~postfix:"extensions'" extendee in
   (* Get spec and type *)
   let c =
     let params = Parameters.{params with singleton_record = false} in
@@ -241,6 +242,7 @@ let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
       let module_name = Type_db.get_message_name type_db ~proto_path:(Scope.get_proto_path scope) name in
       module_name, Scope.push scope name
   in
+
   (* Filter out map types, as no code is needed for these *)
   let nested_types_no_map =
     List.filter ~f:(function
@@ -256,7 +258,7 @@ let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
   let () =
     match name with
     | Some _name ->
-      let is_cyclic = Scope.is_cyclic scope in
+      let is_cyclic = Type_db.is_cyclic type_db (Scope.get_proto_path scope) in
       (* Map fields to denote if they are map types *)
       let fields =
         List.map ~f:(function

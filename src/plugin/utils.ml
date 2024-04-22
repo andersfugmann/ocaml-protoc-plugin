@@ -63,6 +63,13 @@ module List = struct
     in
     inner [] [] false lines
 
+  let filteri ~f lst =
+    let rec inner i = function
+      | [] -> []
+      | x :: xs when f i x -> x :: inner (i+1) xs
+      | _ :: xs -> inner (i+1) xs
+    in
+    inner 0 lst
 end
 
 module StringMap = struct
