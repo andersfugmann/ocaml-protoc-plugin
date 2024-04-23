@@ -99,22 +99,22 @@ let test_json ~debug ~proto_file (type t) (module M : T with type t = t) (t: t) 
       failwith "Could not parse reference json"
   in
   let test_json ?enum_names ?json_names ?omit_default_values t =
-    let compare ~message t json =
-      match (M.from_json_exn json = t) with
+    let compare ~message t expect =
+      match (M.from_json_exn expect = t) with
       | true -> ()
       | false ->
-        let observed = M.from_json_exn json |> json_ref in
+        let observed = M.from_json_exn expect |> json_ref in
         Printf.printf "Json encode/decode not identical. %s\n  Expect:  %s\n  Observe: %s\n" message
-          (Yojson.Basic.to_string json) (Yojson.Basic.to_string observed)
+          (Yojson.Basic.to_string expect) (Yojson.Basic.to_string observed)
       | exception exn ->
-        Printf.printf "Json encode/decode failed for %s: %s\n" message (Yojson.Basic.to_string json);
+        Printf.printf "Json encode/decode failed for %s: %s\n" message (Yojson.Basic.to_string expect);
         Printf.printf "  Error: %s\n" (Printexc.to_string exn);
     in
     let () =
       try
         let options = Json_options.make ?enum_names ?json_names ?omit_default_values () in
         let json = M.to_json options t in
-        compare ~message:"Ocaml proto plugin" t json
+        compare ~message:(M.name ()) t json
       with | exn -> Printf.printf "Error: %s\n" (Printexc.to_string exn)
     in
     t
@@ -130,8 +130,8 @@ let test_json ~debug ~proto_file (type t) (module M : T with type t = t) (t: t) 
         |> Reader.create
         |> M.from_proto_exn
       in
-      if t <> t' then Printf.printf "Cannot deserialize reference json.\n";
-      if t <> t'' then Printf.printf "Cannot deserialize generated json.\n";
+      if t <> t' then Printf.printf "Deserialized json does not match.\n";
+      if t <> t'' then Printf.printf "Deserialized generated json does not match\n";
       if (not (Yojson.Basic.equal json' json)) then
         Printf.printf "Generated json not equal\n";
 

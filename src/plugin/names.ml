@@ -1,4 +1,6 @@
-open StdLabels
+open !StdLabels
+open !MoreLabels
+open !Utils
 
 type char_type = Lower | Upper | Neither
 
@@ -45,19 +47,31 @@ let to_snake_case ident =
   |> String.lowercase_ascii
   |> String.capitalize_ascii
 
-let field_name ?(mangle_f=(fun x -> x)) field_name =
-  match String.uncapitalize_ascii (mangle_f field_name) with
-  | name when is_reserved name -> name ^ "'"
-  | name -> name
+let field_name field_name =
+  String.uncapitalize_ascii field_name
 
-let module_name ?(mangle_f=(fun x -> x)) name =
-  let name = mangle_f name in
+let method_name = field_name
+
+let module_name name =
   match name.[0] with
   | '_' -> "P" ^ name
   | _ -> String.capitalize_ascii name
 
-let poly_constructor_name ?(mangle_f=(fun x -> x)) name =
-  "`" ^ (mangle_f name |> String.capitalize_ascii)
+let module_name_of_proto ?package proto_file =
+  Filename.chop_extension proto_file
+  |> Filename.basename
+  |> (
+    match package with
+    | Some package -> Printf.sprintf "%s_%s" package
+    | None -> fun s -> s
+  )
+  |> String.capitalize_ascii
+  |> String.map ~f:(function '-' | '.' -> '_' | c -> c)
+
+let constructor_name = module_name
+
+let poly_constructor_name name =
+  "`" ^ String.capitalize_ascii name
 
 let has_mangle_option options =
   match options with
@@ -68,3 +82,86 @@ let has_mangle_option options =
     |> function
     | Some v -> v
     | None -> false
+
+(** Map a set of proto_names to ocaml names. The mapping will be uniq and prioritize minimum differences
+    [mangle_f] is a generic mangle function
+    [name_f] is a function to convert a name into the ocaml required type (E.g. capitalize or adding a '`')
+*)
+let create_ocaml_mapping: ?name_map:string StringMap.t -> ?mangle_f:(string -> string) -> name_f:(string -> string) -> string list -> string StringMap.t =
+  fun ?(name_map=StringMap.empty) ?(mangle_f=(fun x -> x)) ~name_f proto_names ->
+
+  (* Expand names into proto_name, mapped_name, mangled_name *)
+  let expanded_names =
+    let name_f proto_name =
+      name_f proto_name |> function
+      | name when is_reserved name -> name ^ "'"
+      | name -> name
+    in
+    let mangle_f proto_name = name_f (mangle_f proto_name) in
+
+    List.map ~f:(fun proto_name ->
+      let standard_name = name_f proto_name in
+      let mangled_name = mangle_f proto_name in
+      (proto_name, mangled_name, standard_name)
+    ) proto_names
+  in
+
+  (* Sort the names to create a stable-like mapping *)
+  let expanded_names =
+    let l = String.lowercase_ascii in
+    let cmp n1 n2 =
+      match n1, n2 with
+      (* Ocaml name = proto name *)
+      | ( proto_name,  mangled_name, _standard_name), ( proto_name',  mangled_name', _standard_name') when
+          proto_name = mangled_name && proto_name' = mangled_name' -> 0
+      | ( proto_name,  mangled_name, _standard_name), (_proto_name', _mangled_name', _standard_name') when
+          proto_name = mangled_name -> -1
+      | (_proto_name, _mangled_name, _standard_name), ( proto_name', mangled_name', _standard_name') when
+          proto_name' = mangled_name' -> 1
+      (* Ocaml name = standard name *)
+      | (_proto_name,  mangled_name,  standard_name), (_proto_name',  mangled_name',  standard_name') when
+          mangled_name = standard_name && mangled_name' = standard_name'-> 0
+      | (_proto_name,  mangled_name,  standard_name), (_proto_name', _mangled_name', _standard_name') when
+          mangled_name = standard_name -> -1
+      | (_proto_name, _mangled_name, _standard_name), (_proto_name',  mangled_name',  standard_name') when
+          mangled_name' = standard_name'-> 1
+      (* Lower case ocaml name = lower case proto name *)
+      | ( proto_name,  mangled_name, _standard_name), ( proto_name',  mangled_name', _standard_name') when
+          l proto_name = l mangled_name && l proto_name' = l mangled_name' -> 0
+      | ( proto_name,  mangled_name, _standard_name), (_proto_name', _mangled_name', _standard_name') when
+          l proto_name = l mangled_name -> -1
+      | (_proto_name, _mangled_name, _standard_name), ( proto_name', mangled_name', _standard_name') when
+          l proto_name' = l mangled_name' -> 1
+      (* Lower case Ocaml name = lower case standard name *)
+      | (_proto_name,  mangled_name,  standard_name), (_proto_name',  mangled_name',  standard_name') when
+          l mangled_name = l standard_name && l mangled_name' = l standard_name'-> 0
+      | (_proto_name,  mangled_name,  standard_name), (_proto_name', _mangled_name', _standard_name') when
+          l mangled_name = l standard_name -> -1
+      | (_proto_name, _mangled_name, _standard_name), (_proto_name',  mangled_name',  standard_name') when
+          l mangled_name' = l standard_name'-> 1
+      (* No mapping available. *)
+      | ( _proto_name, _mangled_name, _standard_name), ( _proto_name', _mangled_name', _standard_name') -> 0
+    in
+    (* Stable sort is important here *)
+    List.stable_sort ~cmp expanded_names
+  in
+
+  let seen =
+    StringMap.fold ~init:StringSet.empty ~f:(fun ~key:_ ~data:ocaml_name seen ->
+      StringSet.add ocaml_name seen
+    ) name_map
+  in
+  let name_map, _seen =
+    let rec make_uniq seen name =
+      match StringSet.mem name seen with
+      | false -> name
+      | true -> make_uniq seen (name ^ "'")
+    in
+    List.fold_left ~init:(name_map, seen) ~f:(
+      fun (map, seen) (proto_name, ocaml_name, _) ->
+        let ocaml_name = make_uniq seen ocaml_name in
+        StringMap.add ~key:proto_name ~data:ocaml_name map,
+        StringSet.add ocaml_name seen
+    ) expanded_names
+  in
+  name_map

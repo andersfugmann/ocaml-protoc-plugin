@@ -1,5 +1,8 @@
 GOOGLE_INCLUDE=$(shell pkg-config protobuf --variable=includedir)/google/protobuf
 
+OCAMLRUNPARAM=b
+export OCAMLRUNPARAM
+
 .PHONY: build
 build: ## Build
 	@dune build @install

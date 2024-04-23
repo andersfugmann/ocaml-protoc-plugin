@@ -20,6 +20,7 @@ val spec_of_field:
   params:Parameters.t ->
   syntax:[ `Proto2 | `Proto3 ] ->
   scope:Scope.t ->
+  type_db:Type_db.t ->
   map_type:DescriptorProto.t option ->
   FieldDescriptorProto.t -> field_spec
 
@@ -29,4 +30,6 @@ val make:
   is_cyclic: bool ->
   extension_ranges: (int*int) list ->
   scope:Scope.t ->
+  type_db:Type_db.t ->
+  comment_db:Comment_db.t ->
   fields:(FieldDescriptorProto.t * DescriptorProto.t option) list -> OneofDescriptorProto.t list -> t
