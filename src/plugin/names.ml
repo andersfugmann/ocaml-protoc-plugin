@@ -90,23 +90,15 @@ let has_mangle_option options =
 let create_ocaml_mapping: ?name_map:string StringMap.t -> ?mangle_f:(string -> string) -> name_f:(string -> string) -> string list -> string StringMap.t =
   fun ?(name_map=StringMap.empty) ?(mangle_f=(fun x -> x)) ~name_f proto_names ->
 
-  let rec make_uniq seen name =
-    match StringSet.mem name seen with
-    | true -> make_uniq seen (name ^ "'")
-    | false -> name
-  in
-
-  let append_ping_if_reserved name =
-    match is_reserved name with
-    | true -> name ^ "'"
-    | false -> name
-  in
-
-  let name_f proto_name = name_f proto_name |> append_ping_if_reserved in
-  let mangle_f proto_name = name_f (mangle_f proto_name) in
-
   (* Expand names into proto_name, mapped_name, mangled_name *)
   let expanded_names =
+    let name_f proto_name =
+      name_f proto_name |> function
+      | name when is_reserved name -> name ^ "'"
+      | name -> name
+    in
+    let mangle_f proto_name = name_f (mangle_f proto_name) in
+
     List.map ~f:(fun proto_name ->
       let standard_name = name_f proto_name in
       let mangled_name = mangle_f proto_name in
@@ -114,39 +106,62 @@ let create_ocaml_mapping: ?name_map:string StringMap.t -> ?mangle_f:(string -> s
     ) proto_names
   in
 
-  (* Create a preferred (preallocation) mapping: ocaml_name -> proto_name *)
-  let preferred_names =
-    let update ~pred map =
-      List.fold_left ~init:map ~f:(fun map names ->
-        let (proto_name, mangled_name, _) = names in
-        match pred names && not (StringMap.mem mangled_name map) with
-        | true -> StringMap.add ~key:mangled_name ~data:proto_name map
-        | false -> map
-      ) expanded_names
+  (* Sort the names to create a stable-like mapping *)
+  let expanded_names =
+    let l = String.lowercase_ascii in
+    let cmp n1 n2 =
+      match n1, n2 with
+      (* Ocaml name = proto name *)
+      | ( proto_name,  mangled_name, _standard_name), ( proto_name',  mangled_name', _standard_name') when
+          proto_name = mangled_name && proto_name' = mangled_name' -> 0
+      | ( proto_name,  mangled_name, _standard_name), (_proto_name', _mangled_name', _standard_name') when
+          proto_name = mangled_name -> -1
+      | (_proto_name, _mangled_name, _standard_name), ( proto_name', mangled_name', _standard_name') when
+          proto_name' = mangled_name' -> 1
+      (* Ocaml name = standard name *)
+      | (_proto_name,  mangled_name,  standard_name), (_proto_name',  mangled_name',  standard_name') when
+          mangled_name = standard_name && mangled_name' = standard_name'-> 0
+      | (_proto_name,  mangled_name,  standard_name), (_proto_name', _mangled_name', _standard_name') when
+          mangled_name = standard_name -> -1
+      | (_proto_name, _mangled_name, _standard_name), (_proto_name',  mangled_name',  standard_name') when
+          mangled_name' = standard_name'-> 1
+      (* Lower case ocaml name = lower case proto name *)
+      | ( proto_name,  mangled_name, _standard_name), ( proto_name',  mangled_name', _standard_name') when
+          l proto_name = l mangled_name && l proto_name' = l mangled_name' -> 0
+      | ( proto_name,  mangled_name, _standard_name), (_proto_name', _mangled_name', _standard_name') when
+          l proto_name = l mangled_name -> -1
+      | (_proto_name, _mangled_name, _standard_name), ( proto_name', mangled_name', _standard_name') when
+          l proto_name' = l mangled_name' -> 1
+      (* Lower case Ocaml name = lower case standard name *)
+      | (_proto_name,  mangled_name,  standard_name), (_proto_name',  mangled_name',  standard_name') when
+          l mangled_name = l standard_name && l mangled_name' = l standard_name'-> 0
+      | (_proto_name,  mangled_name,  standard_name), (_proto_name', _mangled_name', _standard_name') when
+          l mangled_name = l standard_name -> -1
+      | (_proto_name, _mangled_name, _standard_name), (_proto_name',  mangled_name',  standard_name') when
+          l mangled_name' = l standard_name'-> 1
+      (* No mapping available. *)
+      | ( _proto_name, _mangled_name, _standard_name), ( _proto_name', _mangled_name', _standard_name') -> 0
     in
-    StringMap.empty
-    |> update ~pred:(fun ( name, mangled_name, _standard_name) -> String.equal mangled_name name)
-    |> update ~pred:(fun (_name, mangled_name,  standard_name) -> String.equal mangled_name standard_name)
-    |> update ~pred:(fun ( name, mangled_name, _standard_name) -> String.equal (String.lowercase_ascii mangled_name) (String.lowercase_ascii name))
-    |> update ~pred:(fun (_name, mangled_name,  standard_name) -> String.equal (String.lowercase_ascii mangled_name) (String.lowercase_ascii standard_name))
+    (* Stable sort is important here *)
+    List.stable_sort ~cmp expanded_names
   in
 
-  (* Create the mapping. If a names is in the preferred set (and maps to the expected proto_name) this names is used.
-     If the name in preferred_names is used (preallocated) for another proto name, then append a "'"
-     All names are guaranteed to be uniq.
-  *)
-  let seen = StringMap.fold ~init:StringSet.empty name_map ~f:(fun ~key:_ ~data seen -> StringSet.add data seen) in
-  let (name_map, _seen) =
-    List.fold_left ~init:(name_map, seen) ~f:(fun (name_map, seen) (proto_name, mangled_name, _) ->
-      let ocaml_name = match StringMap.find_opt mangled_name preferred_names with
-        | None -> mangled_name
-        | Some proto_name' when proto_name' = proto_name -> mangled_name
-        | Some _ -> mangled_name ^ "'"
-      in
-      let ocaml_name = make_uniq seen ocaml_name in
-      let map = StringMap.add ~key:proto_name ~data:ocaml_name name_map in
-      let seen = StringSet.add ocaml_name seen in
-      (map, seen)
+  let seen =
+    StringMap.fold ~init:StringSet.empty ~f:(fun ~key:_ ~data:ocaml_name seen ->
+      StringSet.add ocaml_name seen
+    ) name_map
+  in
+  let name_map, _seen =
+    let rec make_uniq seen name =
+      match StringSet.mem name seen with
+      | false -> name
+      | true -> make_uniq seen (name ^ "'")
+    in
+    List.fold_left ~init:(name_map, seen) ~f:(
+      fun (map, seen) (proto_name, ocaml_name, _) ->
+        let ocaml_name = make_uniq seen ocaml_name in
+        StringMap.add ~key:proto_name ~data:ocaml_name map,
+        StringSet.add ocaml_name seen
     ) expanded_names
   in
   name_map
