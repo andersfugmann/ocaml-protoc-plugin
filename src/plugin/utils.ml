@@ -70,6 +70,10 @@ module List = struct
       | _ :: xs -> inner (i+1) xs
     in
     inner 0 lst
+
+  let rec find_map ~f = function
+    | [] -> None
+    | x :: xs -> match f x with Some _ as v -> v | None -> find_map ~f xs
 end
 
 module StringMap = struct
