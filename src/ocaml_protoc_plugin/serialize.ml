@@ -111,7 +111,7 @@ let rec write: type a b. (a, b) compound -> Writer.t -> a -> unit = function
       List.iter ~f:(fun v -> write writer v) vs
   | Map ((index, _, _), (key_spec, value_compound)) ->
     let write_header = write_field_header String index in
-    let write_key = write (Basic ((1, "key", "key"), key_spec, default_of_spec key_spec)) in
+    let write_key = write (Basic_req ((1, "key", "key"), key_spec)) in
     let write_value = write value_compound in
     let write_entry writer (key, value) =
       write_key writer key;
