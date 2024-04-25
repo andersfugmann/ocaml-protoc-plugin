@@ -16,3 +16,12 @@ module Service = Service
 module Result = Result
 module Extensions = Extensions
 module Json_options = Json_options
+
+
+let apply_lazy f =
+  match Sys.backend_type with
+  | Native | Bytecode ->
+    f ()
+  | Other _ ->
+    let f = Lazy.from_fun f in
+    fun x -> (Lazy.force f) x

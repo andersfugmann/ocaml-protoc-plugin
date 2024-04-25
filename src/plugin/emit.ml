@@ -304,7 +304,7 @@ let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
       Code.emit implementation `None "let spec () = %s" spec_str;
 
       Code.emit implementation `Begin "let to_proto' =";
-      Code.emit implementation `None "let serialize = Runtime'.Serialize.serialize (spec ()) in";
+      Code.emit implementation `None "let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in";
       Code.emit implementation `None "fun writer %s -> serialize writer %s" destructor (String.concat ~sep:" " args);
       Code.emit implementation `End "";
 
@@ -312,14 +312,14 @@ let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
 
       Code.emit implementation `Begin "let from_proto_exn =";
       Code.emit implementation `None "let constructor %s = %s in" (String.concat ~sep:" " args) destructor;
-      Code.emit implementation `None "Runtime'.Deserialize.deserialize (spec ()) constructor";
+      Code.emit implementation `None "Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)";
       Code.emit implementation `End "let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)";
       Code.emit implementation `Begin "let to_json options = ";
       Code.emit implementation `None "let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in";
       Code.emit implementation `None "fun %s -> serialize %s" destructor (String.concat ~sep:" " args);
       Code.emit implementation `EndBegin "let from_json_exn =";
       Code.emit implementation `None "let constructor %s = %s in" (String.concat ~sep:" " args) destructor;
-      Code.emit implementation `None "Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor";
+      Code.emit implementation `None "Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)";
       Code.emit implementation `End "let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)";
     | None -> ()
   in
