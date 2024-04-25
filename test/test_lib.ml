@@ -130,8 +130,8 @@ let test_json ~debug ~proto_file (type t) (module M : T with type t = t) (t: t) 
         |> Reader.create
         |> M.from_proto_exn
       in
-      if t <> t' then Printf.printf "Deserialized json does not match.\n";
-      if t <> t'' then Printf.printf "Deserialized generated json does not match\n";
+      if not (M.equal t t') then Printf.printf "Deserialized json does not match.\n";
+      if not (M.equal t t'') then Printf.printf "Deserialized generated json does not match\n";
       if (not (Yojson.Basic.equal json' json)) then
         Printf.printf "Generated json not equal\n";
 

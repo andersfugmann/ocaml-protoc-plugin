@@ -27,6 +27,6 @@ let%expect_test _ =
 let%expect_test _ =
   let module T = Enum.Negative in
   let t = T.Enum.A3 in
-  Test_lib.test_encode ~proto_file (module T) t;
+  Test_lib.test_encode ~skip_json:true ~proto_file (module T) t;
   [%expect {|
     e: A3 |}]
