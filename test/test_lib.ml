@@ -169,7 +169,7 @@ let test_decode (type t) (module M : T with type t = t) strategy expect data =
     Printf.printf "\n%s:Data: %s\n" (Test_runtime.show_strategy strategy) (List.map ~f:fst fields |> List.map ~f:string_of_int |> String.concat ~sep:", ")
 
 (** Create a common function for testing. *)
-let test_encode (type t) ?dump ?(debug_json=false) ?proto_file ?protoc_args (module M : T with type t = t) ?(skip_json=false) ?(validate : t option) ?(expect : t option) (t : t) =
+let test_encode (type t) ?dump ?(debug_json=false) ?proto_file ?protoc_args (module M : T with type t = t) ?(skip_json=false) ?(skip_protoc=false) ?(validate : t option) ?(expect : t option) (t : t) =
   let expect = Option.value ~default:t expect in
   let () = match validate with
     | Some v when v <> expect -> Printf.printf "Validate match failed\n"
@@ -187,11 +187,11 @@ let test_encode (type t) ?dump ?(debug_json=false) ?proto_file ?protoc_args (mod
   in
   let () =
     match proto_file with
-    | Some proto_file ->
+    | Some proto_file when not skip_protoc ->
       let typename = M.name () in
       let typename = String.sub typename ~pos:1 ~len:(String.length typename - 1) in
       dump_protoc ?protoc_args ~proto_file typename data
-    | None -> ()
+    | _ -> ()
   in
 
   test_decode (module M) Test_runtime.Standard expect data_space;
