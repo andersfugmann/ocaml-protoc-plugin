@@ -1,4 +1,14 @@
-## 6.0.0: 2014-04-13
+## 6.1.0: 2024-04-25
+- Fix name resolution leading to wrongly mapped named
+- Fix codegen bug causing the plugin to reject valid protobuf
+- Add preliminary support for melange though disabling eager
+  evaluation of serialize and deserialize functions when not using
+  native or bytecode backends
+- Fix missing cflags when compiling test c stub
+- Make Map tests compatible with older versions of protoc
+- Fix negative integer test failues due to a bug in older versions of protobuf (google) c lib
+
+## 6.0.0: 2024-04-13
 
 ### New features
 - [x] Implement json serialization and deserialization (#5)
