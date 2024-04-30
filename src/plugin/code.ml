@@ -141,3 +141,34 @@ let emit_comment ~(position:[`Leading | `Trailing]) t = function
 let contents t =
   List.map ~f:(Printf.sprintf "%s") (List.rev t.code)
   |> String.concat ~sep:"\n"
+
+(** Emit function comments *)
+let add_arg_doc t
+      ~(position:[`Leading | `Trailing])
+      ?(format:('a -> 'b, unit, string, unit) format4="param %s")
+      ?(comment=[])
+      param_comments =
+
+  let comments = map_comments comment in
+
+  (* Remove parameters with no comments *)
+  let param_comments =
+    List.filter ~f:(fun (_, comments) -> not (List.is_empty comments)) param_comments
+  in
+
+  match comments, param_comments with
+  | [], [] -> ()
+  | [comment], [] ->
+    emit t `None "(** %s *)" (String.trim comment)
+  | comments, param_comments ->
+    if position = `Leading then emit t `None "";
+    emit t `Begin "(**";
+    List.iter ~f:(emit t `None "%s") comments;
+    emit t `None "";
+    List.iter ~f:(fun (param, comments) ->
+      let comments = map_comments comments in
+      emit t `Begin format param;
+      List.iter ~f:(emit t `None "%s") comments;
+      emit t `None "";
+    ) param_comments;
+    emit t `End "*)"

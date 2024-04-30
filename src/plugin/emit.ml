@@ -166,7 +166,7 @@ let emit_extension ~scope ~params ~comment_db ~type_db field =
   (* Get spec and type *)
   let c =
     let params = Parameters.{params with singleton_record = false} in
-    Types.spec_of_field ~params ~syntax:`Proto2 ~scope ~type_db ~map_type:None field
+    Types.spec_of_field ~params ~syntax:`Proto2 ~scope ~type_db ~comment_db ~map_type:None field
   in
   let signature = Code.init () in
   let implementation = Code.init () in
@@ -227,6 +227,20 @@ let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
   let signature = Code.init () in
   let implementation = Code.init () in
   let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
+  let proto_path = Scope.get_proto_path scope ?name in
+
+  (* Need extensions if specified, added to the list of fields *)
+  let emit_message_type code ~annot = function
+    | _, [] ->
+      Code.emit code `None "type t = unit %s" annot
+    | `Tuple, (types: Types.c list) ->
+      let types = List.map ~f:(fun (c: Types.c) -> Types.string_of_type c.type') types in
+      Code.emit code `None "type t = (%s) %s" (String.concat ~sep:" * " types) annot
+    | `Record, (types: Types.c list) ->
+      Code.emit code `Begin "type t = {";
+      List.iter ~f:(fun (c: Types.c) -> Code.emit code `None "%s:%s;" (Type_db.get_message_field type_db ~proto_path c.name) (Types.string_of_type c.type')) types;
+      Code.emit code `End "} %s" annot;
+  in
 
   let extension_ranges =
     List.map ~f:(function
@@ -270,7 +284,7 @@ let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
                   default_constructor_sig; default_constructor_impl; merge_impl } =
         Types.make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~type_db ~comment_db ~fields oneof_decls
       in
-      Code.emit signature `None "type t = %s%s" type' params.annot;
+      emit_message_type signature ~annot:params.annot type';
       Code.emit signature `None "val make: %s" default_constructor_sig;
       Code.emit signature `None "(** Helper function to generate a message using default values *)\n";
 
@@ -296,7 +310,7 @@ let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
       Code.emit signature `None "(**/**)";
 
       Code.emit implementation `None "let name () = \"%s\"" (Scope.get_proto_path scope);
-      Code.emit implementation `None "type t = %s%s" type' params.annot;
+      emit_message_type implementation ~annot:params.annot type';
 
       Code.emit implementation `None "type make_t = %s" default_constructor_sig;
       Code.emit implementation `None "let make %s" default_constructor_impl;

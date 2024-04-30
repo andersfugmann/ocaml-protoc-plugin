@@ -5,10 +5,7 @@ open !MoreLabels
 open !Utils
 open Spec.Descriptor.Google.Protobuf
 
-(* TODO:
-   - Understand proto3_optional flags (Used to map oneof fields for some reason)
-   - Packages should be mapped also, so they can be named correctly
-*)
+
 let sprintf = Printf.sprintf
 
 type oneof = { name: string; constructor_name: string; type_: string option; }
@@ -25,6 +22,9 @@ type element_type =
   | Service of entry list
   | Package
   | Extension
+
+(** Name of extensions field *)
+let extensions_name = "extensions'"
 
 let string_of_element_type = function
   | Message _ -> "Message"
@@ -48,7 +48,7 @@ let add_scope ~proto_name ~ocaml_name { proto_path; ocaml_path; module_name; oca
   { proto_path; ocaml_path; ocaml_name; module_name }
 
 let element_of_message ~mangle_f descriptorproto =
-  let DescriptorProto.{ field = fields; oneof_decl = oneof_decls; options; _ } = descriptorproto in
+  let DescriptorProto.{ field = fields; oneof_decl = oneof_decls; options; extension_range; _ } = descriptorproto in
   let map_type = match options with
     | Some MessageOptions.{ map_entry = Some true; _ } -> Some descriptorproto
     | _ -> None
@@ -68,9 +68,17 @@ let element_of_message ~mangle_f descriptorproto =
   in
 
   let field_name_map =
+    (* If the message specifies extensions, reserve the name here *)
+    let name_map = match List.is_empty extension_range with
+      | true -> StringMap.empty
+      | false ->
+        StringMap.singleton extensions_name extensions_name
+    in
+
     let plain_field_names = List.filter_map ~f:(fun field -> field.FieldDescriptorProto.name) plain_fields in
     let oneof_names = List.filter_map ~f:(fun field -> field.OneofDescriptorProto.name) oneof_decls in
-    Names.create_ocaml_mapping ~mangle_f ~name_f:Names.field_name (plain_field_names @ oneof_names)
+    (* Extend name mapping. The 'extensions_name' should already have been allocated *)
+    Names.create_ocaml_mapping ~name_map ~mangle_f ~name_f:Names.field_name (plain_field_names @ oneof_names)
   in
   (* Need to exclude oneof's where its a proto3 message. In reality, we should not really care. *)
   let oneofs =
@@ -110,11 +118,15 @@ let element_of_message ~mangle_f descriptorproto =
         | Some FieldDescriptorProto.Type.TYPE_MESSAGE -> type_name
         | _ -> None
       in
-      { name; ocaml_name; }, Plain { type_; }
+      { name; ocaml_name; }, Plain { type_ }
     ) plain_fields
   in
-  let fields = plain_fields @ oneofs in
-  (* Interesting that this just returns the scope *)
+  let fields =
+    let fields = plain_fields @ oneofs in
+    match List.is_empty extension_range with
+    | true -> fields
+    | false -> ({ name = extensions_name; ocaml_name = extensions_name }, Plain { type_ = None }) :: fields
+  in
   Message { map_type; fields }
 
 let element_of_enum ~mangle_f EnumDescriptorProto.{ value; _ } =
@@ -154,14 +166,12 @@ let rec traverse_message ~mangle_f ~scope map services descriptorproto =
   (* Scope contains this element *)
   let message_element = element_of_message ~mangle_f descriptorproto in
 
-
   (* Extension name should not interfere with other module names, but should still be uniq *)
   let extension_names = List.filter_map ~f:(fun e -> e.FieldDescriptorProto.name) extensions in
   let name_map =
     Names.create_ocaml_mapping ~name_map ~mangle_f ~name_f:Names.module_name extension_names
   in
 
-  (* Add extensions *)
   let map =
     List.fold_left ~init:map ~f:(fun map extension ->
       let proto_name = Option.value_exn ~message:"Enums must have a name" extension.FieldDescriptorProto.name in
@@ -278,33 +288,19 @@ let make_module_name ~prefix_module_names ?package name =
   in
   Names.module_name_of_proto ?package name
 
-let dump { map; cyclic_set; file_map } =
-  ignore cyclic_set;
-  StringMap.iter ~f:(fun ~key ~data -> Printf.eprintf "Module %s: %s\n" key data) file_map;
-  StringMap.iter ~f:(fun ~key ~data -> Printf.eprintf "Type: %s: %s\n" key (string_of_element_type (snd data))) map;
-  (*
-  StringMap.iter ~f:(fun ~key ~data:{ module_name; ocaml_name; element_type } ->
-    let element_str = match element_type with
-      | Message { is_map; fields; _ } ->
-        List.map ~f:(function
-          | { name; _ }, Plain { type_ } -> sprintf "(%s, %s)" name (Option.value ~default:"<none>" type_)
-          | { name; _ }, Oneof _ -> name
-        ) fields
-        |> String.concat ~sep:"; "
-        |> sprintf "is_map: %b, [ %s ]" is_map
-      | _ -> ""
-    in
-    match StringSet.mem key cyclic_set with
-    | true -> Printf.eprintf "Cyclic: %s -> %s.%s : %s\n" key module_name ocaml_name element_str
-    | false -> ()
-  ) map;
-  StringMap.iter ~f:(fun ~key ~data:{ module_name; ocaml_name; element_type } ->
+let dump { map; cyclic_set = _; file_map } =
+  let eprintf = Printf.eprintf in
+
+  StringMap.iter ~f:(fun ~key ~data -> eprintf "Module %s: %s\n" key data) file_map;
+  (* Just traverse everything *)
+  StringMap.iter ~f:(fun ~key:proto_path ~data:({module_name; _ }, element_type) ->
     match element_type with
-    | Message { is_map = true; _ } -> Printf.eprintf "Map: %s -> %s#%s\n" key module_name ocaml_name
+    | Message { fields; _ } ->
+      List.iter ~f:(fun ({name; ocaml_name }, _field) ->
+        eprintf "%s%s.%s -> %s\n" module_name proto_path name ocaml_name
+      ) fields
     | _ -> ()
-   ) map;
-  *)
-  ()
+  ) map
 
 let init ~prefix_module_names (files : FileDescriptorProto.t list) =
   let map, file_map = List.fold_left ~init:(StringMap.empty, StringMap.empty) ~f:(
@@ -315,8 +311,6 @@ let init ~prefix_module_names (files : FileDescriptorProto.t list) =
       let map = traverse_file map module_name file in
       (map, file_map)
   ) files in
-
-
 
   let cyclic_set = create_cyclic_set map in
   let t = { map; cyclic_set; file_map } in
