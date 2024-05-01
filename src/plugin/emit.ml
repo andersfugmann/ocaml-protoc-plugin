@@ -239,9 +239,19 @@ let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
       let deprecated = List.for_all types ~f:(fun Types.{ deprecated; name = _; _ } -> deprecated) in
       Code.emit code `None "type t = %s %s" (Code.append_deprecaton_if ~deprecated:(deprecated && sig_type = `Signature) `Item type_str) annot;
       if sig_type = `Signature then begin
-        let field_comments = List.map ~f:(fun Types.{ name; comments; _ } -> (name, comments)) types in
-        let comment_heading = List.map ~f:fst field_comments |> String.concat ~sep:", " |> sprintf "[(%s)]" in
-        Code.emit_field_doc code ~position:`Trailing ~comment:comment_heading field_comments
+        (* Only emit documentation comments, if there are comments to emit *)
+        match types with
+        | [Types.{ name = _; comments ; _ }] ->
+          Code.emit_comment code ~position:`Trailing comments
+        | types ->
+          let field_comments = List.map ~f:(fun Types.{ name; comments; _ } -> (name, comments)) types in
+          let comment =
+            List.map ~f:fst field_comments
+            |> String.concat ~sep:", "
+            |> sprintf "[(%s)]"
+          in
+          if List.exists ~f:(function (_, []) -> false | _ -> true) field_comments then
+            Code.emit_field_doc code ~position:`Trailing ~comment:comment field_comments
       end
     | `Record, (types: Types.c list) ->
       Code.emit code `Begin "type t = {";

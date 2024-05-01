@@ -15,6 +15,7 @@ module Spec = Spec
 module Field = Field
 module Merge = Merge
 
+(** Apply lazy binding if the backed is neither Native or bytecode *)
 let[@inline] apply_lazy f =
   match Sys.backend_type with
   | Native | Bytecode ->
@@ -23,11 +24,3 @@ let[@inline] apply_lazy f =
     let f = Lazy.from_fun f in
     fun x -> (Lazy.force f) x
 (**/**)
-
-type test =
-  { a: int; (** This is an int *)
-    b: [`First | `Second]; (** {e b} is [b]
-                               - `First is ok
-                               - `Second is also
-                           *)
-  }

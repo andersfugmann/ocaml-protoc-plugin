@@ -139,7 +139,7 @@ let emit_comment ~(position:[`Leading | `Trailing]) t = function
         List.iter ~f:(emit t `None "%s") comments;
         emit t `End "*)";
     in
-    (* if position = `Trailing then emit t `None ""; (* Dont think this is needed *) *)
+    if position = `Trailing then emit t `None "";
     ()
 
 let contents t =
