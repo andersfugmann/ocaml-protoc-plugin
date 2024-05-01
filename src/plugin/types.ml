@@ -552,10 +552,9 @@ let c_of_oneof ~params ~syntax:_ ~scope ~type_db ~comment_db OneofDescriptorProt
     in
     let type' =
       field_infos
-      |> List.map ~f:(fun (_, field_name, type', _, deprecated) ->
+      |> List.map ~f:(fun (_, field_name, type', _, _deprecated) ->
         let adt_name = Type_db.get_message_oneof_field type_db ~proto_name ~oneof_name ~field_name in
         sprintf "%s of %s" adt_name type'
-        |> Code.append_deprecaton_if ~deprecated `Attribute
        )
       |> String.concat ~sep:" | "
       |> sprintf "[ `not_set | %s ]"
@@ -669,7 +668,6 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~type_db ~comment_d
     (* Must be a tuple if there are no fields *)
     List.length field_info = 0 || not must_be_record
   in
-  let _has_deprecated_fields = List.exists ~f:(fun ({ deprecated; _ }: c) -> deprecated) ts in
 
   let constructor_sig_arg c =
     let field_name = Type_db.get_message_field type_db ~proto_path c.name in
