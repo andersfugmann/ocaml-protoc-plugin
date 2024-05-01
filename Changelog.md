@@ -1,3 +1,8 @@
+## 6.1.1: Unreleased
+- Fix potential nameclash for messages defining extensions
+- Resolve compilation warning on deprecated fields enclosed in a oneof
+- Improve how comments are copied to generated code
+
 ## 6.1.0: 2024-04-25
 - Fix name resolution leading to wrongly mapped names
 - Fix codegen bug causing the plugin to reject valid protobuf

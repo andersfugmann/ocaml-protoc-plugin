@@ -230,15 +230,28 @@ let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
   let proto_path = Scope.get_proto_path scope ?name in
 
   (* Need extensions if specified, added to the list of fields *)
-  let emit_message_type code ~annot = function
+  let emit_message_type code (sig_type:[`Signature|`Implementation]) ~annot = function
     | _, [] ->
       Code.emit code `None "type t = unit %s" annot
-    | `Tuple, (types: Types.c list) ->
-      let types = List.map ~f:(fun (c: Types.c) -> Types.string_of_type c.type') types in
-      Code.emit code `None "type t = (%s) %s" (String.concat ~sep:" * " types) annot
+    | (`Tuple, (types: Types.c list)) ->
+      let types_str = List.map ~f:(fun (Types.{ type'; _ } : Types.c)-> Types.string_of_type type') types in
+      let type_str = sprintf "(%s) %s" (String.concat ~sep:" * " types_str) annot in
+      let deprecated = List.for_all types ~f:(fun Types.{ deprecated; name = _; _ } -> deprecated) in
+      Code.emit code `None "type t = %s" (Code.append_deprecaton_if ~deprecated:(deprecated && sig_type = `Signature) `Attribute type_str);
+      if sig_type = `Signature then begin
+        let field_comments = List.map ~f:(fun Types.{ name; comments; _ } -> (name, comments)) types in
+        let comment_heading = List.map ~f:fst field_comments |> String.concat ~sep:", " |> sprintf "[(%s)]" in
+        Code.emit_field_doc code ~position:`Trailing ~comment:comment_heading field_comments
+      end
     | `Record, (types: Types.c list) ->
       Code.emit code `Begin "type t = {";
-      List.iter ~f:(fun (c: Types.c) -> Code.emit code `None "%s:%s;" (Type_db.get_message_field type_db ~proto_path c.name) (Types.string_of_type c.type')) types;
+      List.iter ~f:(fun Types.{ name; comments; deprecated; type'; _ } ->
+        let field = sprintf "%s:%s" (Type_db.get_message_field type_db ~proto_path name) (Types.string_of_type type') in
+        Code.emit code `None "%s;" (Code.append_deprecaton_if ~deprecated:(deprecated && sig_type = `Signature) `Attribute field);
+        if sig_type = `Signature then begin
+          Code.emit_comment code ~position:`Trailing comments
+        end
+      ) types;
       Code.emit code `End "} %s" annot;
   in
 
@@ -284,7 +297,7 @@ let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
                   default_constructor_sig; default_constructor_impl; merge_impl } =
         Types.make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~type_db ~comment_db ~fields oneof_decls
       in
-      emit_message_type signature ~annot:params.annot type';
+      emit_message_type signature `Signature ~annot:params.annot type';
       Code.emit signature `None "val make: %s" default_constructor_sig;
       Code.emit signature `None "(** Helper function to generate a message using default values *)\n";
 
@@ -310,7 +323,7 @@ let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
       Code.emit signature `None "(**/**)";
 
       Code.emit implementation `None "let name () = \"%s\"" (Scope.get_proto_path scope);
-      emit_message_type implementation ~annot:params.annot type';
+      emit_message_type implementation `Implementation ~annot:params.annot type';
 
       Code.emit implementation `None "type make_t = %s" default_constructor_sig;
       Code.emit implementation `None "let make %s" default_constructor_impl;
