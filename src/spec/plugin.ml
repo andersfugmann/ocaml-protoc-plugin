@@ -68,6 +68,7 @@ module rec Google : sig
         (**/**)
       end
 
+
       (** An encoded CodeGeneratorRequest is written to the plugin's stdin. *)
       and CodeGeneratorRequest : sig
         type t = {
@@ -107,6 +108,7 @@ module rec Google : sig
         (**/**)
       end
 
+
       (** The plugin writes an encoded CodeGeneratorResponse to stdout. *)
       and CodeGeneratorResponse : sig
 
@@ -127,6 +129,7 @@ module rec Google : sig
           val from_string_exn: string -> t
           (**/**)
         end
+
 
         (** Represents a single generated file. *)
         and File : sig
@@ -180,6 +183,7 @@ module rec Google : sig
           val from_json_exn: Runtime'.Json.t -> t
           (**/**)
         end
+
         type t = {
           error:string option;
           (**
@@ -222,6 +226,7 @@ module rec Google : sig
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
     end
   end
 end = struct
@@ -268,6 +273,7 @@ end = struct
         (**/**)
       end
 
+
       (** An encoded CodeGeneratorRequest is written to the plugin's stdin. *)
       and CodeGeneratorRequest : sig
         type t = {
@@ -307,6 +313,7 @@ end = struct
         (**/**)
       end
 
+
       (** The plugin writes an encoded CodeGeneratorResponse to stdout. *)
       and CodeGeneratorResponse : sig
 
@@ -327,6 +334,7 @@ end = struct
           val from_string_exn: string -> t
           (**/**)
         end
+
 
         (** Represents a single generated file. *)
         and File : sig
@@ -380,6 +388,7 @@ end = struct
           val from_json_exn: Runtime'.Json.t -> t
           (**/**)
         end
+
         type t = {
           error:string option;
           (**
@@ -422,6 +431,7 @@ end = struct
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
     end
   end = struct
     module rec Compiler : sig
@@ -466,6 +476,7 @@ end = struct
         (**/**)
       end
 
+
       (** An encoded CodeGeneratorRequest is written to the plugin's stdin. *)
       and CodeGeneratorRequest : sig
         type t = {
@@ -505,6 +516,7 @@ end = struct
         (**/**)
       end
 
+
       (** The plugin writes an encoded CodeGeneratorResponse to stdout. *)
       and CodeGeneratorResponse : sig
 
@@ -525,6 +537,7 @@ end = struct
           val from_string_exn: string -> t
           (**/**)
         end
+
 
         (** Represents a single generated file. *)
         and File : sig
@@ -578,6 +591,7 @@ end = struct
           val from_json_exn: Runtime'.Json.t -> t
           (**/**)
         end
+
         type t = {
           error:string option;
           (**
@@ -620,6 +634,7 @@ end = struct
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
     end = struct
       module rec Version : sig
         type t = {
@@ -698,6 +713,7 @@ end = struct
           Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
+
       and CodeGeneratorRequest : sig
         type t = {
           file_to_generate:string list;
@@ -774,6 +790,7 @@ end = struct
           Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
+
       and CodeGeneratorResponse : sig
 
         (** Sync with code_generator.h. *)
@@ -793,6 +810,7 @@ end = struct
           val from_string_exn: string -> t
           (**/**)
         end
+
 
         (** Represents a single generated file. *)
         and File : sig
@@ -846,6 +864,7 @@ end = struct
           val from_json_exn: Runtime'.Json.t -> t
           (**/**)
         end
+
         type t = {
           error:string option;
           (**
@@ -928,6 +947,7 @@ end = struct
             | s -> Runtime'.Result.raise (`Unknown_enum_name s)
 
         end
+
         and File : sig
           type t = {
             name:string option;
@@ -1018,6 +1038,7 @@ end = struct
             Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
           let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
         end
+
         let name () = ".google.protobuf.compiler.CodeGeneratorResponse"
         type t = {
           error:string option;
@@ -1053,6 +1074,7 @@ end = struct
           Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
+
     end
   end
 end

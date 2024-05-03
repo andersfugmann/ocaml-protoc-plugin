@@ -59,6 +59,7 @@ module rec Google : sig
       (**/**)
     end
 
+
     (** Describes a complete .proto file. *)
     and FileDescriptorProto : sig
       type t = {
@@ -119,6 +120,7 @@ module rec Google : sig
       (**/**)
     end
 
+
     (** Describes a message type. *)
     and DescriptorProto : sig
       module rec ExtensionRange : sig
@@ -161,6 +163,7 @@ module rec Google : sig
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
 
       (**
         Range of reserved tag numbers. Reserved tag numbers may not be used by
@@ -206,6 +209,7 @@ module rec Google : sig
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
       type t = {
         name:string option;
         field:FieldDescriptorProto.t list;
@@ -244,6 +248,7 @@ module rec Google : sig
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
     and ExtensionRangeOptions : sig
       type t = {
         uninterpreted_option:UninterpretedOption.t list;
@@ -275,6 +280,7 @@ module rec Google : sig
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
 
     (** Describes a field within a message. *)
     and FieldDescriptorProto : sig
@@ -340,6 +346,7 @@ module rec Google : sig
         val from_string_exn: string -> t
         (**/**)
       end
+
       and Label : sig
         type t =
           | LABEL_OPTIONAL
@@ -359,6 +366,7 @@ module rec Google : sig
         val from_string_exn: string -> t
         (**/**)
       end
+
       type t = {
         name:string option;
         extendee:string option;
@@ -409,6 +417,7 @@ module rec Google : sig
       (**/**)
     end
 
+
     (** Describes a oneof. *)
     and OneofDescriptorProto : sig
       type t = {
@@ -441,6 +450,7 @@ module rec Google : sig
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
 
     (** Describes an enum type. *)
     and EnumDescriptorProto : sig
@@ -492,6 +502,7 @@ module rec Google : sig
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
       type t = {
         name:string option;
         value:EnumValueDescriptorProto.t list;
@@ -525,6 +536,7 @@ module rec Google : sig
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
 
     (** Describes a value within an enum. *)
     and EnumValueDescriptorProto : sig
@@ -560,6 +572,7 @@ module rec Google : sig
       (**/**)
     end
 
+
     (** Describes a service. *)
     and ServiceDescriptorProto : sig
       type t = {
@@ -593,6 +606,7 @@ module rec Google : sig
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
 
     (** Describes a method of a service. *)
     and MethodDescriptorProto : sig
@@ -630,6 +644,7 @@ module rec Google : sig
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
     and FileOptions : sig
 
       (** Generated classes can be optimized for speed or code size. *)
@@ -661,6 +676,7 @@ module rec Google : sig
         val from_string_exn: string -> t
         (**/**)
       end
+
       type t = {
         java_package:string option;
         java_outer_classname:string option;
@@ -718,6 +734,7 @@ module rec Google : sig
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
     and MessageOptions : sig
       type t = {
         message_set_wire_format:bool;
@@ -760,6 +777,7 @@ module rec Google : sig
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
     and FieldOptions : sig
       module rec CType : sig
         type t =
@@ -780,6 +798,7 @@ module rec Google : sig
         val from_string_exn: string -> t
         (**/**)
       end
+
       and JSType : sig
         type t =
           | JS_NORMAL
@@ -803,6 +822,7 @@ module rec Google : sig
         val from_string_exn: string -> t
         (**/**)
       end
+
       type t = {
         ctype:CType.t;
         (**
@@ -914,6 +934,7 @@ module rec Google : sig
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
     and OneofOptions : sig
       type t = {
         uninterpreted_option:UninterpretedOption.t list;
@@ -945,6 +966,7 @@ module rec Google : sig
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
     and EnumOptions : sig
       type t = {
         allow_alias:bool option;
@@ -985,6 +1007,7 @@ module rec Google : sig
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
     and EnumValueOptions : sig
       type t = {
         deprecated:bool;
@@ -1024,6 +1047,7 @@ module rec Google : sig
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
     and ServiceOptions : sig
       type t = {
         deprecated:bool;
@@ -1063,6 +1087,7 @@ module rec Google : sig
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
     and MethodOptions : sig
 
       (**
@@ -1091,6 +1116,7 @@ module rec Google : sig
         val from_string_exn: string -> t
         (**/**)
       end
+
       type t = {
         deprecated:bool;
         (**
@@ -1130,6 +1156,7 @@ module rec Google : sig
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
 
     (**
       A message representing a option the parser does not recognize. This only
@@ -1179,6 +1206,7 @@ module rec Google : sig
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
       type t = {
         name:NamePart.t list;
         identifier_value:string option;
@@ -1214,6 +1242,7 @@ module rec Google : sig
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
 
     (**
       Encapsulates information about the original source file from which a
@@ -1299,6 +1328,7 @@ module rec Google : sig
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
       type t = (Location.t list)
       (**
         A Location identifies a piece of source code in a .proto file which
@@ -1378,6 +1408,7 @@ module rec Google : sig
       (**/**)
     end
 
+
     (**
       Describes the relationship between generated code and its original source
       file. A GeneratedCodeInfo message is associated with only one generated
@@ -1433,6 +1464,7 @@ module rec Google : sig
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
       type t = (Annotation.t list)
       (**
         An Annotation connects some span of text in generated code to an element
@@ -1465,6 +1497,7 @@ module rec Google : sig
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
   end
 end = struct
   module rec Protobuf : sig
@@ -1502,6 +1535,7 @@ end = struct
       (**/**)
     end
 
+
     (** Describes a complete .proto file. *)
     and FileDescriptorProto : sig
       type t = {
@@ -1562,6 +1596,7 @@ end = struct
       (**/**)
     end
 
+
     (** Describes a message type. *)
     and DescriptorProto : sig
       module rec ExtensionRange : sig
@@ -1604,6 +1639,7 @@ end = struct
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
 
       (**
         Range of reserved tag numbers. Reserved tag numbers may not be used by
@@ -1649,6 +1685,7 @@ end = struct
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
       type t = {
         name:string option;
         field:FieldDescriptorProto.t list;
@@ -1687,6 +1724,7 @@ end = struct
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
     and ExtensionRangeOptions : sig
       type t = {
         uninterpreted_option:UninterpretedOption.t list;
@@ -1718,6 +1756,7 @@ end = struct
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
 
     (** Describes a field within a message. *)
     and FieldDescriptorProto : sig
@@ -1783,6 +1822,7 @@ end = struct
         val from_string_exn: string -> t
         (**/**)
       end
+
       and Label : sig
         type t =
           | LABEL_OPTIONAL
@@ -1802,6 +1842,7 @@ end = struct
         val from_string_exn: string -> t
         (**/**)
       end
+
       type t = {
         name:string option;
         extendee:string option;
@@ -1852,6 +1893,7 @@ end = struct
       (**/**)
     end
 
+
     (** Describes a oneof. *)
     and OneofDescriptorProto : sig
       type t = {
@@ -1884,6 +1926,7 @@ end = struct
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
 
     (** Describes an enum type. *)
     and EnumDescriptorProto : sig
@@ -1935,6 +1978,7 @@ end = struct
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
       type t = {
         name:string option;
         value:EnumValueDescriptorProto.t list;
@@ -1968,6 +2012,7 @@ end = struct
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
 
     (** Describes a value within an enum. *)
     and EnumValueDescriptorProto : sig
@@ -2003,6 +2048,7 @@ end = struct
       (**/**)
     end
 
+
     (** Describes a service. *)
     and ServiceDescriptorProto : sig
       type t = {
@@ -2036,6 +2082,7 @@ end = struct
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
 
     (** Describes a method of a service. *)
     and MethodDescriptorProto : sig
@@ -2073,6 +2120,7 @@ end = struct
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
     and FileOptions : sig
 
       (** Generated classes can be optimized for speed or code size. *)
@@ -2104,6 +2152,7 @@ end = struct
         val from_string_exn: string -> t
         (**/**)
       end
+
       type t = {
         java_package:string option;
         java_outer_classname:string option;
@@ -2161,6 +2210,7 @@ end = struct
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
     and MessageOptions : sig
       type t = {
         message_set_wire_format:bool;
@@ -2203,6 +2253,7 @@ end = struct
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
     and FieldOptions : sig
       module rec CType : sig
         type t =
@@ -2223,6 +2274,7 @@ end = struct
         val from_string_exn: string -> t
         (**/**)
       end
+
       and JSType : sig
         type t =
           | JS_NORMAL
@@ -2246,6 +2298,7 @@ end = struct
         val from_string_exn: string -> t
         (**/**)
       end
+
       type t = {
         ctype:CType.t;
         (**
@@ -2357,6 +2410,7 @@ end = struct
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
     and OneofOptions : sig
       type t = {
         uninterpreted_option:UninterpretedOption.t list;
@@ -2388,6 +2442,7 @@ end = struct
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
     and EnumOptions : sig
       type t = {
         allow_alias:bool option;
@@ -2428,6 +2483,7 @@ end = struct
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
     and EnumValueOptions : sig
       type t = {
         deprecated:bool;
@@ -2467,6 +2523,7 @@ end = struct
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
     and ServiceOptions : sig
       type t = {
         deprecated:bool;
@@ -2506,6 +2563,7 @@ end = struct
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
     and MethodOptions : sig
 
       (**
@@ -2534,6 +2592,7 @@ end = struct
         val from_string_exn: string -> t
         (**/**)
       end
+
       type t = {
         deprecated:bool;
         (**
@@ -2573,6 +2632,7 @@ end = struct
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
 
     (**
       A message representing a option the parser does not recognize. This only
@@ -2622,6 +2682,7 @@ end = struct
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
       type t = {
         name:NamePart.t list;
         identifier_value:string option;
@@ -2657,6 +2718,7 @@ end = struct
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
 
     (**
       Encapsulates information about the original source file from which a
@@ -2742,6 +2804,7 @@ end = struct
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
       type t = (Location.t list)
       (**
         A Location identifies a piece of source code in a .proto file which
@@ -2821,6 +2884,7 @@ end = struct
       (**/**)
     end
 
+
     (**
       Describes the relationship between generated code and its original source
       file. A GeneratedCodeInfo message is associated with only one generated
@@ -2876,6 +2940,7 @@ end = struct
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
       type t = (Annotation.t list)
       (**
         An Annotation connects some span of text in generated code to an element
@@ -2908,6 +2973,7 @@ end = struct
       val from_json_exn: Runtime'.Json.t -> t
       (**/**)
     end
+
   end = struct
     module rec FileDescriptorSet : sig
       type t = (FileDescriptorProto.t list)
@@ -2963,6 +3029,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and FileDescriptorProto : sig
       type t = {
         name:string option;
@@ -3084,6 +3151,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and DescriptorProto : sig
       module rec ExtensionRange : sig
         type t = {
@@ -3125,6 +3193,7 @@ end = struct
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
 
       (**
         Range of reserved tag numbers. Reserved tag numbers may not be used by
@@ -3170,6 +3239,7 @@ end = struct
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
       type t = {
         name:string option;
         field:FieldDescriptorProto.t list;
@@ -3285,6 +3355,7 @@ end = struct
           Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
+
       and ReservedRange : sig
         type t = {
           start:int option;
@@ -3357,6 +3428,7 @@ end = struct
           Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
+
       let name () = ".google.protobuf.DescriptorProto"
       type t = {
         name:string option;
@@ -3413,6 +3485,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and ExtensionRangeOptions : sig
       type t = {
         uninterpreted_option:UninterpretedOption.t list;
@@ -3476,6 +3549,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and FieldDescriptorProto : sig
       module rec Type : sig
         type t =
@@ -3539,6 +3613,7 @@ end = struct
         val from_string_exn: string -> t
         (**/**)
       end
+
       and Label : sig
         type t =
           | LABEL_OPTIONAL
@@ -3558,6 +3633,7 @@ end = struct
         val from_string_exn: string -> t
         (**/**)
       end
+
       type t = {
         name:string option;
         extendee:string option;
@@ -3803,6 +3879,7 @@ end = struct
           | s -> Runtime'.Result.raise (`Unknown_enum_name s)
 
       end
+
       and Label : sig
         type t =
           | LABEL_OPTIONAL
@@ -3852,6 +3929,7 @@ end = struct
           | s -> Runtime'.Result.raise (`Unknown_enum_name s)
 
       end
+
       let name () = ".google.protobuf.FieldDescriptorProto"
       type t = {
         name:string option;
@@ -3911,6 +3989,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and OneofDescriptorProto : sig
       type t = {
         name:string option;
@@ -3975,6 +4054,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and EnumDescriptorProto : sig
 
       (**
@@ -4024,6 +4104,7 @@ end = struct
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
       type t = {
         name:string option;
         value:EnumValueDescriptorProto.t list;
@@ -4130,6 +4211,7 @@ end = struct
           Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
+
       let name () = ".google.protobuf.EnumDescriptorProto"
       type t = {
         name:string option;
@@ -4171,6 +4253,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and EnumValueDescriptorProto : sig
       type t = {
         name:string option;
@@ -4239,6 +4322,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and ServiceDescriptorProto : sig
       type t = {
         name:string option;
@@ -4307,6 +4391,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and MethodDescriptorProto : sig
       type t = {
         name:string option;
@@ -4387,6 +4472,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and FileOptions : sig
 
       (** Generated classes can be optimized for speed or code size. *)
@@ -4418,6 +4504,7 @@ end = struct
         val from_string_exn: string -> t
         (**/**)
       end
+
       type t = {
         java_package:string option;
         java_outer_classname:string option;
@@ -4543,6 +4630,7 @@ end = struct
           | s -> Runtime'.Result.raise (`Unknown_enum_name s)
 
       end
+
       let name () = ".google.protobuf.FileOptions"
       type t = {
         java_package:string option;
@@ -4634,6 +4722,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and MessageOptions : sig
       type t = {
         message_set_wire_format:bool;
@@ -4720,6 +4809,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and FieldOptions : sig
       module rec CType : sig
         type t =
@@ -4740,6 +4830,7 @@ end = struct
         val from_string_exn: string -> t
         (**/**)
       end
+
       and JSType : sig
         type t =
           | JS_NORMAL
@@ -4763,6 +4854,7 @@ end = struct
         val from_string_exn: string -> t
         (**/**)
       end
+
       type t = {
         ctype:CType.t;
         (**
@@ -4924,6 +5016,7 @@ end = struct
           | s -> Runtime'.Result.raise (`Unknown_enum_name s)
 
       end
+
       and JSType : sig
         type t =
           | JS_NORMAL
@@ -4981,6 +5074,7 @@ end = struct
           | s -> Runtime'.Result.raise (`Unknown_enum_name s)
 
       end
+
       let name () = ".google.protobuf.FieldOptions"
       type t = {
         ctype:CType.t;
@@ -5033,6 +5127,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and OneofOptions : sig
       type t = {
         uninterpreted_option:UninterpretedOption.t list;
@@ -5096,6 +5191,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and EnumOptions : sig
       type t = {
         allow_alias:bool option;
@@ -5174,6 +5270,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and EnumValueOptions : sig
       type t = {
         deprecated:bool;
@@ -5248,6 +5345,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and ServiceOptions : sig
       type t = {
         deprecated:bool;
@@ -5322,6 +5420,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and MethodOptions : sig
 
       (**
@@ -5350,6 +5449,7 @@ end = struct
         val from_string_exn: string -> t
         (**/**)
       end
+
       type t = {
         deprecated:bool;
         (**
@@ -5443,6 +5543,7 @@ end = struct
           | s -> Runtime'.Result.raise (`Unknown_enum_name s)
 
       end
+
       let name () = ".google.protobuf.MethodOptions"
       type t = {
         deprecated:bool;
@@ -5480,6 +5581,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and UninterpretedOption : sig
 
       (**
@@ -5520,6 +5622,7 @@ end = struct
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
       type t = {
         name:NamePart.t list;
         identifier_value:string option;
@@ -5620,6 +5723,7 @@ end = struct
           Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
+
       let name () = ".google.protobuf.UninterpretedOption"
       type t = {
         name:NamePart.t list;
@@ -5667,6 +5771,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and SourceCodeInfo : sig
       module rec Location : sig
         type t = {
@@ -5747,6 +5852,7 @@ end = struct
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
       type t = (Location.t list)
       (**
         A Location identifies a piece of source code in a .proto file which
@@ -5947,6 +6053,7 @@ end = struct
           Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
+
       let name () = ".google.protobuf.SourceCodeInfo"
       type t = (Location.t list)
       type make_t = ?location:Location.t list -> unit -> t
@@ -5972,6 +6079,7 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
     and GeneratedCodeInfo : sig
       module rec Annotation : sig
         type t = {
@@ -6022,6 +6130,7 @@ end = struct
         val from_json_exn: Runtime'.Json.t -> t
         (**/**)
       end
+
       type t = (Annotation.t list)
       (**
         An Annotation connects some span of text in generated code to an element
@@ -6143,6 +6252,7 @@ end = struct
           Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
+
       let name () = ".google.protobuf.GeneratedCodeInfo"
       type t = (Annotation.t list)
       type make_t = ?annotation:Annotation.t list -> unit -> t
@@ -6168,5 +6278,6 @@ end = struct
         Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
+
   end
 end

@@ -78,6 +78,7 @@ end = struct
     Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
   let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
 end
+
 and Ocaml_options : sig
   type t = Options.t option
   val get_exn: Imported'modules.Descriptor.Google.Protobuf.FileOptions.t -> Options.t option
@@ -94,3 +95,4 @@ end = struct
     { extendee with Imported'modules.Descriptor.Google.Protobuf.FileOptions.extensions' = extensions' } [@@warning "-23"]
 
 end
+
