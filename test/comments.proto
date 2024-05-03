@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+
+// This is my package
+package Comments;
+
+// This is a message with a single regular field
+message SingleRegularField {
+
+  // This is field SingleRegularField.a
+  uint32 a = 1;
+
+}
+// This is a message with regular multiplefields
+message MultipleRegularFields {
+
+  // This is field MultipleRegularFields.a
+  uint32 a = 1;
+
+  // This is field MultipleRegularFields.b
+  uint32 b = 2;
+
+  // This is field MultipleRegularFields.c
+  uint32 c = 3;
+}
+
+// This is a message with a single oneof field
+message SingleOneofField {
+
+  // This is SingleOneofField.oneof_field
+  oneof oneof_field {
+
+    // This is field SingleOneofField.oa
+    uint32 oa = 10;
+
+    // This is field SingleOneofField.ob
+    uint32 ob = 20;
+
+    // This is field SingleOneofField.oc
+    uint32 oc = 30;
+  }
+}
+
+// This is a message with multiple fields and a oneof field
+message MultipleWithOneofField {
+
+  // This is field MultipleWithOneofField.a
+  uint32 a = 1;
+
+  // This is field MultipleWithOneofField.b
+  uint32 b = 2;
+
+  // This is field MultipleWithOneofField.c
+  uint32 c = 3;
+
+  // This is MultipleWithOneofField.oneof_field
+  oneof oneof_field {
+
+    // This is field MultipleWithOneofField.oa
+    uint32 oa = 10;
+
+    // This is field MultipleWithOneofField.ob
+    uint32 ob = 20;
+
+    // This is field MultipleWithOneofField.oc
+    uint32 oc = 30;
+  }
+}
+
+// This is a message with a single map field
+message SingleMapField {
+
+  // This is map field SingleMapField.m
+  map<uint64, uint32> m = 1;
+}

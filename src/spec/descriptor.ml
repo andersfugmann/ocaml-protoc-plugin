@@ -18,7 +18,6 @@
     prefix_output_with_package=false
 *)
 [@@@ocaml.alert "-protobuf"] (* Disable deprecation warnings for protobuf*)
-
 (**/**)
 module Runtime' = Ocaml_protoc_plugin [@@warning "-33"]
 module Imported'modules = struct
@@ -63,23 +62,35 @@ module rec Google : sig
     (** Describes a complete .proto file. *)
     and FileDescriptorProto : sig
       type t = {
-      name: string option;(** file name, relative to root of source tree *)
-      package: string option;(** e.g. "foo", "foo.bar", etc. *)
-      dependency: string list;(** Names of files imported by this file. *)
-      message_type: DescriptorProto.t list;(** All top-level definitions in this file. *)
-      enum_type: EnumDescriptorProto.t list;
-      service: ServiceDescriptorProto.t list;
-      extension: FieldDescriptorProto.t list;
-      options: FileOptions.t option;
-      source_code_info: SourceCodeInfo.t option;(** This field contains optional information about the original source code.
-      You may safely remove this entire field without harming runtime
-      functionality of the descriptors -- the information is needed only by
-      development tools. *)
-      public_dependency: int list;(** Indexes of the public imported files in the dependency list above. *)
-      weak_dependency: int list;(** Indexes of the weak imported files in the dependency list.
-      For Google-internal migration only. Do not use. *)
-      syntax: string option;(** The syntax of the proto file.
-      The supported values are "proto2" and "proto3". *)
+        name:string option;
+        (**
+          file name, relative to root of source tree
+        *)
+
+        package:string option;
+        (**
+          e.g. "foo", "foo.bar", etc.
+        *)
+
+        dependency:string list;
+        (**
+          Names of files imported by this file.
+        *)
+
+        message_type:DescriptorProto.t list;
+        enum_type:EnumDescriptorProto.t list;
+        service:ServiceDescriptorProto.t list;
+        extension:FieldDescriptorProto.t list;
+        options:FileOptions.t option;
+        source_code_info:SourceCodeInfo.t option;
+        public_dependency:int list;
+        weak_dependency:int list;
+        syntax:string option;
+        (**
+          The syntax of the proto file.
+          The supported values are "proto2" and "proto3".
+        *)
+
       }
       val make: ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -112,9 +123,17 @@ module rec Google : sig
     and DescriptorProto : sig
       module rec ExtensionRange : sig
         type t = {
-        start: int option;(** Inclusive. *)
-        end': int option;(** Exclusive. *)
-        options: ExtensionRangeOptions.t option;
+          start:int option;
+          (**
+            Inclusive.
+          *)
+
+          end':int option;
+          (**
+            Exclusive.
+          *)
+
+          options:ExtensionRangeOptions.t option;
         }
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -150,8 +169,16 @@ module rec Google : sig
       *)
       and ReservedRange : sig
         type t = {
-        start: int option;(** Inclusive. *)
-        end': int option;(** Exclusive. *)
+          start:int option;
+          (**
+            Inclusive.
+          *)
+
+          end':int option;
+          (**
+            Exclusive.
+          *)
+
         }
         val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -180,17 +207,16 @@ module rec Google : sig
         (**/**)
       end
       type t = {
-      name: string option;
-      field: FieldDescriptorProto.t list;
-      nested_type: t list;
-      enum_type: EnumDescriptorProto.t list;
-      extension_range: ExtensionRange.t list;
-      extension: FieldDescriptorProto.t list;
-      options: MessageOptions.t option;
-      oneof_decl: OneofDescriptorProto.t list;
-      reserved_range: ReservedRange.t list;
-      reserved_name: string list;(** Reserved field names, which may not be used by fields in the same message.
-      A given name may only be reserved once. *)
+        name:string option;
+        field:FieldDescriptorProto.t list;
+        nested_type:t list;
+        enum_type:EnumDescriptorProto.t list;
+        extension_range:ExtensionRange.t list;
+        extension:FieldDescriptorProto.t list;
+        options:MessageOptions.t option;
+        oneof_decl:OneofDescriptorProto.t list;
+        reserved_range:ReservedRange.t list;
+        reserved_name:string list;
       }
       val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -220,8 +246,8 @@ module rec Google : sig
     end
     and ExtensionRangeOptions : sig
       type t = {
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -259,18 +285,21 @@ module rec Google : sig
             0 is reserved for errors.
             Order is weird for historical reasons.
           *)
+
           | TYPE_FLOAT
           | TYPE_INT64
           (**
             Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT64 if
             negative values are likely.
           *)
+
           | TYPE_UINT64
           | TYPE_INT32
           (**
             Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT32 if
             negative values are likely.
           *)
+
           | TYPE_FIXED64
           | TYPE_FIXED32
           | TYPE_BOOL
@@ -282,18 +311,23 @@ module rec Google : sig
             implementations should still be able to parse the group wire format and
             treat group fields as unknown fields.
           *)
+
           | TYPE_MESSAGE
           (** Length-delimited aggregate. *)
+
           | TYPE_BYTES
           (** New in version 2. *)
+
           | TYPE_UINT32
           | TYPE_ENUM
           | TYPE_SFIXED32
           | TYPE_SFIXED64
           | TYPE_SINT32
           (** Uses ZigZag encoding. *)
+
           | TYPE_SINT64
           (** Uses ZigZag encoding. *)
+
 
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
@@ -310,6 +344,7 @@ module rec Google : sig
         type t =
           | LABEL_OPTIONAL
           (** 0 is reserved for errors *)
+
           | LABEL_REQUIRED
           | LABEL_REPEATED
 
@@ -325,50 +360,27 @@ module rec Google : sig
         (**/**)
       end
       type t = {
-      name: string option;
-      extendee: string option;(** For extensions, this is the name of the type being extended.  It is
-      resolved in the same manner as type_name. *)
-      number: int option;
-      label: Label.t option;
-      type': Type.t option;(** If type_name is set, this need not be set.  If both this and type_name
-      are set, this must be one of TYPE_ENUM, TYPE_MESSAGE or TYPE_GROUP. *)
-      type_name: string option;(** For message and enum types, this is the name of the type.  If the name
-      starts with a '.', it is fully-qualified.  Otherwise, C++-like scoping
-      rules are used to find the type (i.e. first the nested types within this
-      message are searched, then within the parent, on up to the root
-      namespace). *)
-      default_value: string option;(** For numeric types, contains the original text representation of the value.
-      For booleans, "true" or "false".
-      For strings, contains the default text contents (not escaped in any way).
-      For bytes, contains the C escaped value.  All bytes >= 128 are escaped. *)
-      options: FieldOptions.t option;
-      oneof_index: int option;(** If set, gives the index of a oneof in the containing type's oneof_decl
-      list.  This field is a member of that oneof. *)
-      json_name: string option;(** JSON name of this field. The value is set by protocol compiler. If the
-      user has set a "json_name" option on this field, that option's value
-      will be used. Otherwise, it's deduced from the field's name by converting
-      it to camelCase. *)
-      proto3_optional: bool option;(** If true, this is a proto3 "optional". When a proto3 field is optional, it
-      tracks presence regardless of field type.
+        name:string option;
+        extendee:string option;
+        (**
+          For extensions, this is the name of the type being extended.  It is
+          resolved in the same manner as type_name.
+        *)
 
-      When proto3_optional is true, this field must be belong to a oneof to
-      signal to old proto3 clients that presence is tracked for this field. This
-      oneof is known as a "synthetic" oneof, and this field must be its sole
-      member (each proto3 optional field gets its own synthetic oneof). Synthetic
-      oneofs exist in the descriptor only, and do not generate any API. Synthetic
-      oneofs must be ordered after all "real" oneofs.
+        number:int option;
+        label:Label.t option;
+        type':Type.t option;
+        (**
+          If type_name is set, this need not be set.  If both this and type_name
+          are set, this must be one of TYPE_ENUM, TYPE_MESSAGE or TYPE_GROUP.
+        *)
 
-      For message fields, proto3_optional doesn't create any semantic change,
-      since non-repeated message fields always track presence. However it still
-      indicates the semantic detail of whether the user wrote "optional" or not.
-      This can be useful for round-tripping the .proto file. For consistency we
-      give message fields a synthetic oneof also, even though it is not required
-      to track presence. This is especially important because the parser can't
-      tell if a field is a message or an enum, so it must always create a
-      synthetic oneof.
-
-      Proto2 optional fields do not set this flag, because they already indicate
-      optional with `LABEL_OPTIONAL`. *)
+        type_name:string option;
+        default_value:string option;
+        options:FieldOptions.t option;
+        oneof_index:int option;
+        json_name:string option;
+        proto3_optional:bool option;
       }
       val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -400,8 +412,8 @@ module rec Google : sig
     (** Describes a oneof. *)
     and OneofDescriptorProto : sig
       type t = {
-      name: string option;
-      options: OneofOptions.t option;
+        name:string option;
+        options:OneofOptions.t option;
       }
       val make: ?name:string -> ?options:OneofOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -443,8 +455,16 @@ module rec Google : sig
       *)
       module rec EnumReservedRange : sig
         type t = {
-        start: int option;(** Inclusive. *)
-        end': int option;(** Inclusive. *)
+          start:int option;
+          (**
+            Inclusive.
+          *)
+
+          end':int option;
+          (**
+            Inclusive.
+          *)
+
         }
         val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -473,14 +493,11 @@ module rec Google : sig
         (**/**)
       end
       type t = {
-      name: string option;
-      value: EnumValueDescriptorProto.t list;
-      options: EnumOptions.t option;
-      reserved_range: EnumReservedRange.t list;(** Range of reserved numeric values. Reserved numeric values may not be used
-      by enum values in the same enum declaration. Reserved ranges may not
-      overlap. *)
-      reserved_name: string list;(** Reserved enum value names, which may not be reused. A given name may only
-      be reserved once. *)
+        name:string option;
+        value:EnumValueDescriptorProto.t list;
+        options:EnumOptions.t option;
+        reserved_range:EnumReservedRange.t list;
+        reserved_name:string list;
       }
       val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -512,9 +529,9 @@ module rec Google : sig
     (** Describes a value within an enum. *)
     and EnumValueDescriptorProto : sig
       type t = {
-      name: string option;
-      number: int option;
-      options: EnumValueOptions.t option;
+        name:string option;
+        number:int option;
+        options:EnumValueOptions.t option;
       }
       val make: ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -546,9 +563,9 @@ module rec Google : sig
     (** Describes a service. *)
     and ServiceDescriptorProto : sig
       type t = {
-      name: string option;
-      method': MethodDescriptorProto.t list;
-      options: ServiceOptions.t option;
+        name:string option;
+        method':MethodDescriptorProto.t list;
+        options:ServiceOptions.t option;
       }
       val make: ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -580,13 +597,12 @@ module rec Google : sig
     (** Describes a method of a service. *)
     and MethodDescriptorProto : sig
       type t = {
-      name: string option;
-      input_type: string option;(** Input and output type names.  These are resolved in the same way as
-      FieldDescriptorProto.type_name, but must refer to a message type. *)
-      output_type: string option;
-      options: MethodOptions.t option;
-      client_streaming: bool;(** Identifies if client streams multiple client messages *)
-      server_streaming: bool;(** Identifies if server streams multiple server messages *)
+        name:string option;
+        input_type:string option;
+        output_type:string option;
+        options:MethodOptions.t option;
+        client_streaming:bool;
+        server_streaming:bool;
       }
       val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -621,6 +637,7 @@ module rec Google : sig
         type t =
           | SPEED
           (** Generate complete code for parsing, serialization, *)
+
           | CODE_SIZE
           (**
             etc.
@@ -628,8 +645,10 @@ module rec Google : sig
 
             Use ReflectionOps to implement these methods.
           *)
+
           | LITE_RUNTIME
           (** Generate code using MessageLite and the lite runtime. *)
+
 
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
@@ -643,75 +662,35 @@ module rec Google : sig
         (**/**)
       end
       type t = {
-      java_package: string option;(** Sets the Java package where classes generated from this .proto will be
-      placed.  By default, the proto package is used, but this is often
-      inappropriate because proto packages do not normally start with backwards
-      domain names. *)
-      java_outer_classname: string option;(** Controls the name of the wrapper Java class generated for the .proto file.
-      That class will always contain the .proto file's getDescriptor() method as
-      well as any top-level extensions defined in the .proto file.
-      If java_multiple_files is disabled, then all the other classes from the
-      .proto file will be nested inside the single wrapper outer class. *)
-      optimize_for: OptimizeMode.t;(** Clients can define custom options in extensions of this message.
-      See the documentation for the "Options" section above. *)
-      java_multiple_files: bool;(** If enabled, then the Java code generator will generate a separate .java
-      file for each top-level message, enum, and service defined in the .proto
-      file.  Thus, these types will *not* be nested inside the wrapper class
-      named by java_outer_classname.  However, the wrapper class will still be
-      generated to contain the file's getDescriptor() method as well as any
-      top-level extensions defined in the file. *)
-      go_package: string option;(** Sets the Go package where structs generated from this .proto will be
-      placed. If omitted, the Go package will be derived from the following:
-      - The basename of the package import path, if provided.
-      - Otherwise, the package statement in the .proto file, if present.
-      - Otherwise, the basename of the .proto file, without extension. *)
-      cc_generic_services: bool;(** Should generic services be generated in each language?  "Generic" services
-      are not specific to any particular RPC system.  They are generated by the
-      main code generators in each language (without additional plugins).
-      Generic services were the only kind of service generation supported by
-      early versions of google.protobuf.
+        java_package:string option;
+        java_outer_classname:string option;
+        optimize_for:OptimizeMode.t;
+        java_multiple_files:bool;
+        go_package:string option;
+        cc_generic_services:bool;
+        java_generic_services:bool;
+        py_generic_services:bool;
+        java_generate_equals_and_hash:bool option[@ocaml.alert protobuf "Marked as deprecated in the .proto file"];
+        deprecated:bool;
+        (**
+          Is this file deprecated?
+          Depending on the target platform, this can emit Deprecated annotations
+          for everything in the file, or it will be completely ignored; in the very
+          least, this is a formalization for deprecating files.
+        *)
 
-      Generic services are now considered deprecated in favor of using plugins
-      that generate code specific to your particular RPC system.  Therefore,
-      these default to false.  Old code which depends on generic services should
-      explicitly set them to true. *)
-      java_generic_services: bool;
-      py_generic_services: bool;
-      java_generate_equals_and_hash: bool option[@ocaml.alert protobuf "Marked as deprecated in the .proto file"];(** This option does nothing. *)
-      deprecated: bool;(** Is this file deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for everything in the file, or it will be completely ignored; in the very
-      least, this is a formalization for deprecating files. *)
-      java_string_check_utf8: bool;(** If set true, then the Java2 code generator will generate code that
-      throws an exception whenever an attempt is made to assign a non-UTF-8
-      byte sequence to a string field.
-      Message reflection will do the same.
-      However, an extension field still accepts non-UTF-8 byte sequences.
-      This option has no effect on when used with the lite runtime. *)
-      cc_enable_arenas: bool;(** Enables the use of arenas for the proto messages in this file. This applies
-      only to generated classes for C++. *)
-      objc_class_prefix: string option;(** Sets the objective c class prefix which is prepended to all objective c
-      generated classes from this .proto. There is no default. *)
-      csharp_namespace: string option;(** Namespace for generated classes; defaults to the package. *)
-      swift_prefix: string option;(** By default Swift generators will take the proto package and CamelCase it
-      replacing '.' with underscore and use that to prefix the types/symbols
-      defined. When this options is provided, they will use this value instead
-      to prefix the types/symbols defined. *)
-      php_class_prefix: string option;(** Sets the php class prefix which is prepended to all php generated classes
-      from this .proto. Default is empty. *)
-      php_namespace: string option;(** Use this option to change the namespace of php generated classes. Default
-      is empty. When this option is empty, the package name will be used for
-      determining the namespace. *)
-      php_generic_services: bool;
-      php_metadata_namespace: string option;(** Use this option to change the namespace of php generated metadata classes.
-      Default is empty. When this option is empty, the proto file name will be
-      used for determining the namespace. *)
-      ruby_package: string option;(** Use this option to change the package of ruby generated classes. Default
-      is empty. When this option is not set, the package name will be used for
-      determining the ruby package. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here.
-      See the documentation for the "Options" section above. *)
-      extensions': Runtime'.Extensions.t;
+        java_string_check_utf8:bool;
+        cc_enable_arenas:bool;
+        objc_class_prefix:string option;
+        csharp_namespace:string option;
+        swift_prefix:string option;
+        php_class_prefix:string option;
+        php_namespace:string option;
+        php_generic_services:bool;
+        php_metadata_namespace:string option;
+        ruby_package:string option;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -741,59 +720,19 @@ module rec Google : sig
     end
     and MessageOptions : sig
       type t = {
-      message_set_wire_format: bool;(** Set true to use the old proto1 MessageSet wire format for extensions.
-      This is provided for backwards-compatibility with the MessageSet wire
-      format.  You should not use this for any other reason:  It's less
-      efficient, has fewer features, and is more complicated.
+        message_set_wire_format:bool;
+        no_standard_descriptor_accessor:bool;
+        deprecated:bool;
+        (**
+          Is this message deprecated?
+          Depending on the target platform, this can emit Deprecated annotations
+          for the message, or it will be completely ignored; in the very least,
+          this is a formalization for deprecating messages.
+        *)
 
-      The message must be defined exactly as follows:
-      {v
-         message Foo {
-           option message_set_wire_format = true;
-           extensions 4 to max;
-         }
-      v}
-      Note that the message cannot have any defined fields; MessageSets only
-      have extensions.
-
-      All extensions of your type must be singular messages; e.g. they cannot
-      be int32s, enums, or repeated messages.
-
-      Because this is an option, the above two restrictions are not enforced by
-      the protocol compiler. *)
-      no_standard_descriptor_accessor: bool;(** Disables the generation of the standard "descriptor()" accessor, which can
-      conflict with a field of the same name.  This is meant to make migration
-      from proto1 easier; new code should avoid fields named "descriptor". *)
-      deprecated: bool;(** Is this message deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the message, or it will be completely ignored; in the very least,
-      this is a formalization for deprecating messages. *)
-      map_entry: bool option;(** Whether the message is an automatically generated map entry type for the
-      maps field.
-
-      For maps fields:
-      {v
-           map<KeyType, ValueType> map_field = 1;
-      v}
-      The parsed descriptor looks like:
-      {v
-           message MapFieldEntry {
-               option map_entry = true;
-               optional KeyType key = 1;
-               optional ValueType value = 2;
-           }
-           repeated MapFieldEntry map_field = 1;
-      v}
-      Implementations may choose not to generate the map_entry=true message, but
-      use a native map in the target language to hold the keys and values.
-      The reflection APIs in such implementations still need to work as
-      if the field is a repeated message field.
-
-      NOTE: Do not set the option in .proto files. Always use the maps syntax
-      instead. The option should only be implicitly set by the proto compiler
-      parser. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        map_entry:bool option;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -826,6 +765,7 @@ module rec Google : sig
         type t =
           | STRING
           (** Default mode. *)
+
           | CORD
           | STRING_PIECE
 
@@ -844,10 +784,13 @@ module rec Google : sig
         type t =
           | JS_NORMAL
           (** Use the default type. *)
+
           | JS_STRING
           (** Use JavaScript strings. *)
+
           | JS_NUMBER
           (** Use JavaScript numbers. *)
+
 
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
@@ -861,67 +804,89 @@ module rec Google : sig
         (**/**)
       end
       type t = {
-      ctype: CType.t;(** The ctype option instructs the C++ code generator to use a different
-      representation of the field than it normally would.  See the specific
-      options below.  This option is not yet implemented in the open source
-      release -- sorry, we'll try to include it in a future version! *)
-      packed: bool option;(** The packed option can be enabled for repeated primitive fields to enable
-      a more efficient representation on the wire. Rather than repeatedly
-      writing the tag and type for each element, the entire array is encoded as
-      a single length-delimited blob. In proto3, only explicit setting it to
-      false will avoid using packed encoding. *)
-      deprecated: bool;(** Clients can define custom options in extensions of this message. See above. *)
-      lazy': bool;(** Should this field be parsed lazily?  Lazy applies only to message-type
-      fields.  It means that when the outer message is initially parsed, the
-      inner message's contents will not be parsed but instead stored in encoded
-      form.  The inner message will actually be parsed when it is first accessed.
+        ctype:CType.t;
+        (**
+          The ctype option instructs the C++ code generator to use a different
+          representation of the field than it normally would.  See the specific
+          options below.  This option is not yet implemented in the open source
+          release -- sorry, we'll try to include it in a future version!
+        *)
 
-      This is only a hint.  Implementations are free to choose whether to use
-      eager or lazy parsing regardless of the value of this option.  However,
-      setting this option true suggests that the protocol author believes that
-      using lazy parsing on this field is worth the additional bookkeeping
-      overhead typically needed to implement it.
+        packed:bool option;
+        (**
+          The packed option can be enabled for repeated primitive fields to enable
+          a more efficient representation on the wire. Rather than repeatedly
+          writing the tag and type for each element, the entire array is encoded as
+          a single length-delimited blob. In proto3, only explicit setting it to
+          false will avoid using packed encoding.
+        *)
 
-      This option does not affect the public interface of any generated code;
-      all method signatures remain the same.  Furthermore, thread-safety of the
-      interface is not affected by this option; const methods remain safe to
-      call from multiple threads concurrently, while non-const methods continue
-      to require exclusive access.
+        deprecated:bool;
+        (**
+          Clients can define custom options in extensions of this message. See above.
+        *)
+
+        lazy':bool;
+        (**
+          Should this field be parsed lazily?  Lazy applies only to message-type
+          fields.  It means that when the outer message is initially parsed, the
+          inner message's contents will not be parsed but instead stored in encoded
+          form.  The inner message will actually be parsed when it is first accessed.
+
+          This is only a hint.  Implementations are free to choose whether to use
+          eager or lazy parsing regardless of the value of this option.  However,
+          setting this option true suggests that the protocol author believes that
+          using lazy parsing on this field is worth the additional bookkeeping
+          overhead typically needed to implement it.
+
+          This option does not affect the public interface of any generated code;
+          all method signatures remain the same.  Furthermore, thread-safety of the
+          interface is not affected by this option; const methods remain safe to
+          call from multiple threads concurrently, while non-const methods continue
+          to require exclusive access.
 
 
-      Note that implementations may choose not to check required fields within
-      a lazy sub-message.  That is, calling IsInitialized() on the outer message
-      may return true even if the inner message has missing required fields.
-      This is necessary because otherwise the inner message would have to be
-      parsed in order to perform the check, defeating the purpose of lazy
-      parsing.  An implementation which chooses not to check required fields
-      must be consistent about it.  That is, for any particular sub-message, the
-      implementation must either *always* check its required fields, or *never*
-      check its required fields, regardless of whether or not the message has
-      been parsed.
+          Note that implementations may choose not to check required fields within
+          a lazy sub-message.  That is, calling IsInitialized() on the outer message
+          may return true even if the inner message has missing required fields.
+          This is necessary because otherwise the inner message would have to be
+          parsed in order to perform the check, defeating the purpose of lazy
+          parsing.  An implementation which chooses not to check required fields
+          must be consistent about it.  That is, for any particular sub-message, the
+          implementation must either *always* check its required fields, or *never*
+          check its required fields, regardless of whether or not the message has
+          been parsed.
 
-      As of 2021, lazy does no correctness checks on the byte stream during
-      parsing.  This may lead to crashes if and when an invalid byte stream is
-      finally parsed upon access.
+          As of 2021, lazy does no correctness checks on the byte stream during
+          parsing.  This may lead to crashes if and when an invalid byte stream is
+          finally parsed upon access.
 
-      TODO(b/211906113):  Enable validation on lazy fields. *)
-      jstype: JSType.t;(** The jstype option determines the JavaScript type used for values of the
-      field.  The option is permitted only for 64 bit integral and fixed types
-      (int64, uint64, sint64, fixed64, sfixed64).  A field with jstype JS_STRING
-      is represented as JavaScript string, which avoids loss of precision that
-      can happen when a large value is converted to a floating point JavaScript.
-      Specifying JS_NUMBER for the jstype causes the generated JavaScript code to
-      use the JavaScript "number" type.  The behavior of the default option
-      JS_NORMAL is implementation dependent.
+          TODO(b/211906113):  Enable validation on lazy fields.
+        *)
 
-      This option is an enum to permit additional types to be added, e.g.
-      goog.math.Integer. *)
-      weak: bool;(** For Google-internal migration only. Do not use. *)
-      unverified_lazy: bool;(** unverified_lazy does no correctness checks on the byte stream. This should
-      only be used where lazy with verification is prohibitive for performance
-      reasons. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        jstype:JSType.t;
+        (**
+          The jstype option determines the JavaScript type used for values of the
+          field.  The option is permitted only for 64 bit integral and fixed types
+          (int64, uint64, sint64, fixed64, sfixed64).  A field with jstype JS_STRING
+          is represented as JavaScript string, which avoids loss of precision that
+          can happen when a large value is converted to a floating point JavaScript.
+          Specifying JS_NUMBER for the jstype causes the generated JavaScript code to
+          use the JavaScript "number" type.  The behavior of the default option
+          JS_NORMAL is implementation dependent.
+
+          This option is an enum to permit additional types to be added, e.g.
+          goog.math.Integer.
+        *)
+
+        weak:bool;
+        (**
+          For Google-internal migration only. Do not use.
+        *)
+
+        unverified_lazy:bool;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -951,8 +916,8 @@ module rec Google : sig
     end
     and OneofOptions : sig
       type t = {
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -982,14 +947,17 @@ module rec Google : sig
     end
     and EnumOptions : sig
       type t = {
-      allow_alias: bool option;(** Set this option to true to allow mapping different tag names to the same
-      value. *)
-      deprecated: bool;(** Is this enum deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the enum, or it will be completely ignored; in the very least, this
-      is a formalization for deprecating enums. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        allow_alias:bool option;
+        deprecated:bool;
+        (**
+          Is this enum deprecated?
+          Depending on the target platform, this can emit Deprecated annotations
+          for the enum, or it will be completely ignored; in the very least, this
+          is a formalization for deprecating enums.
+        *)
+
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -1019,12 +987,16 @@ module rec Google : sig
     end
     and EnumValueOptions : sig
       type t = {
-      deprecated: bool;(** Is this enum value deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the enum value, or it will be completely ignored; in the very least,
-      this is a formalization for deprecating enum values. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        deprecated:bool;
+        (**
+          Is this enum value deprecated?
+          Depending on the target platform, this can emit Deprecated annotations
+          for the enum value, or it will be completely ignored; in the very least,
+          this is a formalization for deprecating enum values.
+        *)
+
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -1054,12 +1026,16 @@ module rec Google : sig
     end
     and ServiceOptions : sig
       type t = {
-      deprecated: bool;(** Is this service deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the service, or it will be completely ignored; in the very least,
-      this is a formalization for deprecating services. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        deprecated:bool;
+        (**
+          Is this service deprecated?
+          Depending on the target platform, this can emit Deprecated annotations
+          for the service, or it will be completely ignored; in the very least,
+          this is a formalization for deprecating services.
+        *)
+
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -1099,8 +1075,10 @@ module rec Google : sig
           | IDEMPOTENCY_UNKNOWN
           | NO_SIDE_EFFECTS
           (** implies idempotent *)
+
           | IDEMPOTENT
           (** idempotent, but may have side effects *)
+
 
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
@@ -1114,13 +1092,17 @@ module rec Google : sig
         (**/**)
       end
       type t = {
-      deprecated: bool;(** Is this method deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the method, or it will be completely ignored; in the very least,
-      this is a formalization for deprecating methods. *)
-      idempotency_level: IdempotencyLevel.t;
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        deprecated:bool;
+        (**
+          Is this method deprecated?
+          Depending on the target platform, this can emit Deprecated annotations
+          for the method, or it will be completely ignored; in the very least,
+          this is a formalization for deprecating methods.
+        *)
+
+        idempotency_level:IdempotencyLevel.t;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -1168,8 +1150,8 @@ module rec Google : sig
       *)
       module rec NamePart : sig
         type t = {
-        name_part: string;
-        is_extension: bool;
+          name_part:string;
+          is_extension:bool;
         }
         val make: name_part:string -> is_extension:bool -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -1198,14 +1180,13 @@ module rec Google : sig
         (**/**)
       end
       type t = {
-      name: NamePart.t list;
-      identifier_value: string option;(** The value of the uninterpreted option, in whatever type the tokenizer
-      identified it as during parsing. Exactly one of these should be set. *)
-      positive_int_value: int option;
-      negative_int_value: int option;
-      double_value: float option;
-      string_value: bytes option;
-      aggregate_value: string option;
+        name:NamePart.t list;
+        identifier_value:string option;
+        positive_int_value:int option;
+        negative_int_value:int option;
+        double_value:float option;
+        string_value:bytes option;
+        aggregate_value:string option;
       }
       val make: ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -1241,95 +1222,56 @@ module rec Google : sig
     and SourceCodeInfo : sig
       module rec Location : sig
         type t = {
-        path: int list;(** Identifies which part of the FileDescriptorProto was defined at this
-        location.
+          path:int list;
+          (**
+            Identifies which part of the FileDescriptorProto was defined at this
+            location.
 
-        Each element is a field number or an index.  They form a path from
-        the root FileDescriptorProto to the place where the definition occurs.
-        For example, this path:
-        {v
-           [ 4, 3, 2, 7, 1 ]
-        v}
-        refers to:
-        {v
-           file.message_type(3)  // 4, 3
-               .field(7)         // 2, 7
-               .name()           // 1
-        v}
-        This is because FileDescriptorProto.message_type has field number 4:
-        {v
-           repeated DescriptorProto message_type = 4;
-        v}
-        and DescriptorProto.field has field number 2:
-        {v
-           repeated FieldDescriptorProto field = 2;
-        v}
-        and FieldDescriptorProto.name has field number 1:
-        {v
-           optional string name = 1;
-        v}
-        Thus, the above path gives the location of a field name.  If we removed
-        the last element:
-        {v
-           [ 4, 3, 2, 7 ]
-        v}
-        this path refers to the whole field declaration (from the beginning
-        of the label to the terminating semicolon). *)
-        span: int list;(** Always has exactly three or four elements: start line, start column,
-        end line (optional, otherwise assumed same as start line), end column.
-        These are packed into a single field for efficiency.  Note that line
-        and column numbers are zero-based -- typically you will want to add
-        1 to each before displaying to a user. *)
-        leading_comments: string option;(** If this SourceCodeInfo represents a complete declaration, these are any
-        comments appearing before and after the declaration which appear to be
-        attached to the declaration.
+            Each element is a field number or an index.  They form a path from
+            the root FileDescriptorProto to the place where the definition occurs.
+            For example, this path:
+            {v
+               [ 4, 3, 2, 7, 1 ]
+            v}
+            refers to:
+            {v
+               file.message_type(3)  // 4, 3
+                   .field(7)         // 2, 7
+                   .name()           // 1
+            v}
+            This is because FileDescriptorProto.message_type has field number 4:
+            {v
+               repeated DescriptorProto message_type = 4;
+            v}
+            and DescriptorProto.field has field number 2:
+            {v
+               repeated FieldDescriptorProto field = 2;
+            v}
+            and FieldDescriptorProto.name has field number 1:
+            {v
+               optional string name = 1;
+            v}
+            Thus, the above path gives the location of a field name.  If we removed
+            the last element:
+            {v
+               [ 4, 3, 2, 7 ]
+            v}
+            this path refers to the whole field declaration (from the beginning
+            of the label to the terminating semicolon).
+          *)
 
-        A series of line comments appearing on consecutive lines, with no other
-        tokens appearing on those lines, will be treated as a single comment.
+          span:int list;
+          (**
+            Always has exactly three or four elements: start line, start column,
+            end line (optional, otherwise assumed same as start line), end column.
+            These are packed into a single field for efficiency.  Note that line
+            and column numbers are zero-based -- typically you will want to add
+            1 to each before displaying to a user.
+          *)
 
-        leading_detached_comments will keep paragraphs of comments that appear
-        before (but not connected to) the current element. Each paragraph,
-        separated by empty lines, will be one comment element in the repeated
-        field.
-
-        Only the comment content is provided; comment markers (e.g. //) are
-        stripped out.  For block comments, leading whitespace and an asterisk
-        will be stripped from the beginning of each line other than the first.
-        Newlines are included in the output.
-
-        Examples:
-        {v
-           optional int32 foo = 1;  // Comment attached to foo.
-           // Comment attached to bar.
-           optional int32 bar = 2;
-
-           optional string baz = 3;
-           // Comment attached to baz.
-           // Another line attached to baz.
-
-           // Comment attached to moo.
-           //
-           // Another line attached to moo.
-           optional double moo = 4;
-
-           // Detached comment for corge. This is not leading or trailing comments
-           // to moo or corge because there are blank lines separating it from
-           // both.
-
-           // Detached comment for corge paragraph 2.
-
-           optional string corge = 5;
-           /* Block comment attached
-            * to corge.  Leading asterisks
-            * will be removed. */
-           /* Block comment attached to
-            * grault. */
-           optional int32 grault = 6;
-
-           // ignored detached comments.
-        v} *)
-        trailing_comments: string option;
-        leading_detached_comments: string list;
+          leading_comments:string option;
+          trailing_comments:string option;
+          leading_detached_comments:string list;
         }
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -1359,54 +1301,54 @@ module rec Google : sig
       end
       type t = (Location.t list)
       (**
-      A Location identifies a piece of source code in a .proto file which
-      corresponds to a particular definition.  This information is intended
-      to be useful to IDEs, code indexers, documentation generators, and similar
-      tools.
+        A Location identifies a piece of source code in a .proto file which
+        corresponds to a particular definition.  This information is intended
+        to be useful to IDEs, code indexers, documentation generators, and similar
+        tools.
 
-      For example, say we have a file like:
-      {v
-         message Foo {
+        For example, say we have a file like:
+        {v
+           message Foo {
+             optional string foo = 1;
+           }
+        v}
+        Let's look at just the field definition:
+        {v
            optional string foo = 1;
-         }
-      v}
-      Let's look at just the field definition:
-      {v
-         optional string foo = 1;
-         ^       ^^     ^^  ^  ^^^
-         a       bc     de  f  ghi
-      v}
-      We have the following locations:
-      {v
-         span   path               represents
-         [a,i)  [ 4, 0, 2, 0 ]     The whole field definition.
-         [a,b)  [ 4, 0, 2, 0, 4 ]  The label (optional).
-         [c,d)  [ 4, 0, 2, 0, 5 ]  The type (string).
-         [e,f)  [ 4, 0, 2, 0, 1 ]  The name (foo).
-         [g,h)  [ 4, 0, 2, 0, 3 ]  The number (1).
-      v}
-      Notes:
-      - A location may refer to a repeated field itself (i.e. not to any
-      particular index within it).  This is used whenever a set of elements are
-      logically enclosed in a single code segment.  For example, an entire
-      extend block (possibly containing multiple extension definitions) will
-      have an outer location whose path refers to the "extensions" repeated
-      field without an index.
-      - Multiple locations may have the same path.  This happens when a single
-      logical declaration is spread out across multiple places.  The most
-      obvious example is the "extend" block again -- there may be multiple
-      extend blocks in the same scope, each of which will have the same path.
-      - A location's span is not always a subset of its parent's span.  For
-      example, the "extendee" of an extension declaration appears at the
-      beginning of the "extend" block and is shared by all extensions within
-      the block.
-      - Just because a location's span is a subset of some other location's span
-      does not mean that it is a descendant.  For example, a "group" defines
-      both a type and a field in a single declaration.  Thus, the locations
-      corresponding to the type and field and their components will overlap.
-      - Code which tries to interpret locations should probably be designed to
-      ignore those that it doesn't understand, as more types of locations could
-      be recorded in the future.
+           ^       ^^     ^^  ^  ^^^
+           a       bc     de  f  ghi
+        v}
+        We have the following locations:
+        {v
+           span   path               represents
+           [a,i)  [ 4, 0, 2, 0 ]     The whole field definition.
+           [a,b)  [ 4, 0, 2, 0, 4 ]  The label (optional).
+           [c,d)  [ 4, 0, 2, 0, 5 ]  The type (string).
+           [e,f)  [ 4, 0, 2, 0, 1 ]  The name (foo).
+           [g,h)  [ 4, 0, 2, 0, 3 ]  The number (1).
+        v}
+        Notes:
+        - A location may refer to a repeated field itself (i.e. not to any
+        particular index within it).  This is used whenever a set of elements are
+        logically enclosed in a single code segment.  For example, an entire
+        extend block (possibly containing multiple extension definitions) will
+        have an outer location whose path refers to the "extensions" repeated
+        field without an index.
+        - Multiple locations may have the same path.  This happens when a single
+        logical declaration is spread out across multiple places.  The most
+        obvious example is the "extend" block again -- there may be multiple
+        extend blocks in the same scope, each of which will have the same path.
+        - A location's span is not always a subset of its parent's span.  For
+        example, the "extendee" of an extension declaration appears at the
+        beginning of the "extend" block and is shared by all extensions within
+        the block.
+        - Just because a location's span is a subset of some other location's span
+        does not mean that it is a descendant.  For example, a "group" defines
+        both a type and a field in a single declaration.  Thus, the locations
+        corresponding to the type and field and their components will overlap.
+        - Code which tries to interpret locations should probably be designed to
+        ignore those that it doesn't understand, as more types of locations could
+        be recorded in the future.
       *)
 
       val make: ?location:Location.t list -> unit -> t
@@ -1444,14 +1386,26 @@ module rec Google : sig
     and GeneratedCodeInfo : sig
       module rec Annotation : sig
         type t = {
-        path: int list;(** Identifies the element in the original source .proto file. This field
-        is formatted the same as SourceCodeInfo.Location.path. *)
-        source_file: string option;(** Identifies the filesystem path to the original source .proto. *)
-        begin': int option;(** Identifies the starting offset in bytes in the generated code
-        that relates to the identified object. *)
-        end': int option;(** Identifies the ending offset in bytes in the generated code that
-        relates to the identified offset. The end offset should be one past
-        the last relevant byte (so the length of the text = end - begin). *)
+          path:int list;
+          (**
+            Identifies the element in the original source .proto file. This field
+            is formatted the same as SourceCodeInfo.Location.path.
+          *)
+
+          source_file:string option;
+          begin':int option;
+          (**
+            Identifies the starting offset in bytes in the generated code
+            that relates to the identified object.
+          *)
+
+          end':int option;
+          (**
+            Identifies the ending offset in bytes in the generated code that
+            relates to the identified offset. The end offset should be one past
+            the last relevant byte (so the length of the text = end - begin).
+          *)
+
         }
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -1481,8 +1435,8 @@ module rec Google : sig
       end
       type t = (Annotation.t list)
       (**
-      An Annotation connects some span of text in generated code to an element
-      of its generating .proto file.
+        An Annotation connects some span of text in generated code to an element
+        of its generating .proto file.
       *)
 
       val make: ?annotation:Annotation.t list -> unit -> t
@@ -1551,23 +1505,35 @@ end = struct
     (** Describes a complete .proto file. *)
     and FileDescriptorProto : sig
       type t = {
-      name: string option;(** file name, relative to root of source tree *)
-      package: string option;(** e.g. "foo", "foo.bar", etc. *)
-      dependency: string list;(** Names of files imported by this file. *)
-      message_type: DescriptorProto.t list;(** All top-level definitions in this file. *)
-      enum_type: EnumDescriptorProto.t list;
-      service: ServiceDescriptorProto.t list;
-      extension: FieldDescriptorProto.t list;
-      options: FileOptions.t option;
-      source_code_info: SourceCodeInfo.t option;(** This field contains optional information about the original source code.
-      You may safely remove this entire field without harming runtime
-      functionality of the descriptors -- the information is needed only by
-      development tools. *)
-      public_dependency: int list;(** Indexes of the public imported files in the dependency list above. *)
-      weak_dependency: int list;(** Indexes of the weak imported files in the dependency list.
-      For Google-internal migration only. Do not use. *)
-      syntax: string option;(** The syntax of the proto file.
-      The supported values are "proto2" and "proto3". *)
+        name:string option;
+        (**
+          file name, relative to root of source tree
+        *)
+
+        package:string option;
+        (**
+          e.g. "foo", "foo.bar", etc.
+        *)
+
+        dependency:string list;
+        (**
+          Names of files imported by this file.
+        *)
+
+        message_type:DescriptorProto.t list;
+        enum_type:EnumDescriptorProto.t list;
+        service:ServiceDescriptorProto.t list;
+        extension:FieldDescriptorProto.t list;
+        options:FileOptions.t option;
+        source_code_info:SourceCodeInfo.t option;
+        public_dependency:int list;
+        weak_dependency:int list;
+        syntax:string option;
+        (**
+          The syntax of the proto file.
+          The supported values are "proto2" and "proto3".
+        *)
+
       }
       val make: ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -1600,9 +1566,17 @@ end = struct
     and DescriptorProto : sig
       module rec ExtensionRange : sig
         type t = {
-        start: int option;(** Inclusive. *)
-        end': int option;(** Exclusive. *)
-        options: ExtensionRangeOptions.t option;
+          start:int option;
+          (**
+            Inclusive.
+          *)
+
+          end':int option;
+          (**
+            Exclusive.
+          *)
+
+          options:ExtensionRangeOptions.t option;
         }
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -1638,8 +1612,16 @@ end = struct
       *)
       and ReservedRange : sig
         type t = {
-        start: int option;(** Inclusive. *)
-        end': int option;(** Exclusive. *)
+          start:int option;
+          (**
+            Inclusive.
+          *)
+
+          end':int option;
+          (**
+            Exclusive.
+          *)
+
         }
         val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -1668,17 +1650,16 @@ end = struct
         (**/**)
       end
       type t = {
-      name: string option;
-      field: FieldDescriptorProto.t list;
-      nested_type: t list;
-      enum_type: EnumDescriptorProto.t list;
-      extension_range: ExtensionRange.t list;
-      extension: FieldDescriptorProto.t list;
-      options: MessageOptions.t option;
-      oneof_decl: OneofDescriptorProto.t list;
-      reserved_range: ReservedRange.t list;
-      reserved_name: string list;(** Reserved field names, which may not be used by fields in the same message.
-      A given name may only be reserved once. *)
+        name:string option;
+        field:FieldDescriptorProto.t list;
+        nested_type:t list;
+        enum_type:EnumDescriptorProto.t list;
+        extension_range:ExtensionRange.t list;
+        extension:FieldDescriptorProto.t list;
+        options:MessageOptions.t option;
+        oneof_decl:OneofDescriptorProto.t list;
+        reserved_range:ReservedRange.t list;
+        reserved_name:string list;
       }
       val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -1708,8 +1689,8 @@ end = struct
     end
     and ExtensionRangeOptions : sig
       type t = {
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -1747,18 +1728,21 @@ end = struct
             0 is reserved for errors.
             Order is weird for historical reasons.
           *)
+
           | TYPE_FLOAT
           | TYPE_INT64
           (**
             Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT64 if
             negative values are likely.
           *)
+
           | TYPE_UINT64
           | TYPE_INT32
           (**
             Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT32 if
             negative values are likely.
           *)
+
           | TYPE_FIXED64
           | TYPE_FIXED32
           | TYPE_BOOL
@@ -1770,18 +1754,23 @@ end = struct
             implementations should still be able to parse the group wire format and
             treat group fields as unknown fields.
           *)
+
           | TYPE_MESSAGE
           (** Length-delimited aggregate. *)
+
           | TYPE_BYTES
           (** New in version 2. *)
+
           | TYPE_UINT32
           | TYPE_ENUM
           | TYPE_SFIXED32
           | TYPE_SFIXED64
           | TYPE_SINT32
           (** Uses ZigZag encoding. *)
+
           | TYPE_SINT64
           (** Uses ZigZag encoding. *)
+
 
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
@@ -1798,6 +1787,7 @@ end = struct
         type t =
           | LABEL_OPTIONAL
           (** 0 is reserved for errors *)
+
           | LABEL_REQUIRED
           | LABEL_REPEATED
 
@@ -1813,50 +1803,27 @@ end = struct
         (**/**)
       end
       type t = {
-      name: string option;
-      extendee: string option;(** For extensions, this is the name of the type being extended.  It is
-      resolved in the same manner as type_name. *)
-      number: int option;
-      label: Label.t option;
-      type': Type.t option;(** If type_name is set, this need not be set.  If both this and type_name
-      are set, this must be one of TYPE_ENUM, TYPE_MESSAGE or TYPE_GROUP. *)
-      type_name: string option;(** For message and enum types, this is the name of the type.  If the name
-      starts with a '.', it is fully-qualified.  Otherwise, C++-like scoping
-      rules are used to find the type (i.e. first the nested types within this
-      message are searched, then within the parent, on up to the root
-      namespace). *)
-      default_value: string option;(** For numeric types, contains the original text representation of the value.
-      For booleans, "true" or "false".
-      For strings, contains the default text contents (not escaped in any way).
-      For bytes, contains the C escaped value.  All bytes >= 128 are escaped. *)
-      options: FieldOptions.t option;
-      oneof_index: int option;(** If set, gives the index of a oneof in the containing type's oneof_decl
-      list.  This field is a member of that oneof. *)
-      json_name: string option;(** JSON name of this field. The value is set by protocol compiler. If the
-      user has set a "json_name" option on this field, that option's value
-      will be used. Otherwise, it's deduced from the field's name by converting
-      it to camelCase. *)
-      proto3_optional: bool option;(** If true, this is a proto3 "optional". When a proto3 field is optional, it
-      tracks presence regardless of field type.
+        name:string option;
+        extendee:string option;
+        (**
+          For extensions, this is the name of the type being extended.  It is
+          resolved in the same manner as type_name.
+        *)
 
-      When proto3_optional is true, this field must be belong to a oneof to
-      signal to old proto3 clients that presence is tracked for this field. This
-      oneof is known as a "synthetic" oneof, and this field must be its sole
-      member (each proto3 optional field gets its own synthetic oneof). Synthetic
-      oneofs exist in the descriptor only, and do not generate any API. Synthetic
-      oneofs must be ordered after all "real" oneofs.
+        number:int option;
+        label:Label.t option;
+        type':Type.t option;
+        (**
+          If type_name is set, this need not be set.  If both this and type_name
+          are set, this must be one of TYPE_ENUM, TYPE_MESSAGE or TYPE_GROUP.
+        *)
 
-      For message fields, proto3_optional doesn't create any semantic change,
-      since non-repeated message fields always track presence. However it still
-      indicates the semantic detail of whether the user wrote "optional" or not.
-      This can be useful for round-tripping the .proto file. For consistency we
-      give message fields a synthetic oneof also, even though it is not required
-      to track presence. This is especially important because the parser can't
-      tell if a field is a message or an enum, so it must always create a
-      synthetic oneof.
-
-      Proto2 optional fields do not set this flag, because they already indicate
-      optional with `LABEL_OPTIONAL`. *)
+        type_name:string option;
+        default_value:string option;
+        options:FieldOptions.t option;
+        oneof_index:int option;
+        json_name:string option;
+        proto3_optional:bool option;
       }
       val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -1888,8 +1855,8 @@ end = struct
     (** Describes a oneof. *)
     and OneofDescriptorProto : sig
       type t = {
-      name: string option;
-      options: OneofOptions.t option;
+        name:string option;
+        options:OneofOptions.t option;
       }
       val make: ?name:string -> ?options:OneofOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -1931,8 +1898,16 @@ end = struct
       *)
       module rec EnumReservedRange : sig
         type t = {
-        start: int option;(** Inclusive. *)
-        end': int option;(** Inclusive. *)
+          start:int option;
+          (**
+            Inclusive.
+          *)
+
+          end':int option;
+          (**
+            Inclusive.
+          *)
+
         }
         val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -1961,14 +1936,11 @@ end = struct
         (**/**)
       end
       type t = {
-      name: string option;
-      value: EnumValueDescriptorProto.t list;
-      options: EnumOptions.t option;
-      reserved_range: EnumReservedRange.t list;(** Range of reserved numeric values. Reserved numeric values may not be used
-      by enum values in the same enum declaration. Reserved ranges may not
-      overlap. *)
-      reserved_name: string list;(** Reserved enum value names, which may not be reused. A given name may only
-      be reserved once. *)
+        name:string option;
+        value:EnumValueDescriptorProto.t list;
+        options:EnumOptions.t option;
+        reserved_range:EnumReservedRange.t list;
+        reserved_name:string list;
       }
       val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -2000,9 +1972,9 @@ end = struct
     (** Describes a value within an enum. *)
     and EnumValueDescriptorProto : sig
       type t = {
-      name: string option;
-      number: int option;
-      options: EnumValueOptions.t option;
+        name:string option;
+        number:int option;
+        options:EnumValueOptions.t option;
       }
       val make: ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -2034,9 +2006,9 @@ end = struct
     (** Describes a service. *)
     and ServiceDescriptorProto : sig
       type t = {
-      name: string option;
-      method': MethodDescriptorProto.t list;
-      options: ServiceOptions.t option;
+        name:string option;
+        method':MethodDescriptorProto.t list;
+        options:ServiceOptions.t option;
       }
       val make: ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -2068,13 +2040,12 @@ end = struct
     (** Describes a method of a service. *)
     and MethodDescriptorProto : sig
       type t = {
-      name: string option;
-      input_type: string option;(** Input and output type names.  These are resolved in the same way as
-      FieldDescriptorProto.type_name, but must refer to a message type. *)
-      output_type: string option;
-      options: MethodOptions.t option;
-      client_streaming: bool;(** Identifies if client streams multiple client messages *)
-      server_streaming: bool;(** Identifies if server streams multiple server messages *)
+        name:string option;
+        input_type:string option;
+        output_type:string option;
+        options:MethodOptions.t option;
+        client_streaming:bool;
+        server_streaming:bool;
       }
       val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -2109,6 +2080,7 @@ end = struct
         type t =
           | SPEED
           (** Generate complete code for parsing, serialization, *)
+
           | CODE_SIZE
           (**
             etc.
@@ -2116,8 +2088,10 @@ end = struct
 
             Use ReflectionOps to implement these methods.
           *)
+
           | LITE_RUNTIME
           (** Generate code using MessageLite and the lite runtime. *)
+
 
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
@@ -2131,75 +2105,35 @@ end = struct
         (**/**)
       end
       type t = {
-      java_package: string option;(** Sets the Java package where classes generated from this .proto will be
-      placed.  By default, the proto package is used, but this is often
-      inappropriate because proto packages do not normally start with backwards
-      domain names. *)
-      java_outer_classname: string option;(** Controls the name of the wrapper Java class generated for the .proto file.
-      That class will always contain the .proto file's getDescriptor() method as
-      well as any top-level extensions defined in the .proto file.
-      If java_multiple_files is disabled, then all the other classes from the
-      .proto file will be nested inside the single wrapper outer class. *)
-      optimize_for: OptimizeMode.t;(** Clients can define custom options in extensions of this message.
-      See the documentation for the "Options" section above. *)
-      java_multiple_files: bool;(** If enabled, then the Java code generator will generate a separate .java
-      file for each top-level message, enum, and service defined in the .proto
-      file.  Thus, these types will *not* be nested inside the wrapper class
-      named by java_outer_classname.  However, the wrapper class will still be
-      generated to contain the file's getDescriptor() method as well as any
-      top-level extensions defined in the file. *)
-      go_package: string option;(** Sets the Go package where structs generated from this .proto will be
-      placed. If omitted, the Go package will be derived from the following:
-      - The basename of the package import path, if provided.
-      - Otherwise, the package statement in the .proto file, if present.
-      - Otherwise, the basename of the .proto file, without extension. *)
-      cc_generic_services: bool;(** Should generic services be generated in each language?  "Generic" services
-      are not specific to any particular RPC system.  They are generated by the
-      main code generators in each language (without additional plugins).
-      Generic services were the only kind of service generation supported by
-      early versions of google.protobuf.
+        java_package:string option;
+        java_outer_classname:string option;
+        optimize_for:OptimizeMode.t;
+        java_multiple_files:bool;
+        go_package:string option;
+        cc_generic_services:bool;
+        java_generic_services:bool;
+        py_generic_services:bool;
+        java_generate_equals_and_hash:bool option[@ocaml.alert protobuf "Marked as deprecated in the .proto file"];
+        deprecated:bool;
+        (**
+          Is this file deprecated?
+          Depending on the target platform, this can emit Deprecated annotations
+          for everything in the file, or it will be completely ignored; in the very
+          least, this is a formalization for deprecating files.
+        *)
 
-      Generic services are now considered deprecated in favor of using plugins
-      that generate code specific to your particular RPC system.  Therefore,
-      these default to false.  Old code which depends on generic services should
-      explicitly set them to true. *)
-      java_generic_services: bool;
-      py_generic_services: bool;
-      java_generate_equals_and_hash: bool option[@ocaml.alert protobuf "Marked as deprecated in the .proto file"];(** This option does nothing. *)
-      deprecated: bool;(** Is this file deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for everything in the file, or it will be completely ignored; in the very
-      least, this is a formalization for deprecating files. *)
-      java_string_check_utf8: bool;(** If set true, then the Java2 code generator will generate code that
-      throws an exception whenever an attempt is made to assign a non-UTF-8
-      byte sequence to a string field.
-      Message reflection will do the same.
-      However, an extension field still accepts non-UTF-8 byte sequences.
-      This option has no effect on when used with the lite runtime. *)
-      cc_enable_arenas: bool;(** Enables the use of arenas for the proto messages in this file. This applies
-      only to generated classes for C++. *)
-      objc_class_prefix: string option;(** Sets the objective c class prefix which is prepended to all objective c
-      generated classes from this .proto. There is no default. *)
-      csharp_namespace: string option;(** Namespace for generated classes; defaults to the package. *)
-      swift_prefix: string option;(** By default Swift generators will take the proto package and CamelCase it
-      replacing '.' with underscore and use that to prefix the types/symbols
-      defined. When this options is provided, they will use this value instead
-      to prefix the types/symbols defined. *)
-      php_class_prefix: string option;(** Sets the php class prefix which is prepended to all php generated classes
-      from this .proto. Default is empty. *)
-      php_namespace: string option;(** Use this option to change the namespace of php generated classes. Default
-      is empty. When this option is empty, the package name will be used for
-      determining the namespace. *)
-      php_generic_services: bool;
-      php_metadata_namespace: string option;(** Use this option to change the namespace of php generated metadata classes.
-      Default is empty. When this option is empty, the proto file name will be
-      used for determining the namespace. *)
-      ruby_package: string option;(** Use this option to change the package of ruby generated classes. Default
-      is empty. When this option is not set, the package name will be used for
-      determining the ruby package. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here.
-      See the documentation for the "Options" section above. *)
-      extensions': Runtime'.Extensions.t;
+        java_string_check_utf8:bool;
+        cc_enable_arenas:bool;
+        objc_class_prefix:string option;
+        csharp_namespace:string option;
+        swift_prefix:string option;
+        php_class_prefix:string option;
+        php_namespace:string option;
+        php_generic_services:bool;
+        php_metadata_namespace:string option;
+        ruby_package:string option;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -2229,59 +2163,19 @@ end = struct
     end
     and MessageOptions : sig
       type t = {
-      message_set_wire_format: bool;(** Set true to use the old proto1 MessageSet wire format for extensions.
-      This is provided for backwards-compatibility with the MessageSet wire
-      format.  You should not use this for any other reason:  It's less
-      efficient, has fewer features, and is more complicated.
+        message_set_wire_format:bool;
+        no_standard_descriptor_accessor:bool;
+        deprecated:bool;
+        (**
+          Is this message deprecated?
+          Depending on the target platform, this can emit Deprecated annotations
+          for the message, or it will be completely ignored; in the very least,
+          this is a formalization for deprecating messages.
+        *)
 
-      The message must be defined exactly as follows:
-      {v
-         message Foo {
-           option message_set_wire_format = true;
-           extensions 4 to max;
-         }
-      v}
-      Note that the message cannot have any defined fields; MessageSets only
-      have extensions.
-
-      All extensions of your type must be singular messages; e.g. they cannot
-      be int32s, enums, or repeated messages.
-
-      Because this is an option, the above two restrictions are not enforced by
-      the protocol compiler. *)
-      no_standard_descriptor_accessor: bool;(** Disables the generation of the standard "descriptor()" accessor, which can
-      conflict with a field of the same name.  This is meant to make migration
-      from proto1 easier; new code should avoid fields named "descriptor". *)
-      deprecated: bool;(** Is this message deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the message, or it will be completely ignored; in the very least,
-      this is a formalization for deprecating messages. *)
-      map_entry: bool option;(** Whether the message is an automatically generated map entry type for the
-      maps field.
-
-      For maps fields:
-      {v
-           map<KeyType, ValueType> map_field = 1;
-      v}
-      The parsed descriptor looks like:
-      {v
-           message MapFieldEntry {
-               option map_entry = true;
-               optional KeyType key = 1;
-               optional ValueType value = 2;
-           }
-           repeated MapFieldEntry map_field = 1;
-      v}
-      Implementations may choose not to generate the map_entry=true message, but
-      use a native map in the target language to hold the keys and values.
-      The reflection APIs in such implementations still need to work as
-      if the field is a repeated message field.
-
-      NOTE: Do not set the option in .proto files. Always use the maps syntax
-      instead. The option should only be implicitly set by the proto compiler
-      parser. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        map_entry:bool option;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -2314,6 +2208,7 @@ end = struct
         type t =
           | STRING
           (** Default mode. *)
+
           | CORD
           | STRING_PIECE
 
@@ -2332,10 +2227,13 @@ end = struct
         type t =
           | JS_NORMAL
           (** Use the default type. *)
+
           | JS_STRING
           (** Use JavaScript strings. *)
+
           | JS_NUMBER
           (** Use JavaScript numbers. *)
+
 
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
@@ -2349,67 +2247,89 @@ end = struct
         (**/**)
       end
       type t = {
-      ctype: CType.t;(** The ctype option instructs the C++ code generator to use a different
-      representation of the field than it normally would.  See the specific
-      options below.  This option is not yet implemented in the open source
-      release -- sorry, we'll try to include it in a future version! *)
-      packed: bool option;(** The packed option can be enabled for repeated primitive fields to enable
-      a more efficient representation on the wire. Rather than repeatedly
-      writing the tag and type for each element, the entire array is encoded as
-      a single length-delimited blob. In proto3, only explicit setting it to
-      false will avoid using packed encoding. *)
-      deprecated: bool;(** Clients can define custom options in extensions of this message. See above. *)
-      lazy': bool;(** Should this field be parsed lazily?  Lazy applies only to message-type
-      fields.  It means that when the outer message is initially parsed, the
-      inner message's contents will not be parsed but instead stored in encoded
-      form.  The inner message will actually be parsed when it is first accessed.
+        ctype:CType.t;
+        (**
+          The ctype option instructs the C++ code generator to use a different
+          representation of the field than it normally would.  See the specific
+          options below.  This option is not yet implemented in the open source
+          release -- sorry, we'll try to include it in a future version!
+        *)
 
-      This is only a hint.  Implementations are free to choose whether to use
-      eager or lazy parsing regardless of the value of this option.  However,
-      setting this option true suggests that the protocol author believes that
-      using lazy parsing on this field is worth the additional bookkeeping
-      overhead typically needed to implement it.
+        packed:bool option;
+        (**
+          The packed option can be enabled for repeated primitive fields to enable
+          a more efficient representation on the wire. Rather than repeatedly
+          writing the tag and type for each element, the entire array is encoded as
+          a single length-delimited blob. In proto3, only explicit setting it to
+          false will avoid using packed encoding.
+        *)
 
-      This option does not affect the public interface of any generated code;
-      all method signatures remain the same.  Furthermore, thread-safety of the
-      interface is not affected by this option; const methods remain safe to
-      call from multiple threads concurrently, while non-const methods continue
-      to require exclusive access.
+        deprecated:bool;
+        (**
+          Clients can define custom options in extensions of this message. See above.
+        *)
+
+        lazy':bool;
+        (**
+          Should this field be parsed lazily?  Lazy applies only to message-type
+          fields.  It means that when the outer message is initially parsed, the
+          inner message's contents will not be parsed but instead stored in encoded
+          form.  The inner message will actually be parsed when it is first accessed.
+
+          This is only a hint.  Implementations are free to choose whether to use
+          eager or lazy parsing regardless of the value of this option.  However,
+          setting this option true suggests that the protocol author believes that
+          using lazy parsing on this field is worth the additional bookkeeping
+          overhead typically needed to implement it.
+
+          This option does not affect the public interface of any generated code;
+          all method signatures remain the same.  Furthermore, thread-safety of the
+          interface is not affected by this option; const methods remain safe to
+          call from multiple threads concurrently, while non-const methods continue
+          to require exclusive access.
 
 
-      Note that implementations may choose not to check required fields within
-      a lazy sub-message.  That is, calling IsInitialized() on the outer message
-      may return true even if the inner message has missing required fields.
-      This is necessary because otherwise the inner message would have to be
-      parsed in order to perform the check, defeating the purpose of lazy
-      parsing.  An implementation which chooses not to check required fields
-      must be consistent about it.  That is, for any particular sub-message, the
-      implementation must either *always* check its required fields, or *never*
-      check its required fields, regardless of whether or not the message has
-      been parsed.
+          Note that implementations may choose not to check required fields within
+          a lazy sub-message.  That is, calling IsInitialized() on the outer message
+          may return true even if the inner message has missing required fields.
+          This is necessary because otherwise the inner message would have to be
+          parsed in order to perform the check, defeating the purpose of lazy
+          parsing.  An implementation which chooses not to check required fields
+          must be consistent about it.  That is, for any particular sub-message, the
+          implementation must either *always* check its required fields, or *never*
+          check its required fields, regardless of whether or not the message has
+          been parsed.
 
-      As of 2021, lazy does no correctness checks on the byte stream during
-      parsing.  This may lead to crashes if and when an invalid byte stream is
-      finally parsed upon access.
+          As of 2021, lazy does no correctness checks on the byte stream during
+          parsing.  This may lead to crashes if and when an invalid byte stream is
+          finally parsed upon access.
 
-      TODO(b/211906113):  Enable validation on lazy fields. *)
-      jstype: JSType.t;(** The jstype option determines the JavaScript type used for values of the
-      field.  The option is permitted only for 64 bit integral and fixed types
-      (int64, uint64, sint64, fixed64, sfixed64).  A field with jstype JS_STRING
-      is represented as JavaScript string, which avoids loss of precision that
-      can happen when a large value is converted to a floating point JavaScript.
-      Specifying JS_NUMBER for the jstype causes the generated JavaScript code to
-      use the JavaScript "number" type.  The behavior of the default option
-      JS_NORMAL is implementation dependent.
+          TODO(b/211906113):  Enable validation on lazy fields.
+        *)
 
-      This option is an enum to permit additional types to be added, e.g.
-      goog.math.Integer. *)
-      weak: bool;(** For Google-internal migration only. Do not use. *)
-      unverified_lazy: bool;(** unverified_lazy does no correctness checks on the byte stream. This should
-      only be used where lazy with verification is prohibitive for performance
-      reasons. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        jstype:JSType.t;
+        (**
+          The jstype option determines the JavaScript type used for values of the
+          field.  The option is permitted only for 64 bit integral and fixed types
+          (int64, uint64, sint64, fixed64, sfixed64).  A field with jstype JS_STRING
+          is represented as JavaScript string, which avoids loss of precision that
+          can happen when a large value is converted to a floating point JavaScript.
+          Specifying JS_NUMBER for the jstype causes the generated JavaScript code to
+          use the JavaScript "number" type.  The behavior of the default option
+          JS_NORMAL is implementation dependent.
+
+          This option is an enum to permit additional types to be added, e.g.
+          goog.math.Integer.
+        *)
+
+        weak:bool;
+        (**
+          For Google-internal migration only. Do not use.
+        *)
+
+        unverified_lazy:bool;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -2439,8 +2359,8 @@ end = struct
     end
     and OneofOptions : sig
       type t = {
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -2470,14 +2390,17 @@ end = struct
     end
     and EnumOptions : sig
       type t = {
-      allow_alias: bool option;(** Set this option to true to allow mapping different tag names to the same
-      value. *)
-      deprecated: bool;(** Is this enum deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the enum, or it will be completely ignored; in the very least, this
-      is a formalization for deprecating enums. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        allow_alias:bool option;
+        deprecated:bool;
+        (**
+          Is this enum deprecated?
+          Depending on the target platform, this can emit Deprecated annotations
+          for the enum, or it will be completely ignored; in the very least, this
+          is a formalization for deprecating enums.
+        *)
+
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -2507,12 +2430,16 @@ end = struct
     end
     and EnumValueOptions : sig
       type t = {
-      deprecated: bool;(** Is this enum value deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the enum value, or it will be completely ignored; in the very least,
-      this is a formalization for deprecating enum values. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        deprecated:bool;
+        (**
+          Is this enum value deprecated?
+          Depending on the target platform, this can emit Deprecated annotations
+          for the enum value, or it will be completely ignored; in the very least,
+          this is a formalization for deprecating enum values.
+        *)
+
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -2542,12 +2469,16 @@ end = struct
     end
     and ServiceOptions : sig
       type t = {
-      deprecated: bool;(** Is this service deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the service, or it will be completely ignored; in the very least,
-      this is a formalization for deprecating services. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        deprecated:bool;
+        (**
+          Is this service deprecated?
+          Depending on the target platform, this can emit Deprecated annotations
+          for the service, or it will be completely ignored; in the very least,
+          this is a formalization for deprecating services.
+        *)
+
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -2587,8 +2518,10 @@ end = struct
           | IDEMPOTENCY_UNKNOWN
           | NO_SIDE_EFFECTS
           (** implies idempotent *)
+
           | IDEMPOTENT
           (** idempotent, but may have side effects *)
+
 
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
@@ -2602,13 +2535,17 @@ end = struct
         (**/**)
       end
       type t = {
-      deprecated: bool;(** Is this method deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the method, or it will be completely ignored; in the very least,
-      this is a formalization for deprecating methods. *)
-      idempotency_level: IdempotencyLevel.t;
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        deprecated:bool;
+        (**
+          Is this method deprecated?
+          Depending on the target platform, this can emit Deprecated annotations
+          for the method, or it will be completely ignored; in the very least,
+          this is a formalization for deprecating methods.
+        *)
+
+        idempotency_level:IdempotencyLevel.t;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -2656,8 +2593,8 @@ end = struct
       *)
       module rec NamePart : sig
         type t = {
-        name_part: string;
-        is_extension: bool;
+          name_part:string;
+          is_extension:bool;
         }
         val make: name_part:string -> is_extension:bool -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -2686,14 +2623,13 @@ end = struct
         (**/**)
       end
       type t = {
-      name: NamePart.t list;
-      identifier_value: string option;(** The value of the uninterpreted option, in whatever type the tokenizer
-      identified it as during parsing. Exactly one of these should be set. *)
-      positive_int_value: int option;
-      negative_int_value: int option;
-      double_value: float option;
-      string_value: bytes option;
-      aggregate_value: string option;
+        name:NamePart.t list;
+        identifier_value:string option;
+        positive_int_value:int option;
+        negative_int_value:int option;
+        double_value:float option;
+        string_value:bytes option;
+        aggregate_value:string option;
       }
       val make: ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -2729,95 +2665,56 @@ end = struct
     and SourceCodeInfo : sig
       module rec Location : sig
         type t = {
-        path: int list;(** Identifies which part of the FileDescriptorProto was defined at this
-        location.
+          path:int list;
+          (**
+            Identifies which part of the FileDescriptorProto was defined at this
+            location.
 
-        Each element is a field number or an index.  They form a path from
-        the root FileDescriptorProto to the place where the definition occurs.
-        For example, this path:
-        {v
-           [ 4, 3, 2, 7, 1 ]
-        v}
-        refers to:
-        {v
-           file.message_type(3)  // 4, 3
-               .field(7)         // 2, 7
-               .name()           // 1
-        v}
-        This is because FileDescriptorProto.message_type has field number 4:
-        {v
-           repeated DescriptorProto message_type = 4;
-        v}
-        and DescriptorProto.field has field number 2:
-        {v
-           repeated FieldDescriptorProto field = 2;
-        v}
-        and FieldDescriptorProto.name has field number 1:
-        {v
-           optional string name = 1;
-        v}
-        Thus, the above path gives the location of a field name.  If we removed
-        the last element:
-        {v
-           [ 4, 3, 2, 7 ]
-        v}
-        this path refers to the whole field declaration (from the beginning
-        of the label to the terminating semicolon). *)
-        span: int list;(** Always has exactly three or four elements: start line, start column,
-        end line (optional, otherwise assumed same as start line), end column.
-        These are packed into a single field for efficiency.  Note that line
-        and column numbers are zero-based -- typically you will want to add
-        1 to each before displaying to a user. *)
-        leading_comments: string option;(** If this SourceCodeInfo represents a complete declaration, these are any
-        comments appearing before and after the declaration which appear to be
-        attached to the declaration.
+            Each element is a field number or an index.  They form a path from
+            the root FileDescriptorProto to the place where the definition occurs.
+            For example, this path:
+            {v
+               [ 4, 3, 2, 7, 1 ]
+            v}
+            refers to:
+            {v
+               file.message_type(3)  // 4, 3
+                   .field(7)         // 2, 7
+                   .name()           // 1
+            v}
+            This is because FileDescriptorProto.message_type has field number 4:
+            {v
+               repeated DescriptorProto message_type = 4;
+            v}
+            and DescriptorProto.field has field number 2:
+            {v
+               repeated FieldDescriptorProto field = 2;
+            v}
+            and FieldDescriptorProto.name has field number 1:
+            {v
+               optional string name = 1;
+            v}
+            Thus, the above path gives the location of a field name.  If we removed
+            the last element:
+            {v
+               [ 4, 3, 2, 7 ]
+            v}
+            this path refers to the whole field declaration (from the beginning
+            of the label to the terminating semicolon).
+          *)
 
-        A series of line comments appearing on consecutive lines, with no other
-        tokens appearing on those lines, will be treated as a single comment.
+          span:int list;
+          (**
+            Always has exactly three or four elements: start line, start column,
+            end line (optional, otherwise assumed same as start line), end column.
+            These are packed into a single field for efficiency.  Note that line
+            and column numbers are zero-based -- typically you will want to add
+            1 to each before displaying to a user.
+          *)
 
-        leading_detached_comments will keep paragraphs of comments that appear
-        before (but not connected to) the current element. Each paragraph,
-        separated by empty lines, will be one comment element in the repeated
-        field.
-
-        Only the comment content is provided; comment markers (e.g. //) are
-        stripped out.  For block comments, leading whitespace and an asterisk
-        will be stripped from the beginning of each line other than the first.
-        Newlines are included in the output.
-
-        Examples:
-        {v
-           optional int32 foo = 1;  // Comment attached to foo.
-           // Comment attached to bar.
-           optional int32 bar = 2;
-
-           optional string baz = 3;
-           // Comment attached to baz.
-           // Another line attached to baz.
-
-           // Comment attached to moo.
-           //
-           // Another line attached to moo.
-           optional double moo = 4;
-
-           // Detached comment for corge. This is not leading or trailing comments
-           // to moo or corge because there are blank lines separating it from
-           // both.
-
-           // Detached comment for corge paragraph 2.
-
-           optional string corge = 5;
-           /* Block comment attached
-            * to corge.  Leading asterisks
-            * will be removed. */
-           /* Block comment attached to
-            * grault. */
-           optional int32 grault = 6;
-
-           // ignored detached comments.
-        v} *)
-        trailing_comments: string option;
-        leading_detached_comments: string list;
+          leading_comments:string option;
+          trailing_comments:string option;
+          leading_detached_comments:string list;
         }
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -2847,54 +2744,54 @@ end = struct
       end
       type t = (Location.t list)
       (**
-      A Location identifies a piece of source code in a .proto file which
-      corresponds to a particular definition.  This information is intended
-      to be useful to IDEs, code indexers, documentation generators, and similar
-      tools.
+        A Location identifies a piece of source code in a .proto file which
+        corresponds to a particular definition.  This information is intended
+        to be useful to IDEs, code indexers, documentation generators, and similar
+        tools.
 
-      For example, say we have a file like:
-      {v
-         message Foo {
+        For example, say we have a file like:
+        {v
+           message Foo {
+             optional string foo = 1;
+           }
+        v}
+        Let's look at just the field definition:
+        {v
            optional string foo = 1;
-         }
-      v}
-      Let's look at just the field definition:
-      {v
-         optional string foo = 1;
-         ^       ^^     ^^  ^  ^^^
-         a       bc     de  f  ghi
-      v}
-      We have the following locations:
-      {v
-         span   path               represents
-         [a,i)  [ 4, 0, 2, 0 ]     The whole field definition.
-         [a,b)  [ 4, 0, 2, 0, 4 ]  The label (optional).
-         [c,d)  [ 4, 0, 2, 0, 5 ]  The type (string).
-         [e,f)  [ 4, 0, 2, 0, 1 ]  The name (foo).
-         [g,h)  [ 4, 0, 2, 0, 3 ]  The number (1).
-      v}
-      Notes:
-      - A location may refer to a repeated field itself (i.e. not to any
-      particular index within it).  This is used whenever a set of elements are
-      logically enclosed in a single code segment.  For example, an entire
-      extend block (possibly containing multiple extension definitions) will
-      have an outer location whose path refers to the "extensions" repeated
-      field without an index.
-      - Multiple locations may have the same path.  This happens when a single
-      logical declaration is spread out across multiple places.  The most
-      obvious example is the "extend" block again -- there may be multiple
-      extend blocks in the same scope, each of which will have the same path.
-      - A location's span is not always a subset of its parent's span.  For
-      example, the "extendee" of an extension declaration appears at the
-      beginning of the "extend" block and is shared by all extensions within
-      the block.
-      - Just because a location's span is a subset of some other location's span
-      does not mean that it is a descendant.  For example, a "group" defines
-      both a type and a field in a single declaration.  Thus, the locations
-      corresponding to the type and field and their components will overlap.
-      - Code which tries to interpret locations should probably be designed to
-      ignore those that it doesn't understand, as more types of locations could
-      be recorded in the future.
+           ^       ^^     ^^  ^  ^^^
+           a       bc     de  f  ghi
+        v}
+        We have the following locations:
+        {v
+           span   path               represents
+           [a,i)  [ 4, 0, 2, 0 ]     The whole field definition.
+           [a,b)  [ 4, 0, 2, 0, 4 ]  The label (optional).
+           [c,d)  [ 4, 0, 2, 0, 5 ]  The type (string).
+           [e,f)  [ 4, 0, 2, 0, 1 ]  The name (foo).
+           [g,h)  [ 4, 0, 2, 0, 3 ]  The number (1).
+        v}
+        Notes:
+        - A location may refer to a repeated field itself (i.e. not to any
+        particular index within it).  This is used whenever a set of elements are
+        logically enclosed in a single code segment.  For example, an entire
+        extend block (possibly containing multiple extension definitions) will
+        have an outer location whose path refers to the "extensions" repeated
+        field without an index.
+        - Multiple locations may have the same path.  This happens when a single
+        logical declaration is spread out across multiple places.  The most
+        obvious example is the "extend" block again -- there may be multiple
+        extend blocks in the same scope, each of which will have the same path.
+        - A location's span is not always a subset of its parent's span.  For
+        example, the "extendee" of an extension declaration appears at the
+        beginning of the "extend" block and is shared by all extensions within
+        the block.
+        - Just because a location's span is a subset of some other location's span
+        does not mean that it is a descendant.  For example, a "group" defines
+        both a type and a field in a single declaration.  Thus, the locations
+        corresponding to the type and field and their components will overlap.
+        - Code which tries to interpret locations should probably be designed to
+        ignore those that it doesn't understand, as more types of locations could
+        be recorded in the future.
       *)
 
       val make: ?location:Location.t list -> unit -> t
@@ -2932,14 +2829,26 @@ end = struct
     and GeneratedCodeInfo : sig
       module rec Annotation : sig
         type t = {
-        path: int list;(** Identifies the element in the original source .proto file. This field
-        is formatted the same as SourceCodeInfo.Location.path. *)
-        source_file: string option;(** Identifies the filesystem path to the original source .proto. *)
-        begin': int option;(** Identifies the starting offset in bytes in the generated code
-        that relates to the identified object. *)
-        end': int option;(** Identifies the ending offset in bytes in the generated code that
-        relates to the identified offset. The end offset should be one past
-        the last relevant byte (so the length of the text = end - begin). *)
+          path:int list;
+          (**
+            Identifies the element in the original source .proto file. This field
+            is formatted the same as SourceCodeInfo.Location.path.
+          *)
+
+          source_file:string option;
+          begin':int option;
+          (**
+            Identifies the starting offset in bytes in the generated code
+            that relates to the identified object.
+          *)
+
+          end':int option;
+          (**
+            Identifies the ending offset in bytes in the generated code that
+            relates to the identified offset. The end offset should be one past
+            the last relevant byte (so the length of the text = end - begin).
+          *)
+
         }
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -2969,8 +2878,8 @@ end = struct
       end
       type t = (Annotation.t list)
       (**
-      An Annotation connects some span of text in generated code to an element
-      of its generating .proto file.
+        An Annotation connects some span of text in generated code to an element
+        of its generating .proto file.
       *)
 
       val make: ?annotation:Annotation.t list -> unit -> t
@@ -3038,41 +2947,53 @@ end = struct
       fun (t1_file) (t2_file) -> merge_file t1_file t2_file
       let spec () = Runtime'.Spec.( repeated ((1, "file", "file"), (message (module FileDescriptorProto)), not_packed) ^:: nil )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer (file) -> serialize writer file
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor file = (file) in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun (file) -> serialize file
       let from_json_exn =
         let constructor file = (file) in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and FileDescriptorProto : sig
       type t = {
-      name: string option;(** file name, relative to root of source tree *)
-      package: string option;(** e.g. "foo", "foo.bar", etc. *)
-      dependency: string list;(** Names of files imported by this file. *)
-      message_type: DescriptorProto.t list;(** All top-level definitions in this file. *)
-      enum_type: EnumDescriptorProto.t list;
-      service: ServiceDescriptorProto.t list;
-      extension: FieldDescriptorProto.t list;
-      options: FileOptions.t option;
-      source_code_info: SourceCodeInfo.t option;(** This field contains optional information about the original source code.
-      You may safely remove this entire field without harming runtime
-      functionality of the descriptors -- the information is needed only by
-      development tools. *)
-      public_dependency: int list;(** Indexes of the public imported files in the dependency list above. *)
-      weak_dependency: int list;(** Indexes of the weak imported files in the dependency list.
-      For Google-internal migration only. Do not use. *)
-      syntax: string option;(** The syntax of the proto file.
-      The supported values are "proto2" and "proto3". *)
+        name:string option;
+        (**
+          file name, relative to root of source tree
+        *)
+
+        package:string option;
+        (**
+          e.g. "foo", "foo.bar", etc.
+        *)
+
+        dependency:string list;
+        (**
+          Names of files imported by this file.
+        *)
+
+        message_type:DescriptorProto.t list;
+        enum_type:EnumDescriptorProto.t list;
+        service:ServiceDescriptorProto.t list;
+        extension:FieldDescriptorProto.t list;
+        options:FileOptions.t option;
+        source_code_info:SourceCodeInfo.t option;
+        public_dependency:int list;
+        weak_dependency:int list;
+        syntax:string option;
+        (**
+          The syntax of the proto file.
+          The supported values are "proto2" and "proto3".
+        *)
+
       }
       val make: ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -3103,23 +3024,18 @@ end = struct
       module This'_ = FileDescriptorProto
       let name () = ".google.protobuf.FileDescriptorProto"
       type t = {
-      name: string option;(** file name, relative to root of source tree *)
-      package: string option;(** e.g. "foo", "foo.bar", etc. *)
-      dependency: string list;(** Names of files imported by this file. *)
-      message_type: DescriptorProto.t list;(** All top-level definitions in this file. *)
-      enum_type: EnumDescriptorProto.t list;
-      service: ServiceDescriptorProto.t list;
-      extension: FieldDescriptorProto.t list;
-      options: FileOptions.t option;
-      source_code_info: SourceCodeInfo.t option;(** This field contains optional information about the original source code.
-      You may safely remove this entire field without harming runtime
-      functionality of the descriptors -- the information is needed only by
-      development tools. *)
-      public_dependency: int list;(** Indexes of the public imported files in the dependency list above. *)
-      weak_dependency: int list;(** Indexes of the weak imported files in the dependency list.
-      For Google-internal migration only. Do not use. *)
-      syntax: string option;(** The syntax of the proto file.
-      The supported values are "proto2" and "proto3". *)
+        name:string option;
+        package:string option;
+        dependency:string list;
+        message_type:DescriptorProto.t list;
+        enum_type:EnumDescriptorProto.t list;
+        service:ServiceDescriptorProto.t list;
+        extension:FieldDescriptorProto.t list;
+        options:FileOptions.t option;
+        source_code_info:SourceCodeInfo.t option;
+        public_dependency:int list;
+        weak_dependency:int list;
+        syntax:string option;
       }
       type make_t = ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       let make ?name ?package ?(dependency = []) ?(message_type = []) ?(enum_type = []) ?(service = []) ?(extension = []) ?options ?source_code_info ?(public_dependency = []) ?(weak_dependency = []) ?syntax () = { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax }
@@ -3152,28 +3068,36 @@ end = struct
        }
       let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "package", "package"), string) ^:: repeated ((3, "dependency", "dependency"), string, not_packed) ^:: repeated ((4, "message_type", "messageType"), (message (module DescriptorProto)), not_packed) ^:: repeated ((5, "enum_type", "enumType"), (message (module EnumDescriptorProto)), not_packed) ^:: repeated ((6, "service", "service"), (message (module ServiceDescriptorProto)), not_packed) ^:: repeated ((7, "extension", "extension"), (message (module FieldDescriptorProto)), not_packed) ^:: basic_opt ((8, "options", "options"), (message (module FileOptions))) ^:: basic_opt ((9, "source_code_info", "sourceCodeInfo"), (message (module SourceCodeInfo))) ^:: repeated ((10, "public_dependency", "publicDependency"), int32_int, not_packed) ^:: repeated ((11, "weak_dependency", "weakDependency"), int32_int, not_packed) ^:: basic_opt ((12, "syntax", "syntax"), string) ^:: nil )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } -> serialize writer name package dependency message_type enum_type service extension options source_code_info public_dependency weak_dependency syntax
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name package dependency message_type enum_type service extension options source_code_info public_dependency weak_dependency syntax = { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } -> serialize name package dependency message_type enum_type service extension options source_code_info public_dependency weak_dependency syntax
       let from_json_exn =
         let constructor name package dependency message_type enum_type service extension options source_code_info public_dependency weak_dependency syntax = { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and DescriptorProto : sig
       module rec ExtensionRange : sig
         type t = {
-        start: int option;(** Inclusive. *)
-        end': int option;(** Exclusive. *)
-        options: ExtensionRangeOptions.t option;
+          start:int option;
+          (**
+            Inclusive.
+          *)
+
+          end':int option;
+          (**
+            Exclusive.
+          *)
+
+          options:ExtensionRangeOptions.t option;
         }
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -3209,8 +3133,16 @@ end = struct
       *)
       and ReservedRange : sig
         type t = {
-        start: int option;(** Inclusive. *)
-        end': int option;(** Exclusive. *)
+          start:int option;
+          (**
+            Inclusive.
+          *)
+
+          end':int option;
+          (**
+            Exclusive.
+          *)
+
         }
         val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -3239,17 +3171,16 @@ end = struct
         (**/**)
       end
       type t = {
-      name: string option;
-      field: FieldDescriptorProto.t list;
-      nested_type: t list;
-      enum_type: EnumDescriptorProto.t list;
-      extension_range: ExtensionRange.t list;
-      extension: FieldDescriptorProto.t list;
-      options: MessageOptions.t option;
-      oneof_decl: OneofDescriptorProto.t list;
-      reserved_range: ReservedRange.t list;
-      reserved_name: string list;(** Reserved field names, which may not be used by fields in the same message.
-      A given name may only be reserved once. *)
+        name:string option;
+        field:FieldDescriptorProto.t list;
+        nested_type:t list;
+        enum_type:EnumDescriptorProto.t list;
+        extension_range:ExtensionRange.t list;
+        extension:FieldDescriptorProto.t list;
+        options:MessageOptions.t option;
+        oneof_decl:OneofDescriptorProto.t list;
+        reserved_range:ReservedRange.t list;
+        reserved_name:string list;
       }
       val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -3280,9 +3211,17 @@ end = struct
       module This'_ = DescriptorProto
       module rec ExtensionRange : sig
         type t = {
-        start: int option;(** Inclusive. *)
-        end': int option;(** Exclusive. *)
-        options: ExtensionRangeOptions.t option;
+          start:int option;
+          (**
+            Inclusive.
+          *)
+
+          end':int option;
+          (**
+            Exclusive.
+          *)
+
+          options:ExtensionRangeOptions.t option;
         }
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -3313,9 +3252,9 @@ end = struct
         module This'_ = ExtensionRange
         let name () = ".google.protobuf.DescriptorProto.ExtensionRange"
         type t = {
-        start: int option;(** Inclusive. *)
-        end': int option;(** Exclusive. *)
-        options: ExtensionRangeOptions.t option;
+          start:int option;
+          end':int option;
+          options:ExtensionRangeOptions.t option;
         }
         type make_t = ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         let make ?start ?end' ?options () = { start; end'; options }
@@ -3330,26 +3269,34 @@ end = struct
          }
         let spec () = Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ^:: basic_opt ((2, "end", "end"), int32_int) ^:: basic_opt ((3, "options", "options"), (message (module ExtensionRangeOptions))) ^:: nil )
         let to_proto' =
-          let serialize = Runtime'.Serialize.serialize (spec ()) in
+          let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
           fun writer { start; end'; options } -> serialize writer start end' options
 
         let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor start end' options = { start; end'; options } in
-          Runtime'.Deserialize.deserialize (spec ()) constructor
+          Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
           let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { start; end'; options } -> serialize start end' options
         let from_json_exn =
           let constructor start end' options = { start; end'; options } in
-          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+          Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       and ReservedRange : sig
         type t = {
-        start: int option;(** Inclusive. *)
-        end': int option;(** Exclusive. *)
+          start:int option;
+          (**
+            Inclusive.
+          *)
+
+          end':int option;
+          (**
+            Exclusive.
+          *)
+
         }
         val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -3380,8 +3327,8 @@ end = struct
         module This'_ = ReservedRange
         let name () = ".google.protobuf.DescriptorProto.ReservedRange"
         type t = {
-        start: int option;(** Inclusive. *)
-        end': int option;(** Exclusive. *)
+          start:int option;
+          end':int option;
         }
         type make_t = ?start:int -> ?end':int -> unit -> t
         let make ?start ?end' () = { start; end' }
@@ -3394,35 +3341,34 @@ end = struct
          }
         let spec () = Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ^:: basic_opt ((2, "end", "end"), int32_int) ^:: nil )
         let to_proto' =
-          let serialize = Runtime'.Serialize.serialize (spec ()) in
+          let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
           fun writer { start; end' } -> serialize writer start end'
 
         let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor start end' = { start; end' } in
-          Runtime'.Deserialize.deserialize (spec ()) constructor
+          Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
           let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { start; end' } -> serialize start end'
         let from_json_exn =
           let constructor start end' = { start; end' } in
-          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+          Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       let name () = ".google.protobuf.DescriptorProto"
       type t = {
-      name: string option;
-      field: FieldDescriptorProto.t list;
-      nested_type: t list;
-      enum_type: EnumDescriptorProto.t list;
-      extension_range: ExtensionRange.t list;
-      extension: FieldDescriptorProto.t list;
-      options: MessageOptions.t option;
-      oneof_decl: OneofDescriptorProto.t list;
-      reserved_range: ReservedRange.t list;
-      reserved_name: string list;(** Reserved field names, which may not be used by fields in the same message.
-      A given name may only be reserved once. *)
+        name:string option;
+        field:FieldDescriptorProto.t list;
+        nested_type:t list;
+        enum_type:EnumDescriptorProto.t list;
+        extension_range:ExtensionRange.t list;
+        extension:FieldDescriptorProto.t list;
+        options:MessageOptions.t option;
+        oneof_decl:OneofDescriptorProto.t list;
+        reserved_range:ReservedRange.t list;
+        reserved_name:string list;
       }
       type make_t = ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       let make ?name ?(field = []) ?(nested_type = []) ?(enum_type = []) ?(extension_range = []) ?(extension = []) ?options ?(oneof_decl = []) ?(reserved_range = []) ?(reserved_name = []) () = { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name }
@@ -3451,26 +3397,26 @@ end = struct
        }
       let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "field", "field"), (message (module FieldDescriptorProto)), not_packed) ^:: repeated ((3, "nested_type", "nestedType"), (message (module This'_)), not_packed) ^:: repeated ((4, "enum_type", "enumType"), (message (module EnumDescriptorProto)), not_packed) ^:: repeated ((5, "extension_range", "extensionRange"), (message (module ExtensionRange)), not_packed) ^:: repeated ((6, "extension", "extension"), (message (module FieldDescriptorProto)), not_packed) ^:: basic_opt ((7, "options", "options"), (message (module MessageOptions))) ^:: repeated ((8, "oneof_decl", "oneofDecl"), (message (module OneofDescriptorProto)), not_packed) ^:: repeated ((9, "reserved_range", "reservedRange"), (message (module ReservedRange)), not_packed) ^:: repeated ((10, "reserved_name", "reservedName"), string, not_packed) ^:: nil )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } -> serialize writer name field nested_type enum_type extension_range extension options oneof_decl reserved_range reserved_name
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name field nested_type enum_type extension_range extension options oneof_decl reserved_range reserved_name = { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } -> serialize name field nested_type enum_type extension_range extension options oneof_decl reserved_range reserved_name
       let from_json_exn =
         let constructor name field nested_type enum_type extension_range extension options oneof_decl reserved_range reserved_name = { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and ExtensionRangeOptions : sig
       type t = {
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -3501,8 +3447,8 @@ end = struct
       module This'_ = ExtensionRangeOptions
       let name () = ".google.protobuf.ExtensionRangeOptions"
       type t = {
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       type make_t = ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       let make ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { uninterpreted_option; extensions' }
@@ -3514,20 +3460,20 @@ end = struct
        }
       let spec () = Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer { uninterpreted_option; extensions' } -> serialize writer uninterpreted_option extensions'
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor uninterpreted_option extensions' = { uninterpreted_option; extensions' } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { uninterpreted_option; extensions' } -> serialize uninterpreted_option extensions'
       let from_json_exn =
         let constructor uninterpreted_option extensions' = { uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and FieldDescriptorProto : sig
@@ -3538,18 +3484,21 @@ end = struct
             0 is reserved for errors.
             Order is weird for historical reasons.
           *)
+
           | TYPE_FLOAT
           | TYPE_INT64
           (**
             Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT64 if
             negative values are likely.
           *)
+
           | TYPE_UINT64
           | TYPE_INT32
           (**
             Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT32 if
             negative values are likely.
           *)
+
           | TYPE_FIXED64
           | TYPE_FIXED32
           | TYPE_BOOL
@@ -3561,18 +3510,23 @@ end = struct
             implementations should still be able to parse the group wire format and
             treat group fields as unknown fields.
           *)
+
           | TYPE_MESSAGE
           (** Length-delimited aggregate. *)
+
           | TYPE_BYTES
           (** New in version 2. *)
+
           | TYPE_UINT32
           | TYPE_ENUM
           | TYPE_SFIXED32
           | TYPE_SFIXED64
           | TYPE_SINT32
           (** Uses ZigZag encoding. *)
+
           | TYPE_SINT64
           (** Uses ZigZag encoding. *)
+
 
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
@@ -3589,6 +3543,7 @@ end = struct
         type t =
           | LABEL_OPTIONAL
           (** 0 is reserved for errors *)
+
           | LABEL_REQUIRED
           | LABEL_REPEATED
 
@@ -3604,50 +3559,27 @@ end = struct
         (**/**)
       end
       type t = {
-      name: string option;
-      extendee: string option;(** For extensions, this is the name of the type being extended.  It is
-      resolved in the same manner as type_name. *)
-      number: int option;
-      label: Label.t option;
-      type': Type.t option;(** If type_name is set, this need not be set.  If both this and type_name
-      are set, this must be one of TYPE_ENUM, TYPE_MESSAGE or TYPE_GROUP. *)
-      type_name: string option;(** For message and enum types, this is the name of the type.  If the name
-      starts with a '.', it is fully-qualified.  Otherwise, C++-like scoping
-      rules are used to find the type (i.e. first the nested types within this
-      message are searched, then within the parent, on up to the root
-      namespace). *)
-      default_value: string option;(** For numeric types, contains the original text representation of the value.
-      For booleans, "true" or "false".
-      For strings, contains the default text contents (not escaped in any way).
-      For bytes, contains the C escaped value.  All bytes >= 128 are escaped. *)
-      options: FieldOptions.t option;
-      oneof_index: int option;(** If set, gives the index of a oneof in the containing type's oneof_decl
-      list.  This field is a member of that oneof. *)
-      json_name: string option;(** JSON name of this field. The value is set by protocol compiler. If the
-      user has set a "json_name" option on this field, that option's value
-      will be used. Otherwise, it's deduced from the field's name by converting
-      it to camelCase. *)
-      proto3_optional: bool option;(** If true, this is a proto3 "optional". When a proto3 field is optional, it
-      tracks presence regardless of field type.
+        name:string option;
+        extendee:string option;
+        (**
+          For extensions, this is the name of the type being extended.  It is
+          resolved in the same manner as type_name.
+        *)
 
-      When proto3_optional is true, this field must be belong to a oneof to
-      signal to old proto3 clients that presence is tracked for this field. This
-      oneof is known as a "synthetic" oneof, and this field must be its sole
-      member (each proto3 optional field gets its own synthetic oneof). Synthetic
-      oneofs exist in the descriptor only, and do not generate any API. Synthetic
-      oneofs must be ordered after all "real" oneofs.
+        number:int option;
+        label:Label.t option;
+        type':Type.t option;
+        (**
+          If type_name is set, this need not be set.  If both this and type_name
+          are set, this must be one of TYPE_ENUM, TYPE_MESSAGE or TYPE_GROUP.
+        *)
 
-      For message fields, proto3_optional doesn't create any semantic change,
-      since non-repeated message fields always track presence. However it still
-      indicates the semantic detail of whether the user wrote "optional" or not.
-      This can be useful for round-tripping the .proto file. For consistency we
-      give message fields a synthetic oneof also, even though it is not required
-      to track presence. This is especially important because the parser can't
-      tell if a field is a message or an enum, so it must always create a
-      synthetic oneof.
-
-      Proto2 optional fields do not set this flag, because they already indicate
-      optional with `LABEL_OPTIONAL`. *)
+        type_name:string option;
+        default_value:string option;
+        options:FieldOptions.t option;
+        oneof_index:int option;
+        json_name:string option;
+        proto3_optional:bool option;
       }
       val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -3683,18 +3615,21 @@ end = struct
             0 is reserved for errors.
             Order is weird for historical reasons.
           *)
+
           | TYPE_FLOAT
           | TYPE_INT64
           (**
             Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT64 if
             negative values are likely.
           *)
+
           | TYPE_UINT64
           | TYPE_INT32
           (**
             Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT32 if
             negative values are likely.
           *)
+
           | TYPE_FIXED64
           | TYPE_FIXED32
           | TYPE_BOOL
@@ -3706,18 +3641,23 @@ end = struct
             implementations should still be able to parse the group wire format and
             treat group fields as unknown fields.
           *)
+
           | TYPE_MESSAGE
           (** Length-delimited aggregate. *)
+
           | TYPE_BYTES
           (** New in version 2. *)
+
           | TYPE_UINT32
           | TYPE_ENUM
           | TYPE_SFIXED32
           | TYPE_SFIXED64
           | TYPE_SINT32
           (** Uses ZigZag encoding. *)
+
           | TYPE_SINT64
           (** Uses ZigZag encoding. *)
+
 
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
@@ -3737,18 +3677,21 @@ end = struct
             0 is reserved for errors.
             Order is weird for historical reasons.
           *)
+
           | TYPE_FLOAT
           | TYPE_INT64
           (**
             Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT64 if
             negative values are likely.
           *)
+
           | TYPE_UINT64
           | TYPE_INT32
           (**
             Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT32 if
             negative values are likely.
           *)
+
           | TYPE_FIXED64
           | TYPE_FIXED32
           | TYPE_BOOL
@@ -3760,18 +3703,23 @@ end = struct
             implementations should still be able to parse the group wire format and
             treat group fields as unknown fields.
           *)
+
           | TYPE_MESSAGE
           (** Length-delimited aggregate. *)
+
           | TYPE_BYTES
           (** New in version 2. *)
+
           | TYPE_UINT32
           | TYPE_ENUM
           | TYPE_SFIXED32
           | TYPE_SFIXED64
           | TYPE_SINT32
           (** Uses ZigZag encoding. *)
+
           | TYPE_SINT64
           (** Uses ZigZag encoding. *)
+
 
         let name () = ".google.protobuf.FieldDescriptorProto.Type"
         let to_int = function
@@ -3859,6 +3807,7 @@ end = struct
         type t =
           | LABEL_OPTIONAL
           (** 0 is reserved for errors *)
+
           | LABEL_REQUIRED
           | LABEL_REPEATED
 
@@ -3877,6 +3826,7 @@ end = struct
         type t =
           | LABEL_OPTIONAL
           (** 0 is reserved for errors *)
+
           | LABEL_REQUIRED
           | LABEL_REPEATED
 
@@ -3904,50 +3854,17 @@ end = struct
       end
       let name () = ".google.protobuf.FieldDescriptorProto"
       type t = {
-      name: string option;
-      extendee: string option;(** For extensions, this is the name of the type being extended.  It is
-      resolved in the same manner as type_name. *)
-      number: int option;
-      label: Label.t option;
-      type': Type.t option;(** If type_name is set, this need not be set.  If both this and type_name
-      are set, this must be one of TYPE_ENUM, TYPE_MESSAGE or TYPE_GROUP. *)
-      type_name: string option;(** For message and enum types, this is the name of the type.  If the name
-      starts with a '.', it is fully-qualified.  Otherwise, C++-like scoping
-      rules are used to find the type (i.e. first the nested types within this
-      message are searched, then within the parent, on up to the root
-      namespace). *)
-      default_value: string option;(** For numeric types, contains the original text representation of the value.
-      For booleans, "true" or "false".
-      For strings, contains the default text contents (not escaped in any way).
-      For bytes, contains the C escaped value.  All bytes >= 128 are escaped. *)
-      options: FieldOptions.t option;
-      oneof_index: int option;(** If set, gives the index of a oneof in the containing type's oneof_decl
-      list.  This field is a member of that oneof. *)
-      json_name: string option;(** JSON name of this field. The value is set by protocol compiler. If the
-      user has set a "json_name" option on this field, that option's value
-      will be used. Otherwise, it's deduced from the field's name by converting
-      it to camelCase. *)
-      proto3_optional: bool option;(** If true, this is a proto3 "optional". When a proto3 field is optional, it
-      tracks presence regardless of field type.
-
-      When proto3_optional is true, this field must be belong to a oneof to
-      signal to old proto3 clients that presence is tracked for this field. This
-      oneof is known as a "synthetic" oneof, and this field must be its sole
-      member (each proto3 optional field gets its own synthetic oneof). Synthetic
-      oneofs exist in the descriptor only, and do not generate any API. Synthetic
-      oneofs must be ordered after all "real" oneofs.
-
-      For message fields, proto3_optional doesn't create any semantic change,
-      since non-repeated message fields always track presence. However it still
-      indicates the semantic detail of whether the user wrote "optional" or not.
-      This can be useful for round-tripping the .proto file. For consistency we
-      give message fields a synthetic oneof also, even though it is not required
-      to track presence. This is especially important because the parser can't
-      tell if a field is a message or an enum, so it must always create a
-      synthetic oneof.
-
-      Proto2 optional fields do not set this flag, because they already indicate
-      optional with `LABEL_OPTIONAL`. *)
+        name:string option;
+        extendee:string option;
+        number:int option;
+        label:Label.t option;
+        type':Type.t option;
+        type_name:string option;
+        default_value:string option;
+        options:FieldOptions.t option;
+        oneof_index:int option;
+        json_name:string option;
+        proto3_optional:bool option;
       }
       type make_t = ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       let make ?name ?extendee ?number ?label ?type' ?type_name ?default_value ?options ?oneof_index ?json_name ?proto3_optional () = { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional }
@@ -3978,26 +3895,26 @@ end = struct
        }
       let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "extendee", "extendee"), string) ^:: basic_opt ((3, "number", "number"), int32_int) ^:: basic_opt ((4, "label", "label"), (enum (module Label))) ^:: basic_opt ((5, "type", "type"), (enum (module Type))) ^:: basic_opt ((6, "type_name", "typeName"), string) ^:: basic_opt ((7, "default_value", "defaultValue"), string) ^:: basic_opt ((8, "options", "options"), (message (module FieldOptions))) ^:: basic_opt ((9, "oneof_index", "oneofIndex"), int32_int) ^:: basic_opt ((10, "json_name", "jsonName"), string) ^:: basic_opt ((17, "proto3_optional", "proto3Optional"), bool) ^:: nil )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } -> serialize writer name extendee number label type' type_name default_value options oneof_index json_name proto3_optional
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name extendee number label type' type_name default_value options oneof_index json_name proto3_optional = { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } -> serialize name extendee number label type' type_name default_value options oneof_index json_name proto3_optional
       let from_json_exn =
         let constructor name extendee number label type' type_name default_value options oneof_index json_name proto3_optional = { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and OneofDescriptorProto : sig
       type t = {
-      name: string option;
-      options: OneofOptions.t option;
+        name:string option;
+        options:OneofOptions.t option;
       }
       val make: ?name:string -> ?options:OneofOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -4028,8 +3945,8 @@ end = struct
       module This'_ = OneofDescriptorProto
       let name () = ".google.protobuf.OneofDescriptorProto"
       type t = {
-      name: string option;
-      options: OneofOptions.t option;
+        name:string option;
+        options:OneofOptions.t option;
       }
       type make_t = ?name:string -> ?options:OneofOptions.t -> unit -> t
       let make ?name ?options () = { name; options }
@@ -4042,20 +3959,20 @@ end = struct
        }
       let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "options", "options"), (message (module OneofOptions))) ^:: nil )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer { name; options } -> serialize writer name options
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name options = { name; options } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; options } -> serialize name options
       let from_json_exn =
         let constructor name options = { name; options } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and EnumDescriptorProto : sig
@@ -4070,8 +3987,16 @@ end = struct
       *)
       module rec EnumReservedRange : sig
         type t = {
-        start: int option;(** Inclusive. *)
-        end': int option;(** Inclusive. *)
+          start:int option;
+          (**
+            Inclusive.
+          *)
+
+          end':int option;
+          (**
+            Inclusive.
+          *)
+
         }
         val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -4100,14 +4025,11 @@ end = struct
         (**/**)
       end
       type t = {
-      name: string option;
-      value: EnumValueDescriptorProto.t list;
-      options: EnumOptions.t option;
-      reserved_range: EnumReservedRange.t list;(** Range of reserved numeric values. Reserved numeric values may not be used
-      by enum values in the same enum declaration. Reserved ranges may not
-      overlap. *)
-      reserved_name: string list;(** Reserved enum value names, which may not be reused. A given name may only
-      be reserved once. *)
+        name:string option;
+        value:EnumValueDescriptorProto.t list;
+        options:EnumOptions.t option;
+        reserved_range:EnumReservedRange.t list;
+        reserved_name:string list;
       }
       val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -4138,8 +4060,16 @@ end = struct
       module This'_ = EnumDescriptorProto
       module rec EnumReservedRange : sig
         type t = {
-        start: int option;(** Inclusive. *)
-        end': int option;(** Inclusive. *)
+          start:int option;
+          (**
+            Inclusive.
+          *)
+
+          end':int option;
+          (**
+            Inclusive.
+          *)
+
         }
         val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -4170,8 +4100,8 @@ end = struct
         module This'_ = EnumReservedRange
         let name () = ".google.protobuf.EnumDescriptorProto.EnumReservedRange"
         type t = {
-        start: int option;(** Inclusive. *)
-        end': int option;(** Inclusive. *)
+          start:int option;
+          end':int option;
         }
         type make_t = ?start:int -> ?end':int -> unit -> t
         let make ?start ?end' () = { start; end' }
@@ -4184,32 +4114,29 @@ end = struct
          }
         let spec () = Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ^:: basic_opt ((2, "end", "end"), int32_int) ^:: nil )
         let to_proto' =
-          let serialize = Runtime'.Serialize.serialize (spec ()) in
+          let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
           fun writer { start; end' } -> serialize writer start end'
 
         let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor start end' = { start; end' } in
-          Runtime'.Deserialize.deserialize (spec ()) constructor
+          Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
           let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { start; end' } -> serialize start end'
         let from_json_exn =
           let constructor start end' = { start; end' } in
-          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+          Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       let name () = ".google.protobuf.EnumDescriptorProto"
       type t = {
-      name: string option;
-      value: EnumValueDescriptorProto.t list;
-      options: EnumOptions.t option;
-      reserved_range: EnumReservedRange.t list;(** Range of reserved numeric values. Reserved numeric values may not be used
-      by enum values in the same enum declaration. Reserved ranges may not
-      overlap. *)
-      reserved_name: string list;(** Reserved enum value names, which may not be reused. A given name may only
-      be reserved once. *)
+        name:string option;
+        value:EnumValueDescriptorProto.t list;
+        options:EnumOptions.t option;
+        reserved_range:EnumReservedRange.t list;
+        reserved_name:string list;
       }
       type make_t = ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       let make ?name ?(value = []) ?options ?(reserved_range = []) ?(reserved_name = []) () = { name; value; options; reserved_range; reserved_name }
@@ -4228,27 +4155,27 @@ end = struct
        }
       let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "value", "value"), (message (module EnumValueDescriptorProto)), not_packed) ^:: basic_opt ((3, "options", "options"), (message (module EnumOptions))) ^:: repeated ((4, "reserved_range", "reservedRange"), (message (module EnumReservedRange)), not_packed) ^:: repeated ((5, "reserved_name", "reservedName"), string, not_packed) ^:: nil )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer { name; value; options; reserved_range; reserved_name } -> serialize writer name value options reserved_range reserved_name
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name value options reserved_range reserved_name = { name; value; options; reserved_range; reserved_name } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; value; options; reserved_range; reserved_name } -> serialize name value options reserved_range reserved_name
       let from_json_exn =
         let constructor name value options reserved_range reserved_name = { name; value; options; reserved_range; reserved_name } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and EnumValueDescriptorProto : sig
       type t = {
-      name: string option;
-      number: int option;
-      options: EnumValueOptions.t option;
+        name:string option;
+        number:int option;
+        options:EnumValueOptions.t option;
       }
       val make: ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -4279,9 +4206,9 @@ end = struct
       module This'_ = EnumValueDescriptorProto
       let name () = ".google.protobuf.EnumValueDescriptorProto"
       type t = {
-      name: string option;
-      number: int option;
-      options: EnumValueOptions.t option;
+        name:string option;
+        number:int option;
+        options:EnumValueOptions.t option;
       }
       type make_t = ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       let make ?name ?number ?options () = { name; number; options }
@@ -4296,27 +4223,27 @@ end = struct
        }
       let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "number", "number"), int32_int) ^:: basic_opt ((3, "options", "options"), (message (module EnumValueOptions))) ^:: nil )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer { name; number; options } -> serialize writer name number options
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name number options = { name; number; options } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; number; options } -> serialize name number options
       let from_json_exn =
         let constructor name number options = { name; number; options } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and ServiceDescriptorProto : sig
       type t = {
-      name: string option;
-      method': MethodDescriptorProto.t list;
-      options: ServiceOptions.t option;
+        name:string option;
+        method':MethodDescriptorProto.t list;
+        options:ServiceOptions.t option;
       }
       val make: ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -4347,9 +4274,9 @@ end = struct
       module This'_ = ServiceDescriptorProto
       let name () = ".google.protobuf.ServiceDescriptorProto"
       type t = {
-      name: string option;
-      method': MethodDescriptorProto.t list;
-      options: ServiceOptions.t option;
+        name:string option;
+        method':MethodDescriptorProto.t list;
+        options:ServiceOptions.t option;
       }
       type make_t = ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       let make ?name ?(method' = []) ?options () = { name; method'; options }
@@ -4364,31 +4291,30 @@ end = struct
        }
       let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "method", "method"), (message (module MethodDescriptorProto)), not_packed) ^:: basic_opt ((3, "options", "options"), (message (module ServiceOptions))) ^:: nil )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer { name; method'; options } -> serialize writer name method' options
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name method' options = { name; method'; options } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; method'; options } -> serialize name method' options
       let from_json_exn =
         let constructor name method' options = { name; method'; options } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and MethodDescriptorProto : sig
       type t = {
-      name: string option;
-      input_type: string option;(** Input and output type names.  These are resolved in the same way as
-      FieldDescriptorProto.type_name, but must refer to a message type. *)
-      output_type: string option;
-      options: MethodOptions.t option;
-      client_streaming: bool;(** Identifies if client streams multiple client messages *)
-      server_streaming: bool;(** Identifies if server streams multiple server messages *)
+        name:string option;
+        input_type:string option;
+        output_type:string option;
+        options:MethodOptions.t option;
+        client_streaming:bool;
+        server_streaming:bool;
       }
       val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -4419,13 +4345,12 @@ end = struct
       module This'_ = MethodDescriptorProto
       let name () = ".google.protobuf.MethodDescriptorProto"
       type t = {
-      name: string option;
-      input_type: string option;(** Input and output type names.  These are resolved in the same way as
-      FieldDescriptorProto.type_name, but must refer to a message type. *)
-      output_type: string option;
-      options: MethodOptions.t option;
-      client_streaming: bool;(** Identifies if client streams multiple client messages *)
-      server_streaming: bool;(** Identifies if server streams multiple server messages *)
+        name:string option;
+        input_type:string option;
+        output_type:string option;
+        options:MethodOptions.t option;
+        client_streaming:bool;
+        server_streaming:bool;
       }
       type make_t = ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       let make ?name ?input_type ?output_type ?options ?(client_streaming = false) ?(server_streaming = false) () = { name; input_type; output_type; options; client_streaming; server_streaming }
@@ -4446,20 +4371,20 @@ end = struct
        }
       let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "input_type", "inputType"), string) ^:: basic_opt ((3, "output_type", "outputType"), string) ^:: basic_opt ((4, "options", "options"), (message (module MethodOptions))) ^:: basic ((5, "client_streaming", "clientStreaming"), bool, (false)) ^:: basic ((6, "server_streaming", "serverStreaming"), bool, (false)) ^:: nil )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer { name; input_type; output_type; options; client_streaming; server_streaming } -> serialize writer name input_type output_type options client_streaming server_streaming
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name input_type output_type options client_streaming server_streaming = { name; input_type; output_type; options; client_streaming; server_streaming } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; input_type; output_type; options; client_streaming; server_streaming } -> serialize name input_type output_type options client_streaming server_streaming
       let from_json_exn =
         let constructor name input_type output_type options client_streaming server_streaming = { name; input_type; output_type; options; client_streaming; server_streaming } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and FileOptions : sig
@@ -4469,6 +4394,7 @@ end = struct
         type t =
           | SPEED
           (** Generate complete code for parsing, serialization, *)
+
           | CODE_SIZE
           (**
             etc.
@@ -4476,8 +4402,10 @@ end = struct
 
             Use ReflectionOps to implement these methods.
           *)
+
           | LITE_RUNTIME
           (** Generate code using MessageLite and the lite runtime. *)
+
 
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
@@ -4491,75 +4419,35 @@ end = struct
         (**/**)
       end
       type t = {
-      java_package: string option;(** Sets the Java package where classes generated from this .proto will be
-      placed.  By default, the proto package is used, but this is often
-      inappropriate because proto packages do not normally start with backwards
-      domain names. *)
-      java_outer_classname: string option;(** Controls the name of the wrapper Java class generated for the .proto file.
-      That class will always contain the .proto file's getDescriptor() method as
-      well as any top-level extensions defined in the .proto file.
-      If java_multiple_files is disabled, then all the other classes from the
-      .proto file will be nested inside the single wrapper outer class. *)
-      optimize_for: OptimizeMode.t;(** Clients can define custom options in extensions of this message.
-      See the documentation for the "Options" section above. *)
-      java_multiple_files: bool;(** If enabled, then the Java code generator will generate a separate .java
-      file for each top-level message, enum, and service defined in the .proto
-      file.  Thus, these types will *not* be nested inside the wrapper class
-      named by java_outer_classname.  However, the wrapper class will still be
-      generated to contain the file's getDescriptor() method as well as any
-      top-level extensions defined in the file. *)
-      go_package: string option;(** Sets the Go package where structs generated from this .proto will be
-      placed. If omitted, the Go package will be derived from the following:
-      - The basename of the package import path, if provided.
-      - Otherwise, the package statement in the .proto file, if present.
-      - Otherwise, the basename of the .proto file, without extension. *)
-      cc_generic_services: bool;(** Should generic services be generated in each language?  "Generic" services
-      are not specific to any particular RPC system.  They are generated by the
-      main code generators in each language (without additional plugins).
-      Generic services were the only kind of service generation supported by
-      early versions of google.protobuf.
+        java_package:string option;
+        java_outer_classname:string option;
+        optimize_for:OptimizeMode.t;
+        java_multiple_files:bool;
+        go_package:string option;
+        cc_generic_services:bool;
+        java_generic_services:bool;
+        py_generic_services:bool;
+        java_generate_equals_and_hash:bool option[@ocaml.alert protobuf "Marked as deprecated in the .proto file"];
+        deprecated:bool;
+        (**
+          Is this file deprecated?
+          Depending on the target platform, this can emit Deprecated annotations
+          for everything in the file, or it will be completely ignored; in the very
+          least, this is a formalization for deprecating files.
+        *)
 
-      Generic services are now considered deprecated in favor of using plugins
-      that generate code specific to your particular RPC system.  Therefore,
-      these default to false.  Old code which depends on generic services should
-      explicitly set them to true. *)
-      java_generic_services: bool;
-      py_generic_services: bool;
-      java_generate_equals_and_hash: bool option[@ocaml.alert protobuf "Marked as deprecated in the .proto file"];(** This option does nothing. *)
-      deprecated: bool;(** Is this file deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for everything in the file, or it will be completely ignored; in the very
-      least, this is a formalization for deprecating files. *)
-      java_string_check_utf8: bool;(** If set true, then the Java2 code generator will generate code that
-      throws an exception whenever an attempt is made to assign a non-UTF-8
-      byte sequence to a string field.
-      Message reflection will do the same.
-      However, an extension field still accepts non-UTF-8 byte sequences.
-      This option has no effect on when used with the lite runtime. *)
-      cc_enable_arenas: bool;(** Enables the use of arenas for the proto messages in this file. This applies
-      only to generated classes for C++. *)
-      objc_class_prefix: string option;(** Sets the objective c class prefix which is prepended to all objective c
-      generated classes from this .proto. There is no default. *)
-      csharp_namespace: string option;(** Namespace for generated classes; defaults to the package. *)
-      swift_prefix: string option;(** By default Swift generators will take the proto package and CamelCase it
-      replacing '.' with underscore and use that to prefix the types/symbols
-      defined. When this options is provided, they will use this value instead
-      to prefix the types/symbols defined. *)
-      php_class_prefix: string option;(** Sets the php class prefix which is prepended to all php generated classes
-      from this .proto. Default is empty. *)
-      php_namespace: string option;(** Use this option to change the namespace of php generated classes. Default
-      is empty. When this option is empty, the package name will be used for
-      determining the namespace. *)
-      php_generic_services: bool;
-      php_metadata_namespace: string option;(** Use this option to change the namespace of php generated metadata classes.
-      Default is empty. When this option is empty, the proto file name will be
-      used for determining the namespace. *)
-      ruby_package: string option;(** Use this option to change the package of ruby generated classes. Default
-      is empty. When this option is not set, the package name will be used for
-      determining the ruby package. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here.
-      See the documentation for the "Options" section above. *)
-      extensions': Runtime'.Extensions.t;
+        java_string_check_utf8:bool;
+        cc_enable_arenas:bool;
+        objc_class_prefix:string option;
+        csharp_namespace:string option;
+        swift_prefix:string option;
+        php_class_prefix:string option;
+        php_namespace:string option;
+        php_generic_services:bool;
+        php_metadata_namespace:string option;
+        ruby_package:string option;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -4592,6 +4480,7 @@ end = struct
         type t =
           | SPEED
           (** Generate complete code for parsing, serialization, *)
+
           | CODE_SIZE
           (**
             etc.
@@ -4599,8 +4488,10 @@ end = struct
 
             Use ReflectionOps to implement these methods.
           *)
+
           | LITE_RUNTIME
           (** Generate code using MessageLite and the lite runtime. *)
+
 
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
@@ -4617,6 +4508,7 @@ end = struct
         type t =
           | SPEED
           (** Generate complete code for parsing, serialization, *)
+
           | CODE_SIZE
           (**
             etc.
@@ -4624,8 +4516,10 @@ end = struct
 
             Use ReflectionOps to implement these methods.
           *)
+
           | LITE_RUNTIME
           (** Generate code using MessageLite and the lite runtime. *)
+
 
         let name () = ".google.protobuf.FileOptions.OptimizeMode"
         let to_int = function
@@ -4651,75 +4545,28 @@ end = struct
       end
       let name () = ".google.protobuf.FileOptions"
       type t = {
-      java_package: string option;(** Sets the Java package where classes generated from this .proto will be
-      placed.  By default, the proto package is used, but this is often
-      inappropriate because proto packages do not normally start with backwards
-      domain names. *)
-      java_outer_classname: string option;(** Controls the name of the wrapper Java class generated for the .proto file.
-      That class will always contain the .proto file's getDescriptor() method as
-      well as any top-level extensions defined in the .proto file.
-      If java_multiple_files is disabled, then all the other classes from the
-      .proto file will be nested inside the single wrapper outer class. *)
-      optimize_for: OptimizeMode.t;(** Clients can define custom options in extensions of this message.
-      See the documentation for the "Options" section above. *)
-      java_multiple_files: bool;(** If enabled, then the Java code generator will generate a separate .java
-      file for each top-level message, enum, and service defined in the .proto
-      file.  Thus, these types will *not* be nested inside the wrapper class
-      named by java_outer_classname.  However, the wrapper class will still be
-      generated to contain the file's getDescriptor() method as well as any
-      top-level extensions defined in the file. *)
-      go_package: string option;(** Sets the Go package where structs generated from this .proto will be
-      placed. If omitted, the Go package will be derived from the following:
-      - The basename of the package import path, if provided.
-      - Otherwise, the package statement in the .proto file, if present.
-      - Otherwise, the basename of the .proto file, without extension. *)
-      cc_generic_services: bool;(** Should generic services be generated in each language?  "Generic" services
-      are not specific to any particular RPC system.  They are generated by the
-      main code generators in each language (without additional plugins).
-      Generic services were the only kind of service generation supported by
-      early versions of google.protobuf.
-
-      Generic services are now considered deprecated in favor of using plugins
-      that generate code specific to your particular RPC system.  Therefore,
-      these default to false.  Old code which depends on generic services should
-      explicitly set them to true. *)
-      java_generic_services: bool;
-      py_generic_services: bool;
-      java_generate_equals_and_hash: bool option[@ocaml.alert protobuf "Marked as deprecated in the .proto file"];(** This option does nothing. *)
-      deprecated: bool;(** Is this file deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for everything in the file, or it will be completely ignored; in the very
-      least, this is a formalization for deprecating files. *)
-      java_string_check_utf8: bool;(** If set true, then the Java2 code generator will generate code that
-      throws an exception whenever an attempt is made to assign a non-UTF-8
-      byte sequence to a string field.
-      Message reflection will do the same.
-      However, an extension field still accepts non-UTF-8 byte sequences.
-      This option has no effect on when used with the lite runtime. *)
-      cc_enable_arenas: bool;(** Enables the use of arenas for the proto messages in this file. This applies
-      only to generated classes for C++. *)
-      objc_class_prefix: string option;(** Sets the objective c class prefix which is prepended to all objective c
-      generated classes from this .proto. There is no default. *)
-      csharp_namespace: string option;(** Namespace for generated classes; defaults to the package. *)
-      swift_prefix: string option;(** By default Swift generators will take the proto package and CamelCase it
-      replacing '.' with underscore and use that to prefix the types/symbols
-      defined. When this options is provided, they will use this value instead
-      to prefix the types/symbols defined. *)
-      php_class_prefix: string option;(** Sets the php class prefix which is prepended to all php generated classes
-      from this .proto. Default is empty. *)
-      php_namespace: string option;(** Use this option to change the namespace of php generated classes. Default
-      is empty. When this option is empty, the package name will be used for
-      determining the namespace. *)
-      php_generic_services: bool;
-      php_metadata_namespace: string option;(** Use this option to change the namespace of php generated metadata classes.
-      Default is empty. When this option is empty, the proto file name will be
-      used for determining the namespace. *)
-      ruby_package: string option;(** Use this option to change the package of ruby generated classes. Default
-      is empty. When this option is not set, the package name will be used for
-      determining the ruby package. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here.
-      See the documentation for the "Options" section above. *)
-      extensions': Runtime'.Extensions.t;
+        java_package:string option;
+        java_outer_classname:string option;
+        optimize_for:OptimizeMode.t;
+        java_multiple_files:bool;
+        go_package:string option;
+        cc_generic_services:bool;
+        java_generic_services:bool;
+        py_generic_services:bool;
+        java_generate_equals_and_hash:bool option;
+        deprecated:bool;
+        java_string_check_utf8:bool;
+        cc_enable_arenas:bool;
+        objc_class_prefix:string option;
+        csharp_namespace:string option;
+        swift_prefix:string option;
+        php_class_prefix:string option;
+        php_namespace:string option;
+        php_generic_services:bool;
+        php_metadata_namespace:string option;
+        ruby_package:string option;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       type make_t = ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       let make ?java_package ?java_outer_classname ?(optimize_for = OptimizeMode.SPEED) ?(java_multiple_files = false) ?go_package ?(cc_generic_services = false) ?(java_generic_services = false) ?(py_generic_services = false) ?java_generate_equals_and_hash ?(deprecated = false) ?(java_string_check_utf8 = false) ?(cc_enable_arenas = true) ?objc_class_prefix ?csharp_namespace ?swift_prefix ?php_class_prefix ?php_namespace ?(php_generic_services = false) ?php_metadata_namespace ?ruby_package ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' }
@@ -4771,77 +4618,37 @@ end = struct
        }
       let spec () = Runtime'.Spec.( basic_opt ((1, "java_package", "javaPackage"), string) ^:: basic_opt ((8, "java_outer_classname", "javaOuterClassname"), string) ^:: basic ((9, "optimize_for", "optimizeFor"), (enum (module OptimizeMode)), (OptimizeMode.SPEED)) ^:: basic ((10, "java_multiple_files", "javaMultipleFiles"), bool, (false)) ^:: basic_opt ((11, "go_package", "goPackage"), string) ^:: basic ((16, "cc_generic_services", "ccGenericServices"), bool, (false)) ^:: basic ((17, "java_generic_services", "javaGenericServices"), bool, (false)) ^:: basic ((18, "py_generic_services", "pyGenericServices"), bool, (false)) ^:: basic_opt ((20, "java_generate_equals_and_hash", "javaGenerateEqualsAndHash"), bool) ^:: basic ((23, "deprecated", "deprecated"), bool, (false)) ^:: basic ((27, "java_string_check_utf8", "javaStringCheckUtf8"), bool, (false)) ^:: basic ((31, "cc_enable_arenas", "ccEnableArenas"), bool, (true)) ^:: basic_opt ((36, "objc_class_prefix", "objcClassPrefix"), string) ^:: basic_opt ((37, "csharp_namespace", "csharpNamespace"), string) ^:: basic_opt ((39, "swift_prefix", "swiftPrefix"), string) ^:: basic_opt ((40, "php_class_prefix", "phpClassPrefix"), string) ^:: basic_opt ((41, "php_namespace", "phpNamespace"), string) ^:: basic ((42, "php_generic_services", "phpGenericServices"), bool, (false)) ^:: basic_opt ((44, "php_metadata_namespace", "phpMetadataNamespace"), string) ^:: basic_opt ((45, "ruby_package", "rubyPackage"), string) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } -> serialize writer java_package java_outer_classname optimize_for java_multiple_files go_package cc_generic_services java_generic_services py_generic_services java_generate_equals_and_hash deprecated java_string_check_utf8 cc_enable_arenas objc_class_prefix csharp_namespace swift_prefix php_class_prefix php_namespace php_generic_services php_metadata_namespace ruby_package uninterpreted_option extensions'
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor java_package java_outer_classname optimize_for java_multiple_files go_package cc_generic_services java_generic_services py_generic_services java_generate_equals_and_hash deprecated java_string_check_utf8 cc_enable_arenas objc_class_prefix csharp_namespace swift_prefix php_class_prefix php_namespace php_generic_services php_metadata_namespace ruby_package uninterpreted_option extensions' = { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } -> serialize java_package java_outer_classname optimize_for java_multiple_files go_package cc_generic_services java_generic_services py_generic_services java_generate_equals_and_hash deprecated java_string_check_utf8 cc_enable_arenas objc_class_prefix csharp_namespace swift_prefix php_class_prefix php_namespace php_generic_services php_metadata_namespace ruby_package uninterpreted_option extensions'
       let from_json_exn =
         let constructor java_package java_outer_classname optimize_for java_multiple_files go_package cc_generic_services java_generic_services py_generic_services java_generate_equals_and_hash deprecated java_string_check_utf8 cc_enable_arenas objc_class_prefix csharp_namespace swift_prefix php_class_prefix php_namespace php_generic_services php_metadata_namespace ruby_package uninterpreted_option extensions' = { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and MessageOptions : sig
       type t = {
-      message_set_wire_format: bool;(** Set true to use the old proto1 MessageSet wire format for extensions.
-      This is provided for backwards-compatibility with the MessageSet wire
-      format.  You should not use this for any other reason:  It's less
-      efficient, has fewer features, and is more complicated.
+        message_set_wire_format:bool;
+        no_standard_descriptor_accessor:bool;
+        deprecated:bool;
+        (**
+          Is this message deprecated?
+          Depending on the target platform, this can emit Deprecated annotations
+          for the message, or it will be completely ignored; in the very least,
+          this is a formalization for deprecating messages.
+        *)
 
-      The message must be defined exactly as follows:
-      {v
-         message Foo {
-           option message_set_wire_format = true;
-           extensions 4 to max;
-         }
-      v}
-      Note that the message cannot have any defined fields; MessageSets only
-      have extensions.
-
-      All extensions of your type must be singular messages; e.g. they cannot
-      be int32s, enums, or repeated messages.
-
-      Because this is an option, the above two restrictions are not enforced by
-      the protocol compiler. *)
-      no_standard_descriptor_accessor: bool;(** Disables the generation of the standard "descriptor()" accessor, which can
-      conflict with a field of the same name.  This is meant to make migration
-      from proto1 easier; new code should avoid fields named "descriptor". *)
-      deprecated: bool;(** Is this message deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the message, or it will be completely ignored; in the very least,
-      this is a formalization for deprecating messages. *)
-      map_entry: bool option;(** Whether the message is an automatically generated map entry type for the
-      maps field.
-
-      For maps fields:
-      {v
-           map<KeyType, ValueType> map_field = 1;
-      v}
-      The parsed descriptor looks like:
-      {v
-           message MapFieldEntry {
-               option map_entry = true;
-               optional KeyType key = 1;
-               optional ValueType value = 2;
-           }
-           repeated MapFieldEntry map_field = 1;
-      v}
-      Implementations may choose not to generate the map_entry=true message, but
-      use a native map in the target language to hold the keys and values.
-      The reflection APIs in such implementations still need to work as
-      if the field is a repeated message field.
-
-      NOTE: Do not set the option in .proto files. Always use the maps syntax
-      instead. The option should only be implicitly set by the proto compiler
-      parser. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        map_entry:bool option;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -4872,59 +4679,12 @@ end = struct
       module This'_ = MessageOptions
       let name () = ".google.protobuf.MessageOptions"
       type t = {
-      message_set_wire_format: bool;(** Set true to use the old proto1 MessageSet wire format for extensions.
-      This is provided for backwards-compatibility with the MessageSet wire
-      format.  You should not use this for any other reason:  It's less
-      efficient, has fewer features, and is more complicated.
-
-      The message must be defined exactly as follows:
-      {v
-         message Foo {
-           option message_set_wire_format = true;
-           extensions 4 to max;
-         }
-      v}
-      Note that the message cannot have any defined fields; MessageSets only
-      have extensions.
-
-      All extensions of your type must be singular messages; e.g. they cannot
-      be int32s, enums, or repeated messages.
-
-      Because this is an option, the above two restrictions are not enforced by
-      the protocol compiler. *)
-      no_standard_descriptor_accessor: bool;(** Disables the generation of the standard "descriptor()" accessor, which can
-      conflict with a field of the same name.  This is meant to make migration
-      from proto1 easier; new code should avoid fields named "descriptor". *)
-      deprecated: bool;(** Is this message deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the message, or it will be completely ignored; in the very least,
-      this is a formalization for deprecating messages. *)
-      map_entry: bool option;(** Whether the message is an automatically generated map entry type for the
-      maps field.
-
-      For maps fields:
-      {v
-           map<KeyType, ValueType> map_field = 1;
-      v}
-      The parsed descriptor looks like:
-      {v
-           message MapFieldEntry {
-               option map_entry = true;
-               optional KeyType key = 1;
-               optional ValueType value = 2;
-           }
-           repeated MapFieldEntry map_field = 1;
-      v}
-      Implementations may choose not to generate the map_entry=true message, but
-      use a native map in the target language to hold the keys and values.
-      The reflection APIs in such implementations still need to work as
-      if the field is a repeated message field.
-
-      NOTE: Do not set the option in .proto files. Always use the maps syntax
-      instead. The option should only be implicitly set by the proto compiler
-      parser. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        message_set_wire_format:bool;
+        no_standard_descriptor_accessor:bool;
+        deprecated:bool;
+        map_entry:bool option;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       type make_t = ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       let make ?(message_set_wire_format = false) ?(no_standard_descriptor_accessor = false) ?(deprecated = false) ?map_entry ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' }
@@ -4944,20 +4704,20 @@ end = struct
        }
       let spec () = Runtime'.Spec.( basic ((1, "message_set_wire_format", "messageSetWireFormat"), bool, (false)) ^:: basic ((2, "no_standard_descriptor_accessor", "noStandardDescriptorAccessor"), bool, (false)) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: basic_opt ((7, "map_entry", "mapEntry"), bool) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } -> serialize writer message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option extensions'
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option extensions' = { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } -> serialize message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option extensions'
       let from_json_exn =
         let constructor message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option extensions' = { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and FieldOptions : sig
@@ -4965,6 +4725,7 @@ end = struct
         type t =
           | STRING
           (** Default mode. *)
+
           | CORD
           | STRING_PIECE
 
@@ -4983,10 +4744,13 @@ end = struct
         type t =
           | JS_NORMAL
           (** Use the default type. *)
+
           | JS_STRING
           (** Use JavaScript strings. *)
+
           | JS_NUMBER
           (** Use JavaScript numbers. *)
+
 
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
@@ -5000,67 +4764,89 @@ end = struct
         (**/**)
       end
       type t = {
-      ctype: CType.t;(** The ctype option instructs the C++ code generator to use a different
-      representation of the field than it normally would.  See the specific
-      options below.  This option is not yet implemented in the open source
-      release -- sorry, we'll try to include it in a future version! *)
-      packed: bool option;(** The packed option can be enabled for repeated primitive fields to enable
-      a more efficient representation on the wire. Rather than repeatedly
-      writing the tag and type for each element, the entire array is encoded as
-      a single length-delimited blob. In proto3, only explicit setting it to
-      false will avoid using packed encoding. *)
-      deprecated: bool;(** Clients can define custom options in extensions of this message. See above. *)
-      lazy': bool;(** Should this field be parsed lazily?  Lazy applies only to message-type
-      fields.  It means that when the outer message is initially parsed, the
-      inner message's contents will not be parsed but instead stored in encoded
-      form.  The inner message will actually be parsed when it is first accessed.
+        ctype:CType.t;
+        (**
+          The ctype option instructs the C++ code generator to use a different
+          representation of the field than it normally would.  See the specific
+          options below.  This option is not yet implemented in the open source
+          release -- sorry, we'll try to include it in a future version!
+        *)
 
-      This is only a hint.  Implementations are free to choose whether to use
-      eager or lazy parsing regardless of the value of this option.  However,
-      setting this option true suggests that the protocol author believes that
-      using lazy parsing on this field is worth the additional bookkeeping
-      overhead typically needed to implement it.
+        packed:bool option;
+        (**
+          The packed option can be enabled for repeated primitive fields to enable
+          a more efficient representation on the wire. Rather than repeatedly
+          writing the tag and type for each element, the entire array is encoded as
+          a single length-delimited blob. In proto3, only explicit setting it to
+          false will avoid using packed encoding.
+        *)
 
-      This option does not affect the public interface of any generated code;
-      all method signatures remain the same.  Furthermore, thread-safety of the
-      interface is not affected by this option; const methods remain safe to
-      call from multiple threads concurrently, while non-const methods continue
-      to require exclusive access.
+        deprecated:bool;
+        (**
+          Clients can define custom options in extensions of this message. See above.
+        *)
+
+        lazy':bool;
+        (**
+          Should this field be parsed lazily?  Lazy applies only to message-type
+          fields.  It means that when the outer message is initially parsed, the
+          inner message's contents will not be parsed but instead stored in encoded
+          form.  The inner message will actually be parsed when it is first accessed.
+
+          This is only a hint.  Implementations are free to choose whether to use
+          eager or lazy parsing regardless of the value of this option.  However,
+          setting this option true suggests that the protocol author believes that
+          using lazy parsing on this field is worth the additional bookkeeping
+          overhead typically needed to implement it.
+
+          This option does not affect the public interface of any generated code;
+          all method signatures remain the same.  Furthermore, thread-safety of the
+          interface is not affected by this option; const methods remain safe to
+          call from multiple threads concurrently, while non-const methods continue
+          to require exclusive access.
 
 
-      Note that implementations may choose not to check required fields within
-      a lazy sub-message.  That is, calling IsInitialized() on the outer message
-      may return true even if the inner message has missing required fields.
-      This is necessary because otherwise the inner message would have to be
-      parsed in order to perform the check, defeating the purpose of lazy
-      parsing.  An implementation which chooses not to check required fields
-      must be consistent about it.  That is, for any particular sub-message, the
-      implementation must either *always* check its required fields, or *never*
-      check its required fields, regardless of whether or not the message has
-      been parsed.
+          Note that implementations may choose not to check required fields within
+          a lazy sub-message.  That is, calling IsInitialized() on the outer message
+          may return true even if the inner message has missing required fields.
+          This is necessary because otherwise the inner message would have to be
+          parsed in order to perform the check, defeating the purpose of lazy
+          parsing.  An implementation which chooses not to check required fields
+          must be consistent about it.  That is, for any particular sub-message, the
+          implementation must either *always* check its required fields, or *never*
+          check its required fields, regardless of whether or not the message has
+          been parsed.
 
-      As of 2021, lazy does no correctness checks on the byte stream during
-      parsing.  This may lead to crashes if and when an invalid byte stream is
-      finally parsed upon access.
+          As of 2021, lazy does no correctness checks on the byte stream during
+          parsing.  This may lead to crashes if and when an invalid byte stream is
+          finally parsed upon access.
 
-      TODO(b/211906113):  Enable validation on lazy fields. *)
-      jstype: JSType.t;(** The jstype option determines the JavaScript type used for values of the
-      field.  The option is permitted only for 64 bit integral and fixed types
-      (int64, uint64, sint64, fixed64, sfixed64).  A field with jstype JS_STRING
-      is represented as JavaScript string, which avoids loss of precision that
-      can happen when a large value is converted to a floating point JavaScript.
-      Specifying JS_NUMBER for the jstype causes the generated JavaScript code to
-      use the JavaScript "number" type.  The behavior of the default option
-      JS_NORMAL is implementation dependent.
+          TODO(b/211906113):  Enable validation on lazy fields.
+        *)
 
-      This option is an enum to permit additional types to be added, e.g.
-      goog.math.Integer. *)
-      weak: bool;(** For Google-internal migration only. Do not use. *)
-      unverified_lazy: bool;(** unverified_lazy does no correctness checks on the byte stream. This should
-      only be used where lazy with verification is prohibitive for performance
-      reasons. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        jstype:JSType.t;
+        (**
+          The jstype option determines the JavaScript type used for values of the
+          field.  The option is permitted only for 64 bit integral and fixed types
+          (int64, uint64, sint64, fixed64, sfixed64).  A field with jstype JS_STRING
+          is represented as JavaScript string, which avoids loss of precision that
+          can happen when a large value is converted to a floating point JavaScript.
+          Specifying JS_NUMBER for the jstype causes the generated JavaScript code to
+          use the JavaScript "number" type.  The behavior of the default option
+          JS_NORMAL is implementation dependent.
+
+          This option is an enum to permit additional types to be added, e.g.
+          goog.math.Integer.
+        *)
+
+        weak:bool;
+        (**
+          For Google-internal migration only. Do not use.
+        *)
+
+        unverified_lazy:bool;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -5093,6 +4879,7 @@ end = struct
         type t =
           | STRING
           (** Default mode. *)
+
           | CORD
           | STRING_PIECE
 
@@ -5111,6 +4898,7 @@ end = struct
         type t =
           | STRING
           (** Default mode. *)
+
           | CORD
           | STRING_PIECE
 
@@ -5140,10 +4928,13 @@ end = struct
         type t =
           | JS_NORMAL
           (** Use the default type. *)
+
           | JS_STRING
           (** Use JavaScript strings. *)
+
           | JS_NUMBER
           (** Use JavaScript numbers. *)
+
 
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
@@ -5160,10 +4951,13 @@ end = struct
         type t =
           | JS_NORMAL
           (** Use the default type. *)
+
           | JS_STRING
           (** Use JavaScript strings. *)
+
           | JS_NUMBER
           (** Use JavaScript numbers. *)
+
 
         let name () = ".google.protobuf.FieldOptions.JSType"
         let to_int = function
@@ -5189,67 +4983,15 @@ end = struct
       end
       let name () = ".google.protobuf.FieldOptions"
       type t = {
-      ctype: CType.t;(** The ctype option instructs the C++ code generator to use a different
-      representation of the field than it normally would.  See the specific
-      options below.  This option is not yet implemented in the open source
-      release -- sorry, we'll try to include it in a future version! *)
-      packed: bool option;(** The packed option can be enabled for repeated primitive fields to enable
-      a more efficient representation on the wire. Rather than repeatedly
-      writing the tag and type for each element, the entire array is encoded as
-      a single length-delimited blob. In proto3, only explicit setting it to
-      false will avoid using packed encoding. *)
-      deprecated: bool;(** Clients can define custom options in extensions of this message. See above. *)
-      lazy': bool;(** Should this field be parsed lazily?  Lazy applies only to message-type
-      fields.  It means that when the outer message is initially parsed, the
-      inner message's contents will not be parsed but instead stored in encoded
-      form.  The inner message will actually be parsed when it is first accessed.
-
-      This is only a hint.  Implementations are free to choose whether to use
-      eager or lazy parsing regardless of the value of this option.  However,
-      setting this option true suggests that the protocol author believes that
-      using lazy parsing on this field is worth the additional bookkeeping
-      overhead typically needed to implement it.
-
-      This option does not affect the public interface of any generated code;
-      all method signatures remain the same.  Furthermore, thread-safety of the
-      interface is not affected by this option; const methods remain safe to
-      call from multiple threads concurrently, while non-const methods continue
-      to require exclusive access.
-
-
-      Note that implementations may choose not to check required fields within
-      a lazy sub-message.  That is, calling IsInitialized() on the outer message
-      may return true even if the inner message has missing required fields.
-      This is necessary because otherwise the inner message would have to be
-      parsed in order to perform the check, defeating the purpose of lazy
-      parsing.  An implementation which chooses not to check required fields
-      must be consistent about it.  That is, for any particular sub-message, the
-      implementation must either *always* check its required fields, or *never*
-      check its required fields, regardless of whether or not the message has
-      been parsed.
-
-      As of 2021, lazy does no correctness checks on the byte stream during
-      parsing.  This may lead to crashes if and when an invalid byte stream is
-      finally parsed upon access.
-
-      TODO(b/211906113):  Enable validation on lazy fields. *)
-      jstype: JSType.t;(** The jstype option determines the JavaScript type used for values of the
-      field.  The option is permitted only for 64 bit integral and fixed types
-      (int64, uint64, sint64, fixed64, sfixed64).  A field with jstype JS_STRING
-      is represented as JavaScript string, which avoids loss of precision that
-      can happen when a large value is converted to a floating point JavaScript.
-      Specifying JS_NUMBER for the jstype causes the generated JavaScript code to
-      use the JavaScript "number" type.  The behavior of the default option
-      JS_NORMAL is implementation dependent.
-
-      This option is an enum to permit additional types to be added, e.g.
-      goog.math.Integer. *)
-      weak: bool;(** For Google-internal migration only. Do not use. *)
-      unverified_lazy: bool;(** unverified_lazy does no correctness checks on the byte stream. This should
-      only be used where lazy with verification is prohibitive for performance
-      reasons. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        ctype:CType.t;
+        packed:bool option;
+        deprecated:bool;
+        lazy':bool;
+        jstype:JSType.t;
+        weak:bool;
+        unverified_lazy:bool;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       type make_t = ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       let make ?(ctype = CType.STRING) ?packed ?(deprecated = false) ?(lazy' = false) ?(jstype = JSType.JS_NORMAL) ?(weak = false) ?(unverified_lazy = false) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' }
@@ -5275,26 +5017,26 @@ end = struct
        }
       let spec () = Runtime'.Spec.( basic ((1, "ctype", "ctype"), (enum (module CType)), (CType.STRING)) ^:: basic_opt ((2, "packed", "packed"), bool) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: basic ((5, "lazy", "lazy"), bool, (false)) ^:: basic ((6, "jstype", "jstype"), (enum (module JSType)), (JSType.JS_NORMAL)) ^:: basic ((10, "weak", "weak"), bool, (false)) ^:: basic ((15, "unverified_lazy", "unverifiedLazy"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } -> serialize writer ctype packed deprecated lazy' jstype weak unverified_lazy uninterpreted_option extensions'
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor ctype packed deprecated lazy' jstype weak unverified_lazy uninterpreted_option extensions' = { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } -> serialize ctype packed deprecated lazy' jstype weak unverified_lazy uninterpreted_option extensions'
       let from_json_exn =
         let constructor ctype packed deprecated lazy' jstype weak unverified_lazy uninterpreted_option extensions' = { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and OneofOptions : sig
       type t = {
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -5325,8 +5067,8 @@ end = struct
       module This'_ = OneofOptions
       let name () = ".google.protobuf.OneofOptions"
       type t = {
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       type make_t = ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       let make ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { uninterpreted_option; extensions' }
@@ -5338,32 +5080,35 @@ end = struct
        }
       let spec () = Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer { uninterpreted_option; extensions' } -> serialize writer uninterpreted_option extensions'
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor uninterpreted_option extensions' = { uninterpreted_option; extensions' } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { uninterpreted_option; extensions' } -> serialize uninterpreted_option extensions'
       let from_json_exn =
         let constructor uninterpreted_option extensions' = { uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and EnumOptions : sig
       type t = {
-      allow_alias: bool option;(** Set this option to true to allow mapping different tag names to the same
-      value. *)
-      deprecated: bool;(** Is this enum deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the enum, or it will be completely ignored; in the very least, this
-      is a formalization for deprecating enums. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        allow_alias:bool option;
+        deprecated:bool;
+        (**
+          Is this enum deprecated?
+          Depending on the target platform, this can emit Deprecated annotations
+          for the enum, or it will be completely ignored; in the very least, this
+          is a formalization for deprecating enums.
+        *)
+
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -5394,14 +5139,10 @@ end = struct
       module This'_ = EnumOptions
       let name () = ".google.protobuf.EnumOptions"
       type t = {
-      allow_alias: bool option;(** Set this option to true to allow mapping different tag names to the same
-      value. *)
-      deprecated: bool;(** Is this enum deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the enum, or it will be completely ignored; in the very least, this
-      is a formalization for deprecating enums. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        allow_alias:bool option;
+        deprecated:bool;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       type make_t = ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       let make ?allow_alias ?(deprecated = false) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { allow_alias; deprecated; uninterpreted_option; extensions' }
@@ -5417,30 +5158,34 @@ end = struct
        }
       let spec () = Runtime'.Spec.( basic_opt ((2, "allow_alias", "allowAlias"), bool) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer { allow_alias; deprecated; uninterpreted_option; extensions' } -> serialize writer allow_alias deprecated uninterpreted_option extensions'
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor allow_alias deprecated uninterpreted_option extensions' = { allow_alias; deprecated; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { allow_alias; deprecated; uninterpreted_option; extensions' } -> serialize allow_alias deprecated uninterpreted_option extensions'
       let from_json_exn =
         let constructor allow_alias deprecated uninterpreted_option extensions' = { allow_alias; deprecated; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and EnumValueOptions : sig
       type t = {
-      deprecated: bool;(** Is this enum value deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the enum value, or it will be completely ignored; in the very least,
-      this is a formalization for deprecating enum values. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        deprecated:bool;
+        (**
+          Is this enum value deprecated?
+          Depending on the target platform, this can emit Deprecated annotations
+          for the enum value, or it will be completely ignored; in the very least,
+          this is a formalization for deprecating enum values.
+        *)
+
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -5471,12 +5216,9 @@ end = struct
       module This'_ = EnumValueOptions
       let name () = ".google.protobuf.EnumValueOptions"
       type t = {
-      deprecated: bool;(** Is this enum value deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the enum value, or it will be completely ignored; in the very least,
-      this is a formalization for deprecating enum values. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        deprecated:bool;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       type make_t = ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       let make ?(deprecated = false) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { deprecated; uninterpreted_option; extensions' }
@@ -5490,30 +5232,34 @@ end = struct
        }
       let spec () = Runtime'.Spec.( basic ((1, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer { deprecated; uninterpreted_option; extensions' } -> serialize writer deprecated uninterpreted_option extensions'
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor deprecated uninterpreted_option extensions' = { deprecated; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { deprecated; uninterpreted_option; extensions' } -> serialize deprecated uninterpreted_option extensions'
       let from_json_exn =
         let constructor deprecated uninterpreted_option extensions' = { deprecated; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and ServiceOptions : sig
       type t = {
-      deprecated: bool;(** Is this service deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the service, or it will be completely ignored; in the very least,
-      this is a formalization for deprecating services. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        deprecated:bool;
+        (**
+          Is this service deprecated?
+          Depending on the target platform, this can emit Deprecated annotations
+          for the service, or it will be completely ignored; in the very least,
+          this is a formalization for deprecating services.
+        *)
+
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -5544,12 +5290,9 @@ end = struct
       module This'_ = ServiceOptions
       let name () = ".google.protobuf.ServiceOptions"
       type t = {
-      deprecated: bool;(** Is this service deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the service, or it will be completely ignored; in the very least,
-      this is a formalization for deprecating services. *)
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        deprecated:bool;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       type make_t = ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       let make ?(deprecated = false) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { deprecated; uninterpreted_option; extensions' }
@@ -5563,20 +5306,20 @@ end = struct
        }
       let spec () = Runtime'.Spec.( basic ((33, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer { deprecated; uninterpreted_option; extensions' } -> serialize writer deprecated uninterpreted_option extensions'
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor deprecated uninterpreted_option extensions' = { deprecated; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { deprecated; uninterpreted_option; extensions' } -> serialize deprecated uninterpreted_option extensions'
       let from_json_exn =
         let constructor deprecated uninterpreted_option extensions' = { deprecated; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and MethodOptions : sig
@@ -5591,8 +5334,10 @@ end = struct
           | IDEMPOTENCY_UNKNOWN
           | NO_SIDE_EFFECTS
           (** implies idempotent *)
+
           | IDEMPOTENT
           (** idempotent, but may have side effects *)
+
 
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
@@ -5606,13 +5351,17 @@ end = struct
         (**/**)
       end
       type t = {
-      deprecated: bool;(** Is this method deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the method, or it will be completely ignored; in the very least,
-      this is a formalization for deprecating methods. *)
-      idempotency_level: IdempotencyLevel.t;
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        deprecated:bool;
+        (**
+          Is this method deprecated?
+          Depending on the target platform, this can emit Deprecated annotations
+          for the method, or it will be completely ignored; in the very least,
+          this is a formalization for deprecating methods.
+        *)
+
+        idempotency_level:IdempotencyLevel.t;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -5646,8 +5395,10 @@ end = struct
           | IDEMPOTENCY_UNKNOWN
           | NO_SIDE_EFFECTS
           (** implies idempotent *)
+
           | IDEMPOTENT
           (** idempotent, but may have side effects *)
+
 
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
@@ -5665,8 +5416,10 @@ end = struct
           | IDEMPOTENCY_UNKNOWN
           | NO_SIDE_EFFECTS
           (** implies idempotent *)
+
           | IDEMPOTENT
           (** idempotent, but may have side effects *)
+
 
         let name () = ".google.protobuf.MethodOptions.IdempotencyLevel"
         let to_int = function
@@ -5692,13 +5445,10 @@ end = struct
       end
       let name () = ".google.protobuf.MethodOptions"
       type t = {
-      deprecated: bool;(** Is this method deprecated?
-      Depending on the target platform, this can emit Deprecated annotations
-      for the method, or it will be completely ignored; in the very least,
-      this is a formalization for deprecating methods. *)
-      idempotency_level: IdempotencyLevel.t;
-      uninterpreted_option: UninterpretedOption.t list;(** The parser stores options it doesn't recognize here. See above. *)
-      extensions': Runtime'.Extensions.t;
+        deprecated:bool;
+        idempotency_level:IdempotencyLevel.t;
+        uninterpreted_option:UninterpretedOption.t list;
+        extensions':Runtime'.Extensions.t;
       }
       type make_t = ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       let make ?(deprecated = false) ?(idempotency_level = IdempotencyLevel.IDEMPOTENCY_UNKNOWN) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { deprecated; idempotency_level; uninterpreted_option; extensions' }
@@ -5714,20 +5464,20 @@ end = struct
        }
       let spec () = Runtime'.Spec.( basic ((33, "deprecated", "deprecated"), bool, (false)) ^:: basic ((34, "idempotency_level", "idempotencyLevel"), (enum (module IdempotencyLevel)), (IdempotencyLevel.IDEMPOTENCY_UNKNOWN)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer { deprecated; idempotency_level; uninterpreted_option; extensions' } -> serialize writer deprecated idempotency_level uninterpreted_option extensions'
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor deprecated idempotency_level uninterpreted_option extensions' = { deprecated; idempotency_level; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { deprecated; idempotency_level; uninterpreted_option; extensions' } -> serialize deprecated idempotency_level uninterpreted_option extensions'
       let from_json_exn =
         let constructor deprecated idempotency_level uninterpreted_option extensions' = { deprecated; idempotency_level; uninterpreted_option; extensions' } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and UninterpretedOption : sig
@@ -5741,8 +5491,8 @@ end = struct
       *)
       module rec NamePart : sig
         type t = {
-        name_part: string;
-        is_extension: bool;
+          name_part:string;
+          is_extension:bool;
         }
         val make: name_part:string -> is_extension:bool -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -5771,14 +5521,13 @@ end = struct
         (**/**)
       end
       type t = {
-      name: NamePart.t list;
-      identifier_value: string option;(** The value of the uninterpreted option, in whatever type the tokenizer
-      identified it as during parsing. Exactly one of these should be set. *)
-      positive_int_value: int option;
-      negative_int_value: int option;
-      double_value: float option;
-      string_value: bytes option;
-      aggregate_value: string option;
+        name:NamePart.t list;
+        identifier_value:string option;
+        positive_int_value:int option;
+        negative_int_value:int option;
+        double_value:float option;
+        string_value:bytes option;
+        aggregate_value:string option;
       }
       val make: ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -5809,8 +5558,8 @@ end = struct
       module This'_ = UninterpretedOption
       module rec NamePart : sig
         type t = {
-        name_part: string;
-        is_extension: bool;
+          name_part:string;
+          is_extension:bool;
         }
         val make: name_part:string -> is_extension:bool -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -5841,8 +5590,8 @@ end = struct
         module This'_ = NamePart
         let name () = ".google.protobuf.UninterpretedOption.NamePart"
         type t = {
-        name_part: string;
-        is_extension: bool;
+          name_part:string;
+          is_extension:bool;
         }
         type make_t = name_part:string -> is_extension:bool -> unit -> t
         let make ~name_part ~is_extension () = { name_part; is_extension }
@@ -5855,32 +5604,31 @@ end = struct
          }
         let spec () = Runtime'.Spec.( basic_req ((1, "name_part", "namePart"), string) ^:: basic_req ((2, "is_extension", "isExtension"), bool) ^:: nil )
         let to_proto' =
-          let serialize = Runtime'.Serialize.serialize (spec ()) in
+          let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
           fun writer { name_part; is_extension } -> serialize writer name_part is_extension
 
         let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor name_part is_extension = { name_part; is_extension } in
-          Runtime'.Deserialize.deserialize (spec ()) constructor
+          Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
           let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { name_part; is_extension } -> serialize name_part is_extension
         let from_json_exn =
           let constructor name_part is_extension = { name_part; is_extension } in
-          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+          Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       let name () = ".google.protobuf.UninterpretedOption"
       type t = {
-      name: NamePart.t list;
-      identifier_value: string option;(** The value of the uninterpreted option, in whatever type the tokenizer
-      identified it as during parsing. Exactly one of these should be set. *)
-      positive_int_value: int option;
-      negative_int_value: int option;
-      double_value: float option;
-      string_value: bytes option;
-      aggregate_value: string option;
+        name:NamePart.t list;
+        identifier_value:string option;
+        positive_int_value:int option;
+        negative_int_value:int option;
+        double_value:float option;
+        string_value:bytes option;
+        aggregate_value:string option;
       }
       type make_t = ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       let make ?(name = []) ?identifier_value ?positive_int_value ?negative_int_value ?double_value ?string_value ?aggregate_value () = { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value }
@@ -5903,114 +5651,75 @@ end = struct
        }
       let spec () = Runtime'.Spec.( repeated ((2, "name", "name"), (message (module NamePart)), not_packed) ^:: basic_opt ((3, "identifier_value", "identifierValue"), string) ^:: basic_opt ((4, "positive_int_value", "positiveIntValue"), uint64_int) ^:: basic_opt ((5, "negative_int_value", "negativeIntValue"), int64_int) ^:: basic_opt ((6, "double_value", "doubleValue"), double) ^:: basic_opt ((7, "string_value", "stringValue"), bytes) ^:: basic_opt ((8, "aggregate_value", "aggregateValue"), string) ^:: nil )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } -> serialize writer name identifier_value positive_int_value negative_int_value double_value string_value aggregate_value
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor name identifier_value positive_int_value negative_int_value double_value string_value aggregate_value = { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } -> serialize name identifier_value positive_int_value negative_int_value double_value string_value aggregate_value
       let from_json_exn =
         let constructor name identifier_value positive_int_value negative_int_value double_value string_value aggregate_value = { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value } in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and SourceCodeInfo : sig
       module rec Location : sig
         type t = {
-        path: int list;(** Identifies which part of the FileDescriptorProto was defined at this
-        location.
+          path:int list;
+          (**
+            Identifies which part of the FileDescriptorProto was defined at this
+            location.
 
-        Each element is a field number or an index.  They form a path from
-        the root FileDescriptorProto to the place where the definition occurs.
-        For example, this path:
-        {v
-           [ 4, 3, 2, 7, 1 ]
-        v}
-        refers to:
-        {v
-           file.message_type(3)  // 4, 3
-               .field(7)         // 2, 7
-               .name()           // 1
-        v}
-        This is because FileDescriptorProto.message_type has field number 4:
-        {v
-           repeated DescriptorProto message_type = 4;
-        v}
-        and DescriptorProto.field has field number 2:
-        {v
-           repeated FieldDescriptorProto field = 2;
-        v}
-        and FieldDescriptorProto.name has field number 1:
-        {v
-           optional string name = 1;
-        v}
-        Thus, the above path gives the location of a field name.  If we removed
-        the last element:
-        {v
-           [ 4, 3, 2, 7 ]
-        v}
-        this path refers to the whole field declaration (from the beginning
-        of the label to the terminating semicolon). *)
-        span: int list;(** Always has exactly three or four elements: start line, start column,
-        end line (optional, otherwise assumed same as start line), end column.
-        These are packed into a single field for efficiency.  Note that line
-        and column numbers are zero-based -- typically you will want to add
-        1 to each before displaying to a user. *)
-        leading_comments: string option;(** If this SourceCodeInfo represents a complete declaration, these are any
-        comments appearing before and after the declaration which appear to be
-        attached to the declaration.
+            Each element is a field number or an index.  They form a path from
+            the root FileDescriptorProto to the place where the definition occurs.
+            For example, this path:
+            {v
+               [ 4, 3, 2, 7, 1 ]
+            v}
+            refers to:
+            {v
+               file.message_type(3)  // 4, 3
+                   .field(7)         // 2, 7
+                   .name()           // 1
+            v}
+            This is because FileDescriptorProto.message_type has field number 4:
+            {v
+               repeated DescriptorProto message_type = 4;
+            v}
+            and DescriptorProto.field has field number 2:
+            {v
+               repeated FieldDescriptorProto field = 2;
+            v}
+            and FieldDescriptorProto.name has field number 1:
+            {v
+               optional string name = 1;
+            v}
+            Thus, the above path gives the location of a field name.  If we removed
+            the last element:
+            {v
+               [ 4, 3, 2, 7 ]
+            v}
+            this path refers to the whole field declaration (from the beginning
+            of the label to the terminating semicolon).
+          *)
 
-        A series of line comments appearing on consecutive lines, with no other
-        tokens appearing on those lines, will be treated as a single comment.
+          span:int list;
+          (**
+            Always has exactly three or four elements: start line, start column,
+            end line (optional, otherwise assumed same as start line), end column.
+            These are packed into a single field for efficiency.  Note that line
+            and column numbers are zero-based -- typically you will want to add
+            1 to each before displaying to a user.
+          *)
 
-        leading_detached_comments will keep paragraphs of comments that appear
-        before (but not connected to) the current element. Each paragraph,
-        separated by empty lines, will be one comment element in the repeated
-        field.
-
-        Only the comment content is provided; comment markers (e.g. //) are
-        stripped out.  For block comments, leading whitespace and an asterisk
-        will be stripped from the beginning of each line other than the first.
-        Newlines are included in the output.
-
-        Examples:
-        {v
-           optional int32 foo = 1;  // Comment attached to foo.
-           // Comment attached to bar.
-           optional int32 bar = 2;
-
-           optional string baz = 3;
-           // Comment attached to baz.
-           // Another line attached to baz.
-
-           // Comment attached to moo.
-           //
-           // Another line attached to moo.
-           optional double moo = 4;
-
-           // Detached comment for corge. This is not leading or trailing comments
-           // to moo or corge because there are blank lines separating it from
-           // both.
-
-           // Detached comment for corge paragraph 2.
-
-           optional string corge = 5;
-           /* Block comment attached
-            * to corge.  Leading asterisks
-            * will be removed. */
-           /* Block comment attached to
-            * grault. */
-           optional int32 grault = 6;
-
-           // ignored detached comments.
-        v} *)
-        trailing_comments: string option;
-        leading_detached_comments: string list;
+          leading_comments:string option;
+          trailing_comments:string option;
+          leading_detached_comments:string list;
         }
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -6040,54 +5749,54 @@ end = struct
       end
       type t = (Location.t list)
       (**
-      A Location identifies a piece of source code in a .proto file which
-      corresponds to a particular definition.  This information is intended
-      to be useful to IDEs, code indexers, documentation generators, and similar
-      tools.
+        A Location identifies a piece of source code in a .proto file which
+        corresponds to a particular definition.  This information is intended
+        to be useful to IDEs, code indexers, documentation generators, and similar
+        tools.
 
-      For example, say we have a file like:
-      {v
-         message Foo {
+        For example, say we have a file like:
+        {v
+           message Foo {
+             optional string foo = 1;
+           }
+        v}
+        Let's look at just the field definition:
+        {v
            optional string foo = 1;
-         }
-      v}
-      Let's look at just the field definition:
-      {v
-         optional string foo = 1;
-         ^       ^^     ^^  ^  ^^^
-         a       bc     de  f  ghi
-      v}
-      We have the following locations:
-      {v
-         span   path               represents
-         [a,i)  [ 4, 0, 2, 0 ]     The whole field definition.
-         [a,b)  [ 4, 0, 2, 0, 4 ]  The label (optional).
-         [c,d)  [ 4, 0, 2, 0, 5 ]  The type (string).
-         [e,f)  [ 4, 0, 2, 0, 1 ]  The name (foo).
-         [g,h)  [ 4, 0, 2, 0, 3 ]  The number (1).
-      v}
-      Notes:
-      - A location may refer to a repeated field itself (i.e. not to any
-      particular index within it).  This is used whenever a set of elements are
-      logically enclosed in a single code segment.  For example, an entire
-      extend block (possibly containing multiple extension definitions) will
-      have an outer location whose path refers to the "extensions" repeated
-      field without an index.
-      - Multiple locations may have the same path.  This happens when a single
-      logical declaration is spread out across multiple places.  The most
-      obvious example is the "extend" block again -- there may be multiple
-      extend blocks in the same scope, each of which will have the same path.
-      - A location's span is not always a subset of its parent's span.  For
-      example, the "extendee" of an extension declaration appears at the
-      beginning of the "extend" block and is shared by all extensions within
-      the block.
-      - Just because a location's span is a subset of some other location's span
-      does not mean that it is a descendant.  For example, a "group" defines
-      both a type and a field in a single declaration.  Thus, the locations
-      corresponding to the type and field and their components will overlap.
-      - Code which tries to interpret locations should probably be designed to
-      ignore those that it doesn't understand, as more types of locations could
-      be recorded in the future.
+           ^       ^^     ^^  ^  ^^^
+           a       bc     de  f  ghi
+        v}
+        We have the following locations:
+        {v
+           span   path               represents
+           [a,i)  [ 4, 0, 2, 0 ]     The whole field definition.
+           [a,b)  [ 4, 0, 2, 0, 4 ]  The label (optional).
+           [c,d)  [ 4, 0, 2, 0, 5 ]  The type (string).
+           [e,f)  [ 4, 0, 2, 0, 1 ]  The name (foo).
+           [g,h)  [ 4, 0, 2, 0, 3 ]  The number (1).
+        v}
+        Notes:
+        - A location may refer to a repeated field itself (i.e. not to any
+        particular index within it).  This is used whenever a set of elements are
+        logically enclosed in a single code segment.  For example, an entire
+        extend block (possibly containing multiple extension definitions) will
+        have an outer location whose path refers to the "extensions" repeated
+        field without an index.
+        - Multiple locations may have the same path.  This happens when a single
+        logical declaration is spread out across multiple places.  The most
+        obvious example is the "extend" block again -- there may be multiple
+        extend blocks in the same scope, each of which will have the same path.
+        - A location's span is not always a subset of its parent's span.  For
+        example, the "extendee" of an extension declaration appears at the
+        beginning of the "extend" block and is shared by all extensions within
+        the block.
+        - Just because a location's span is a subset of some other location's span
+        does not mean that it is a descendant.  For example, a "group" defines
+        both a type and a field in a single declaration.  Thus, the locations
+        corresponding to the type and field and their components will overlap.
+        - Code which tries to interpret locations should probably be designed to
+        ignore those that it doesn't understand, as more types of locations could
+        be recorded in the future.
       *)
 
       val make: ?location:Location.t list -> unit -> t
@@ -6119,95 +5828,56 @@ end = struct
       module This'_ = SourceCodeInfo
       module rec Location : sig
         type t = {
-        path: int list;(** Identifies which part of the FileDescriptorProto was defined at this
-        location.
+          path:int list;
+          (**
+            Identifies which part of the FileDescriptorProto was defined at this
+            location.
 
-        Each element is a field number or an index.  They form a path from
-        the root FileDescriptorProto to the place where the definition occurs.
-        For example, this path:
-        {v
-           [ 4, 3, 2, 7, 1 ]
-        v}
-        refers to:
-        {v
-           file.message_type(3)  // 4, 3
-               .field(7)         // 2, 7
-               .name()           // 1
-        v}
-        This is because FileDescriptorProto.message_type has field number 4:
-        {v
-           repeated DescriptorProto message_type = 4;
-        v}
-        and DescriptorProto.field has field number 2:
-        {v
-           repeated FieldDescriptorProto field = 2;
-        v}
-        and FieldDescriptorProto.name has field number 1:
-        {v
-           optional string name = 1;
-        v}
-        Thus, the above path gives the location of a field name.  If we removed
-        the last element:
-        {v
-           [ 4, 3, 2, 7 ]
-        v}
-        this path refers to the whole field declaration (from the beginning
-        of the label to the terminating semicolon). *)
-        span: int list;(** Always has exactly three or four elements: start line, start column,
-        end line (optional, otherwise assumed same as start line), end column.
-        These are packed into a single field for efficiency.  Note that line
-        and column numbers are zero-based -- typically you will want to add
-        1 to each before displaying to a user. *)
-        leading_comments: string option;(** If this SourceCodeInfo represents a complete declaration, these are any
-        comments appearing before and after the declaration which appear to be
-        attached to the declaration.
+            Each element is a field number or an index.  They form a path from
+            the root FileDescriptorProto to the place where the definition occurs.
+            For example, this path:
+            {v
+               [ 4, 3, 2, 7, 1 ]
+            v}
+            refers to:
+            {v
+               file.message_type(3)  // 4, 3
+                   .field(7)         // 2, 7
+                   .name()           // 1
+            v}
+            This is because FileDescriptorProto.message_type has field number 4:
+            {v
+               repeated DescriptorProto message_type = 4;
+            v}
+            and DescriptorProto.field has field number 2:
+            {v
+               repeated FieldDescriptorProto field = 2;
+            v}
+            and FieldDescriptorProto.name has field number 1:
+            {v
+               optional string name = 1;
+            v}
+            Thus, the above path gives the location of a field name.  If we removed
+            the last element:
+            {v
+               [ 4, 3, 2, 7 ]
+            v}
+            this path refers to the whole field declaration (from the beginning
+            of the label to the terminating semicolon).
+          *)
 
-        A series of line comments appearing on consecutive lines, with no other
-        tokens appearing on those lines, will be treated as a single comment.
+          span:int list;
+          (**
+            Always has exactly three or four elements: start line, start column,
+            end line (optional, otherwise assumed same as start line), end column.
+            These are packed into a single field for efficiency.  Note that line
+            and column numbers are zero-based -- typically you will want to add
+            1 to each before displaying to a user.
+          *)
 
-        leading_detached_comments will keep paragraphs of comments that appear
-        before (but not connected to) the current element. Each paragraph,
-        separated by empty lines, will be one comment element in the repeated
-        field.
-
-        Only the comment content is provided; comment markers (e.g. //) are
-        stripped out.  For block comments, leading whitespace and an asterisk
-        will be stripped from the beginning of each line other than the first.
-        Newlines are included in the output.
-
-        Examples:
-        {v
-           optional int32 foo = 1;  // Comment attached to foo.
-           // Comment attached to bar.
-           optional int32 bar = 2;
-
-           optional string baz = 3;
-           // Comment attached to baz.
-           // Another line attached to baz.
-
-           // Comment attached to moo.
-           //
-           // Another line attached to moo.
-           optional double moo = 4;
-
-           // Detached comment for corge. This is not leading or trailing comments
-           // to moo or corge because there are blank lines separating it from
-           // both.
-
-           // Detached comment for corge paragraph 2.
-
-           optional string corge = 5;
-           /* Block comment attached
-            * to corge.  Leading asterisks
-            * will be removed. */
-           /* Block comment attached to
-            * grault. */
-           optional int32 grault = 6;
-
-           // ignored detached comments.
-        v} *)
-        trailing_comments: string option;
-        leading_detached_comments: string list;
+          leading_comments:string option;
+          trailing_comments:string option;
+          leading_detached_comments:string list;
         }
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -6238,95 +5908,11 @@ end = struct
         module This'_ = Location
         let name () = ".google.protobuf.SourceCodeInfo.Location"
         type t = {
-        path: int list;(** Identifies which part of the FileDescriptorProto was defined at this
-        location.
-
-        Each element is a field number or an index.  They form a path from
-        the root FileDescriptorProto to the place where the definition occurs.
-        For example, this path:
-        {v
-           [ 4, 3, 2, 7, 1 ]
-        v}
-        refers to:
-        {v
-           file.message_type(3)  // 4, 3
-               .field(7)         // 2, 7
-               .name()           // 1
-        v}
-        This is because FileDescriptorProto.message_type has field number 4:
-        {v
-           repeated DescriptorProto message_type = 4;
-        v}
-        and DescriptorProto.field has field number 2:
-        {v
-           repeated FieldDescriptorProto field = 2;
-        v}
-        and FieldDescriptorProto.name has field number 1:
-        {v
-           optional string name = 1;
-        v}
-        Thus, the above path gives the location of a field name.  If we removed
-        the last element:
-        {v
-           [ 4, 3, 2, 7 ]
-        v}
-        this path refers to the whole field declaration (from the beginning
-        of the label to the terminating semicolon). *)
-        span: int list;(** Always has exactly three or four elements: start line, start column,
-        end line (optional, otherwise assumed same as start line), end column.
-        These are packed into a single field for efficiency.  Note that line
-        and column numbers are zero-based -- typically you will want to add
-        1 to each before displaying to a user. *)
-        leading_comments: string option;(** If this SourceCodeInfo represents a complete declaration, these are any
-        comments appearing before and after the declaration which appear to be
-        attached to the declaration.
-
-        A series of line comments appearing on consecutive lines, with no other
-        tokens appearing on those lines, will be treated as a single comment.
-
-        leading_detached_comments will keep paragraphs of comments that appear
-        before (but not connected to) the current element. Each paragraph,
-        separated by empty lines, will be one comment element in the repeated
-        field.
-
-        Only the comment content is provided; comment markers (e.g. //) are
-        stripped out.  For block comments, leading whitespace and an asterisk
-        will be stripped from the beginning of each line other than the first.
-        Newlines are included in the output.
-
-        Examples:
-        {v
-           optional int32 foo = 1;  // Comment attached to foo.
-           // Comment attached to bar.
-           optional int32 bar = 2;
-
-           optional string baz = 3;
-           // Comment attached to baz.
-           // Another line attached to baz.
-
-           // Comment attached to moo.
-           //
-           // Another line attached to moo.
-           optional double moo = 4;
-
-           // Detached comment for corge. This is not leading or trailing comments
-           // to moo or corge because there are blank lines separating it from
-           // both.
-
-           // Detached comment for corge paragraph 2.
-
-           optional string corge = 5;
-           /* Block comment attached
-            * to corge.  Leading asterisks
-            * will be removed. */
-           /* Block comment attached to
-            * grault. */
-           optional int32 grault = 6;
-
-           // ignored detached comments.
-        v} *)
-        trailing_comments: string option;
-        leading_detached_comments: string list;
+          path:int list;
+          span:int list;
+          leading_comments:string option;
+          trailing_comments:string option;
+          leading_detached_comments:string list;
         }
         type make_t = ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         let make ?(path = []) ?(span = []) ?leading_comments ?trailing_comments ?(leading_detached_comments = []) () = { path; span; leading_comments; trailing_comments; leading_detached_comments }
@@ -6345,75 +5931,24 @@ end = struct
          }
         let spec () = Runtime'.Spec.( repeated ((1, "path", "path"), int32_int, packed) ^:: repeated ((2, "span", "span"), int32_int, packed) ^:: basic_opt ((3, "leading_comments", "leadingComments"), string) ^:: basic_opt ((4, "trailing_comments", "trailingComments"), string) ^:: repeated ((6, "leading_detached_comments", "leadingDetachedComments"), string, not_packed) ^:: nil )
         let to_proto' =
-          let serialize = Runtime'.Serialize.serialize (spec ()) in
+          let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
           fun writer { path; span; leading_comments; trailing_comments; leading_detached_comments } -> serialize writer path span leading_comments trailing_comments leading_detached_comments
 
         let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor path span leading_comments trailing_comments leading_detached_comments = { path; span; leading_comments; trailing_comments; leading_detached_comments } in
-          Runtime'.Deserialize.deserialize (spec ()) constructor
+          Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
           let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { path; span; leading_comments; trailing_comments; leading_detached_comments } -> serialize path span leading_comments trailing_comments leading_detached_comments
         let from_json_exn =
           let constructor path span leading_comments trailing_comments leading_detached_comments = { path; span; leading_comments; trailing_comments; leading_detached_comments } in
-          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+          Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       let name () = ".google.protobuf.SourceCodeInfo"
       type t = (Location.t list)
-      (**
-      A Location identifies a piece of source code in a .proto file which
-      corresponds to a particular definition.  This information is intended
-      to be useful to IDEs, code indexers, documentation generators, and similar
-      tools.
-
-      For example, say we have a file like:
-      {v
-         message Foo {
-           optional string foo = 1;
-         }
-      v}
-      Let's look at just the field definition:
-      {v
-         optional string foo = 1;
-         ^       ^^     ^^  ^  ^^^
-         a       bc     de  f  ghi
-      v}
-      We have the following locations:
-      {v
-         span   path               represents
-         [a,i)  [ 4, 0, 2, 0 ]     The whole field definition.
-         [a,b)  [ 4, 0, 2, 0, 4 ]  The label (optional).
-         [c,d)  [ 4, 0, 2, 0, 5 ]  The type (string).
-         [e,f)  [ 4, 0, 2, 0, 1 ]  The name (foo).
-         [g,h)  [ 4, 0, 2, 0, 3 ]  The number (1).
-      v}
-      Notes:
-      - A location may refer to a repeated field itself (i.e. not to any
-      particular index within it).  This is used whenever a set of elements are
-      logically enclosed in a single code segment.  For example, an entire
-      extend block (possibly containing multiple extension definitions) will
-      have an outer location whose path refers to the "extensions" repeated
-      field without an index.
-      - Multiple locations may have the same path.  This happens when a single
-      logical declaration is spread out across multiple places.  The most
-      obvious example is the "extend" block again -- there may be multiple
-      extend blocks in the same scope, each of which will have the same path.
-      - A location's span is not always a subset of its parent's span.  For
-      example, the "extendee" of an extension declaration appears at the
-      beginning of the "extend" block and is shared by all extensions within
-      the block.
-      - Just because a location's span is a subset of some other location's span
-      does not mean that it is a descendant.  For example, a "group" defines
-      both a type and a field in a single declaration.  Thus, the locations
-      corresponding to the type and field and their components will overlap.
-      - Code which tries to interpret locations should probably be designed to
-      ignore those that it doesn't understand, as more types of locations could
-      be recorded in the future.
-      *)
-
       type make_t = ?location:Location.t list -> unit -> t
       let make ?(location = []) () = (location)
       let merge =
@@ -6421,33 +5956,45 @@ end = struct
       fun (t1_location) (t2_location) -> merge_location t1_location t2_location
       let spec () = Runtime'.Spec.( repeated ((1, "location", "location"), (message (module Location)), not_packed) ^:: nil )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer (location) -> serialize writer location
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor location = (location) in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun (location) -> serialize location
       let from_json_exn =
         let constructor location = (location) in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
     and GeneratedCodeInfo : sig
       module rec Annotation : sig
         type t = {
-        path: int list;(** Identifies the element in the original source .proto file. This field
-        is formatted the same as SourceCodeInfo.Location.path. *)
-        source_file: string option;(** Identifies the filesystem path to the original source .proto. *)
-        begin': int option;(** Identifies the starting offset in bytes in the generated code
-        that relates to the identified object. *)
-        end': int option;(** Identifies the ending offset in bytes in the generated code that
-        relates to the identified offset. The end offset should be one past
-        the last relevant byte (so the length of the text = end - begin). *)
+          path:int list;
+          (**
+            Identifies the element in the original source .proto file. This field
+            is formatted the same as SourceCodeInfo.Location.path.
+          *)
+
+          source_file:string option;
+          begin':int option;
+          (**
+            Identifies the starting offset in bytes in the generated code
+            that relates to the identified object.
+          *)
+
+          end':int option;
+          (**
+            Identifies the ending offset in bytes in the generated code that
+            relates to the identified offset. The end offset should be one past
+            the last relevant byte (so the length of the text = end - begin).
+          *)
+
         }
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -6477,8 +6024,8 @@ end = struct
       end
       type t = (Annotation.t list)
       (**
-      An Annotation connects some span of text in generated code to an element
-      of its generating .proto file.
+        An Annotation connects some span of text in generated code to an element
+        of its generating .proto file.
       *)
 
       val make: ?annotation:Annotation.t list -> unit -> t
@@ -6510,14 +6057,26 @@ end = struct
       module This'_ = GeneratedCodeInfo
       module rec Annotation : sig
         type t = {
-        path: int list;(** Identifies the element in the original source .proto file. This field
-        is formatted the same as SourceCodeInfo.Location.path. *)
-        source_file: string option;(** Identifies the filesystem path to the original source .proto. *)
-        begin': int option;(** Identifies the starting offset in bytes in the generated code
-        that relates to the identified object. *)
-        end': int option;(** Identifies the ending offset in bytes in the generated code that
-        relates to the identified offset. The end offset should be one past
-        the last relevant byte (so the length of the text = end - begin). *)
+          path:int list;
+          (**
+            Identifies the element in the original source .proto file. This field
+            is formatted the same as SourceCodeInfo.Location.path.
+          *)
+
+          source_file:string option;
+          begin':int option;
+          (**
+            Identifies the starting offset in bytes in the generated code
+            that relates to the identified object.
+          *)
+
+          end':int option;
+          (**
+            Identifies the ending offset in bytes in the generated code that
+            relates to the identified offset. The end offset should be one past
+            the last relevant byte (so the length of the text = end - begin).
+          *)
+
         }
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -6548,14 +6107,10 @@ end = struct
         module This'_ = Annotation
         let name () = ".google.protobuf.GeneratedCodeInfo.Annotation"
         type t = {
-        path: int list;(** Identifies the element in the original source .proto file. This field
-        is formatted the same as SourceCodeInfo.Location.path. *)
-        source_file: string option;(** Identifies the filesystem path to the original source .proto. *)
-        begin': int option;(** Identifies the starting offset in bytes in the generated code
-        that relates to the identified object. *)
-        end': int option;(** Identifies the ending offset in bytes in the generated code that
-        relates to the identified offset. The end offset should be one past
-        the last relevant byte (so the length of the text = end - begin). *)
+          path:int list;
+          source_file:string option;
+          begin':int option;
+          end':int option;
         }
         type make_t = ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         let make ?(path = []) ?source_file ?begin' ?end' () = { path; source_file; begin'; end' }
@@ -6572,29 +6127,24 @@ end = struct
          }
         let spec () = Runtime'.Spec.( repeated ((1, "path", "path"), int32_int, packed) ^:: basic_opt ((2, "source_file", "sourceFile"), string) ^:: basic_opt ((3, "begin", "begin"), int32_int) ^:: basic_opt ((4, "end", "end"), int32_int) ^:: nil )
         let to_proto' =
-          let serialize = Runtime'.Serialize.serialize (spec ()) in
+          let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
           fun writer { path; source_file; begin'; end' } -> serialize writer path source_file begin' end'
 
         let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
         let from_proto_exn =
           let constructor path source_file begin' end' = { path; source_file; begin'; end' } in
-          Runtime'.Deserialize.deserialize (spec ()) constructor
+          Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
         let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
         let to_json options =
           let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
           fun { path; source_file; begin'; end' } -> serialize path source_file begin' end'
         let from_json_exn =
           let constructor path source_file begin' end' = { path; source_file; begin'; end' } in
-          Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+          Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
         let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
       end
       let name () = ".google.protobuf.GeneratedCodeInfo"
       type t = (Annotation.t list)
-      (**
-      An Annotation connects some span of text in generated code to an element
-      of its generating .proto file.
-      *)
-
       type make_t = ?annotation:Annotation.t list -> unit -> t
       let make ?(annotation = []) () = (annotation)
       let merge =
@@ -6602,20 +6152,20 @@ end = struct
       fun (t1_annotation) (t2_annotation) -> merge_annotation t1_annotation t2_annotation
       let spec () = Runtime'.Spec.( repeated ((1, "annotation", "annotation"), (message (module Annotation)), not_packed) ^:: nil )
       let to_proto' =
-        let serialize = Runtime'.Serialize.serialize (spec ()) in
+        let serialize = Runtime'.apply_lazy (fun () -> Runtime'.Serialize.serialize (spec ())) in
         fun writer (annotation) -> serialize writer annotation
 
       let to_proto t = let writer = Runtime'.Writer.init () in to_proto' writer t; writer
       let from_proto_exn =
         let constructor annotation = (annotation) in
-        Runtime'.Deserialize.deserialize (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize.deserialize (spec ()) constructor)
       let from_proto writer = Runtime'.Result.catch (fun () -> from_proto_exn writer)
       let to_json options =
         let serialize = Runtime'.Serialize_json.serialize ~message_name:(name ()) (spec ()) options in
         fun (annotation) -> serialize annotation
       let from_json_exn =
         let constructor annotation = (annotation) in
-        Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor
+        Runtime'.apply_lazy (fun () -> Runtime'.Deserialize_json.deserialize ~message_name:(name ()) (spec ()) constructor)
       let from_json json = Runtime'.Result.catch (fun () -> from_json_exn json)
     end
   end

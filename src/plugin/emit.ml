@@ -122,6 +122,7 @@ let emit_service_type ~scope ~comment_db ~type_db ServiceDescriptorProto.{ name;
     Code.emit signature `None "module Response : Runtime'.Spec.Message with type t = %s.t and type make_t = %s.make_t" output output;
     Code.emit signature `None "(** Module alias for the response message for this method call *)\n";
     Code.emit signature `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
+    Code.emit signature `None "";
     Code.emit signature `None "val %s : %s" method_name sig_t';
 
     Code.emit implementation `Begin "module %s = struct" (String.capitalize_ascii method_name);
@@ -132,7 +133,7 @@ let emit_service_type ~scope ~comment_db ~type_db ServiceDescriptorProto.{ name;
     Code.emit implementation `None "let name = \"/%s/%s\"" (String.concat ~sep:"." (package_names @ [service_name])) name;
     Code.emit implementation `None "module Request = %s" input;
     Code.emit implementation `None "module Response = %s" output;
-    Code.emit implementation `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
+    Code.emit implementation `End "end";
     Code.emit implementation `Begin "let %s : %s = " method_name sig_t';
     Code.emit implementation `None "(module %s : Runtime'.Spec.Message with type t = %s.t ), " input input;
     Code.emit implementation `None "(module %s : Runtime'.Spec.Message with type t = %s.t )" output output;
@@ -151,7 +152,8 @@ let emit_service_type ~scope ~comment_db ~type_db ServiceDescriptorProto.{ name;
 
   List.iter ~f:(emit_method ~scope:(Scope.push scope name) ~type_db signature implementation name) methods;
   Code.emit signature `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
-  Code.emit implementation `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
+  Code.emit signature `None "";
+  Code.emit implementation `End "end";
   signature, implementation
 
 let emit_extension ~scope ~params ~comment_db ~type_db field =
@@ -166,19 +168,20 @@ let emit_extension ~scope ~params ~comment_db ~type_db field =
   (* Get spec and type *)
   let c =
     let params = Parameters.{params with singleton_record = false} in
-    Types.spec_of_field ~params ~syntax:`Proto2 ~scope ~type_db ~comment_db ~map_type:None field
+    Types.c_of_field ~params ~syntax:`Proto2 ~scope ~type_db ~comment_db ~map_type:None field
   in
   let signature = Code.init () in
   let implementation = Code.init () in
   Code.append implementation signature;
+  let typestr = Types.string_of_type c.type' in
 
-  Code.emit signature `None "type t = %s %s" c.typestr params.annot;
-  Code.emit signature `None "val get_exn: %s -> %s" extendee_type c.typestr;
-  Code.emit signature `None "val get: %s -> (%s, [> Runtime'.Result.error]) result" extendee_type c.typestr;
-  Code.emit signature `None "val set: %s -> %s -> %s" extendee_type c.typestr extendee_type;
+  Code.emit signature `None "type t = %s %s" typestr params.annot;
+  Code.emit signature `None "val get_exn: %s -> %s" extendee_type typestr;
+  Code.emit signature `None "val get: %s -> (%s, [> Runtime'.Result.error]) result" extendee_type typestr;
+  Code.emit signature `None "val set: %s -> %s -> %s" extendee_type typestr extendee_type;
 
   Code.emit implementation `None "module This = %s" module_name;
-  Code.emit implementation `None "type t = %s %s" c.typestr params.annot;
+  Code.emit implementation `None "type t = %s %s" typestr params.annot;
   Code.emit implementation `None "let get_exn extendee = Runtime'.Extensions.get Runtime'.Spec.(%s) (extendee.%s)" c.spec_str extendee_field ;
   Code.emit implementation `None "let get extendee = Runtime'.Result.catch (fun () -> get_exn extendee)";
   Code.emit implementation `Begin "let set extendee t =";
@@ -207,6 +210,7 @@ let emit_sub dest ~is_implementation ~is_first { module_name; signature; impleme
       Code.append dest implementation
   in
   Code.emit dest `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
+  Code.emit dest `None "";
   ()
 
 let rec emit_nested_types ~syntax ~signature ~implementation ?(is_first = true) nested_types =
@@ -233,33 +237,44 @@ let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
   let emit_message_type code (sig_type:[`Signature|`Implementation]) ~annot = function
     | _, [] ->
       Code.emit code `None "type t = unit %s" annot
-    | (`Tuple, (types: Types.c list)) ->
-      let types_str = List.map ~f:(fun (Types.{ type'; _ } : Types.c)-> Types.string_of_type type') types in
+    | (`Tuple, types) ->
+      let types_str = List.map ~f:(fun Types.{ type'; name = _; _ } -> Types.string_of_type type') types in
       let type_str = sprintf "(%s)" (String.concat ~sep:" * " types_str) in
-      let deprecated = List.for_all types ~f:(fun Types.{ deprecated; name = _; _ } -> deprecated) in
+      let deprecated = List.for_all types ~f:(fun Types.{ deprecated; _ } -> deprecated) in
       Code.emit code `None "type t = %s %s" (Code.append_deprecaton_if ~deprecated:(deprecated && sig_type = `Signature) `Item type_str) annot;
       if sig_type = `Signature then begin
-        (* Only emit documentation comments, if there are comments to emit *)
         match types with
-        | [Types.{ name = _; comments ; _ }] ->
-          Code.emit_comment code ~position:`Trailing comments
+        | [Types.{ comments = (comments, arg_comments); _ }] ->
+          Code.emit_field_doc code ~position:`Trailing ~comments:comments arg_comments;
         | types ->
-          let field_comments = List.map ~f:(fun Types.{ name; comments; _ } -> (name, comments)) types in
-          let comment =
+          let field_comments =
+            List.map ~f:(fun Types.{ name; comments = comments; _ } -> (name, comments)) types
+          in
+          let header =
             List.map ~f:fst field_comments
             |> String.concat ~sep:", "
             |> sprintf "[(%s)]"
           in
-          if List.exists ~f:(function (_, []) -> false | _ -> true) field_comments then
-            Code.emit_field_doc code ~position:`Trailing ~comment:comment field_comments
+          (* TODO: emit sub_field comments also. *)
+          let param_comments =
+            List.map ~f:(function
+              | (name, (comments, [])) ->
+                [(name, comments)]
+              | (name, (comments, sub_comments)) ->
+                (name, comments) :: List.filter ~f:(fun (_, cs) -> not (List.is_empty cs)) sub_comments
+            ) field_comments
+            |> List.flatten
+          in
+          (* The header now works. But we need to flat map it *)
+          Code.emit_field_doc code ~position:`Trailing ~header param_comments
       end
-    | `Record, (types: Types.c list) ->
+    | `Record, types ->
       Code.emit code `Begin "type t = {";
-      List.iter ~f:(fun Types.{ name; comments; deprecated; type'; _ } ->
+      List.iter ~f:(fun Types.{ name; comments = (comments, sub_comments); deprecated; type'; _ } ->
         let field = sprintf "%s:%s" (Type_db.get_message_field type_db ~proto_path name) (Types.string_of_type type') in
         Code.emit code `None "%s;" (Code.append_deprecaton_if ~deprecated:(deprecated && sig_type = `Signature) `Attribute field);
         if sig_type = `Signature then begin
-          Code.emit_comment code ~position:`Trailing comments
+          Code.emit_field_doc code ~position:`Trailing ~comments sub_comments
         end
       ) types;
       Code.emit code `End "} %s" annot;

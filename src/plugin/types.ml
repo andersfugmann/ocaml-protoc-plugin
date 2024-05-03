@@ -23,18 +23,13 @@ type type' =
     modifier: type_modifier; (** Modifier: list, option etc. *)
   }
 
+type comments = string list * (string * string list) list
 type c = {
   name : string;
   type' : type';
   spec_str: string;
   deprecated: bool; (** True if the type is marked as deprecated *)
-  comments: string list; (** Comments associated with the type. *)
-}
-(* This should be replace by c - it has the same info (and more) *)
-type field_spec = {
-  typestr : string;
-  spec_str: string;
-  deprecated: bool;
+  comments: comments; (** Comments associated with the type. *)
 }
 
 type t = {
@@ -320,38 +315,38 @@ let string_of_type = function
   | { name; modifier = List; _ } -> sprintf "%s list" name
   | { name; modifier = Optional; _ } -> sprintf "%s option" name
 
-let c_of_compound: type a b. deprecated:bool -> comments:string list -> string -> (a, b) compound -> c = fun ~deprecated ~comments name -> function
+let c_of_compound: type a b. deprecated:bool -> comments:(string list * (string * string list) list) -> string -> (a, b) compound -> c = fun ~deprecated ~comments name -> function
   | Basic (index, spec, default) ->
     let index_string = string_of_index index in
     let spec_str = sprintf "basic (%s, %s, %s)" index_string (string_of_spec spec) (string_of_proto_type spec default) in
     let modifier = No_modifier (string_of_default spec default) in
     let type' = { name = type_of_spec spec; modifier } in
-    { name; type'; spec_str; deprecated; comments  }
+    { name; type'; spec_str; deprecated; comments = comments }
   | Basic_req (index, spec) ->
     let index_string = string_of_index index in
     let spec_str = sprintf "basic_req (%s, %s)" index_string (string_of_spec spec) in
     let type' = { name = type_of_spec spec; modifier = Required } in
-    { name; type'; spec_str; deprecated; comments  }
+    { name; type'; spec_str; deprecated; comments = comments }
   | Basic_opt (index, spec) ->
     let index_string = string_of_index index in
     let spec_str = sprintf "basic_opt (%s, %s)" index_string (string_of_spec spec) in
     let type' = { name = type_of_spec spec; modifier = Optional } in
-    { name; type'; spec_str; deprecated; comments }
+    { name; type'; spec_str; deprecated; comments = comments }
   | Repeated (index, spec, packed) ->
     let index_string = string_of_index index in
     let spec_str = sprintf "repeated (%s, %s, %s)" index_string (string_of_spec spec) (string_of_packed packed) in
     let type' = { name = type_of_spec spec; modifier = List } in
-    { name; type'; spec_str; deprecated; comments }
+    { name; type'; spec_str; deprecated; comments = comments }
   | Map (index, { key_spec; key_type; value_compound } ) ->
     let index_string = string_of_index index in
     let spec_str = sprintf "map (%s, (%s, %s))" index_string key_spec value_compound.spec_str in
     let type_name = sprintf "(%s * %s)" key_type (string_of_type value_compound.type') in
     let type' = { name = type_name; modifier = List } in
-    { name; type'; spec_str; deprecated; comments }
+    { name; type'; spec_str; deprecated; comments = comments }
   | Oneof { type'; spec; fields; _ } ->
     let spec_str = sprintf "oneof (%s)" spec in
     let type' = { name = type'; modifier = Oneof_type ({|`not_set|}, fields) } in
-    { name; type'; spec_str; deprecated; comments }
+    { name; type'; spec_str; deprecated; comments = comments }
 
 let rec c_of_field ~params ~syntax ~scope ~type_db ~comment_db ~map_type field =
   let open FieldDescriptorProto in
@@ -362,7 +357,10 @@ let rec c_of_field ~params ~syntax ~scope ~type_db ~comment_db ~map_type field =
   let index = (number, name, json_name) in
   let deprecated = is_deprecated field in
   let proto_path = Scope.get_proto_path scope in
-  let comments = Comment_db.get_field_comments comment_db ~proto_path ~name:json_name in
+  let comments =
+    let comments = Comment_db.get_field_comments comment_db ~proto_path ~name:json_name in
+    comments, []
+  in
 
   match syntax, field with
   (* This function cannot handle oneof types *)
@@ -516,14 +514,6 @@ let rec c_of_field ~params ~syntax ~scope ~type_db ~comment_db ~map_type field =
   | _, { type' = None; _ } -> failwith "Type must be set"
 
 
-and spec_of_field ~params ~syntax ~scope ~type_db ~comment_db ~map_type field : field_spec =
-  let c = c_of_field ~params ~syntax ~scope ~type_db ~comment_db ~map_type field in
-  {
-    typestr = string_of_type c.type';
-    spec_str = c.spec_str;
-    deprecated = is_deprecated field;
-  }
-
 let c_of_oneof ~params ~syntax:_ ~scope ~type_db ~comment_db OneofDescriptorProto.{ name; _ } fields =
   (* Construct the type. *)
   let oneof_name = Option.value_exn ~message:"Oneofs must have a name" name in
@@ -583,10 +573,24 @@ let c_of_oneof ~params ~syntax:_ ~scope ~type_db ~comment_db OneofDescriptorProt
     Oneof { type'; spec = spec; fields }
   in
 
-  (* TODO: Construct comments for this oneof element *)
+  let deprecated =
+    List.for_all ~f:(function
+      | { FieldDescriptorProto.options = Some { deprecated; _ }; _ }, _ -> deprecated
+      | { FieldDescriptorProto.options = None; _ }, _ -> false
+    ) fields
+  in
   let comments = Comment_db.get_oneof_comments comment_db ~proto_path:proto_name ~name:oneof_name in
-
-  c_of_compound ~deprecated:false ~comments (Option.value_exn name) oneof
+  let sub_comments =
+    List.filter_map ~f:(fun (FieldDescriptorProto.{ name; _ }, _) ->
+      let name = Option.value_exn name in
+      let adt_name = Type_db.get_message_oneof_field type_db ~proto_name ~oneof_name ~field_name:name in
+      let comments = Comment_db.get_field_comments comment_db ~proto_path:proto_name ~name in
+      match comments with
+      | [] -> None
+      | _ -> Some (adt_name, comments)
+    ) fields
+  in
+  c_of_compound ~deprecated ~comments:(comments, sub_comments) (Option.value_exn name) oneof
 
 (** Return a list of plain fields + a list of fields per oneof_decl *)
 let split_oneof_decl fields oneof_decls =
@@ -630,7 +634,7 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~type_db ~comment_d
   let extensions_c =
     { name = Type_db.extensions_name;
       type' = { name = "Runtime'.Extensions.t"; modifier = No_modifier "Runtime'.Extensions.default"; };
-      spec_str = ""; deprecated = false; comments = [] }
+      spec_str = ""; deprecated = false; comments = ([], []) }
   in
 
   let ts =

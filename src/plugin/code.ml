@@ -150,7 +150,8 @@ let contents t =
 let emit_field_doc t
       ~(position:[`Leading | `Trailing])
       ?(format:('a -> 'b, unit, string, unit) format4="[%s]")
-      ?(comment="")
+      ?(header="")
+      ?(comments=[])
       param_comments =
 
   (* Remove parameters with no comments *)
@@ -158,22 +159,22 @@ let emit_field_doc t
     List.filter ~f:(fun (_, comments) -> not (List.is_empty comments)) param_comments
   in
 
-  match comment, param_comments with
-  | "", [] -> ()
-  | comment, [] ->
-    if position = `Leading then emit t `None "";
-    emit t `None "(** %s *)" (String.trim comment);
-    if position = `Trailing then emit t `None ""
-  | comment, param_comments ->
+  let comments = map_comments comments in
+  match List.exists ~f:(fun s -> String.length s > 0) comments, String.length header > 0, not (List.is_empty param_comments) with
+  | false, _, false -> ()
+  | has_comments, has_header, _ ->
     if position = `Leading then emit t `None "";
     emit t `Begin "(**";
-    emit t `None "%s" comment;
-    emit t `None "";
+
+    if has_comments then List.iter ~f:(emit t `None "%s") comments;
+    if has_header then emit t `None "%s" header;
     List.iter ~f:(fun (param, comments) ->
       let comments = map_comments comments in
+      emit t `None "";
       emit t `Begin format param;
       List.iter ~f:(emit t `None "%s") comments;
-      emit t `None "";
+      emit t `End "";
     ) param_comments;
+
     emit t `End "*)";
     if position = `Trailing then emit t `None ""
