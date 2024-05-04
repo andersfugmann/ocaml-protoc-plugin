@@ -1,4 +1,6 @@
-open StdLabels
+open !StdLabels
+open !MoreLabels
+open !Utils
 open Parameters
 open Spec.Descriptor.Google.Protobuf
 
@@ -411,7 +413,6 @@ let rec wrap_packages ~params ~syntax ~options ~comment_db ~type_db ~scope messa
     Code.emit signature `Begin "module rec %s : sig" package_name;
     Code.append signature signature';
     Code.emit signature `End "end";
-
     signature, implementation
 
 
