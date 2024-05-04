@@ -9,18 +9,18 @@ let mk_timestamp () =
 
 
 let mk_request () =
-  Echo.Request.{ timestamp = `Ts (mk_timestamp ()); what = `Type Echo.Request.Who.World }
+  Echo.Request.{ timestamp = Some (mk_timestamp ()); what = `Type Echo.Request.Who.World }
 
 
 let mk_reply Echo.Request.{ timestamp; what } =
 
   let at =
     match timestamp with
-      | `Ts {seconds; nanos = _} ->
+      | Some {seconds; nanos = _} ->
           let minutes = seconds / 60 in
           let hours = minutes / 60 in
           Printf.sprintf "%d:%d:%d" (hours mod 24) (minutes mod 60) (seconds mod 60)
-      | `not_set ->
+      | None ->
           "whenever"
   in
 

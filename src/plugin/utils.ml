@@ -87,3 +87,5 @@ module StringMap = struct
     ) map
 end
 module StringSet = Set.Make(String)
+
+module IntSet = Set.Make(Int)

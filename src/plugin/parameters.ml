@@ -9,6 +9,7 @@ type t = {
   debug: bool;
   singleton_record: bool;
   prefix_output_with_package: bool;
+  singleton_oneof_as_option: bool;
 }
 
 let default = {
@@ -20,6 +21,7 @@ let default = {
   debug = false;
   singleton_record = false;
   prefix_output_with_package = false;
+  singleton_oneof_as_option = true;
 }
 
 let parse_option str =
@@ -41,6 +43,7 @@ let parse parameters =
       | `Expr ("singleton_record", (("true"|"false") as v)) -> { param with singleton_record = (bool_of_string v) };
       | `Stmt "debug" -> { param with debug = true}
       | `Expr ("prefix_output_with_package", (("true"|"false") as v)) -> { param with prefix_output_with_package = (bool_of_string v)}
+      | `Expr ("singleton_oneof_as_option", (("true"|"false") as v)) -> { param with singleton_oneof_as_option = (bool_of_string v)}
       | `Stmt "" -> param
       | _ -> failwith ("Unknown parameter: " ^ option)
     )

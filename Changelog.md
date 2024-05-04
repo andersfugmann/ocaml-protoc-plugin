@@ -1,7 +1,11 @@
-## 6.1.1: Unreleased
+## 6.2.0: Unreleased
 - Fix potential nameclash for messages defining extensions
 - Resolve compilation warning on deprecated fields enclosed in a oneof
 - Improve how comments are copied to generated code
+- Add flag 'singleton\_oneof\_as\_option' to map single field
+  onofs to option type (default on). Set to 'false' to keep old
+  behaviour.
+
 
 ## 6.1.0: 2024-04-25
 - Fix name resolution leading to wrongly mapped names

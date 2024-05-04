@@ -7,8 +7,8 @@ message Request {
      Mum = 0;
      World = 1;
   }
-  oneof timestamp {
-    google.protobuf.Timestamp ts = 1;
+  oneof ts {
+    google.protobuf.Timestamp timestamp = 1;
   };
   oneof what {
     who type = 10;

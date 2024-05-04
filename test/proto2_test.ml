@@ -57,9 +57,9 @@ let%expect_test "Default created messages should not set any fields" =
   in ();
   [%expect {|
     Size of message: 0
-    { of' = `not_set; o0 = "default string"; o1 = "default bytes"; o2 = 27;
-      o3 = 27; o4 = -27; o5 = -27; o6 = -27; o7 = -27; o8 = 27l; o9 = 27L;
-      oa = -27l; ob = -27L; oc = -27.; od = -27.; oe = true } |}]
+    { og = 5; o0 = "default string"; o1 = "default bytes"; o2 = 27; o3 = 27;
+      o4 = -27; o5 = -27; o6 = -27; o7 = -27; o8 = 27l; o9 = 27L; oa = -27l;
+      ob = -27L; oc = -27.; od = -27.; oe = true } |}]
 
 let%expect_test "Default values in oneofs are ignored" =
   let module T = Proto2.Oneof_default in

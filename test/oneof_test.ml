@@ -38,14 +38,14 @@ let%expect_test "Default values in oneof" =
 
 let%expect_test "Single field oneof" =
   let module T = Oneof.Test4 in
-  let t = `I 5 in
+  let t = Some 5 in
   Test_lib.test_encode ~proto_file (module T) t;
   [%expect {|
     i: 5 |}]
 
 let%expect_test "Single field oneof" =
   let module T = Oneof.Test5 in
-  let t = `E () in
+  let t = Some () in
   Test_lib.test_encode ~proto_file (module T) t;
   [%expect {|
     e {

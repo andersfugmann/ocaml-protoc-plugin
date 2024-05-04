@@ -34,7 +34,7 @@ let parse_request Plugin.CodeGeneratorRequest.{file_to_generate = files_to_gener
     List.mem ~set:files_to_generate (Option.value_exn name)
   ) proto_files
   in
-  let type_db = Type_db.init ~prefix_module_names:params.prefix_output_with_package proto_files in
+  let type_db = Type_db.init ~params proto_files in
 
   let result =
     List.map ~f:(fun (proto_file : Descriptor.FileDescriptorProto.t) ->

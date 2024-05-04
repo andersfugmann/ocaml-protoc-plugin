@@ -47,24 +47,37 @@ let add_scope ~proto_name ~ocaml_name { proto_path; ocaml_path; module_name; oca
   in
   { proto_path; ocaml_path; ocaml_name; module_name }
 
-let element_of_message ~mangle_f descriptorproto =
+let element_of_message ~params ~mangle_f descriptorproto =
   let DescriptorProto.{ field = fields; oneof_decl = oneof_decls; options; extension_range; _ } = descriptorproto in
   let map_type = match options with
     | Some MessageOptions.{ map_entry = Some true; _ } -> Some descriptorproto
     | _ -> None
   in
 
-  (* Need to remove the oneof_decls that we should use as fields *)
-  (* This is somewhat annoying. We should really set single field oneofs as option types. *)
-  (* There is essentially no difference from proto3 optional fields to that. *)
-
-  let plain_fields = List.filter ~f:(function
-    | FieldDescriptorProto.{ proto3_optional = Some v; _ } -> v
-    | FieldDescriptorProto.{ oneof_index; _ } -> Option.is_none oneof_index) fields
+  (* Create a set of oneof index' that should be emitted *)
+  let _, oneofs =
+    List.fold_left ~init:(0, IntSet.empty) ~f:(fun (index, acc) _oneof_decl ->
+      let count =
+        List.fold_left ~init:0 ~f:(fun acc -> function
+          | FieldDescriptorProto.{ proto3_optional = Some true; _ } -> acc
+          | FieldDescriptorProto.{ oneof_index = Some oneof_index; _ } when oneof_index = index -> acc + 1
+          | _ -> acc
+        ) fields
+      in
+      let acc =
+        match count > (if params.Parameters.singleton_oneof_as_option then 1 else 0) with
+        | true -> IntSet.add index acc
+        | false -> acc
+      in
+      (index + 1, acc)
+    ) oneof_decls
   in
-  let oneof_decls =
-    let remove_ids = List.filter_map ~f:(fun FieldDescriptorProto.{ oneof_index; _ } -> oneof_index) plain_fields in
-    List.filteri ~f:(fun i _ -> not (List.mem i ~set:remove_ids)) oneof_decls
+
+  let plain_fields =
+    List.filter ~f:(function
+      | FieldDescriptorProto.{ oneof_index = None; _ } -> true
+      | FieldDescriptorProto.{ oneof_index = Some index; _ } -> not (IntSet.mem index oneofs)
+    ) fields
   in
 
   let field_name_map =
@@ -76,13 +89,17 @@ let element_of_message ~mangle_f descriptorproto =
     in
 
     let plain_field_names = List.filter_map ~f:(fun field -> field.FieldDescriptorProto.name) plain_fields in
-    let oneof_names = List.filter_map ~f:(fun field -> field.OneofDescriptorProto.name) oneof_decls in
+    let oneof_names =
+      List.filter_map ~f:(fun field -> field.OneofDescriptorProto.name) oneof_decls
+      |> List.filteri ~f:(fun i _name -> IntSet.mem i oneofs)
+    in
     (* Extend name mapping. The 'extensions_name' should already have been allocated *)
     Names.create_ocaml_mapping ~name_map ~mangle_f ~name_f:Names.field_name (plain_field_names @ oneof_names)
   in
-  (* Need to exclude oneof's where its a proto3 message. In reality, we should not really care. *)
   let oneofs =
-    List.mapi ~f:(fun i OneofDescriptorProto.{ name; _ } ->
+    List.mapi ~f:(fun i oneof -> i, oneof) oneof_decls
+    |> List.filter ~f:(fun (i, _) -> IntSet.mem i oneofs)
+    |> List.map ~f:(fun (i, OneofDescriptorProto.{ name; _ }) ->
       let name = Option.value_exn ~message:"Oneof field must have a name" name in
       (* Get all the fields *)
       let oneof_fields =
@@ -107,8 +124,8 @@ let element_of_message ~mangle_f descriptorproto =
         ) oneof_fields
       in
       let ocaml_name = StringMap.find name field_name_map in
-      { name; ocaml_name }, Oneof oneofs
-    ) oneof_decls
+      ({ name; ocaml_name }, Oneof oneofs)
+    )
   in
   let plain_fields =
     List.map ~f:(fun FieldDescriptorProto.{ name; type_name; type'; _ } ->
@@ -154,7 +171,7 @@ let element_of_service ~mangle_f ServiceDescriptorProto.{ method'; _ } =
   in
   Service entries
 
-let rec traverse_message ~mangle_f ~scope map services descriptorproto =
+let rec traverse_message ~params ~mangle_f ~scope map services descriptorproto =
   let DescriptorProto.{ nested_type; enum_type; extension = extensions; _ } = descriptorproto in
   (* Scope contains all messages *)
   let name_map =
@@ -164,7 +181,7 @@ let rec traverse_message ~mangle_f ~scope map services descriptorproto =
     Names.create_ocaml_mapping ~mangle_f ~name_f:Names.module_name (message_names @ enum_names @ service_names)
   in
   (* Scope contains this element *)
-  let message_element = element_of_message ~mangle_f descriptorproto in
+  let message_element = element_of_message ~params ~mangle_f descriptorproto in
 
   (* Extension name should not interfere with other module names, but should still be uniq *)
   let extension_names = List.filter_map ~f:(fun e -> e.FieldDescriptorProto.name) extensions in
@@ -197,7 +214,7 @@ let rec traverse_message ~mangle_f ~scope map services descriptorproto =
       let proto_name = Option.value_exn ~message:"All messages must have a name" message.DescriptorProto.name in
       let ocaml_name = StringMap.find proto_name name_map in
       let scope = add_scope ~proto_name ~ocaml_name scope in
-      let map, message_element = traverse_message ~mangle_f ~scope map [] message in
+      let map, message_element = traverse_message ~params ~mangle_f ~scope map [] message in
       StringMap.add ~key:scope.proto_path ~data:(scope, message_element) map
     ) nested_type
   in
@@ -212,7 +229,7 @@ let rec traverse_message ~mangle_f ~scope map services descriptorproto =
   in
   map, message_element
 
-let traverse_file map module_name FileDescriptorProto.{ message_type = messages; package; enum_type = enums; service = services; extension = extensions; options; _ } =
+let traverse_file ~params map module_name FileDescriptorProto.{ message_type = messages; package; enum_type = enums; service = services; extension = extensions; options; _ } =
   let mangle_f = match (Names.has_mangle_option options) with
     | true -> Names.to_snake_case
     | false -> fun x -> x
@@ -236,7 +253,7 @@ let traverse_file map module_name FileDescriptorProto.{ message_type = messages;
   in
   (* Mimic a message. *)
   let message = DescriptorProto.make ~nested_type:messages ~enum_type:enums ~extension:extensions () in
-  let map, _ = traverse_message ~mangle_f map ~scope services message in
+  let map, _ = traverse_message ~params ~mangle_f map ~scope services message in
   map
 
 (** Construct a set of proto_names (types) that are cyclic *)
@@ -302,13 +319,13 @@ let dump { map; cyclic_set = _; file_map } =
     | _ -> ()
   ) map
 
-let init ~prefix_module_names (files : FileDescriptorProto.t list) =
+let init ~params (files : FileDescriptorProto.t list) =
   let map, file_map = List.fold_left ~init:(StringMap.empty, StringMap.empty) ~f:(
     fun (map, file_map) file ->
       let file_name = Option.value_exn ~message:"Files must have a name" file.FileDescriptorProto.name in
-      let module_name = make_module_name ~prefix_module_names ?package:file.package file_name in
+      let module_name = make_module_name ~prefix_module_names:params.Parameters.prefix_output_with_package ?package:file.package file_name in
       let file_map = StringMap.add ~key:file_name ~data:module_name file_map in
-      let map = traverse_file map module_name file in
+      let map = traverse_file ~params map module_name file in
       (map, file_map)
   ) files in
 
@@ -372,14 +389,14 @@ let get_message_oneof_field { map; _ } ~proto_name ~oneof_name ~field_name =
           | { name; constructor_name; _ } when name = field_name -> Some constructor_name
           | _ -> None
         ) oneofs
-        |> Option.value_exn ~message:(sprintf "Field %s not part of oneof %s in message %s"
+        |> Option.value_exn ~message:(sprintf "Field '%s' not part of oneof '%s' in message '%s'"
                                         field_name oneof_name proto_name)
 
-      | Some (Plain _) -> failwith_f "Field %s in message %s is not a oneof field" field_name proto_name
-      | None -> failwith_f "Field %s not found for message %s" oneof_name proto_name
+      | Some (Plain _) -> failwith_f "Field '%s' in message %s is not a oneof field" field_name proto_name
+      | None -> failwith_f "Field '%s' not found for message '%s'" oneof_name proto_name
     in
     name
-  | _ -> failwith_f "%s is not a message" proto_name
+  | _ -> failwith_f "'%s' is not a message" proto_name
 
 
 (** Get the name of an enum *)
@@ -390,8 +407,8 @@ let get_enum_name { map; _ } ~proto_path ?name () =
   in
   match StringMap.find_opt proto_name map with
   | Some ({ ocaml_name; _ }, Enum _) -> ocaml_name
-  | Some (_, element_type) -> failwith_f "%s is not an enum but a %s" proto_name (string_of_element_type element_type)
-  | None -> failwith_f "%s not found" proto_name
+  | Some (_, element_type) -> failwith_f "'%s' is not an enum but a '%s'" proto_name (string_of_element_type element_type)
+  | None -> failwith_f "'%s' not found" proto_name
 
 (** Get the name of an enum value (constructor) for a enum *)
 let get_enum_value { map; _ } ~proto_path ?enum_name enum_value_name =
@@ -400,22 +417,22 @@ let get_enum_value { map; _ } ~proto_path ?enum_name enum_value_name =
     | Some enum_name -> sprintf "%s.%s" proto_path enum_name
   in
   match StringMap.find_opt proto_name map with
-  | None -> failwith_f "Enum %s not found" proto_name
+  | None -> failwith_f "Enum '%s' not found" proto_name
   | Some (_, Enum values) -> begin
       List.find_opt values ~f:(fun { name; _ } -> name = enum_value_name)
       |> function
-      | None -> failwith_f "Enum value %s not found in enum %s" enum_value_name proto_name
+      | None -> failwith_f "Enum value '%s' not found in enum '%s'" enum_value_name proto_name
       | Some { ocaml_name; _ } -> ocaml_name
     end
-  | Some (_, element_type) -> failwith_f "%s(%s):%s is of type %s and not type enum" proto_name (Option.value ~default:"<none>" enum_name) enum_value_name (string_of_element_type element_type)
+  | Some (_, element_type) -> failwith_f "'%s(%s):%s' is of type '%s' and not type enum" proto_name (Option.value ~default:"<none>" enum_name) enum_value_name (string_of_element_type element_type)
 
 (** Get the module name for a service *)
 let get_service { map; _ } ~proto_path name =
   let proto_name = sprintf "%s.%s" proto_path name in
   match StringMap.find_opt proto_name map with
   | Some ({ ocaml_name; _ }, Service _) -> ocaml_name
-  | Some (_, element_type) -> failwith_f "%s is not a service but a %s" proto_name (string_of_element_type element_type)
-  | None -> failwith_f "%s not found" proto_name
+  | Some (_, element_type) -> failwith_f "'%s' is not a service but a '%s'" proto_name (string_of_element_type element_type)
+  | None -> failwith_f "'%s' not found" proto_name
 
 (** Get the ocaml method name for a method in a service *)
 let get_service_method { map; _ } ~proto_path ~service_name method_name =
@@ -428,26 +445,26 @@ let get_service_method { map; _ } ~proto_path ~service_name method_name =
       ) methods
       |> function
       | Some name -> name
-      | None -> failwith_f "method %s not found in service %s" method_name proto_name
+      | None -> failwith_f "method '%s' not found in service '%s'" method_name proto_name
     end
-  | Some (_, element_type) -> failwith_f "%s is not a method but a %s" proto_name (string_of_element_type element_type)
-  | None -> failwith_f "%s not found" proto_name
+  | Some (_, element_type) -> failwith_f "'%s' is not a method but a '%s'" proto_name (string_of_element_type element_type)
+  | None -> failwith_f "'%s' not found" proto_name
 
 let get_module_name { file_map; _ } proto_file =
   match StringMap.find_opt proto_file file_map with
-  | None -> failwith_f "Could not find module name for %s" proto_file
+  | None -> failwith_f "Could not find module name for '%s'" proto_file
   | Some module_name -> module_name
 
 let get_location { map; _ } proto_path =
   match StringMap.find_opt proto_path map with
-  | None -> failwith_f "Unknown proto_path %s" proto_path
+  | None -> failwith_f "Unknown proto_path '%s'" proto_path
   | Some ({ module_name; _}, _) -> module_name
 
 let get_map_type { map; _ } proto_path =
   match StringMap.find_opt proto_path map with
   | Some (_, Message { map_type; _ }) -> map_type
-  | Some (_, element_type) -> failwith_f "%s is not a message but a %s" proto_path (string_of_element_type element_type)
-  | None -> failwith_f "message %s not found" proto_path
+  | Some (_, element_type) -> failwith_f "'%s' is not a message but a '%s'" proto_path (string_of_element_type element_type)
+  | None -> failwith_f "message '%s' not found" proto_path
 
 let get_entry { map; _ } proto_path =
   match StringMap.find_opt proto_path map with
@@ -463,11 +480,11 @@ let get_ocaml_path { map; _ } proto_path =
   match StringMap.find_opt proto_path map with
   | Some ({ ocaml_path = ""; ocaml_name; _ }, _) -> ocaml_name
   | Some ({ ocaml_path; ocaml_name; _ }, _ ) -> sprintf "%s.%s" ocaml_path ocaml_name
-  | None -> failwith_f "type %s not found" proto_path
+  | None -> failwith_f "type '%s' not found" proto_path
 
 let get_extension { map; _ } ~proto_path name =
   let proto_name = sprintf "%s.%s" proto_path name in
   match StringMap.find_opt proto_name map with
   | Some ({ ocaml_name; _ }, Extension) -> ocaml_name
-  | Some (_, element_type) -> failwith_f "%s is not an extension but a %s" proto_name (string_of_element_type element_type)
-  | None -> failwith_f "%s not found" proto_name
+  | Some (_, element_type) -> failwith_f "'%s' is not an extension but a '%s'" proto_name (string_of_element_type element_type)
+  | None -> failwith_f "'%s' not found" proto_name

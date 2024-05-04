@@ -641,7 +641,12 @@ let make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~type_db ~comment_d
     split_oneof_decl fields oneof_decls
     |> List.map ~f:(function
       (* proto3 Oneof fields with only one field is mapped as regular field *)
-      | `Oneof (_, [ (FieldDescriptorProto.{ proto3_optional = Some true; _ } as field, map_type) ] )
+      | `Oneof (_, [ field, map_type ] ) when params.singleton_oneof_as_option ->
+        let field = { field with proto3_optional = Some true; oneof_index = None } in
+        c_of_field ~params ~syntax ~scope ~map_type ~type_db ~comment_db field
+      | `Oneof (_, [ (FieldDescriptorProto.{ proto3_optional = Some true; _ } as field, map_type) ] ) ->
+        let field = { field with oneof_index = None } in
+        c_of_field ~params ~syntax ~scope ~map_type ~type_db ~comment_db field
       | `Field ( field, map_type) ->
         c_of_field ~params ~syntax ~scope ~map_type ~type_db ~comment_db field
       | `Oneof (decl, fields) ->
