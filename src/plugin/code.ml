@@ -62,7 +62,6 @@ let map_comments comments =
         |> List.map ~f:(String.replace ~substring:"v}" ~f:(fun _ -> "v\\}"))
         |> remove_trailing_empty_lines
       in
-      (* TODO: Remove indentation *)
       "{v" :: lines @ ["v}"]
   )
   |> List.flatten

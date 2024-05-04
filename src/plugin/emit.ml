@@ -260,7 +260,6 @@ let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
             |> String.concat ~sep:", "
             |> sprintf "[(%s)]"
           in
-          (* TODO: emit sub_field comments also. *)
           let param_comments =
             List.map ~f:(function
               | (name, (comments, [])) ->
