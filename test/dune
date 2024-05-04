@@ -50,7 +50,7 @@
    included2.ml included3_dash.ml service.ml recursive.ml recursive2.ml protocol.ml name_clash.ml
    name_clash_mangle.ml proto2.ml packed.ml mangle_names.ml extensions.ml
    options.ml name_clash2.ml empty.ml service_rpc_clash.ml service_empty_package.ml
-   deprecated.ml json_encoding.ml)
+   deprecated.ml json_encoding.ml comments.ml)
  (deps
   (:plugin ../src/plugin/protoc_gen_ocaml.exe)
   (:proto
@@ -60,7 +60,7 @@
     recursive.proto recursive2.proto protocol.proto name_clash.proto name_clash_mangle.proto
     proto2.proto packed.proto mangle_names.proto extensions.proto options.proto
     name_clash2.proto empty.proto service_rpc_clash.proto service_empty_package.proto
-    deprecated.proto json_encoding.proto)
+    deprecated.proto json_encoding.proto comments.proto)
  )
  (action
   (run protoc -I %{read-lines:google_include} -I .

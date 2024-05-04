@@ -16,7 +16,7 @@ depends: [
   "conf-protoc" {>= "1.0.0"}
   "conf-pkg-config"
   "conf-protoc-dev" {with-test}
-  "conf-c+++" {with-test}
+  "conf-c++" {with-test}
   "dune" {>= "3.12"}
   "ocaml" {>= "4.08.0"}
   "ppx_expect"

@@ -34,3 +34,12 @@ message Bar {
 extend Bar {
     optional uint32 z = 131;
 }
+
+// Test name clashes for extensions name.
+message extensions {
+    required uint32 extensions = 1;
+    required uint32 extensions_ = 2;
+    required uint32 Extensions = 3;
+    required uint32 Extensions_ = 4;
+    extensions 100 to 199; // This should have reserved the name.
+}

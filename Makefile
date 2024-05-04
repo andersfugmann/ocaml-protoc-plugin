@@ -64,10 +64,12 @@ bootstrap: src/spec/descriptor.ml src/spec/plugin.ml src/spec/options.ml ## Rege
 
 
 .PHONY: doc
-doc: ## Build documentation
-	dune build @doc
+doc: ## Build documentation, including private libraries
+	dune build @doc @doc-private
 
-gh-pages: doc ## Publish documentation
+gh-pages:
+	dune clean
+	dune build @doc -p ocaml-protoc-plugin
 	git clone `git config --get remote.origin.url` .gh-pages --reference .
 	git -C .gh-pages checkout --orphan gh-pages
 	git -C .gh-pages reset

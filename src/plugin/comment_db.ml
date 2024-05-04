@@ -3,8 +3,6 @@ open !MoreLabels
 open !Utils
 open Spec.Descriptor.Google.Protobuf
 
-let debug=false
-
 (** Module to lookup comments for various elements in a proto file *)
 
 type element =
@@ -30,25 +28,27 @@ let rec string_of_element = function
   | Option -> "Option"
   | Unknown (ctx, n) -> Printf.sprintf "Unknown(%s, %d)" (string_of_element ctx) n
 
-let element_of_int ~context = function
-  | 4 when context = File -> Message
-  | 8 when context = File -> Option
-  | 3 when context = Message -> Message
+(* 4,3,8,0??? *)
+let element_of_int ~context field_no =
+  match field_no, context with
+  | 4, File -> Message
+  | 8, File -> Option
+  | 3, Message -> Message
 
-  | 5 when context = File -> Enum
-  | 4 when context = Message -> Enum
-  | 2 when context = Enum -> Enum_value
+  | 5, File -> Enum
+  | 4, Message -> Enum
+  | 2, Enum -> Enum_value
 
-  | 8 when context = Message -> Oneof
-  | 2 when context = Message -> Field
+  | 8, Message -> Oneof
+  | 2, Message -> Field
 
-  | 6 when context = File -> Service
-  | 2 when context = Service -> Method
+  | 6, File -> Service
+  | 2, Service -> Method
 
-  | 7 when context = File -> Extension
-  | 6 when context = Message -> Extension
+  | 7, File -> Extension
+  | 6, Message -> Extension
 
-  | n -> Unknown (context, n)
+  | n, context -> Unknown (context, n)
 
 type path = (element * int) list
 
@@ -105,6 +105,10 @@ let traverse_field index FieldDescriptorProto.{ name; _ } =
   let name = Option.value_exn name in
   [Field, index], name
 
+let traverse_oneof index OneofDescriptorProto.{ name; _ } =
+  let name = Option.value_exn name in
+  [Oneof, index], name
+
 let traverse_extension index FieldDescriptorProto.{ name; _ } =
   let name = Option.value_exn name in
   [Extension, index], name
@@ -127,14 +131,15 @@ let traverse_enum_type index EnumDescriptorProto.{ name; value; _ } =
   let values = List.mapi ~f:traverse_enum_value value in
   prepend_path ~tpe:Enum ~index ~name values
 
-let rec traverse_message index DescriptorProto.{ name; field; nested_type; enum_type; extension; _ } =
+let rec traverse_message index DescriptorProto.{ name; field; nested_type; enum_type; extension; oneof_decl; _ } =
   let name = Option.value_exn name in
   let fields = List.mapi ~f:traverse_field field in
   let sub_messages = concat_mapi ~f:traverse_message nested_type in
   let extensions = List.mapi ~f:traverse_extension extension in
   let enums = concat_mapi ~f:traverse_enum_type enum_type in
+  let oneofs = List.mapi ~f:traverse_oneof oneof_decl in
 
-  (fields @ sub_messages @ extensions @ enums)
+  (fields @ sub_messages @ extensions @ enums @ oneofs)
   |> prepend_path ~tpe:Message ~index ~name
 
 let traverse FileDescriptorProto.{ package; enum_type; service; extension; message_type; _ } =
@@ -151,8 +156,6 @@ let traverse FileDescriptorProto.{ package; enum_type; service; extension; messa
 
 let type_prefix path = List.rev path |> List.hd |> fst |> string_of_element
 
-let unhandled = ref StringSet.empty
-
 (** Traverse the full filedescriptor proto to construct proto_name -> comments mapping *)
 let init: FileDescriptorProto.t -> t = fun filedescriptor ->
   let code_info_map = make_code_info_map filedescriptor.source_code_info in
@@ -166,12 +169,6 @@ let init: FileDescriptorProto.t -> t = fun filedescriptor ->
       | None -> t
     )
   in
-  (* Dump all unfetched keys *)
-  if debug then begin
-    StringSet.iter ~f:(Printf.eprintf "Unhandled: %s\n") !unhandled;
-    unhandled := StringMap.fold ~init:StringSet.empty ~f:(fun ~key ~data:_ set -> StringSet.add key set) db;
-    Printf.eprintf "*** process %s\n" (Option.value_exn filedescriptor.name)
-  end;
   db
 
 
@@ -185,7 +182,6 @@ let get_comments: element_type:element -> proto_path:string -> ?name:string -> t
     | Some name -> Printf.sprintf "%s.%s" key name
     | None -> key
   in
-  if debug then unhandled := StringSet.remove key !unhandled;
   StringMap.find_opt key t
   |> Option.map ~f:( fun { leading; trailing; _} -> [leading; trailing])
   (*|> (fun x -> match x with

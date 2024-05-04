@@ -122,6 +122,10 @@ let append_comments ~comments str =
   | false ->
     Printf.sprintf "%s(** %s *)" str comment_str
 
+let emit_deprecation ?(deprecated=true) t level =
+  if deprecated then
+    emit t `None "%s" (append_deprecaton_if ~deprecated:true level "")
+
 let emit_comment ~(position:[`Leading | `Trailing]) t = function
   | [] -> ()
   | comments ->
@@ -135,9 +139,42 @@ let emit_comment ~(position:[`Leading | `Trailing]) t = function
         List.iter ~f:(emit t `None "%s") comments;
         emit t `End "*)";
     in
-    (* if position = `Trailing then emit t `None ""; (* Dont think this is needed *) *)
+    if position = `Trailing then emit t `None "";
     ()
 
 let contents t =
   List.map ~f:(Printf.sprintf "%s") (List.rev t.code)
   |> String.concat ~sep:"\n"
+
+(** Emit comment for muliple fields / constructors *)
+let emit_field_doc t
+      ~(position:[`Leading | `Trailing])
+      ?(format:('a -> 'b, unit, string, unit) format4="[%s]")
+      ?(header="")
+      ?(comments=[])
+      param_comments =
+
+  (* Remove parameters with no comments *)
+  let param_comments =
+    List.filter ~f:(fun (_, comments) -> not (List.is_empty comments)) param_comments
+  in
+
+  let comments = map_comments comments in
+  match List.exists ~f:(fun s -> String.length s > 0) comments, String.length header > 0, not (List.is_empty param_comments) with
+  | false, _, false -> ()
+  | has_comments, has_header, _ ->
+    if position = `Leading then emit t `None "";
+    emit t `Begin "(**";
+
+    if has_comments then List.iter ~f:(emit t `None "%s") comments;
+    if has_header then emit t `None "%s" header;
+    List.iter ~f:(fun (param, comments) ->
+      let comments = map_comments comments in
+      emit t `None "";
+      emit t `Begin format param;
+      List.iter ~f:(emit t `None "%s") comments;
+      emit t `End "";
+    ) param_comments;
+
+    emit t `End "*)";
+    if position = `Trailing then emit t `None ""

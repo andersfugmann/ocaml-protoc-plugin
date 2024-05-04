@@ -1,5 +1,10 @@
+## 6.1.1: Unreleased
+- Fix potential nameclash for messages defining extensions
+- Resolve compilation warning on deprecated fields enclosed in a oneof
+- Improve how comments are copied to generated code
+
 ## 6.1.0: 2024-04-25
-- Fix name resolution leading to wrongly mapped named
+- Fix name resolution leading to wrongly mapped names
 - Fix codegen bug causing the plugin to reject valid protobuf
 - Add preliminary support for melange though disabling eager
   evaluation of serialize and deserialize functions when not using
@@ -21,7 +26,7 @@
 - [x] Fix file output name if files contains a '-'
 - [x] Resolve bug for Request/Response module aliases leading to
 generating uncompilable code. (#21)
-- [x] Fix codegen bug for messages with out fields and setting
+- [x] Fix codegen bug for messages without fields and setting
 singleton_records = true (#20)
 - [x] In Services, the package field is now correctly set to None if
       the service if not defined in a package scope (#24)

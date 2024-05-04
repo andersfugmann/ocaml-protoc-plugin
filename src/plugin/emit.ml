@@ -1,4 +1,6 @@
-open StdLabels
+open !StdLabels
+open !MoreLabels
+open !Utils
 open Parameters
 open Spec.Descriptor.Google.Protobuf
 
@@ -122,7 +124,8 @@ let emit_service_type ~scope ~comment_db ~type_db ServiceDescriptorProto.{ name;
     Code.emit signature `None "module Response : Runtime'.Spec.Message with type t = %s.t and type make_t = %s.make_t" output output;
     Code.emit signature `None "(** Module alias for the response message for this method call *)\n";
     Code.emit signature `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
-    Code.emit signature `None "val %s : %s" method_name sig_t';
+    Code.emit signature `None "";
+    Code.emit signature `None "val %s : %s%s" method_name sig_t' (Code.append_deprecaton_if ~deprecated `Item "");
 
     Code.emit implementation `Begin "module %s = struct" (String.capitalize_ascii method_name);
     Code.emit implementation `None "let package_name = %s"
@@ -133,9 +136,11 @@ let emit_service_type ~scope ~comment_db ~type_db ServiceDescriptorProto.{ name;
     Code.emit implementation `None "module Request = %s" input;
     Code.emit implementation `None "module Response = %s" output;
     Code.emit implementation `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
+    Code.emit implementation `None "";
     Code.emit implementation `Begin "let %s : %s = " method_name sig_t';
     Code.emit implementation `None "(module %s : Runtime'.Spec.Message with type t = %s.t ), " input input;
     Code.emit implementation `None "(module %s : Runtime'.Spec.Message with type t = %s.t )" output output;
+    Code.emit implementation `None "%s" (Code.append_deprecaton_if ~deprecated `Item "");
     Code.emit implementation `End "";
   in
   let name = Option.value_exn ~message:"Service definitions must have a name" name in
@@ -151,7 +156,9 @@ let emit_service_type ~scope ~comment_db ~type_db ServiceDescriptorProto.{ name;
 
   List.iter ~f:(emit_method ~scope:(Scope.push scope name) ~type_db signature implementation name) methods;
   Code.emit signature `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
+  Code.emit signature `None "";
   Code.emit implementation `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
+  Code.emit implementation `None "";
   signature, implementation
 
 let emit_extension ~scope ~params ~comment_db ~type_db field =
@@ -166,19 +173,20 @@ let emit_extension ~scope ~params ~comment_db ~type_db field =
   (* Get spec and type *)
   let c =
     let params = Parameters.{params with singleton_record = false} in
-    Types.spec_of_field ~params ~syntax:`Proto2 ~scope ~type_db ~map_type:None field
+    Types.c_of_field ~params ~syntax:`Proto2 ~scope ~type_db ~comment_db ~map_type:None field
   in
   let signature = Code.init () in
   let implementation = Code.init () in
   Code.append implementation signature;
+  let typestr = Types.string_of_type c.type' in
 
-  Code.emit signature `None "type t = %s %s" c.typestr params.annot;
-  Code.emit signature `None "val get_exn: %s -> %s" extendee_type c.typestr;
-  Code.emit signature `None "val get: %s -> (%s, [> Runtime'.Result.error]) result" extendee_type c.typestr;
-  Code.emit signature `None "val set: %s -> %s -> %s" extendee_type c.typestr extendee_type;
+  Code.emit signature `None "type t = %s %s" typestr params.annot;
+  Code.emit signature `None "val get_exn: %s -> %s" extendee_type typestr;
+  Code.emit signature `None "val get: %s -> (%s, [> Runtime'.Result.error]) result" extendee_type typestr;
+  Code.emit signature `None "val set: %s -> %s -> %s" extendee_type typestr extendee_type;
 
   Code.emit implementation `None "module This = %s" module_name;
-  Code.emit implementation `None "type t = %s %s" c.typestr params.annot;
+  Code.emit implementation `None "type t = %s %s" typestr params.annot;
   Code.emit implementation `None "let get_exn extendee = Runtime'.Extensions.get Runtime'.Spec.(%s) (extendee.%s)" c.spec_str extendee_field ;
   Code.emit implementation `None "let get extendee = Runtime'.Result.catch (fun () -> get_exn extendee)";
   Code.emit implementation `Begin "let set extendee t =";
@@ -207,6 +215,7 @@ let emit_sub dest ~is_implementation ~is_first { module_name; signature; impleme
       Code.append dest implementation
   in
   Code.emit dest `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
+  Code.emit dest `None "";
   ()
 
 let rec emit_nested_types ~syntax ~signature ~implementation ?(is_first = true) nested_types =
@@ -227,6 +236,54 @@ let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
   let signature = Code.init () in
   let implementation = Code.init () in
   let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
+  let proto_path = Scope.get_proto_path scope ?name in
+
+  (* Need extensions if specified, added to the list of fields *)
+  let emit_message_type code (sig_type:[`Signature|`Implementation]) ~annot = function
+    | _, [] ->
+      Code.emit code `None "type t = unit %s" annot
+    | (`Tuple, types) ->
+      let types_str = List.map ~f:(fun Types.{ type'; name = _; _ } -> Types.string_of_type type') types in
+      let type_str = sprintf "(%s)" (String.concat ~sep:" * " types_str) in
+      let deprecated = List.for_all types ~f:(fun Types.{ deprecated; _ } -> deprecated) in
+      Code.emit code `None "type t = %s %s" (Code.append_deprecaton_if ~deprecated:(deprecated && sig_type = `Signature) `Item type_str) annot;
+      if sig_type = `Signature then begin
+        match types with
+        | [Types.{ comments = (comments, arg_comments); _ }] ->
+          Code.emit_field_doc code ~position:`Trailing ~comments:comments arg_comments;
+        | types ->
+          let field_comments =
+            List.map ~f:(fun Types.{ name; comments = comments; _ } -> (name, comments)) types
+          in
+          let header =
+            List.map ~f:fst field_comments
+            |> String.concat ~sep:", "
+            |> sprintf "[(%s)]"
+          in
+          (* TODO: emit sub_field comments also. *)
+          let param_comments =
+            List.map ~f:(function
+              | (name, (comments, [])) ->
+                [(name, comments)]
+              | (name, (comments, sub_comments)) ->
+                (name, comments) :: List.filter ~f:(fun (_, cs) -> not (List.is_empty cs)) sub_comments
+            ) field_comments
+            |> List.flatten
+          in
+          (* The header now works. But we need to flat map it *)
+          Code.emit_field_doc code ~position:`Trailing ~header param_comments
+      end
+    | `Record, types ->
+      Code.emit code `Begin "type t = {";
+      List.iter ~f:(fun Types.{ name; comments = (comments, sub_comments); deprecated; type'; _ } ->
+        let field = sprintf "%s:%s" (Type_db.get_message_field type_db ~proto_path name) (Types.string_of_type type') in
+        Code.emit code `None "%s;" (Code.append_deprecaton_if ~deprecated:(deprecated && sig_type = `Signature) `Attribute field);
+        if sig_type = `Signature then begin
+          Code.emit_field_doc code ~position:`Trailing ~comments sub_comments
+        end
+      ) types;
+      Code.emit code `End "} %s" annot;
+  in
 
   let extension_ranges =
     List.map ~f:(function
@@ -270,7 +327,7 @@ let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
                   default_constructor_sig; default_constructor_impl; merge_impl } =
         Types.make ~params ~syntax ~is_cyclic ~extension_ranges ~scope ~type_db ~comment_db ~fields oneof_decls
       in
-      Code.emit signature `None "type t = %s%s" type' params.annot;
+      emit_message_type signature `Signature ~annot:params.annot type';
       Code.emit signature `None "val make: %s" default_constructor_sig;
       Code.emit signature `None "(** Helper function to generate a message using default values *)\n";
 
@@ -296,7 +353,7 @@ let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
       Code.emit signature `None "(**/**)";
 
       Code.emit implementation `None "let name () = \"%s\"" (Scope.get_proto_path scope);
-      Code.emit implementation `None "type t = %s%s" type' params.annot;
+      emit_message_type implementation `Implementation ~annot:params.annot type';
 
       Code.emit implementation `None "type make_t = %s" default_constructor_sig;
       Code.emit implementation `None "let make %s" default_constructor_impl;
@@ -356,11 +413,10 @@ let rec wrap_packages ~params ~syntax ~options ~comment_db ~type_db ~scope messa
     Code.emit signature `Begin "module rec %s : sig" package_name;
     Code.append signature signature';
     Code.emit signature `End "end";
-
     signature, implementation
 
 
-let emit_header implementation ~proto_name ~syntax ~deprecated ~params =
+let emit_header implementation ~proto_name ~syntax ~params =
   Code.emit implementation `None "(********************************************************)";
   Code.emit implementation `None "(*           AUTOGENERATED FILE - DO NOT EDIT!          *)";
   Code.emit implementation `None "(********************************************************)";
@@ -381,7 +437,8 @@ let emit_header implementation ~proto_name ~syntax ~deprecated ~params =
   Code.emit implementation `None "    prefix_output_with_package=%b" params.prefix_output_with_package;
   Code.emit implementation `None "*)";
   Code.emit implementation `None "[@@@ocaml.alert \"-protobuf\"] (* Disable deprecation warnings for protobuf*)";
-  Code.emit implementation `None "%s" (Code.append_deprecaton_if ~deprecated `Floating "");
+  (* Ocaml does not allow marking a module as deprecated. *)
+  (* Code.emit implementation `None "%s" (Code.append_deprecaton_if ~deprecated `Floating ""); *)
   ()
 
 let parse_proto_file ~params ~scope ~type_db filedescriptorproto =
@@ -403,10 +460,11 @@ let parse_proto_file ~params ~scope ~type_db filedescriptorproto =
                      field = []; extension; extension_range = []; oneof_decl = [];
                      options = None; reserved_range = []; reserved_name = []; }
   in
-  let deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
+  (* TODO: Mark all modules as deprecated if the file itself is marked deprecated *)
+  let _deprecated = match options with Some { deprecated; _ } -> deprecated | None -> false in
   let implementation = Code.init () in
 
-  emit_header implementation ~proto_name ~syntax ~deprecated ~params;
+  emit_header implementation ~proto_name ~syntax ~params;
   List.iter ~f:(Code.emit implementation `None "open %s [@@warning \"-33\"]" ) params.opens;
   Code.emit implementation `None "(**/**)";
   Code.emit implementation `None "module Runtime' = Ocaml_protoc_plugin [@@warning \"-33\"]";
