@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Any (ocaml-protoc-plugin.Google_types.Any.Google.Protobuf.Any)</title><meta charset="utf-8"/><link rel="stylesheet" href="../../../../../../odoc.support/odoc.css"/><meta name="generator" content="odoc 2.4.1"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../../../../odoc.support/highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body class="odoc"><nav class="odoc-nav"><a href="../index.html">Up</a> – <a href="../../../../../index.html">ocaml-protoc-plugin</a> &#x00BB; <a href="../../../../index.html">Google_types</a> &#x00BB; <a href="../../../index.html">Any</a> &#x00BB; <a href="../../index.html">Google</a> &#x00BB; <a href="../index.html">Protobuf</a> &#x00BB; Any</nav><header class="odoc-preamble"><h1>Module <code><span>Protobuf.Any</span></code></h1><p>`Any` contains an arbitrary serialized protocol buffer message along with a URL that describes the type of the serialized message.</p><p>Protobuf library provides support to pack/unpack Any values in the form of utility functions or additional generated methods of the Any type.</p><p>Example 1: Pack and unpack a message in C++.</p><pre>           Foo foo = ...;
+           Any any;
+           any.PackFrom(foo);
+           ...
+           if (any.UnpackTo(&amp;foo)) {
+             ...
+           }</pre><p>Example 2: Pack and unpack a message in Java.</p><pre>           Foo foo = ...;
+           Any any = Any.pack(foo);
+           ...
+           if (any.is(Foo.class)) {
+             foo = any.unpack(Foo.class);
+           }</pre><p>Example 3: Pack and unpack a message in Python.</p><pre>           foo = Foo(...)
+           any = Any()
+           any.Pack(foo)
+           ...
+           if any.Is(Foo.DESCRIPTOR):
+             any.Unpack(foo)
+             ...</pre><p>Example 4: Pack and unpack a message in Go</p><pre>            foo := &amp;pb.Foo{...}
+            any, err := anypb.New(foo)
+            if err != nil {
+              ...
+            }
+            ...
+            foo := &amp;pb.Foo{}
+            if err := any.UnmarshalTo(foo); err != nil {
+              ...
+            }</pre><p>The pack methods provided by protobuf library will by default use 'type.googleapis.com/full.type.name' as the type URL and the unpack methods only use the fully qualified type name after the last '/' in the type URL, for example &quot;foo.bar.com/x/y.z&quot; will yield type name &quot;y.z&quot;.</p><p>JSON</p><p>The JSON representation of an `Any` value uses the regular representation of the deserialized, embedded message, with an additional field `@type` which contains the type URL. Example:</p><pre>           package google.profile;
+           message Person {
+             string first_name = 1;
+             string last_name = 2;
+           }
+
+           {
+             &quot;@type&quot;: &quot;type.googleapis.com/google.profile.Person&quot;,
+             &quot;firstName&quot;: &lt;string&gt;,
+             &quot;lastName&quot;: &lt;string&gt;
+           }</pre><p>If the embedded message type is well-known and has a custom JSON representation, that representation will be embedded adding a field `value` which holds the custom JSON in addition to the `@type` field. Example (for message [google.protobuf.Duration][]):</p><pre>           {
+             &quot;@type&quot;: &quot;type.googleapis.com/google.protobuf.Duration&quot;,
+             &quot;value&quot;: &quot;1.212s&quot;
+           }</pre></header><div class="odoc-content"><div class="odoc-spec"><div class="spec type anchored" id="type-t"><a href="#type-t" class="anchor"></a><code><span><span class="keyword">type</span> t</span><span> = </span><span>{</span></code><ol><li id="type-t.type_url" class="def record field anchored"><a href="#type-t.type_url" class="anchor"></a><code><span>type_url : string;</span></code></li><li id="type-t.value" class="def record field anchored"><a href="#type-t.value" class="anchor"></a><code><span>value : bytes;</span></code><div class="def-doc"><span class="comment-delim">(*</span><p>Must be a valid serialized protocol buffer of the above specified type.</p><span class="comment-delim">*)</span></div></li></ol><code><span>}</span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-make"><a href="#val-make" class="anchor"></a><code><span><span class="keyword">val</span> make : <span><span class="optlabel">?type_url</span>:string <span class="arrow">&#45;&gt;</span></span> <span><span class="optlabel">?value</span>:bytes <span class="arrow">&#45;&gt;</span></span> <span>unit <span class="arrow">&#45;&gt;</span></span> <a href="#type-t">t</a></span></code></div><div class="spec-doc"><p>Helper function to generate a message using default values</p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-to_proto"><a href="#val-to_proto" class="anchor"></a><code><span><span class="keyword">val</span> to_proto : <span><a href="#type-t">t</a> <span class="arrow">&#45;&gt;</span></span> <a href="../../../../../Ocaml_protoc_plugin/Writer/index.html#type-t">Ocaml_protoc_plugin.Writer.t</a></span></code></div><div class="spec-doc"><p>Serialize the message to binary format</p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-from_proto"><a href="#val-from_proto" class="anchor"></a><code><span><span class="keyword">val</span> from_proto : 
+  <span><a href="../../../../../Ocaml_protoc_plugin/Reader/index.html#type-t">Ocaml_protoc_plugin.Reader.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<a href="#type-t">t</a>, <span>[&gt; <a href="../../../../../Ocaml_protoc_plugin/Result/index.html#type-error">Ocaml_protoc_plugin.Result.error</a> ]</span>)</span> <span class="xref-unresolved">Stdlib</span>.result</span></span></code></div><div class="spec-doc"><p>Deserialize from binary format</p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-to_json"><a href="#val-to_json" class="anchor"></a><code><span><span class="keyword">val</span> to_json : 
+  <span><a href="../../../../../Ocaml_protoc_plugin/Json_options/index.html#type-t">Ocaml_protoc_plugin.Json_options.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-t">t</a> <span class="arrow">&#45;&gt;</span></span>
+  <a href="../../../../../Ocaml_protoc_plugin/Json/index.html#type-t">Ocaml_protoc_plugin.Json.t</a></span></code></div><div class="spec-doc"><p>Serialize to Json (compatible with Yojson.Basic.t)</p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-from_json"><a href="#val-from_json" class="anchor"></a><code><span><span class="keyword">val</span> from_json : 
+  <span><a href="../../../../../Ocaml_protoc_plugin/Json/index.html#type-t">Ocaml_protoc_plugin.Json.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<a href="#type-t">t</a>, <span>[&gt; <a href="../../../../../Ocaml_protoc_plugin/Result/index.html#type-error">Ocaml_protoc_plugin.Result.error</a> ]</span>)</span> <span class="xref-unresolved">Stdlib</span>.result</span></span></code></div><div class="spec-doc"><p>Deserialize from Json (compatible with Yojson.Basic.t)</p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-name"><a href="#val-name" class="anchor"></a><code><span><span class="keyword">val</span> name : <span>unit <span class="arrow">&#45;&gt;</span></span> string</span></code></div><div class="spec-doc"><p>Fully qualified protobuf name of this message</p></div></div></div></body></html>

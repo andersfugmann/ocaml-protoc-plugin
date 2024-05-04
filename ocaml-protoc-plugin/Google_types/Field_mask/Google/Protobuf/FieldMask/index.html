@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>FieldMask (ocaml-protoc-plugin.Google_types.Field_mask.Google.Protobuf.FieldMask)</title><meta charset="utf-8"/><link rel="stylesheet" href="../../../../../../odoc.support/odoc.css"/><meta name="generator" content="odoc 2.4.1"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../../../../odoc.support/highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body class="odoc"><nav class="odoc-nav"><a href="../index.html">Up</a> – <a href="../../../../../index.html">ocaml-protoc-plugin</a> &#x00BB; <a href="../../../../index.html">Google_types</a> &#x00BB; <a href="../../../index.html">Field_mask</a> &#x00BB; <a href="../../index.html">Google</a> &#x00BB; <a href="../index.html">Protobuf</a> &#x00BB; FieldMask</nav><header class="odoc-preamble"><h1>Module <code><span>Protobuf.FieldMask</span></code></h1><p>`FieldMask` represents a set of symbolic field paths, for example:</p><pre>           paths: &quot;f.a&quot;
+           paths: &quot;f.b.d&quot;</pre><p>Here `f` represents a field in some root message, `a` and `b` fields in the message found in `f`, and `d` a field found in the message in `f.b`.</p><p>Field masks are used to specify a subset of fields that should be returned by a get operation or modified by an update operation. Field masks also have a custom JSON encoding (see below).</p><p># Field Masks in Projections</p><p>When used in the context of a projection, a response message or sub-message is filtered by the API to only contain those fields as specified in the mask. For example, if the mask in the previous example is applied to a response message as follows:</p><pre>           f {
+             a : 22
+             b {
+               d : 1
+               x : 2
+             }
+             y : 13
+           }
+           z: 8</pre><p>The result will not contain specific values for fields x,y and z (their value will be set to the default, and omitted in proto text output):</p><pre>           f {
+             a : 22
+             b {
+               d : 1
+             }
+           }</pre><p>A repeated field is not allowed except at the last position of a paths string.</p><p>If a FieldMask object is not present in a get operation, the operation applies to all fields (as if a FieldMask of all fields had been specified).</p><p>Note that a field mask does not necessarily apply to the top-level response message. In case of a REST get operation, the field mask applies directly to the response, but in case of a REST list operation, the mask instead applies to each individual message in the returned resource list. In case of a REST custom method, other definitions may be used. Where the mask applies will be clearly documented together with its declaration in the API. In any case, the effect on the returned resource/resources is required behavior for APIs.</p><p># Field Masks in Update Operations</p><p>A field mask in update operations specifies which fields of the targeted resource are going to be updated. The API is required to only change the values of the fields as specified in the mask and leave the others untouched. If a resource is passed in to describe the updated values, the API ignores the values of all fields not covered by the mask.</p><p>If a repeated field is specified for an update operation, new values will be appended to the existing repeated field in the target resource. Note that a repeated field is only allowed in the last position of a `paths` string.</p><p>If a sub-message is specified in the last position of the field mask for an update operation, then new value will be merged into the existing sub-message in the target resource.</p><p>For example, given the target message:</p><pre>           f {
+             b {
+               d: 1
+               x: 2
+             }
+             c: [1]
+           }</pre><p>And an update message:</p><pre>           f {
+             b {
+               d: 10
+             }
+             c: [2]
+           }</pre><p>then if the field mask is:</p><pre>        paths: [&quot;f.b&quot;, &quot;f.c&quot;]</pre><p>then the result will be:</p><pre>           f {
+             b {
+               d: 10
+               x: 2
+             }
+             c: [1, 2]
+           }</pre><p>An implementation may provide options to override this default behavior for repeated and message fields.</p><p>In order to reset a field's value to the default, the field must be in the mask and set to the default value in the provided resource. Hence, in order to reset all fields of a resource, provide a default instance of the resource and set all fields in the mask, or do not provide a mask as described below.</p><p>If a field mask is not present on update, the operation applies to all fields (as if a field mask of all fields has been specified). Note that in the presence of schema evolution, this may mean that fields the client does not know and has therefore not filled into the request will be reset to their default. If this is unwanted behavior, a specific service may require a client to always specify a field mask, producing an error if not.</p><p>As with get operations, the location of the resource which describes the updated values in the request message depends on the operation kind. In any case, the effect of the field mask is required to be honored by the API.</p><p>## Considerations for HTTP REST</p><p>The HTTP kind of an update operation which uses a field mask must be set to PATCH instead of PUT in order to satisfy HTTP semantics (PUT must only be used for full updates).</p><p># JSON Encoding of Field Masks</p><p>In JSON, a field mask is encoded as a single string where paths are separated by a comma. Fields name in each path are converted to/from lower-camel naming conventions.</p><p>As an example, consider the following message declarations:</p><pre>           message Profile {
+             User user = 1;
+             Photo photo = 2;
+           }
+           message User {
+             string display_name = 1;
+             string address = 2;
+           }</pre><p>In proto a field mask for `Profile` may look as such:</p><pre>           mask {
+             paths: &quot;user.display_name&quot;
+             paths: &quot;photo&quot;
+           }</pre><p>In JSON, the same mask is represented as below:</p><pre>           {
+             mask: &quot;user.displayName,photo&quot;
+           }</pre><p># Field Masks and Oneof Fields</p><p>Field masks treat fields in oneofs just as regular fields. Consider the following message:</p><pre>           message SampleMessage {
+             oneof test_oneof {
+               string name = 4;
+               SubMessage sub_message = 9;
+             }
+           }</pre><p>The field mask can be:</p><pre>           mask {
+             paths: &quot;name&quot;
+           }</pre><p>Or:</p><pre>           mask {
+             paths: &quot;sub_message&quot;
+           }</pre><p>Note that oneof type names (&quot;test_oneof&quot; in this case) cannot be used in paths.</p><p>## Field Mask Verification</p><p>The implementation of any API method which has a FieldMask type field in the request should verify the included field paths, and return an `INVALID_ARGUMENT` error if any path is unmappable.</p></header><div class="odoc-content"><div class="odoc-spec"><div class="spec type anchored" id="type-t"><a href="#type-t" class="anchor"></a><code><span><span class="keyword">type</span> t</span><span> = <span>string list</span></span></code></div><div class="spec-doc"><p>The set of field mask paths.</p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-make"><a href="#val-make" class="anchor"></a><code><span><span class="keyword">val</span> make : <span><span class="optlabel">?paths</span>:<span>string list</span> <span class="arrow">&#45;&gt;</span></span> <span>unit <span class="arrow">&#45;&gt;</span></span> <a href="#type-t">t</a></span></code></div><div class="spec-doc"><p>Helper function to generate a message using default values</p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-to_proto"><a href="#val-to_proto" class="anchor"></a><code><span><span class="keyword">val</span> to_proto : <span><a href="#type-t">t</a> <span class="arrow">&#45;&gt;</span></span> <a href="../../../../../Ocaml_protoc_plugin/Writer/index.html#type-t">Ocaml_protoc_plugin.Writer.t</a></span></code></div><div class="spec-doc"><p>Serialize the message to binary format</p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-from_proto"><a href="#val-from_proto" class="anchor"></a><code><span><span class="keyword">val</span> from_proto : 
+  <span><a href="../../../../../Ocaml_protoc_plugin/Reader/index.html#type-t">Ocaml_protoc_plugin.Reader.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<a href="#type-t">t</a>, <span>[&gt; <a href="../../../../../Ocaml_protoc_plugin/Result/index.html#type-error">Ocaml_protoc_plugin.Result.error</a> ]</span>)</span> <span class="xref-unresolved">Stdlib</span>.result</span></span></code></div><div class="spec-doc"><p>Deserialize from binary format</p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-to_json"><a href="#val-to_json" class="anchor"></a><code><span><span class="keyword">val</span> to_json : 
+  <span><a href="../../../../../Ocaml_protoc_plugin/Json_options/index.html#type-t">Ocaml_protoc_plugin.Json_options.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-t">t</a> <span class="arrow">&#45;&gt;</span></span>
+  <a href="../../../../../Ocaml_protoc_plugin/Json/index.html#type-t">Ocaml_protoc_plugin.Json.t</a></span></code></div><div class="spec-doc"><p>Serialize to Json (compatible with Yojson.Basic.t)</p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-from_json"><a href="#val-from_json" class="anchor"></a><code><span><span class="keyword">val</span> from_json : 
+  <span><a href="../../../../../Ocaml_protoc_plugin/Json/index.html#type-t">Ocaml_protoc_plugin.Json.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<a href="#type-t">t</a>, <span>[&gt; <a href="../../../../../Ocaml_protoc_plugin/Result/index.html#type-error">Ocaml_protoc_plugin.Result.error</a> ]</span>)</span> <span class="xref-unresolved">Stdlib</span>.result</span></span></code></div><div class="spec-doc"><p>Deserialize from Json (compatible with Yojson.Basic.t)</p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-name"><a href="#val-name" class="anchor"></a><code><span><span class="keyword">val</span> name : <span>unit <span class="arrow">&#45;&gt;</span></span> string</span></code></div><div class="spec-doc"><p>Fully qualified protobuf name of this message</p></div></div></div></body></html>
