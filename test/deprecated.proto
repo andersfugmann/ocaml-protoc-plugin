@@ -38,5 +38,5 @@ service Service1 {
 
 service Service2 {
   rpc Method1(Message2) returns (Message2) { option deprecated = true; }; // Deprecated method
-  rpc Method2(Message2) returns (Message2); // Deprecated method
+  rpc Method2(Message2) returns (Message2);
 }

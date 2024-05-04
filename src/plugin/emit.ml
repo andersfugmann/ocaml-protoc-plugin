@@ -123,7 +123,7 @@ let emit_service_type ~scope ~comment_db ~type_db ServiceDescriptorProto.{ name;
     Code.emit signature `None "(** Module alias for the response message for this method call *)\n";
     Code.emit signature `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
     Code.emit signature `None "";
-    Code.emit signature `None "val %s : %s" method_name sig_t';
+    Code.emit signature `None "val %s : %s%s" method_name sig_t' (Code.append_deprecaton_if ~deprecated `Item "");
 
     Code.emit implementation `Begin "module %s = struct" (String.capitalize_ascii method_name);
     Code.emit implementation `None "let package_name = %s"
@@ -133,10 +133,12 @@ let emit_service_type ~scope ~comment_db ~type_db ServiceDescriptorProto.{ name;
     Code.emit implementation `None "let name = \"/%s/%s\"" (String.concat ~sep:"." (package_names @ [service_name])) name;
     Code.emit implementation `None "module Request = %s" input;
     Code.emit implementation `None "module Response = %s" output;
-    Code.emit implementation `End "end";
+    Code.emit implementation `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
+    Code.emit implementation `None "";
     Code.emit implementation `Begin "let %s : %s = " method_name sig_t';
     Code.emit implementation `None "(module %s : Runtime'.Spec.Message with type t = %s.t ), " input input;
     Code.emit implementation `None "(module %s : Runtime'.Spec.Message with type t = %s.t )" output output;
+    Code.emit implementation `None "%s" (Code.append_deprecaton_if ~deprecated `Item "");
     Code.emit implementation `End "";
   in
   let name = Option.value_exn ~message:"Service definitions must have a name" name in
@@ -153,7 +155,8 @@ let emit_service_type ~scope ~comment_db ~type_db ServiceDescriptorProto.{ name;
   List.iter ~f:(emit_method ~scope:(Scope.push scope name) ~type_db signature implementation name) methods;
   Code.emit signature `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
   Code.emit signature `None "";
-  Code.emit implementation `End "end";
+  Code.emit implementation `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
+  Code.emit implementation `None "";
   signature, implementation
 
 let emit_extension ~scope ~params ~comment_db ~type_db field =
