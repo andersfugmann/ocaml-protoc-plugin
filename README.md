@@ -117,7 +117,7 @@ can generate the Ocaml code by running
 | fixed\_as\_int       | Map \*fixed\* types to `int`                                    | `fixed_as_int=true`          | false   |
 | singleton\_record    | Messages with only one field will be wrapped in a record        | `singleton_record=true`      | false   |
 | prefix\_output\_with\_package | Emit files prefixed with their package name. This allows multiple protofiles of the same name with different package names to be used | `prefix_output_with_package=true` | false |
-| single\_oneof\_fields\_as\_optional | Oneof declerations only containing one field are mapped to a single optional field | single\_oneof\_fields\_as\_optional=false | true |
+| singleton\_oneof\_as\_option | Oneof declarations only containing one field are mapped to a single optional field | singleton\_oneof\_as\_option=false | true |
 
 Parameters are separated by `;`
 

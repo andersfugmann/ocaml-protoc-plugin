@@ -73,3 +73,16 @@ message SingleMapField {
   // This is map field SingleMapField.m
   map<uint64, uint32> m = 1;
 }
+
+// This is message MultipleWithSingletonOneofField
+message MultipleWithSingletonOneofField {
+  // This is field MultipleWithSingletonOneofField.a
+  uint32 a = 1;
+
+  // This is singleton MultipleWithSingletonOneofField.oneof_field
+  oneof oneof_field {
+
+    // This is field MultipleWithSingletonOneofField.oa
+    uint32 oa = 10;
+  }
+}

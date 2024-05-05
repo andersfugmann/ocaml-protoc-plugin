@@ -41,7 +41,8 @@
    service_empty_package.ml
    service_p1_p2_p3_service.ml
    serviceRpcClash_service_rpc_clash.ml
-   singleton_record_singleton_record.ml)
+   singleton_record_singleton_record.ml
+   comments_comments.ml)
  (deps
   (:plugin ../../src/plugin/protoc_gen_ocaml.exe)
   (:proto
@@ -79,9 +80,12 @@
     ../service_empty_package.proto
     ../service.proto
     ../service_rpc_clash.proto
-    ../singleton_record.proto)
+    ../singleton_record.proto
+    ../comments.proto)
  )
  (action
   (run protoc -I %{read-lines:../google_include} -I ..
        "--plugin=protoc-gen-ocaml=%{plugin}"
-       "--ocaml_out=open=Google_types_prefixed;prefix_output_with_package=true;:." %{proto})))
+       "--ocaml_out=open=Google_types_prefixed;singleton_record=true;prefix_output_with_package=true;singleton_oneof_as_option=false:."
+       %{proto}))
+)
