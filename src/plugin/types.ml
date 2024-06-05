@@ -47,7 +47,7 @@ module T = struct
   type _ message = { type': string; module_name: string }
   type _ enum = { type': string; module_name: string; default: string }
   type _ oneof = { type': string; spec: string; fields: (string * string) list }
-  type _ oneof_elem = { adt_name: string }
+  type _ oneof_elem = { adt_name: string } [@@unboxed]
   type _ map = { key_spec: string; key_type: string; value_compound: c }
 end
 
