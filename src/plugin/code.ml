@@ -104,7 +104,7 @@ let append_deprecaton_if ~deprecated level str =
   | false -> str
   | true ->
     let level = match level with
-      | `Attribute-> "@"
+      | `Attribute -> "@"
       | `Item -> "@@"
       | `Floating -> "@@@"
     in

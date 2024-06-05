@@ -137,10 +137,9 @@ let emit_service_type ~scope ~comment_db ~type_db ServiceDescriptorProto.{ name;
     Code.emit implementation `None "module Response = %s" output;
     Code.emit implementation `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
     Code.emit implementation `None "";
-    Code.emit implementation `Begin "let %s : %s = " method_name sig_t';
+    Code.emit implementation `Begin "let %s = " (Code.append_deprecaton_if ~deprecated `Attribute method_name);
     Code.emit implementation `None "(module %s : Runtime'.Spec.Message with type t = %s.t ), " input input;
     Code.emit implementation `None "(module %s : Runtime'.Spec.Message with type t = %s.t )" output output;
-    Code.emit implementation `None "%s" (Code.append_deprecaton_if ~deprecated `Item "");
     Code.emit implementation `End "";
   in
   let name = Option.value_exn ~message:"Service definitions must have a name" name in
