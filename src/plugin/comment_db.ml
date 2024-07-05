@@ -84,18 +84,20 @@ let parse_comments leading trailing detatched =
       | l :: ls when String.starts_with_regex ~regex:"[ ]*- " l -> begin
           match state with
           | `In_list -> l :: inner state ls
-          | `In_code -> ("  " ^ l) :: inner state ls
+          | `In_code true -> ("  " ^ l) :: inner state ls
+          | `In_code false -> l :: inner state ls
           | `Plain -> "" :: inner `In_list (l :: ls)
         end
       | l :: ls when String.starts_with ~prefix:"  " l -> begin
           match state with
           | `In_list -> l :: inner state ls
-          | `In_code -> ("  " ^ l) :: inner state ls
-          | `Plain -> "" :: inner `In_code (l :: ls)
+          | `In_code true -> ("  " ^ l) :: inner state ls
+          | `In_code false -> l :: inner state ls
+          | `Plain -> "" :: inner (`In_code (String.starts_with ~prefix:"    " l |> not)) (l :: ls)
         end
       | l :: ls -> begin
           match state with
-          | `In_code -> "" :: inner `Plain (l :: ls)
+          | `In_code _ -> "" :: inner `Plain (l :: ls)
           | _ -> l :: inner `Plain ls
         end
       | [] -> []
