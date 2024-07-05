@@ -28,7 +28,11 @@ module rec Google : sig
   module rec Protobuf : sig
     module rec Compiler : sig
 
-      (** The version number of protocol compiler. *)
+      (**
+{%html:
+<p>The version number of protocol compiler.</p>
+%}
+      *)
       module rec Version : sig
         type t = {
           major:int option;
@@ -36,8 +40,10 @@ module rec Google : sig
           patch:int option;
           suffix:string option;
           (**
-            A suffix for alpha, beta or rc release, e.g., "alpha-1", "rc2". It should
-            be empty for mainline stable releases.
+{%html:
+<p>A suffix for alpha, beta or rc release, e.g., &quot;alpha-1&quot;, &quot;rc2&quot;. It should
+be empty for mainline stable releases.</p>
+%}
           *)
 
         }
@@ -69,17 +75,54 @@ module rec Google : sig
       end
 
 
-      (** An encoded CodeGeneratorRequest is written to the plugin's stdin. *)
+      (**
+{%html:
+<p>An encoded CodeGeneratorRequest is written to the plugin's stdin.</p>
+%}
+      *)
       and CodeGeneratorRequest : sig
         type t = {
           file_to_generate:string list;
+          (**
+{%html:
+<p>The .proto files that were explicitly listed on the command-line.  The
+code generator should generate code only for these files.  Each file's
+descriptor will be included in proto_file, below.</p>
+%}
+          *)
+
           parameter:string option;
           (**
-            The generator parameter passed on the command-line.
+{%html:
+<p>The generator parameter passed on the command-line.</p>
+%}
           *)
 
           compiler_version:Version.t option;
+          (**
+{%html:
+<p>The version number of protocol compiler.</p>
+%}
+          *)
+
           proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list;
+          (**
+{%html:
+<p>FileDescriptorProtos for all files in files_to_generate and everything
+they import.  The files will appear in topological order, so each file
+appears before any file that imports it.</p>
+<p>protoc guarantees that all proto_files will be written after
+the fields above, even though this is not technically guaranteed by the
+protobuf wire format.  This theoretically could allow a plugin to stream
+in the FileDescriptorProtos and handle them one by one rather than read
+the entire set into memory at once.  However, as of this writing, this
+is not similarly optimized on protoc's end -- it will store all fields in
+memory at once before sending them to the plugin.</p>
+<p>Type names of fields and extensions in the FileDescriptorProto are always
+fully qualified.</p>
+%}
+          *)
+
         }
         val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -109,10 +152,18 @@ module rec Google : sig
       end
 
 
-      (** The plugin writes an encoded CodeGeneratorResponse to stdout. *)
+      (**
+{%html:
+<p>The plugin writes an encoded CodeGeneratorResponse to stdout.</p>
+%}
+      *)
       and CodeGeneratorResponse : sig
 
-        (** Sync with code_generator.h. *)
+        (**
+{%html:
+<p>Sync with code_generator.h.</p>
+%}
+        *)
         module rec Feature : sig
           type t =
             | FEATURE_NONE
@@ -131,31 +182,85 @@ module rec Google : sig
         end
 
 
-        (** Represents a single generated file. *)
+        (**
+{%html:
+<p>Represents a single generated file.</p>
+%}
+        *)
         and File : sig
           type t = {
             name:string option;
             (**
-              The file name, relative to the output directory.  The name must not
-              contain "." or ".." components and must be relative, not be absolute (so,
-              the file cannot lie outside the output directory).  "/" must be used as
-              the path separator, not "\\".
-
-              If the name is omitted, the content will be appended to the previous
-              file.  This allows the generator to break large files into small chunks,
-              and allows the generated text to be streamed back to protoc so that large
-              files need not reside completely in memory at one time.  Note that as of
-              this writing protoc does not optimize for this -- it will read the entire
-              CodeGeneratorResponse before writing files to disk.
+{%html:
+<p>The file name, relative to the output directory.  The name must not
+contain &quot;.&quot; or &quot;..&quot; components and must be relative, not be absolute (so,
+the file cannot lie outside the output directory).  &quot;/&quot; must be used as
+the path separator, not &quot;&quot;.</p>
+<p>If the name is omitted, the content will be appended to the previous
+file.  This allows the generator to break large files into small chunks,
+and allows the generated text to be streamed back to protoc so that large
+files need not reside completely in memory at one time.  Note that as of
+this writing protoc does not optimize for this -- it will read the entire
+CodeGeneratorResponse before writing files to disk.</p>
+%}
             *)
 
             insertion_point:string option;
+            (**
+{%html:
+<p>If non-empty, indicates that the named file should already exist, and the
+content here is to be inserted into that file at a defined insertion
+point.  This feature allows a code generator to extend the output
+produced by another code generator.  The original generator may provide
+insertion points by placing special annotations in the file that look
+like:</p>
+<pre><code> @@protoc_insertion_point(NAME)
+</code></pre>
+<p>The annotation can have arbitrary text before and after it on the line,
+which allows it to be placed in a comment.  NAME should be replaced with
+an identifier naming the point -- this is what other generators will use
+as the insertion_point.  Code inserted at this point will be placed
+immediately above the line containing the insertion point (thus multiple
+insertions to the same point will come out in the order they were added).
+The double-@ is intended to make it unlikely that the generated code
+could contain things that look like insertion points by accident.</p>
+<p>For example, the C++ code generator places the following line in the
+.pb.h files that it generates:
+@@protoc_insertion_point(namespace_scope)
+This line appears within the scope of the file's package namespace, but
+outside of any particular class.  Another plugin can then specify the
+insertion_point &quot;namespace_scope&quot; to generate additional classes or
+other declarations that should be placed in this scope.</p>
+<p>Note that if the line containing the insertion point begins with
+whitespace, the same whitespace will be added to every line of the
+inserted text.  This is useful for languages like Python, where
+indentation matters.  In these languages, the insertion point comment
+should be indented the same amount as any inserted code will need to be
+in order to work correctly in that context.</p>
+<p>The code generator that generates the initial file and the one which
+inserts into it must both run as part of a single invocation of protoc.
+Code generators are executed in the order in which they appear on the
+command line.</p>
+<p>If |insertion_point| is present, |name| must also be present.</p>
+%}
+            *)
+
             content:string option;
             (**
-              The file contents.
+{%html:
+<p>The file contents.</p>
+%}
             *)
 
             generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option;
+            (**
+{%html:
+<p>Information describing the file content being inserted. If an insertion
+point is used, this information will be appropriately offset and inserted
+into the code generation metadata for the generated files.</p>
+%}
+            *)
+
           }
           val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           (** Helper function to generate a message using default values *)
@@ -187,17 +292,25 @@ module rec Google : sig
         type t = {
           error:string option;
           (**
-            Error message.  If non-empty, code generation failed.  The plugin process
-            should exit with status code zero even if it reports an error in this way.
-
-            This should be used to indicate errors in .proto files which prevent the
-            code generator from generating correct code.  Errors which indicate a
-            problem in protoc itself -- such as the input CodeGeneratorRequest being
-            unparseable -- should be reported by writing a message to stderr and
-            exiting with a non-zero status code.
+{%html:
+<p>Error message.  If non-empty, code generation failed.  The plugin process
+should exit with status code zero even if it reports an error in this way.</p>
+<p>This should be used to indicate errors in .proto files which prevent the
+code generator from generating correct code.  Errors which indicate a
+problem in protoc itself -- such as the input CodeGeneratorRequest being
+unparseable -- should be reported by writing a message to stderr and
+exiting with a non-zero status code.</p>
+%}
           *)
 
           supported_features:int option;
+          (**
+{%html:
+<p>A bitmask of supported features that the code generator supports.
+This is a bitwise &quot;or&quot; of values from the Feature enum.</p>
+%}
+          *)
+
           file:File.t list;
         }
         val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
@@ -233,7 +346,11 @@ end = struct
   module rec Protobuf : sig
     module rec Compiler : sig
 
-      (** The version number of protocol compiler. *)
+      (**
+{%html:
+<p>The version number of protocol compiler.</p>
+%}
+      *)
       module rec Version : sig
         type t = {
           major:int option;
@@ -241,8 +358,10 @@ end = struct
           patch:int option;
           suffix:string option;
           (**
-            A suffix for alpha, beta or rc release, e.g., "alpha-1", "rc2". It should
-            be empty for mainline stable releases.
+{%html:
+<p>A suffix for alpha, beta or rc release, e.g., &quot;alpha-1&quot;, &quot;rc2&quot;. It should
+be empty for mainline stable releases.</p>
+%}
           *)
 
         }
@@ -274,17 +393,54 @@ end = struct
       end
 
 
-      (** An encoded CodeGeneratorRequest is written to the plugin's stdin. *)
+      (**
+{%html:
+<p>An encoded CodeGeneratorRequest is written to the plugin's stdin.</p>
+%}
+      *)
       and CodeGeneratorRequest : sig
         type t = {
           file_to_generate:string list;
+          (**
+{%html:
+<p>The .proto files that were explicitly listed on the command-line.  The
+code generator should generate code only for these files.  Each file's
+descriptor will be included in proto_file, below.</p>
+%}
+          *)
+
           parameter:string option;
           (**
-            The generator parameter passed on the command-line.
+{%html:
+<p>The generator parameter passed on the command-line.</p>
+%}
           *)
 
           compiler_version:Version.t option;
+          (**
+{%html:
+<p>The version number of protocol compiler.</p>
+%}
+          *)
+
           proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list;
+          (**
+{%html:
+<p>FileDescriptorProtos for all files in files_to_generate and everything
+they import.  The files will appear in topological order, so each file
+appears before any file that imports it.</p>
+<p>protoc guarantees that all proto_files will be written after
+the fields above, even though this is not technically guaranteed by the
+protobuf wire format.  This theoretically could allow a plugin to stream
+in the FileDescriptorProtos and handle them one by one rather than read
+the entire set into memory at once.  However, as of this writing, this
+is not similarly optimized on protoc's end -- it will store all fields in
+memory at once before sending them to the plugin.</p>
+<p>Type names of fields and extensions in the FileDescriptorProto are always
+fully qualified.</p>
+%}
+          *)
+
         }
         val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -314,10 +470,18 @@ end = struct
       end
 
 
-      (** The plugin writes an encoded CodeGeneratorResponse to stdout. *)
+      (**
+{%html:
+<p>The plugin writes an encoded CodeGeneratorResponse to stdout.</p>
+%}
+      *)
       and CodeGeneratorResponse : sig
 
-        (** Sync with code_generator.h. *)
+        (**
+{%html:
+<p>Sync with code_generator.h.</p>
+%}
+        *)
         module rec Feature : sig
           type t =
             | FEATURE_NONE
@@ -336,31 +500,85 @@ end = struct
         end
 
 
-        (** Represents a single generated file. *)
+        (**
+{%html:
+<p>Represents a single generated file.</p>
+%}
+        *)
         and File : sig
           type t = {
             name:string option;
             (**
-              The file name, relative to the output directory.  The name must not
-              contain "." or ".." components and must be relative, not be absolute (so,
-              the file cannot lie outside the output directory).  "/" must be used as
-              the path separator, not "\\".
-
-              If the name is omitted, the content will be appended to the previous
-              file.  This allows the generator to break large files into small chunks,
-              and allows the generated text to be streamed back to protoc so that large
-              files need not reside completely in memory at one time.  Note that as of
-              this writing protoc does not optimize for this -- it will read the entire
-              CodeGeneratorResponse before writing files to disk.
+{%html:
+<p>The file name, relative to the output directory.  The name must not
+contain &quot;.&quot; or &quot;..&quot; components and must be relative, not be absolute (so,
+the file cannot lie outside the output directory).  &quot;/&quot; must be used as
+the path separator, not &quot;&quot;.</p>
+<p>If the name is omitted, the content will be appended to the previous
+file.  This allows the generator to break large files into small chunks,
+and allows the generated text to be streamed back to protoc so that large
+files need not reside completely in memory at one time.  Note that as of
+this writing protoc does not optimize for this -- it will read the entire
+CodeGeneratorResponse before writing files to disk.</p>
+%}
             *)
 
             insertion_point:string option;
+            (**
+{%html:
+<p>If non-empty, indicates that the named file should already exist, and the
+content here is to be inserted into that file at a defined insertion
+point.  This feature allows a code generator to extend the output
+produced by another code generator.  The original generator may provide
+insertion points by placing special annotations in the file that look
+like:</p>
+<pre><code> @@protoc_insertion_point(NAME)
+</code></pre>
+<p>The annotation can have arbitrary text before and after it on the line,
+which allows it to be placed in a comment.  NAME should be replaced with
+an identifier naming the point -- this is what other generators will use
+as the insertion_point.  Code inserted at this point will be placed
+immediately above the line containing the insertion point (thus multiple
+insertions to the same point will come out in the order they were added).
+The double-@ is intended to make it unlikely that the generated code
+could contain things that look like insertion points by accident.</p>
+<p>For example, the C++ code generator places the following line in the
+.pb.h files that it generates:
+@@protoc_insertion_point(namespace_scope)
+This line appears within the scope of the file's package namespace, but
+outside of any particular class.  Another plugin can then specify the
+insertion_point &quot;namespace_scope&quot; to generate additional classes or
+other declarations that should be placed in this scope.</p>
+<p>Note that if the line containing the insertion point begins with
+whitespace, the same whitespace will be added to every line of the
+inserted text.  This is useful for languages like Python, where
+indentation matters.  In these languages, the insertion point comment
+should be indented the same amount as any inserted code will need to be
+in order to work correctly in that context.</p>
+<p>The code generator that generates the initial file and the one which
+inserts into it must both run as part of a single invocation of protoc.
+Code generators are executed in the order in which they appear on the
+command line.</p>
+<p>If |insertion_point| is present, |name| must also be present.</p>
+%}
+            *)
+
             content:string option;
             (**
-              The file contents.
+{%html:
+<p>The file contents.</p>
+%}
             *)
 
             generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option;
+            (**
+{%html:
+<p>Information describing the file content being inserted. If an insertion
+point is used, this information will be appropriately offset and inserted
+into the code generation metadata for the generated files.</p>
+%}
+            *)
+
           }
           val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           (** Helper function to generate a message using default values *)
@@ -392,17 +610,25 @@ end = struct
         type t = {
           error:string option;
           (**
-            Error message.  If non-empty, code generation failed.  The plugin process
-            should exit with status code zero even if it reports an error in this way.
-
-            This should be used to indicate errors in .proto files which prevent the
-            code generator from generating correct code.  Errors which indicate a
-            problem in protoc itself -- such as the input CodeGeneratorRequest being
-            unparseable -- should be reported by writing a message to stderr and
-            exiting with a non-zero status code.
+{%html:
+<p>Error message.  If non-empty, code generation failed.  The plugin process
+should exit with status code zero even if it reports an error in this way.</p>
+<p>This should be used to indicate errors in .proto files which prevent the
+code generator from generating correct code.  Errors which indicate a
+problem in protoc itself -- such as the input CodeGeneratorRequest being
+unparseable -- should be reported by writing a message to stderr and
+exiting with a non-zero status code.</p>
+%}
           *)
 
           supported_features:int option;
+          (**
+{%html:
+<p>A bitmask of supported features that the code generator supports.
+This is a bitwise &quot;or&quot; of values from the Feature enum.</p>
+%}
+          *)
+
           file:File.t list;
         }
         val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
@@ -436,7 +662,11 @@ end = struct
   end = struct
     module rec Compiler : sig
 
-      (** The version number of protocol compiler. *)
+      (**
+{%html:
+<p>The version number of protocol compiler.</p>
+%}
+      *)
       module rec Version : sig
         type t = {
           major:int option;
@@ -444,8 +674,10 @@ end = struct
           patch:int option;
           suffix:string option;
           (**
-            A suffix for alpha, beta or rc release, e.g., "alpha-1", "rc2". It should
-            be empty for mainline stable releases.
+{%html:
+<p>A suffix for alpha, beta or rc release, e.g., &quot;alpha-1&quot;, &quot;rc2&quot;. It should
+be empty for mainline stable releases.</p>
+%}
           *)
 
         }
@@ -477,17 +709,54 @@ end = struct
       end
 
 
-      (** An encoded CodeGeneratorRequest is written to the plugin's stdin. *)
+      (**
+{%html:
+<p>An encoded CodeGeneratorRequest is written to the plugin's stdin.</p>
+%}
+      *)
       and CodeGeneratorRequest : sig
         type t = {
           file_to_generate:string list;
+          (**
+{%html:
+<p>The .proto files that were explicitly listed on the command-line.  The
+code generator should generate code only for these files.  Each file's
+descriptor will be included in proto_file, below.</p>
+%}
+          *)
+
           parameter:string option;
           (**
-            The generator parameter passed on the command-line.
+{%html:
+<p>The generator parameter passed on the command-line.</p>
+%}
           *)
 
           compiler_version:Version.t option;
+          (**
+{%html:
+<p>The version number of protocol compiler.</p>
+%}
+          *)
+
           proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list;
+          (**
+{%html:
+<p>FileDescriptorProtos for all files in files_to_generate and everything
+they import.  The files will appear in topological order, so each file
+appears before any file that imports it.</p>
+<p>protoc guarantees that all proto_files will be written after
+the fields above, even though this is not technically guaranteed by the
+protobuf wire format.  This theoretically could allow a plugin to stream
+in the FileDescriptorProtos and handle them one by one rather than read
+the entire set into memory at once.  However, as of this writing, this
+is not similarly optimized on protoc's end -- it will store all fields in
+memory at once before sending them to the plugin.</p>
+<p>Type names of fields and extensions in the FileDescriptorProto are always
+fully qualified.</p>
+%}
+          *)
+
         }
         val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -517,10 +786,18 @@ end = struct
       end
 
 
-      (** The plugin writes an encoded CodeGeneratorResponse to stdout. *)
+      (**
+{%html:
+<p>The plugin writes an encoded CodeGeneratorResponse to stdout.</p>
+%}
+      *)
       and CodeGeneratorResponse : sig
 
-        (** Sync with code_generator.h. *)
+        (**
+{%html:
+<p>Sync with code_generator.h.</p>
+%}
+        *)
         module rec Feature : sig
           type t =
             | FEATURE_NONE
@@ -539,31 +816,85 @@ end = struct
         end
 
 
-        (** Represents a single generated file. *)
+        (**
+{%html:
+<p>Represents a single generated file.</p>
+%}
+        *)
         and File : sig
           type t = {
             name:string option;
             (**
-              The file name, relative to the output directory.  The name must not
-              contain "." or ".." components and must be relative, not be absolute (so,
-              the file cannot lie outside the output directory).  "/" must be used as
-              the path separator, not "\\".
-
-              If the name is omitted, the content will be appended to the previous
-              file.  This allows the generator to break large files into small chunks,
-              and allows the generated text to be streamed back to protoc so that large
-              files need not reside completely in memory at one time.  Note that as of
-              this writing protoc does not optimize for this -- it will read the entire
-              CodeGeneratorResponse before writing files to disk.
+{%html:
+<p>The file name, relative to the output directory.  The name must not
+contain &quot;.&quot; or &quot;..&quot; components and must be relative, not be absolute (so,
+the file cannot lie outside the output directory).  &quot;/&quot; must be used as
+the path separator, not &quot;&quot;.</p>
+<p>If the name is omitted, the content will be appended to the previous
+file.  This allows the generator to break large files into small chunks,
+and allows the generated text to be streamed back to protoc so that large
+files need not reside completely in memory at one time.  Note that as of
+this writing protoc does not optimize for this -- it will read the entire
+CodeGeneratorResponse before writing files to disk.</p>
+%}
             *)
 
             insertion_point:string option;
+            (**
+{%html:
+<p>If non-empty, indicates that the named file should already exist, and the
+content here is to be inserted into that file at a defined insertion
+point.  This feature allows a code generator to extend the output
+produced by another code generator.  The original generator may provide
+insertion points by placing special annotations in the file that look
+like:</p>
+<pre><code> @@protoc_insertion_point(NAME)
+</code></pre>
+<p>The annotation can have arbitrary text before and after it on the line,
+which allows it to be placed in a comment.  NAME should be replaced with
+an identifier naming the point -- this is what other generators will use
+as the insertion_point.  Code inserted at this point will be placed
+immediately above the line containing the insertion point (thus multiple
+insertions to the same point will come out in the order they were added).
+The double-@ is intended to make it unlikely that the generated code
+could contain things that look like insertion points by accident.</p>
+<p>For example, the C++ code generator places the following line in the
+.pb.h files that it generates:
+@@protoc_insertion_point(namespace_scope)
+This line appears within the scope of the file's package namespace, but
+outside of any particular class.  Another plugin can then specify the
+insertion_point &quot;namespace_scope&quot; to generate additional classes or
+other declarations that should be placed in this scope.</p>
+<p>Note that if the line containing the insertion point begins with
+whitespace, the same whitespace will be added to every line of the
+inserted text.  This is useful for languages like Python, where
+indentation matters.  In these languages, the insertion point comment
+should be indented the same amount as any inserted code will need to be
+in order to work correctly in that context.</p>
+<p>The code generator that generates the initial file and the one which
+inserts into it must both run as part of a single invocation of protoc.
+Code generators are executed in the order in which they appear on the
+command line.</p>
+<p>If |insertion_point| is present, |name| must also be present.</p>
+%}
+            *)
+
             content:string option;
             (**
-              The file contents.
+{%html:
+<p>The file contents.</p>
+%}
             *)
 
             generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option;
+            (**
+{%html:
+<p>Information describing the file content being inserted. If an insertion
+point is used, this information will be appropriately offset and inserted
+into the code generation metadata for the generated files.</p>
+%}
+            *)
+
           }
           val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           (** Helper function to generate a message using default values *)
@@ -595,17 +926,25 @@ end = struct
         type t = {
           error:string option;
           (**
-            Error message.  If non-empty, code generation failed.  The plugin process
-            should exit with status code zero even if it reports an error in this way.
-
-            This should be used to indicate errors in .proto files which prevent the
-            code generator from generating correct code.  Errors which indicate a
-            problem in protoc itself -- such as the input CodeGeneratorRequest being
-            unparseable -- should be reported by writing a message to stderr and
-            exiting with a non-zero status code.
+{%html:
+<p>Error message.  If non-empty, code generation failed.  The plugin process
+should exit with status code zero even if it reports an error in this way.</p>
+<p>This should be used to indicate errors in .proto files which prevent the
+code generator from generating correct code.  Errors which indicate a
+problem in protoc itself -- such as the input CodeGeneratorRequest being
+unparseable -- should be reported by writing a message to stderr and
+exiting with a non-zero status code.</p>
+%}
           *)
 
           supported_features:int option;
+          (**
+{%html:
+<p>A bitmask of supported features that the code generator supports.
+This is a bitwise &quot;or&quot; of values from the Feature enum.</p>
+%}
+          *)
+
           file:File.t list;
         }
         val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
@@ -643,8 +982,10 @@ end = struct
           patch:int option;
           suffix:string option;
           (**
-            A suffix for alpha, beta or rc release, e.g., "alpha-1", "rc2". It should
-            be empty for mainline stable releases.
+{%html:
+<p>A suffix for alpha, beta or rc release, e.g., &quot;alpha-1&quot;, &quot;rc2&quot;. It should
+be empty for mainline stable releases.</p>
+%}
           *)
 
         }
@@ -690,10 +1031,10 @@ end = struct
         let merge_patch = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "patch", "patch"), int32_int) ) in
         let merge_suffix = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((4, "suffix", "suffix"), string) ) in
         fun t1 t2 -> {
-        major = (merge_major t1.major t2.major);
-        minor = (merge_minor t1.minor t2.minor);
-        patch = (merge_patch t1.patch t2.patch);
-        suffix = (merge_suffix t1.suffix t2.suffix);
+        	major = (merge_major t1.major t2.major);
+        	minor = (merge_minor t1.minor t2.minor);
+        	patch = (merge_patch t1.patch t2.patch);
+        	suffix = (merge_suffix t1.suffix t2.suffix);
          }
         let spec () = Runtime'.Spec.( basic_opt ((1, "major", "major"), int32_int) ^:: basic_opt ((2, "minor", "minor"), int32_int) ^:: basic_opt ((3, "patch", "patch"), int32_int) ^:: basic_opt ((4, "suffix", "suffix"), string) ^:: nil )
         let to_proto' =
@@ -717,13 +1058,46 @@ end = struct
       and CodeGeneratorRequest : sig
         type t = {
           file_to_generate:string list;
+          (**
+{%html:
+<p>The .proto files that were explicitly listed on the command-line.  The
+code generator should generate code only for these files.  Each file's
+descriptor will be included in proto_file, below.</p>
+%}
+          *)
+
           parameter:string option;
           (**
-            The generator parameter passed on the command-line.
+{%html:
+<p>The generator parameter passed on the command-line.</p>
+%}
           *)
 
           compiler_version:Version.t option;
+          (**
+{%html:
+<p>The version number of protocol compiler.</p>
+%}
+          *)
+
           proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list;
+          (**
+{%html:
+<p>FileDescriptorProtos for all files in files_to_generate and everything
+they import.  The files will appear in topological order, so each file
+appears before any file that imports it.</p>
+<p>protoc guarantees that all proto_files will be written after
+the fields above, even though this is not technically guaranteed by the
+protobuf wire format.  This theoretically could allow a plugin to stream
+in the FileDescriptorProtos and handle them one by one rather than read
+the entire set into memory at once.  However, as of this writing, this
+is not similarly optimized on protoc's end -- it will store all fields in
+memory at once before sending them to the plugin.</p>
+<p>Type names of fields and extensions in the FileDescriptorProto are always
+fully qualified.</p>
+%}
+          *)
+
         }
         val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         (** Helper function to generate a message using default values *)
@@ -767,10 +1141,10 @@ end = struct
         let merge_compiler_version = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "compiler_version", "compilerVersion"), (message (module Version))) ) in
         let merge_proto_file = Runtime'.Merge.merge Runtime'.Spec.( repeated ((15, "proto_file", "protoFile"), (message (module Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto)), not_packed) ) in
         fun t1 t2 -> {
-        file_to_generate = (merge_file_to_generate t1.file_to_generate t2.file_to_generate);
-        parameter = (merge_parameter t1.parameter t2.parameter);
-        compiler_version = (merge_compiler_version t1.compiler_version t2.compiler_version);
-        proto_file = (merge_proto_file t1.proto_file t2.proto_file);
+        	file_to_generate = (merge_file_to_generate t1.file_to_generate t2.file_to_generate);
+        	parameter = (merge_parameter t1.parameter t2.parameter);
+        	compiler_version = (merge_compiler_version t1.compiler_version t2.compiler_version);
+        	proto_file = (merge_proto_file t1.proto_file t2.proto_file);
          }
         let spec () = Runtime'.Spec.( repeated ((1, "file_to_generate", "fileToGenerate"), string, not_packed) ^:: basic_opt ((2, "parameter", "parameter"), string) ^:: basic_opt ((3, "compiler_version", "compilerVersion"), (message (module Version))) ^:: repeated ((15, "proto_file", "protoFile"), (message (module Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto)), not_packed) ^:: nil )
         let to_proto' =
@@ -793,7 +1167,11 @@ end = struct
 
       and CodeGeneratorResponse : sig
 
-        (** Sync with code_generator.h. *)
+        (**
+{%html:
+<p>Sync with code_generator.h.</p>
+%}
+        *)
         module rec Feature : sig
           type t =
             | FEATURE_NONE
@@ -812,31 +1190,85 @@ end = struct
         end
 
 
-        (** Represents a single generated file. *)
+        (**
+{%html:
+<p>Represents a single generated file.</p>
+%}
+        *)
         and File : sig
           type t = {
             name:string option;
             (**
-              The file name, relative to the output directory.  The name must not
-              contain "." or ".." components and must be relative, not be absolute (so,
-              the file cannot lie outside the output directory).  "/" must be used as
-              the path separator, not "\\".
-
-              If the name is omitted, the content will be appended to the previous
-              file.  This allows the generator to break large files into small chunks,
-              and allows the generated text to be streamed back to protoc so that large
-              files need not reside completely in memory at one time.  Note that as of
-              this writing protoc does not optimize for this -- it will read the entire
-              CodeGeneratorResponse before writing files to disk.
+{%html:
+<p>The file name, relative to the output directory.  The name must not
+contain &quot;.&quot; or &quot;..&quot; components and must be relative, not be absolute (so,
+the file cannot lie outside the output directory).  &quot;/&quot; must be used as
+the path separator, not &quot;&quot;.</p>
+<p>If the name is omitted, the content will be appended to the previous
+file.  This allows the generator to break large files into small chunks,
+and allows the generated text to be streamed back to protoc so that large
+files need not reside completely in memory at one time.  Note that as of
+this writing protoc does not optimize for this -- it will read the entire
+CodeGeneratorResponse before writing files to disk.</p>
+%}
             *)
 
             insertion_point:string option;
+            (**
+{%html:
+<p>If non-empty, indicates that the named file should already exist, and the
+content here is to be inserted into that file at a defined insertion
+point.  This feature allows a code generator to extend the output
+produced by another code generator.  The original generator may provide
+insertion points by placing special annotations in the file that look
+like:</p>
+<pre><code> @@protoc_insertion_point(NAME)
+</code></pre>
+<p>The annotation can have arbitrary text before and after it on the line,
+which allows it to be placed in a comment.  NAME should be replaced with
+an identifier naming the point -- this is what other generators will use
+as the insertion_point.  Code inserted at this point will be placed
+immediately above the line containing the insertion point (thus multiple
+insertions to the same point will come out in the order they were added).
+The double-@ is intended to make it unlikely that the generated code
+could contain things that look like insertion points by accident.</p>
+<p>For example, the C++ code generator places the following line in the
+.pb.h files that it generates:
+@@protoc_insertion_point(namespace_scope)
+This line appears within the scope of the file's package namespace, but
+outside of any particular class.  Another plugin can then specify the
+insertion_point &quot;namespace_scope&quot; to generate additional classes or
+other declarations that should be placed in this scope.</p>
+<p>Note that if the line containing the insertion point begins with
+whitespace, the same whitespace will be added to every line of the
+inserted text.  This is useful for languages like Python, where
+indentation matters.  In these languages, the insertion point comment
+should be indented the same amount as any inserted code will need to be
+in order to work correctly in that context.</p>
+<p>The code generator that generates the initial file and the one which
+inserts into it must both run as part of a single invocation of protoc.
+Code generators are executed in the order in which they appear on the
+command line.</p>
+<p>If |insertion_point| is present, |name| must also be present.</p>
+%}
+            *)
+
             content:string option;
             (**
-              The file contents.
+{%html:
+<p>The file contents.</p>
+%}
             *)
 
             generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option;
+            (**
+{%html:
+<p>Information describing the file content being inserted. If an insertion
+point is used, this information will be appropriately offset and inserted
+into the code generation metadata for the generated files.</p>
+%}
+            *)
+
           }
           val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           (** Helper function to generate a message using default values *)
@@ -868,17 +1300,25 @@ end = struct
         type t = {
           error:string option;
           (**
-            Error message.  If non-empty, code generation failed.  The plugin process
-            should exit with status code zero even if it reports an error in this way.
-
-            This should be used to indicate errors in .proto files which prevent the
-            code generator from generating correct code.  Errors which indicate a
-            problem in protoc itself -- such as the input CodeGeneratorRequest being
-            unparseable -- should be reported by writing a message to stderr and
-            exiting with a non-zero status code.
+{%html:
+<p>Error message.  If non-empty, code generation failed.  The plugin process
+should exit with status code zero even if it reports an error in this way.</p>
+<p>This should be used to indicate errors in .proto files which prevent the
+code generator from generating correct code.  Errors which indicate a
+problem in protoc itself -- such as the input CodeGeneratorRequest being
+unparseable -- should be reported by writing a message to stderr and
+exiting with a non-zero status code.</p>
+%}
           *)
 
           supported_features:int option;
+          (**
+{%html:
+<p>A bitmask of supported features that the code generator supports.
+This is a bitwise &quot;or&quot; of values from the Feature enum.</p>
+%}
+          *)
+
           file:File.t list;
         }
         val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
@@ -952,26 +1392,76 @@ end = struct
           type t = {
             name:string option;
             (**
-              The file name, relative to the output directory.  The name must not
-              contain "." or ".." components and must be relative, not be absolute (so,
-              the file cannot lie outside the output directory).  "/" must be used as
-              the path separator, not "\\".
-
-              If the name is omitted, the content will be appended to the previous
-              file.  This allows the generator to break large files into small chunks,
-              and allows the generated text to be streamed back to protoc so that large
-              files need not reside completely in memory at one time.  Note that as of
-              this writing protoc does not optimize for this -- it will read the entire
-              CodeGeneratorResponse before writing files to disk.
+{%html:
+<p>The file name, relative to the output directory.  The name must not
+contain &quot;.&quot; or &quot;..&quot; components and must be relative, not be absolute (so,
+the file cannot lie outside the output directory).  &quot;/&quot; must be used as
+the path separator, not &quot;&quot;.</p>
+<p>If the name is omitted, the content will be appended to the previous
+file.  This allows the generator to break large files into small chunks,
+and allows the generated text to be streamed back to protoc so that large
+files need not reside completely in memory at one time.  Note that as of
+this writing protoc does not optimize for this -- it will read the entire
+CodeGeneratorResponse before writing files to disk.</p>
+%}
             *)
 
             insertion_point:string option;
+            (**
+{%html:
+<p>If non-empty, indicates that the named file should already exist, and the
+content here is to be inserted into that file at a defined insertion
+point.  This feature allows a code generator to extend the output
+produced by another code generator.  The original generator may provide
+insertion points by placing special annotations in the file that look
+like:</p>
+<pre><code> @@protoc_insertion_point(NAME)
+</code></pre>
+<p>The annotation can have arbitrary text before and after it on the line,
+which allows it to be placed in a comment.  NAME should be replaced with
+an identifier naming the point -- this is what other generators will use
+as the insertion_point.  Code inserted at this point will be placed
+immediately above the line containing the insertion point (thus multiple
+insertions to the same point will come out in the order they were added).
+The double-@ is intended to make it unlikely that the generated code
+could contain things that look like insertion points by accident.</p>
+<p>For example, the C++ code generator places the following line in the
+.pb.h files that it generates:
+@@protoc_insertion_point(namespace_scope)
+This line appears within the scope of the file's package namespace, but
+outside of any particular class.  Another plugin can then specify the
+insertion_point &quot;namespace_scope&quot; to generate additional classes or
+other declarations that should be placed in this scope.</p>
+<p>Note that if the line containing the insertion point begins with
+whitespace, the same whitespace will be added to every line of the
+inserted text.  This is useful for languages like Python, where
+indentation matters.  In these languages, the insertion point comment
+should be indented the same amount as any inserted code will need to be
+in order to work correctly in that context.</p>
+<p>The code generator that generates the initial file and the one which
+inserts into it must both run as part of a single invocation of protoc.
+Code generators are executed in the order in which they appear on the
+command line.</p>
+<p>If |insertion_point| is present, |name| must also be present.</p>
+%}
+            *)
+
             content:string option;
             (**
-              The file contents.
+{%html:
+<p>The file contents.</p>
+%}
             *)
 
             generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option;
+            (**
+{%html:
+<p>Information describing the file content being inserted. If an insertion
+point is used, this information will be appropriately offset and inserted
+into the code generation metadata for the generated files.</p>
+%}
+            *)
+
           }
           val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           (** Helper function to generate a message using default values *)
@@ -1015,10 +1505,10 @@ end = struct
           let merge_content = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((15, "content", "content"), string) ) in
           let merge_generated_code_info = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((16, "generated_code_info", "generatedCodeInfo"), (message (module Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo))) ) in
           fun t1 t2 -> {
-          name = (merge_name t1.name t2.name);
-          insertion_point = (merge_insertion_point t1.insertion_point t2.insertion_point);
-          content = (merge_content t1.content t2.content);
-          generated_code_info = (merge_generated_code_info t1.generated_code_info t2.generated_code_info);
+          	name = (merge_name t1.name t2.name);
+          	insertion_point = (merge_insertion_point t1.insertion_point t2.insertion_point);
+          	content = (merge_content t1.content t2.content);
+          	generated_code_info = (merge_generated_code_info t1.generated_code_info t2.generated_code_info);
            }
           let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "insertion_point", "insertionPoint"), string) ^:: basic_opt ((15, "content", "content"), string) ^:: basic_opt ((16, "generated_code_info", "generatedCodeInfo"), (message (module Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo))) ^:: nil )
           let to_proto' =
@@ -1052,9 +1542,9 @@ end = struct
         let merge_supported_features = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "supported_features", "supportedFeatures"), uint64_int) ) in
         let merge_file = Runtime'.Merge.merge Runtime'.Spec.( repeated ((15, "file", "file"), (message (module File)), not_packed) ) in
         fun t1 t2 -> {
-        error = (merge_error t1.error t2.error);
-        supported_features = (merge_supported_features t1.supported_features t2.supported_features);
-        file = (merge_file t1.file t2.file);
+        	error = (merge_error t1.error t2.error);
+        	supported_features = (merge_supported_features t1.supported_features t2.supported_features);
+        	file = (merge_file t1.file t2.file);
          }
         let spec () = Runtime'.Spec.( basic_opt ((1, "error", "error"), string) ^:: basic_opt ((2, "supported_features", "supportedFeatures"), uint64_int) ^:: repeated ((15, "file", "file"), (message (module File)), not_packed) ^:: nil )
         let to_proto' =
@@ -1078,3 +1568,4 @@ end = struct
     end
   end
 end
+
