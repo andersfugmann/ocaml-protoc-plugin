@@ -60,13 +60,59 @@ let _string_of_path path =
   |> String.concat ~sep:"; "
   |> Printf.sprintf "[ %s ]"
 
-type comment = string option
-type comments = { leading: comment; trailing: comment; detatched: string list }
+type comment = Omd.doc
 
 module Code_info_map = Map.Make(struct type t = path let compare = compare end)
-type code_info_map = comments Code_info_map.t
+type code_info_map = comment Code_info_map.t
 
-type t = comments StringMap.t
+type t = comment StringMap.t
+
+let parse_comments leading trailing detatched =
+  let remove_comment_prefix =
+    let comment_regex = "^[ \t]*//[ ]?" |> Str.regexp in
+    Str.replace_first comment_regex ""
+  in
+
+  let replace_emph =
+    let emph_regex = {|[[]\([^]]*\)[]][[][]]|} |> Str.regexp in
+    Str.global_replace emph_regex "_\\1_"
+  in
+  let fix_comment doc =
+    let rec inner state = function
+      | l :: ls when String.trim l = "" -> l :: inner state ls (* Ignore empty lines *)
+      | l :: ls when String.starts_with ~prefix:"  " l -> begin
+          match state with
+          | `In_list -> l :: inner state ls
+          | `In_code when not (String.starts_with ~prefix:"    " l) -> ("  " ^ l) :: inner state ls
+          | `In_code -> l :: inner state ls
+          | `Plain -> "" :: inner `In_code (l :: ls)
+        end
+      | l :: ls -> begin
+          match state with
+          | `In_code -> "" :: inner `Plain (l :: ls)
+          | _ when String.starts_with ~prefix:"- " l->
+            l :: inner `In_list ls
+          | _ -> l :: inner `Plain ls
+        end
+      | [] -> []
+    in
+
+    doc
+    |> replace_emph
+    |> String.split_on_char ~sep:'\n'
+    |> List.map ~f:remove_comment_prefix
+    |> inner `Plain
+    |> String.concat ~sep:"\n"
+  in
+
+  let comment =
+    leading :: (List.map ~f:Option.some detatched) @ [trailing]
+    |> List.filter_map ~f:(fun i -> i)
+    |> String.concat ~sep:"\n"
+  in
+
+  fix_comment comment |> Omd.of_string
+
 
 let make_code_info_map: SourceCodeInfo.t option -> code_info_map = fun source_code_info ->
   let source_code_info = Option.value ~default:[] source_code_info in
@@ -85,7 +131,7 @@ let make_code_info_map: SourceCodeInfo.t option -> code_info_map = fun source_co
       | SourceCodeInfo.Location.{ leading_comments = None; trailing_comments = None; leading_detached_comments = []; _ } -> db
       | SourceCodeInfo.Location.{ leading_comments = leading; trailing_comments = trailing; leading_detached_comments = detatched; _ } ->
         let path = map_location ~context:File location.SourceCodeInfo.Location.path in
-        let element = { leading; trailing; detatched } in
+        let element = parse_comments leading trailing detatched in
         Code_info_map.add ~key:path ~data:element db
     ) source_code_info
   in
@@ -174,7 +220,7 @@ let init: FileDescriptorProto.t -> t = fun filedescriptor ->
 
 (** Accessors *)
 
-let get_comments: element_type:element -> proto_path:string -> ?name:string -> t -> string list =
+let get_comments: element_type:element -> proto_path:string -> ?name:string -> t -> comment option =
   fun ~element_type ~proto_path ?name t ->
   let key =
     let key = Printf.sprintf "%s:%s" (string_of_element element_type) proto_path in
@@ -183,13 +229,6 @@ let get_comments: element_type:element -> proto_path:string -> ?name:string -> t
     | None -> key
   in
   StringMap.find_opt key t
-  |> Option.map ~f:( fun { leading; trailing; _} -> [leading; trailing])
-  (*|> (fun x -> match x with
-    | None -> Printf.eprintf "Not Found: %s\n" key; x
-    | Some _ -> Printf.eprintf "Found: %s\n" key; x)
-  *)
-  |> Option.value ~default:[]
-  |> List.filter_map ~f:(fun x -> x)
 
 
 let get_message_comments = get_comments ~element_type:Message
@@ -202,3 +241,9 @@ let get_method_comments = get_comments ~element_type:Method
 let get_extension_comments = get_comments ~element_type:Extension
 let get_file_comments = get_comments ~element_type:File ~proto_path:"." ?name:None
 let get_option_comments = get_comments ~element_type:Option
+
+
+let to_ocaml_doc comments =
+  comments
+  |> Omd.to_html
+  |> Printf.sprintf "{%%html:\n%s%%}"

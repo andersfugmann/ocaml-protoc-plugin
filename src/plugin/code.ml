@@ -94,6 +94,8 @@ let emit t indent fmt =
       decr t;
       prepend s;
       incr t
+    | `Raw ->
+      t.code <- s :: t.code
   in
   Printf.ksprintf emit fmt
 
@@ -126,18 +128,13 @@ let emit_deprecation ?(deprecated=true) t level =
     emit t `None "%s" (append_deprecaton_if ~deprecated:true level "")
 
 let emit_comment ~(position:[`Leading | `Trailing]) t = function
-  | [] -> ()
-  | comments ->
+  | None -> ()
+  | Some comments ->
     if position = `Leading then emit t `None "";
-    let comments = map_comments comments in
-    let () =
-      match comments with
-      | [ comment ] -> emit t `None "(** %s *)" (String.trim comment)
-      | comments ->
-        emit t `Begin "(**";
-        List.iter ~f:(emit t `None "%s") comments;
-        emit t `End "*)";
-    in
+    let comment_string = Comment_db.to_ocaml_doc comments in
+    emit t `Begin "(**";
+    emit t `Raw "%s" comment_string;
+    emit t `End "*)";
     if position = `Trailing then emit t `None "";
     ()
 
@@ -150,28 +147,23 @@ let emit_field_doc t
       ~(position:[`Leading | `Trailing])
       ?(format:('a -> 'b, unit, string, unit) format4="[%s]")
       ?(header="")
-      ?(comments=[])
+      ?(comments)
       param_comments =
 
   (* Remove parameters with no comments *)
-  let param_comments =
-    List.filter ~f:(fun (_, comments) -> not (List.is_empty comments)) param_comments
-  in
+  let has_header = String.length header > 0 in
 
-  let comments = map_comments comments in
-  match List.exists ~f:(fun s -> String.length s > 0) comments, String.length header > 0, not (List.is_empty param_comments) with
-  | false, _, false -> ()
-  | has_comments, has_header, _ ->
+  match comments, List.is_empty param_comments with
+  | None, true -> ()
+  | _  ->
     if position = `Leading then emit t `None "";
     emit t `Begin "(**";
-
-    if has_comments then List.iter ~f:(emit t `None "%s") comments;
+    Option.iter ~f:(fun comments -> emit t `Raw "%s" (Comment_db.to_ocaml_doc comments)) comments;
     if has_header then emit t `None "%s" header;
     List.iter ~f:(fun (param, comments) ->
-      let comments = map_comments comments in
       emit t `None "";
       emit t `Begin format param;
-      List.iter ~f:(emit t `None "%s") comments;
+      emit t `Raw "%s" (Comment_db.to_ocaml_doc comments);
       emit t `End "";
     ) param_comments;
 
