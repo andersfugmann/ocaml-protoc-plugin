@@ -68,6 +68,7 @@ type code_info_map = comment Code_info_map.t
 type t = comment StringMap.t
 
 let parse_comments leading trailing detatched =
+
   let remove_comment_prefix =
     let comment_regex = "^[ \t]*//[ ]?" |> Str.regexp in
     Str.replace_first comment_regex ""
@@ -80,18 +81,21 @@ let parse_comments leading trailing detatched =
   let fix_comment doc =
     let rec inner state = function
       | l :: ls when String.trim l = "" -> l :: inner state ls (* Ignore empty lines *)
+      | l :: ls when String.starts_with_regex ~regex:"[ ]*- " l -> begin
+          match state with
+          | `In_list -> l :: inner state ls
+          | `In_code -> ("  " ^ l) :: inner state ls
+          | `Plain -> "" :: inner `In_list (l :: ls)
+        end
       | l :: ls when String.starts_with ~prefix:"  " l -> begin
           match state with
           | `In_list -> l :: inner state ls
-          | `In_code when not (String.starts_with ~prefix:"    " l) -> ("  " ^ l) :: inner state ls
-          | `In_code -> l :: inner state ls
+          | `In_code -> ("  " ^ l) :: inner state ls
           | `Plain -> "" :: inner `In_code (l :: ls)
         end
       | l :: ls -> begin
           match state with
           | `In_code -> "" :: inner `Plain (l :: ls)
-          | _ when String.starts_with ~prefix:"- " l->
-            l :: inner `In_list ls
           | _ -> l :: inner `Plain ls
         end
       | [] -> []
@@ -241,7 +245,6 @@ let get_method_comments = get_comments ~element_type:Method
 let get_extension_comments = get_comments ~element_type:Extension
 let get_file_comments = get_comments ~element_type:File ~proto_path:"." ?name:None
 let get_option_comments = get_comments ~element_type:Option
-
 
 let to_ocaml_doc comments =
   comments
