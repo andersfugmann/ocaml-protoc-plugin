@@ -27,8 +27,10 @@ module rec Google : sig
   module rec Protobuf : sig
 
     (**
-      The protocol compiler can output a FileDescriptorSet containing the .proto
-      files it parses.
+{%html:
+<p>The protocol compiler can output a FileDescriptorSet containing the .proto
+files it parses.</p>
+%}
     *)
     module rec FileDescriptorSet : sig
       type t = (FileDescriptorProto.t list)
@@ -60,36 +62,76 @@ module rec Google : sig
     end
 
 
-    (** Describes a complete .proto file. *)
+    (**
+{%html:
+<p>Describes a complete .proto file.</p>
+%}
+    *)
     and FileDescriptorProto : sig
       type t = {
         name:string option;
         (**
-          file name, relative to root of source tree
+{%html:
+<p>file name, relative to root of source tree</p>
+%}
         *)
 
         package:string option;
         (**
-          e.g. "foo", "foo.bar", etc.
+{%html:
+<p>e.g. &quot;foo&quot;, &quot;foo.bar&quot;, etc.</p>
+%}
         *)
 
         dependency:string list;
         (**
-          Names of files imported by this file.
+{%html:
+<p>Names of files imported by this file.</p>
+%}
         *)
 
         message_type:DescriptorProto.t list;
+        (**
+{%html:
+<p>All top-level definitions in this file.</p>
+%}
+        *)
+
         enum_type:EnumDescriptorProto.t list;
         service:ServiceDescriptorProto.t list;
         extension:FieldDescriptorProto.t list;
         options:FileOptions.t option;
         source_code_info:SourceCodeInfo.t option;
+        (**
+{%html:
+<p>This field contains optional information about the original source code.
+You may safely remove this entire field without harming runtime
+functionality of the descriptors -- the information is needed only by
+development tools.</p>
+%}
+        *)
+
         public_dependency:int list;
+        (**
+{%html:
+<p>Indexes of the public imported files in the dependency list above.</p>
+%}
+        *)
+
         weak_dependency:int list;
+        (**
+{%html:
+<p>Indexes of the weak imported files in the dependency list.
+For Google-internal migration only. Do not use.</p>
+%}
+        *)
+
         syntax:string option;
         (**
-          The syntax of the proto file.
-          The supported values are "proto2" and "proto3".
+{%html:
+<p>The syntax of the proto file.
+The supported values are &quot;proto2&quot; and &quot;proto3&quot;.</p>
+%}
         *)
 
       }
@@ -121,18 +163,26 @@ module rec Google : sig
     end
 
 
-    (** Describes a message type. *)
+    (**
+{%html:
+<p>Describes a message type.</p>
+%}
+    *)
     and DescriptorProto : sig
       module rec ExtensionRange : sig
         type t = {
           start:int option;
           (**
-            Inclusive.
+{%html:
+<p>Inclusive.</p>
+%}
           *)
 
           end':int option;
           (**
-            Exclusive.
+{%html:
+<p>Exclusive.</p>
+%}
           *)
 
           options:ExtensionRangeOptions.t option;
@@ -166,20 +216,26 @@ module rec Google : sig
 
 
       (**
-        Range of reserved tag numbers. Reserved tag numbers may not be used by
-        fields or extension ranges in the same message. Reserved ranges may
-        not overlap.
+{%html:
+<p>Range of reserved tag numbers. Reserved tag numbers may not be used by
+fields or extension ranges in the same message. Reserved ranges may
+not overlap.</p>
+%}
       *)
       and ReservedRange : sig
         type t = {
           start:int option;
           (**
-            Inclusive.
+{%html:
+<p>Inclusive.</p>
+%}
           *)
 
           end':int option;
           (**
-            Exclusive.
+{%html:
+<p>Exclusive.</p>
+%}
           *)
 
         }
@@ -221,6 +277,13 @@ module rec Google : sig
         oneof_decl:OneofDescriptorProto.t list;
         reserved_range:ReservedRange.t list;
         reserved_name:string list;
+        (**
+{%html:
+<p>Reserved field names, which may not be used by fields in the same message.
+A given name may only be reserved once.</p>
+%}
+        *)
+
       }
       val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -252,6 +315,12 @@ module rec Google : sig
     and ExtensionRangeOptions : sig
       type t = {
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -282,28 +351,38 @@ module rec Google : sig
     end
 
 
-    (** Describes a field within a message. *)
+    (**
+{%html:
+<p>Describes a field within a message.</p>
+%}
+    *)
     and FieldDescriptorProto : sig
       module rec Type : sig
         type t =
           | TYPE_DOUBLE
           (**
-            0 is reserved for errors.
-            Order is weird for historical reasons.
+{%html:
+<p>0 is reserved for errors.
+Order is weird for historical reasons.</p>
+%}
           *)
 
           | TYPE_FLOAT
           | TYPE_INT64
           (**
-            Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT64 if
-            negative values are likely.
+{%html:
+<p>Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT64 if
+negative values are likely.</p>
+%}
           *)
 
           | TYPE_UINT64
           | TYPE_INT32
           (**
-            Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT32 if
-            negative values are likely.
+{%html:
+<p>Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT32 if
+negative values are likely.</p>
+%}
           *)
 
           | TYPE_FIXED64
@@ -312,27 +391,45 @@ module rec Google : sig
           | TYPE_STRING
           | TYPE_GROUP
           (**
-            Tag-delimited aggregate.
-            Group type is deprecated and not supported in proto3. However, Proto3
-            implementations should still be able to parse the group wire format and
-            treat group fields as unknown fields.
+{%html:
+<p>Tag-delimited aggregate.
+Group type is deprecated and not supported in proto3. However, Proto3
+implementations should still be able to parse the group wire format and
+treat group fields as unknown fields.</p>
+%}
           *)
 
           | TYPE_MESSAGE
-          (** Length-delimited aggregate. *)
+          (**
+{%html:
+<p>Length-delimited aggregate.</p>
+%}
+          *)
 
           | TYPE_BYTES
-          (** New in version 2. *)
+          (**
+{%html:
+<p>New in version 2.</p>
+%}
+          *)
 
           | TYPE_UINT32
           | TYPE_ENUM
           | TYPE_SFIXED32
           | TYPE_SFIXED64
           | TYPE_SINT32
-          (** Uses ZigZag encoding. *)
+          (**
+{%html:
+<p>Uses ZigZag encoding.</p>
+%}
+          *)
 
           | TYPE_SINT64
-          (** Uses ZigZag encoding. *)
+          (**
+{%html:
+<p>Uses ZigZag encoding.</p>
+%}
+          *)
 
 
         val name: unit -> string
@@ -350,7 +447,11 @@ module rec Google : sig
       and Label : sig
         type t =
           | LABEL_OPTIONAL
-          (** 0 is reserved for errors *)
+          (**
+{%html:
+<p>0 is reserved for errors</p>
+%}
+          *)
 
           | LABEL_REQUIRED
           | LABEL_REPEATED
@@ -371,24 +472,86 @@ module rec Google : sig
         name:string option;
         extendee:string option;
         (**
-          For extensions, this is the name of the type being extended.  It is
-          resolved in the same manner as type_name.
+{%html:
+<p>For extensions, this is the name of the type being extended.  It is
+resolved in the same manner as type_name.</p>
+%}
         *)
 
         number:int option;
         label:Label.t option;
         type':Type.t option;
         (**
-          If type_name is set, this need not be set.  If both this and type_name
-          are set, this must be one of TYPE_ENUM, TYPE_MESSAGE or TYPE_GROUP.
+{%html:
+<p>If type_name is set, this need not be set.  If both this and type_name
+are set, this must be one of TYPE_ENUM, TYPE_MESSAGE or TYPE_GROUP.</p>
+%}
         *)
 
         type_name:string option;
+        (**
+{%html:
+<p>For message and enum types, this is the name of the type.  If the name
+starts with a '.', it is fully-qualified.  Otherwise, C++-like scoping
+rules are used to find the type (i.e. first the nested types within this
+message are searched, then within the parent, on up to the root
+namespace).</p>
+%}
+        *)
+
         default_value:string option;
+        (**
+{%html:
+<p>For numeric types, contains the original text representation of the value.
+For booleans, &quot;true&quot; or &quot;false&quot;.
+For strings, contains the default text contents (not escaped in any way).
+For bytes, contains the C escaped value.  All bytes &gt;= 128 are escaped.</p>
+%}
+        *)
+
         options:FieldOptions.t option;
         oneof_index:int option;
+        (**
+{%html:
+<p>If set, gives the index of a oneof in the containing type's oneof_decl
+list.  This field is a member of that oneof.</p>
+%}
+        *)
+
         json_name:string option;
+        (**
+{%html:
+<p>JSON name of this field. The value is set by protocol compiler. If the
+user has set a &quot;json_name&quot; option on this field, that option's value
+will be used. Otherwise, it's deduced from the field's name by converting
+it to camelCase.</p>
+%}
+        *)
+
         proto3_optional:bool option;
+        (**
+{%html:
+<p>If true, this is a proto3 &quot;optional&quot;. When a proto3 field is optional, it
+tracks presence regardless of field type.</p>
+<p>When proto3_optional is true, this field must be belong to a oneof to
+signal to old proto3 clients that presence is tracked for this field. This
+oneof is known as a &quot;synthetic&quot; oneof, and this field must be its sole
+member (each proto3 optional field gets its own synthetic oneof). Synthetic
+oneofs exist in the descriptor only, and do not generate any API. Synthetic
+oneofs must be ordered after all &quot;real&quot; oneofs.</p>
+<p>For message fields, proto3_optional doesn't create any semantic change,
+since non-repeated message fields always track presence. However it still
+indicates the semantic detail of whether the user wrote &quot;optional&quot; or not.
+This can be useful for round-tripping the .proto file. For consistency we
+give message fields a synthetic oneof also, even though it is not required
+to track presence. This is especially important because the parser can't
+tell if a field is a message or an enum, so it must always create a
+synthetic oneof.</p>
+<p>Proto2 optional fields do not set this flag, because they already indicate
+optional with <code>LABEL_OPTIONAL</code>.</p>
+%}
+        *)
+
       }
       val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -418,7 +581,11 @@ module rec Google : sig
     end
 
 
-    (** Describes a oneof. *)
+    (**
+{%html:
+<p>Describes a oneof.</p>
+%}
+    *)
     and OneofDescriptorProto : sig
       type t = {
         name:string option;
@@ -452,27 +619,36 @@ module rec Google : sig
     end
 
 
-    (** Describes an enum type. *)
+    (**
+{%html:
+<p>Describes an enum type.</p>
+%}
+    *)
     and EnumDescriptorProto : sig
 
       (**
-        Range of reserved numeric values. Reserved values may not be used by
-        entries in the same enum. Reserved ranges may not overlap.
-
-        Note that this is distinct from DescriptorProto.ReservedRange in that it
-        is inclusive such that it can appropriately represent the entire int32
-        domain.
+{%html:
+<p>Range of reserved numeric values. Reserved values may not be used by
+entries in the same enum. Reserved ranges may not overlap.</p>
+<p>Note that this is distinct from DescriptorProto.ReservedRange in that it
+is inclusive such that it can appropriately represent the entire int32
+domain.</p>
+%}
       *)
       module rec EnumReservedRange : sig
         type t = {
           start:int option;
           (**
-            Inclusive.
+{%html:
+<p>Inclusive.</p>
+%}
           *)
 
           end':int option;
           (**
-            Inclusive.
+{%html:
+<p>Inclusive.</p>
+%}
           *)
 
         }
@@ -508,7 +684,22 @@ module rec Google : sig
         value:EnumValueDescriptorProto.t list;
         options:EnumOptions.t option;
         reserved_range:EnumReservedRange.t list;
+        (**
+{%html:
+<p>Range of reserved numeric values. Reserved numeric values may not be used
+by enum values in the same enum declaration. Reserved ranges may not
+overlap.</p>
+%}
+        *)
+
         reserved_name:string list;
+        (**
+{%html:
+<p>Reserved enum value names, which may not be reused. A given name may only
+be reserved once.</p>
+%}
+        *)
+
       }
       val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -538,7 +729,11 @@ module rec Google : sig
     end
 
 
-    (** Describes a value within an enum. *)
+    (**
+{%html:
+<p>Describes a value within an enum.</p>
+%}
+    *)
     and EnumValueDescriptorProto : sig
       type t = {
         name:string option;
@@ -573,7 +768,11 @@ module rec Google : sig
     end
 
 
-    (** Describes a service. *)
+    (**
+{%html:
+<p>Describes a service.</p>
+%}
+    *)
     and ServiceDescriptorProto : sig
       type t = {
         name:string option;
@@ -608,15 +807,38 @@ module rec Google : sig
     end
 
 
-    (** Describes a method of a service. *)
+    (**
+{%html:
+<p>Describes a method of a service.</p>
+%}
+    *)
     and MethodDescriptorProto : sig
       type t = {
         name:string option;
         input_type:string option;
+        (**
+{%html:
+<p>Input and output type names.  These are resolved in the same way as
+FieldDescriptorProto.type_name, but must refer to a message type.</p>
+%}
+        *)
+
         output_type:string option;
         options:MethodOptions.t option;
         client_streaming:bool;
+        (**
+{%html:
+<p>Identifies if client streams multiple client messages</p>
+%}
+        *)
+
         server_streaming:bool;
+        (**
+{%html:
+<p>Identifies if server streams multiple server messages</p>
+%}
+        *)
+
       }
       val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -645,24 +867,75 @@ module rec Google : sig
       (**/**)
     end
 
+
+    (**
+{%html:
+<p>===================================================================
+Options</p>
+<p>Each of the definitions above may have &quot;options&quot; attached.  These are
+just annotations which may cause code to be generated slightly differently
+or may contain hints for code that manipulates protocol messages.</p>
+<p>Clients may define custom options as extensions of the *Options messages.
+These extensions may not yet be known at parsing time, so the parser cannot
+store the values in them.  Instead it stores them in a field in the *Options
+message called uninterpreted_option. This field must have the same name
+across all *Options messages. We then use this field to populate the
+extensions when we build a descriptor, at which point all protos have been
+parsed and so all extensions are known.</p>
+<p>Extension numbers for custom options may be chosen as follows:</p>
+<ul>
+<li>
+<p>For options which will only be used within a single application or</p>
+<p>organization, or for experimental options, use field numbers 50000
+through 99999.  It is up to you to ensure that you do not use the
+same number for multiple options.</p>
+</li>
+<li>
+<p>For options which will be published and used publicly by multiple</p>
+<p>independent entities, e-mail protobuf-global-extension-registry@google.com
+to reserve extension numbers. Simply provide your project name (e.g.
+Objective-C plugin) and your project website (if available) -- there's no
+need to explain how you intend to use them. Usually you only need one
+extension number. You can declare multiple options with only one extension
+number by putting them in a sub-message. See the Custom Options section of
+the docs for examples:
+https://developers.google.com/protocol-buffers/docs/proto#options
+If this turns out to be popular, a web service will be set up
+to automatically assign option numbers.</p>
+</li>
+</ul>
+%}
+    *)
     and FileOptions : sig
 
-      (** Generated classes can be optimized for speed or code size. *)
+      (**
+{%html:
+<p>Generated classes can be optimized for speed or code size.</p>
+%}
+      *)
       module rec OptimizeMode : sig
         type t =
           | SPEED
-          (** Generate complete code for parsing, serialization, *)
+          (**
+{%html:
+<p>Generate complete code for parsing, serialization,</p>
+%}
+          *)
 
           | CODE_SIZE
           (**
-            etc.
-
-
-            Use ReflectionOps to implement these methods.
+{%html:
+<p>etc.</p>
+<p>Use ReflectionOps to implement these methods.</p>
+%}
           *)
 
           | LITE_RUNTIME
-          (** Generate code using MessageLite and the lite runtime. *)
+          (**
+{%html:
+<p>Generate code using MessageLite and the lite runtime.</p>
+%}
+          *)
 
 
         val name: unit -> string
@@ -679,33 +952,185 @@ module rec Google : sig
 
       type t = {
         java_package:string option;
+        (**
+{%html:
+<p>Sets the Java package where classes generated from this .proto will be
+placed.  By default, the proto package is used, but this is often
+inappropriate because proto packages do not normally start with backwards
+domain names.</p>
+%}
+        *)
+
         java_outer_classname:string option;
+        (**
+{%html:
+<p>Controls the name of the wrapper Java class generated for the .proto file.
+That class will always contain the .proto file's getDescriptor() method as
+well as any top-level extensions defined in the .proto file.
+If java_multiple_files is disabled, then all the other classes from the
+.proto file will be nested inside the single wrapper outer class.</p>
+%}
+        *)
+
         optimize_for:OptimizeMode.t;
+        (**
+{%html:
+<p>Clients can define custom options in extensions of this message.
+See the documentation for the &quot;Options&quot; section above.</p>
+%}
+        *)
+
         java_multiple_files:bool;
+        (**
+{%html:
+<p>If enabled, then the Java code generator will generate a separate .java
+file for each top-level message, enum, and service defined in the .proto
+file.  Thus, these types will <em>not</em> be nested inside the wrapper class
+named by java_outer_classname.  However, the wrapper class will still be
+generated to contain the file's getDescriptor() method as well as any
+top-level extensions defined in the file.</p>
+%}
+        *)
+
         go_package:string option;
+        (**
+{%html:
+<p>Sets the Go package where structs generated from this .proto will be
+placed. If omitted, the Go package will be derived from the following:</p>
+<ul>
+<li>The basename of the package import path, if provided.
+</li>
+<li>Otherwise, the package statement in the .proto file, if present.
+</li>
+<li>Otherwise, the basename of the .proto file, without extension.
+</li>
+</ul>
+%}
+        *)
+
         cc_generic_services:bool;
+        (**
+{%html:
+<p>Should generic services be generated in each language?  &quot;Generic&quot; services
+are not specific to any particular RPC system.  They are generated by the
+main code generators in each language (without additional plugins).
+Generic services were the only kind of service generation supported by
+early versions of google.protobuf.</p>
+<p>Generic services are now considered deprecated in favor of using plugins
+that generate code specific to your particular RPC system.  Therefore,
+these default to false.  Old code which depends on generic services should
+explicitly set them to true.</p>
+%}
+        *)
+
         java_generic_services:bool;
         py_generic_services:bool;
         java_generate_equals_and_hash:bool option[@ocaml.alert protobuf "Marked as deprecated in the .proto file"];
+        (**
+{%html:
+<p>This option does nothing.</p>
+%}
+        *)
+
         deprecated:bool;
         (**
-          Is this file deprecated?
-          Depending on the target platform, this can emit Deprecated annotations
-          for everything in the file, or it will be completely ignored; in the very
-          least, this is a formalization for deprecating files.
+{%html:
+<p>Is this file deprecated?
+Depending on the target platform, this can emit Deprecated annotations
+for everything in the file, or it will be completely ignored; in the very
+least, this is a formalization for deprecating files.</p>
+%}
         *)
 
         java_string_check_utf8:bool;
+        (**
+{%html:
+<p>If set true, then the Java2 code generator will generate code that
+throws an exception whenever an attempt is made to assign a non-UTF-8
+byte sequence to a string field.
+Message reflection will do the same.
+However, an extension field still accepts non-UTF-8 byte sequences.
+This option has no effect on when used with the lite runtime.</p>
+%}
+        *)
+
         cc_enable_arenas:bool;
+        (**
+{%html:
+<p>Enables the use of arenas for the proto messages in this file. This applies
+only to generated classes for C++.</p>
+%}
+        *)
+
         objc_class_prefix:string option;
+        (**
+{%html:
+<p>Sets the objective c class prefix which is prepended to all objective c
+generated classes from this .proto. There is no default.</p>
+%}
+        *)
+
         csharp_namespace:string option;
+        (**
+{%html:
+<p>Namespace for generated classes; defaults to the package.</p>
+%}
+        *)
+
         swift_prefix:string option;
+        (**
+{%html:
+<p>By default Swift generators will take the proto package and CamelCase it
+replacing '.' with underscore and use that to prefix the types/symbols
+defined. When this options is provided, they will use this value instead
+to prefix the types/symbols defined.</p>
+%}
+        *)
+
         php_class_prefix:string option;
+        (**
+{%html:
+<p>Sets the php class prefix which is prepended to all php generated classes
+from this .proto. Default is empty.</p>
+%}
+        *)
+
         php_namespace:string option;
+        (**
+{%html:
+<p>Use this option to change the namespace of php generated classes. Default
+is empty. When this option is empty, the package name will be used for
+determining the namespace.</p>
+%}
+        *)
+
         php_generic_services:bool;
         php_metadata_namespace:string option;
+        (**
+{%html:
+<p>Use this option to change the namespace of php generated metadata classes.
+Default is empty. When this option is empty, the proto file name will be
+used for determining the namespace.</p>
+%}
+        *)
+
         ruby_package:string option;
+        (**
+{%html:
+<p>Use this option to change the package of ruby generated classes. Default
+is empty. When this option is not set, the package name will be used for
+determining the ruby package.</p>
+%}
+        *)
+
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here.
+See the documentation for the &quot;Options&quot; section above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -738,17 +1163,79 @@ module rec Google : sig
     and MessageOptions : sig
       type t = {
         message_set_wire_format:bool;
+        (**
+{%html:
+<p>Set true to use the old proto1 MessageSet wire format for extensions.
+This is provided for backwards-compatibility with the MessageSet wire
+format.  You should not use this for any other reason:  It's less
+efficient, has fewer features, and is more complicated.</p>
+<p>The message must be defined exactly as follows:</p>
+<pre><code> message Foo {
+   option message_set_wire_format = true;
+   extensions 4 to max;
+ }
+</code></pre>
+<p>Note that the message cannot have any defined fields; MessageSets only
+have extensions.</p>
+<p>All extensions of your type must be singular messages; e.g. they cannot
+be int32s, enums, or repeated messages.</p>
+<p>Because this is an option, the above two restrictions are not enforced by
+the protocol compiler.</p>
+%}
+        *)
+
         no_standard_descriptor_accessor:bool;
+        (**
+{%html:
+<p>Disables the generation of the standard &quot;descriptor()&quot; accessor, which can
+conflict with a field of the same name.  This is meant to make migration
+from proto1 easier; new code should avoid fields named &quot;descriptor&quot;.</p>
+%}
+        *)
+
         deprecated:bool;
         (**
-          Is this message deprecated?
-          Depending on the target platform, this can emit Deprecated annotations
-          for the message, or it will be completely ignored; in the very least,
-          this is a formalization for deprecating messages.
+{%html:
+<p>Is this message deprecated?
+Depending on the target platform, this can emit Deprecated annotations
+for the message, or it will be completely ignored; in the very least,
+this is a formalization for deprecating messages.</p>
+%}
         *)
 
         map_entry:bool option;
+        (**
+{%html:
+<p>Whether the message is an automatically generated map entry type for the
+maps field.</p>
+<p>For maps fields:</p>
+<pre><code> map&lt;KeyType, ValueType&gt; map_field = 1;
+</code></pre>
+<p>The parsed descriptor looks like:</p>
+<pre><code> message MapFieldEntry {
+     option map_entry = true;
+     optional KeyType key = 1;
+     optional ValueType value = 2;
+ }
+ repeated MapFieldEntry map_field = 1;
+</code></pre>
+<p>Implementations may choose not to generate the map_entry=true message, but
+use a native map in the target language to hold the keys and values.
+The reflection APIs in such implementations still need to work as
+if the field is a repeated message field.</p>
+<p>NOTE: Do not set the option in .proto files. Always use the maps syntax
+instead. The option should only be implicitly set by the proto compiler
+parser.</p>
+%}
+        *)
+
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -782,7 +1269,11 @@ module rec Google : sig
       module rec CType : sig
         type t =
           | STRING
-          (** Default mode. *)
+          (**
+{%html:
+<p>Default mode.</p>
+%}
+          *)
 
           | CORD
           | STRING_PIECE
@@ -802,13 +1293,25 @@ module rec Google : sig
       and JSType : sig
         type t =
           | JS_NORMAL
-          (** Use the default type. *)
+          (**
+{%html:
+<p>Use the default type.</p>
+%}
+          *)
 
           | JS_STRING
-          (** Use JavaScript strings. *)
+          (**
+{%html:
+<p>Use JavaScript strings.</p>
+%}
+          *)
 
           | JS_NUMBER
-          (** Use JavaScript numbers. *)
+          (**
+{%html:
+<p>Use JavaScript numbers.</p>
+%}
+          *)
 
 
         val name: unit -> string
@@ -826,86 +1329,105 @@ module rec Google : sig
       type t = {
         ctype:CType.t;
         (**
-          The ctype option instructs the C++ code generator to use a different
-          representation of the field than it normally would.  See the specific
-          options below.  This option is not yet implemented in the open source
-          release -- sorry, we'll try to include it in a future version!
+{%html:
+<p>The ctype option instructs the C++ code generator to use a different
+representation of the field than it normally would.  See the specific
+options below.  This option is not yet implemented in the open source
+release -- sorry, we'll try to include it in a future version!</p>
+%}
         *)
 
         packed:bool option;
         (**
-          The packed option can be enabled for repeated primitive fields to enable
-          a more efficient representation on the wire. Rather than repeatedly
-          writing the tag and type for each element, the entire array is encoded as
-          a single length-delimited blob. In proto3, only explicit setting it to
-          false will avoid using packed encoding.
+{%html:
+<p>The packed option can be enabled for repeated primitive fields to enable
+a more efficient representation on the wire. Rather than repeatedly
+writing the tag and type for each element, the entire array is encoded as
+a single length-delimited blob. In proto3, only explicit setting it to
+false will avoid using packed encoding.</p>
+%}
         *)
 
         deprecated:bool;
         (**
-          Clients can define custom options in extensions of this message. See above.
+{%html:
+<p>Clients can define custom options in extensions of this message. See above.</p>
+%}
         *)
 
         lazy':bool;
         (**
-          Should this field be parsed lazily?  Lazy applies only to message-type
-          fields.  It means that when the outer message is initially parsed, the
-          inner message's contents will not be parsed but instead stored in encoded
-          form.  The inner message will actually be parsed when it is first accessed.
-
-          This is only a hint.  Implementations are free to choose whether to use
-          eager or lazy parsing regardless of the value of this option.  However,
-          setting this option true suggests that the protocol author believes that
-          using lazy parsing on this field is worth the additional bookkeeping
-          overhead typically needed to implement it.
-
-          This option does not affect the public interface of any generated code;
-          all method signatures remain the same.  Furthermore, thread-safety of the
-          interface is not affected by this option; const methods remain safe to
-          call from multiple threads concurrently, while non-const methods continue
-          to require exclusive access.
-
-
-          Note that implementations may choose not to check required fields within
-          a lazy sub-message.  That is, calling IsInitialized() on the outer message
-          may return true even if the inner message has missing required fields.
-          This is necessary because otherwise the inner message would have to be
-          parsed in order to perform the check, defeating the purpose of lazy
-          parsing.  An implementation which chooses not to check required fields
-          must be consistent about it.  That is, for any particular sub-message, the
-          implementation must either *always* check its required fields, or *never*
-          check its required fields, regardless of whether or not the message has
-          been parsed.
-
-          As of 2021, lazy does no correctness checks on the byte stream during
-          parsing.  This may lead to crashes if and when an invalid byte stream is
-          finally parsed upon access.
-
-          TODO(b/211906113):  Enable validation on lazy fields.
+{%html:
+<p>Should this field be parsed lazily?  Lazy applies only to message-type
+fields.  It means that when the outer message is initially parsed, the
+inner message's contents will not be parsed but instead stored in encoded
+form.  The inner message will actually be parsed when it is first accessed.</p>
+<p>This is only a hint.  Implementations are free to choose whether to use
+eager or lazy parsing regardless of the value of this option.  However,
+setting this option true suggests that the protocol author believes that
+using lazy parsing on this field is worth the additional bookkeeping
+overhead typically needed to implement it.</p>
+<p>This option does not affect the public interface of any generated code;
+all method signatures remain the same.  Furthermore, thread-safety of the
+interface is not affected by this option; const methods remain safe to
+call from multiple threads concurrently, while non-const methods continue
+to require exclusive access.</p>
+<p>Note that implementations may choose not to check required fields within
+a lazy sub-message.  That is, calling IsInitialized() on the outer message
+may return true even if the inner message has missing required fields.
+This is necessary because otherwise the inner message would have to be
+parsed in order to perform the check, defeating the purpose of lazy
+parsing.  An implementation which chooses not to check required fields
+must be consistent about it.  That is, for any particular sub-message, the
+implementation must either <em>always</em> check its required fields, or <em>never</em>
+check its required fields, regardless of whether or not the message has
+been parsed.</p>
+<p>As of 2021, lazy does no correctness checks on the byte stream during
+parsing.  This may lead to crashes if and when an invalid byte stream is
+finally parsed upon access.</p>
+<p>TODO(b/211906113):  Enable validation on lazy fields.</p>
+%}
         *)
 
         jstype:JSType.t;
         (**
-          The jstype option determines the JavaScript type used for values of the
-          field.  The option is permitted only for 64 bit integral and fixed types
-          (int64, uint64, sint64, fixed64, sfixed64).  A field with jstype JS_STRING
-          is represented as JavaScript string, which avoids loss of precision that
-          can happen when a large value is converted to a floating point JavaScript.
-          Specifying JS_NUMBER for the jstype causes the generated JavaScript code to
-          use the JavaScript "number" type.  The behavior of the default option
-          JS_NORMAL is implementation dependent.
-
-          This option is an enum to permit additional types to be added, e.g.
-          goog.math.Integer.
+{%html:
+<p>The jstype option determines the JavaScript type used for values of the
+field.  The option is permitted only for 64 bit integral and fixed types
+(int64, uint64, sint64, fixed64, sfixed64).  A field with jstype JS_STRING
+is represented as JavaScript string, which avoids loss of precision that
+can happen when a large value is converted to a floating point JavaScript.
+Specifying JS_NUMBER for the jstype causes the generated JavaScript code to
+use the JavaScript &quot;number&quot; type.  The behavior of the default option
+JS_NORMAL is implementation dependent.</p>
+<p>This option is an enum to permit additional types to be added, e.g.
+goog.math.Integer.</p>
+%}
         *)
 
         weak:bool;
         (**
-          For Google-internal migration only. Do not use.
+{%html:
+<p>For Google-internal migration only. Do not use.</p>
+%}
         *)
 
         unverified_lazy:bool;
+        (**
+{%html:
+<p>unverified_lazy does no correctness checks on the byte stream. This should
+only be used where lazy with verification is prohibitive for performance
+reasons.</p>
+%}
+        *)
+
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -938,6 +1460,12 @@ module rec Google : sig
     and OneofOptions : sig
       type t = {
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -970,15 +1498,30 @@ module rec Google : sig
     and EnumOptions : sig
       type t = {
         allow_alias:bool option;
+        (**
+{%html:
+<p>Set this option to true to allow mapping different tag names to the same
+value.</p>
+%}
+        *)
+
         deprecated:bool;
         (**
-          Is this enum deprecated?
-          Depending on the target platform, this can emit Deprecated annotations
-          for the enum, or it will be completely ignored; in the very least, this
-          is a formalization for deprecating enums.
+{%html:
+<p>Is this enum deprecated?
+Depending on the target platform, this can emit Deprecated annotations
+for the enum, or it will be completely ignored; in the very least, this
+is a formalization for deprecating enums.</p>
+%}
         *)
 
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -1012,13 +1555,21 @@ module rec Google : sig
       type t = {
         deprecated:bool;
         (**
-          Is this enum value deprecated?
-          Depending on the target platform, this can emit Deprecated annotations
-          for the enum value, or it will be completely ignored; in the very least,
-          this is a formalization for deprecating enum values.
+{%html:
+<p>Is this enum value deprecated?
+Depending on the target platform, this can emit Deprecated annotations
+for the enum value, or it will be completely ignored; in the very least,
+this is a formalization for deprecating enum values.</p>
+%}
         *)
 
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -1052,13 +1603,26 @@ module rec Google : sig
       type t = {
         deprecated:bool;
         (**
-          Is this service deprecated?
-          Depending on the target platform, this can emit Deprecated annotations
-          for the service, or it will be completely ignored; in the very least,
-          this is a formalization for deprecating services.
+{%html:
+<p>Is this service deprecated?
+Depending on the target platform, this can emit Deprecated annotations
+for the service, or it will be completely ignored; in the very least,
+this is a formalization for deprecating services.</p>
+<p>Note:  Field numbers 1 through 32 are reserved for Google's internal RPC</p>
+<pre><code> framework.  We apologize for hoarding these numbers to ourselves, but
+ we were already using them long before we decided to release Protocol
+ Buffers.
+</code></pre>
+%}
         *)
 
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -1091,18 +1655,28 @@ module rec Google : sig
     and MethodOptions : sig
 
       (**
-        Is this method side-effect-free (or safe in HTTP parlance), or idempotent,
-        or neither? HTTP based RPC implementation may choose GET verb for safe
-        methods, and PUT verb for idempotent methods instead of the default POST.
+{%html:
+<p>Is this method side-effect-free (or safe in HTTP parlance), or idempotent,
+or neither? HTTP based RPC implementation may choose GET verb for safe
+methods, and PUT verb for idempotent methods instead of the default POST.</p>
+%}
       *)
       module rec IdempotencyLevel : sig
         type t =
           | IDEMPOTENCY_UNKNOWN
           | NO_SIDE_EFFECTS
-          (** implies idempotent *)
+          (**
+{%html:
+<p>implies idempotent</p>
+%}
+          *)
 
           | IDEMPOTENT
-          (** idempotent, but may have side effects *)
+          (**
+{%html:
+<p>idempotent, but may have side effects</p>
+%}
+          *)
 
 
         val name: unit -> string
@@ -1120,14 +1694,27 @@ module rec Google : sig
       type t = {
         deprecated:bool;
         (**
-          Is this method deprecated?
-          Depending on the target platform, this can emit Deprecated annotations
-          for the method, or it will be completely ignored; in the very least,
-          this is a formalization for deprecating methods.
+{%html:
+<p>Is this method deprecated?
+Depending on the target platform, this can emit Deprecated annotations
+for the method, or it will be completely ignored; in the very least,
+this is a formalization for deprecating methods.</p>
+<p>Note:  Field numbers 1 through 32 are reserved for Google's internal RPC</p>
+<pre><code> framework.  We apologize for hoarding these numbers to ourselves, but
+ we were already using them long before we decided to release Protocol
+ Buffers.
+</code></pre>
+%}
         *)
 
         idempotency_level:IdempotencyLevel.t;
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -1159,21 +1746,25 @@ module rec Google : sig
 
 
     (**
-      A message representing a option the parser does not recognize. This only
-      appears in options protos created by the compiler::Parser class.
-      DescriptorPool resolves these when building Descriptor objects. Therefore,
-      options protos in descriptor objects (e.g. returned by Descriptor::options(),
-      or produced by Descriptor::CopyTo()) will never have UninterpretedOptions
-      in them.
+{%html:
+<p>A message representing a option the parser does not recognize. This only
+appears in options protos created by the compiler::Parser class.
+DescriptorPool resolves these when building Descriptor objects. Therefore,
+options protos in descriptor objects (e.g. returned by Descriptor::options(),
+or produced by Descriptor::CopyTo()) will never have UninterpretedOptions
+in them.</p>
+%}
     *)
     and UninterpretedOption : sig
 
       (**
-        The name of the uninterpreted option.  Each string represents a segment in
-        a dot-separated name.  is_extension is true iff a segment represents an
-        extension (denoted with parentheses in options specs in .proto files).
-        E.g.,\{ \["foo", false\], \["bar.baz", true\], \["moo", false\] \} represents
-        "foo.(bar.baz).moo".
+{%html:
+<p>The name of the uninterpreted option.  Each string represents a segment in
+a dot-separated name.  is_extension is true iff a segment represents an
+extension (denoted with parentheses in options specs in .proto files).
+E.g.,{ [&quot;foo&quot;, false], [&quot;bar.baz&quot;, true], [&quot;moo&quot;, false] } represents
+&quot;foo.(bar.baz).moo&quot;.</p>
+%}
       *)
       module rec NamePart : sig
         type t = {
@@ -1210,6 +1801,13 @@ module rec Google : sig
       type t = {
         name:NamePart.t list;
         identifier_value:string option;
+        (**
+{%html:
+<p>The value of the uninterpreted option, in whatever type the tokenizer
+identified it as during parsing. Exactly one of these should be set.</p>
+%}
+        *)
+
         positive_int_value:int option;
         negative_int_value:int option;
         double_value:float option;
@@ -1245,60 +1843,106 @@ module rec Google : sig
 
 
     (**
-      Encapsulates information about the original source file from which a
-      FileDescriptorProto was generated.
+{%html:
+<p>Encapsulates information about the original source file from which a
+FileDescriptorProto was generated.</p>
+<p>===================================================================
+Optional source code info</p>
+%}
     *)
     and SourceCodeInfo : sig
       module rec Location : sig
         type t = {
           path:int list;
           (**
-            Identifies which part of the FileDescriptorProto was defined at this
-            location.
-
-            Each element is a field number or an index.  They form a path from
-            the root FileDescriptorProto to the place where the definition occurs.
-            For example, this path:
-            {v
-               [ 4, 3, 2, 7, 1 ]
-            v}
-            refers to:
-            {v
-               file.message_type(3)  // 4, 3
-                   .field(7)         // 2, 7
-                   .name()           // 1
-            v}
-            This is because FileDescriptorProto.message_type has field number 4:
-            {v
-               repeated DescriptorProto message_type = 4;
-            v}
-            and DescriptorProto.field has field number 2:
-            {v
-               repeated FieldDescriptorProto field = 2;
-            v}
-            and FieldDescriptorProto.name has field number 1:
-            {v
-               optional string name = 1;
-            v}
-            Thus, the above path gives the location of a field name.  If we removed
-            the last element:
-            {v
-               [ 4, 3, 2, 7 ]
-            v}
-            this path refers to the whole field declaration (from the beginning
-            of the label to the terminating semicolon).
+{%html:
+<p>Identifies which part of the FileDescriptorProto was defined at this
+location.</p>
+<p>Each element is a field number or an index.  They form a path from
+the root FileDescriptorProto to the place where the definition occurs.
+For example, this path:</p>
+<pre><code> [ 4, 3, 2, 7, 1 ]
+</code></pre>
+<p>refers to:</p>
+<pre><code> file.message_type(3)  // 4, 3
+     .field(7)         // 2, 7
+     .name()           // 1
+</code></pre>
+<p>This is because FileDescriptorProto.message_type has field number 4:</p>
+<pre><code> repeated DescriptorProto message_type = 4;
+</code></pre>
+<p>and DescriptorProto.field has field number 2:</p>
+<pre><code> repeated FieldDescriptorProto field = 2;
+</code></pre>
+<p>and FieldDescriptorProto.name has field number 1:</p>
+<pre><code> optional string name = 1;
+</code></pre>
+<p>Thus, the above path gives the location of a field name.  If we removed
+the last element:</p>
+<pre><code> [ 4, 3, 2, 7 ]
+</code></pre>
+<p>this path refers to the whole field declaration (from the beginning
+of the label to the terminating semicolon).</p>
+%}
           *)
 
           span:int list;
           (**
-            Always has exactly three or four elements: start line, start column,
-            end line (optional, otherwise assumed same as start line), end column.
-            These are packed into a single field for efficiency.  Note that line
-            and column numbers are zero-based -- typically you will want to add
-            1 to each before displaying to a user.
+{%html:
+<p>Always has exactly three or four elements: start line, start column,
+end line (optional, otherwise assumed same as start line), end column.
+These are packed into a single field for efficiency.  Note that line
+and column numbers are zero-based -- typically you will want to add
+1 to each before displaying to a user.</p>
+%}
           *)
 
           leading_comments:string option;
+          (**
+{%html:
+<p>If this SourceCodeInfo represents a complete declaration, these are any
+comments appearing before and after the declaration which appear to be
+attached to the declaration.</p>
+<p>A series of line comments appearing on consecutive lines, with no other
+tokens appearing on those lines, will be treated as a single comment.</p>
+<p>leading_detached_comments will keep paragraphs of comments that appear
+before (but not connected to) the current element. Each paragraph,
+separated by empty lines, will be one comment element in the repeated
+field.</p>
+<p>Only the comment content is provided; comment markers (e.g. //) are
+stripped out.  For block comments, leading whitespace and an asterisk
+will be stripped from the beginning of each line other than the first.
+Newlines are included in the output.</p>
+<p>Examples:</p>
+<pre><code> optional int32 foo = 1;  // Comment attached to foo.
+</code></pre>
+<p>Comment attached to bar.</p>
+<pre><code> optional int32 bar = 2;
+
+ optional string baz = 3;
+</code></pre>
+<p>Comment attached to baz.
+Another line attached to baz.</p>
+<p>Comment attached to moo.</p>
+<p>Another line attached to moo.</p>
+<pre><code> optional double moo = 4;
+</code></pre>
+<p>Detached comment for corge. This is not leading or trailing comments
+to moo or corge because there are blank lines separating it from
+both.</p>
+<p>Detached comment for corge paragraph 2.</p>
+<pre><code> optional string corge = 5;
+ /* Block comment attached
+  * to corge.  Leading asterisks
+  * will be removed. */
+ /* Block comment attached to
+  * grault. */
+ optional int32 grault = 6;
+</code></pre>
+<p>ignored detached comments.</p>
+%}
+          *)
+
           trailing_comments:string option;
           leading_detached_comments:string list;
         }
@@ -1331,54 +1975,59 @@ module rec Google : sig
 
       type t = (Location.t list)
       (**
-        A Location identifies a piece of source code in a .proto file which
-        corresponds to a particular definition.  This information is intended
-        to be useful to IDEs, code indexers, documentation generators, and similar
-        tools.
-
-        For example, say we have a file like:
-        {v
-           message Foo {
-             optional string foo = 1;
-           }
-        v}
-        Let's look at just the field definition:
-        {v
-           optional string foo = 1;
-           ^       ^^     ^^  ^  ^^^
-           a       bc     de  f  ghi
-        v}
-        We have the following locations:
-        {v
-           span   path               represents
-           [a,i)  [ 4, 0, 2, 0 ]     The whole field definition.
-           [a,b)  [ 4, 0, 2, 0, 4 ]  The label (optional).
-           [c,d)  [ 4, 0, 2, 0, 5 ]  The type (string).
-           [e,f)  [ 4, 0, 2, 0, 1 ]  The name (foo).
-           [g,h)  [ 4, 0, 2, 0, 3 ]  The number (1).
-        v}
-        Notes:
-        - A location may refer to a repeated field itself (i.e. not to any
-        particular index within it).  This is used whenever a set of elements are
-        logically enclosed in a single code segment.  For example, an entire
-        extend block (possibly containing multiple extension definitions) will
-        have an outer location whose path refers to the "extensions" repeated
-        field without an index.
-        - Multiple locations may have the same path.  This happens when a single
-        logical declaration is spread out across multiple places.  The most
-        obvious example is the "extend" block again -- there may be multiple
-        extend blocks in the same scope, each of which will have the same path.
-        - A location's span is not always a subset of its parent's span.  For
-        example, the "extendee" of an extension declaration appears at the
-        beginning of the "extend" block and is shared by all extensions within
-        the block.
-        - Just because a location's span is a subset of some other location's span
-        does not mean that it is a descendant.  For example, a "group" defines
-        both a type and a field in a single declaration.  Thus, the locations
-        corresponding to the type and field and their components will overlap.
-        - Code which tries to interpret locations should probably be designed to
-        ignore those that it doesn't understand, as more types of locations could
-        be recorded in the future.
+{%html:
+<p>A Location identifies a piece of source code in a .proto file which
+corresponds to a particular definition.  This information is intended
+to be useful to IDEs, code indexers, documentation generators, and similar
+tools.</p>
+<p>For example, say we have a file like:</p>
+<pre><code> message Foo {
+   optional string foo = 1;
+ }
+</code></pre>
+<p>Let's look at just the field definition:</p>
+<pre><code> optional string foo = 1;
+ ^       ^^     ^^  ^  ^^^
+ a       bc     de  f  ghi
+</code></pre>
+<p>We have the following locations:</p>
+<pre><code> span   path               represents
+ [a,i)  [ 4, 0, 2, 0 ]     The whole field definition.
+ [a,b)  [ 4, 0, 2, 0, 4 ]  The label (optional).
+ [c,d)  [ 4, 0, 2, 0, 5 ]  The type (string).
+ [e,f)  [ 4, 0, 2, 0, 1 ]  The name (foo).
+ [g,h)  [ 4, 0, 2, 0, 3 ]  The number (1).
+</code></pre>
+<p>Notes:</p>
+<ul>
+<li>A location may refer to a repeated field itself (i.e. not to any
+particular index within it).  This is used whenever a set of elements are
+logically enclosed in a single code segment.  For example, an entire
+extend block (possibly containing multiple extension definitions) will
+have an outer location whose path refers to the &quot;extensions&quot; repeated
+field without an index.
+</li>
+<li>Multiple locations may have the same path.  This happens when a single
+logical declaration is spread out across multiple places.  The most
+obvious example is the &quot;extend&quot; block again -- there may be multiple
+extend blocks in the same scope, each of which will have the same path.
+</li>
+<li>A location's span is not always a subset of its parent's span.  For
+example, the &quot;extendee&quot; of an extension declaration appears at the
+beginning of the &quot;extend&quot; block and is shared by all extensions within
+the block.
+</li>
+<li>Just because a location's span is a subset of some other location's span
+does not mean that it is a descendant.  For example, a &quot;group&quot; defines
+both a type and a field in a single declaration.  Thus, the locations
+corresponding to the type and field and their components will overlap.
+</li>
+<li>Code which tries to interpret locations should probably be designed to
+ignore those that it doesn't understand, as more types of locations could
+be recorded in the future.
+</li>
+</ul>
+%}
       *)
 
       val make: ?location:Location.t list -> unit -> t
@@ -1410,31 +2059,45 @@ module rec Google : sig
 
 
     (**
-      Describes the relationship between generated code and its original source
-      file. A GeneratedCodeInfo message is associated with only one generated
-      source file, but may contain references to different source .proto files.
+{%html:
+<p>Describes the relationship between generated code and its original source
+file. A GeneratedCodeInfo message is associated with only one generated
+source file, but may contain references to different source .proto files.</p>
+%}
     *)
     and GeneratedCodeInfo : sig
       module rec Annotation : sig
         type t = {
           path:int list;
           (**
-            Identifies the element in the original source .proto file. This field
-            is formatted the same as SourceCodeInfo.Location.path.
+{%html:
+<p>Identifies the element in the original source .proto file. This field
+is formatted the same as SourceCodeInfo.Location.path.</p>
+%}
           *)
 
           source_file:string option;
+          (**
+{%html:
+<p>Identifies the filesystem path to the original source .proto.</p>
+%}
+          *)
+
           begin':int option;
           (**
-            Identifies the starting offset in bytes in the generated code
-            that relates to the identified object.
+{%html:
+<p>Identifies the starting offset in bytes in the generated code
+that relates to the identified object.</p>
+%}
           *)
 
           end':int option;
           (**
-            Identifies the ending offset in bytes in the generated code that
-            relates to the identified offset. The end offset should be one past
-            the last relevant byte (so the length of the text = end - begin).
+{%html:
+<p>Identifies the ending offset in bytes in the generated code that
+relates to the identified offset. The end offset should be one past
+the last relevant byte (so the length of the text = end - begin).</p>
+%}
           *)
 
         }
@@ -1467,8 +2130,10 @@ module rec Google : sig
 
       type t = (Annotation.t list)
       (**
-        An Annotation connects some span of text in generated code to an element
-        of its generating .proto file.
+{%html:
+<p>An Annotation connects some span of text in generated code to an element
+of its generating .proto file.</p>
+%}
       *)
 
       val make: ?annotation:Annotation.t list -> unit -> t
@@ -1503,8 +2168,10 @@ end = struct
   module rec Protobuf : sig
 
     (**
-      The protocol compiler can output a FileDescriptorSet containing the .proto
-      files it parses.
+{%html:
+<p>The protocol compiler can output a FileDescriptorSet containing the .proto
+files it parses.</p>
+%}
     *)
     module rec FileDescriptorSet : sig
       type t = (FileDescriptorProto.t list)
@@ -1536,36 +2203,76 @@ end = struct
     end
 
 
-    (** Describes a complete .proto file. *)
+    (**
+{%html:
+<p>Describes a complete .proto file.</p>
+%}
+    *)
     and FileDescriptorProto : sig
       type t = {
         name:string option;
         (**
-          file name, relative to root of source tree
+{%html:
+<p>file name, relative to root of source tree</p>
+%}
         *)
 
         package:string option;
         (**
-          e.g. "foo", "foo.bar", etc.
+{%html:
+<p>e.g. &quot;foo&quot;, &quot;foo.bar&quot;, etc.</p>
+%}
         *)
 
         dependency:string list;
         (**
-          Names of files imported by this file.
+{%html:
+<p>Names of files imported by this file.</p>
+%}
         *)
 
         message_type:DescriptorProto.t list;
+        (**
+{%html:
+<p>All top-level definitions in this file.</p>
+%}
+        *)
+
         enum_type:EnumDescriptorProto.t list;
         service:ServiceDescriptorProto.t list;
         extension:FieldDescriptorProto.t list;
         options:FileOptions.t option;
         source_code_info:SourceCodeInfo.t option;
+        (**
+{%html:
+<p>This field contains optional information about the original source code.
+You may safely remove this entire field without harming runtime
+functionality of the descriptors -- the information is needed only by
+development tools.</p>
+%}
+        *)
+
         public_dependency:int list;
+        (**
+{%html:
+<p>Indexes of the public imported files in the dependency list above.</p>
+%}
+        *)
+
         weak_dependency:int list;
+        (**
+{%html:
+<p>Indexes of the weak imported files in the dependency list.
+For Google-internal migration only. Do not use.</p>
+%}
+        *)
+
         syntax:string option;
         (**
-          The syntax of the proto file.
-          The supported values are "proto2" and "proto3".
+{%html:
+<p>The syntax of the proto file.
+The supported values are &quot;proto2&quot; and &quot;proto3&quot;.</p>
+%}
         *)
 
       }
@@ -1597,18 +2304,26 @@ end = struct
     end
 
 
-    (** Describes a message type. *)
+    (**
+{%html:
+<p>Describes a message type.</p>
+%}
+    *)
     and DescriptorProto : sig
       module rec ExtensionRange : sig
         type t = {
           start:int option;
           (**
-            Inclusive.
+{%html:
+<p>Inclusive.</p>
+%}
           *)
 
           end':int option;
           (**
-            Exclusive.
+{%html:
+<p>Exclusive.</p>
+%}
           *)
 
           options:ExtensionRangeOptions.t option;
@@ -1642,20 +2357,26 @@ end = struct
 
 
       (**
-        Range of reserved tag numbers. Reserved tag numbers may not be used by
-        fields or extension ranges in the same message. Reserved ranges may
-        not overlap.
+{%html:
+<p>Range of reserved tag numbers. Reserved tag numbers may not be used by
+fields or extension ranges in the same message. Reserved ranges may
+not overlap.</p>
+%}
       *)
       and ReservedRange : sig
         type t = {
           start:int option;
           (**
-            Inclusive.
+{%html:
+<p>Inclusive.</p>
+%}
           *)
 
           end':int option;
           (**
-            Exclusive.
+{%html:
+<p>Exclusive.</p>
+%}
           *)
 
         }
@@ -1697,6 +2418,13 @@ end = struct
         oneof_decl:OneofDescriptorProto.t list;
         reserved_range:ReservedRange.t list;
         reserved_name:string list;
+        (**
+{%html:
+<p>Reserved field names, which may not be used by fields in the same message.
+A given name may only be reserved once.</p>
+%}
+        *)
+
       }
       val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -1728,6 +2456,12 @@ end = struct
     and ExtensionRangeOptions : sig
       type t = {
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -1758,28 +2492,38 @@ end = struct
     end
 
 
-    (** Describes a field within a message. *)
+    (**
+{%html:
+<p>Describes a field within a message.</p>
+%}
+    *)
     and FieldDescriptorProto : sig
       module rec Type : sig
         type t =
           | TYPE_DOUBLE
           (**
-            0 is reserved for errors.
-            Order is weird for historical reasons.
+{%html:
+<p>0 is reserved for errors.
+Order is weird for historical reasons.</p>
+%}
           *)
 
           | TYPE_FLOAT
           | TYPE_INT64
           (**
-            Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT64 if
-            negative values are likely.
+{%html:
+<p>Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT64 if
+negative values are likely.</p>
+%}
           *)
 
           | TYPE_UINT64
           | TYPE_INT32
           (**
-            Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT32 if
-            negative values are likely.
+{%html:
+<p>Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT32 if
+negative values are likely.</p>
+%}
           *)
 
           | TYPE_FIXED64
@@ -1788,27 +2532,45 @@ end = struct
           | TYPE_STRING
           | TYPE_GROUP
           (**
-            Tag-delimited aggregate.
-            Group type is deprecated and not supported in proto3. However, Proto3
-            implementations should still be able to parse the group wire format and
-            treat group fields as unknown fields.
+{%html:
+<p>Tag-delimited aggregate.
+Group type is deprecated and not supported in proto3. However, Proto3
+implementations should still be able to parse the group wire format and
+treat group fields as unknown fields.</p>
+%}
           *)
 
           | TYPE_MESSAGE
-          (** Length-delimited aggregate. *)
+          (**
+{%html:
+<p>Length-delimited aggregate.</p>
+%}
+          *)
 
           | TYPE_BYTES
-          (** New in version 2. *)
+          (**
+{%html:
+<p>New in version 2.</p>
+%}
+          *)
 
           | TYPE_UINT32
           | TYPE_ENUM
           | TYPE_SFIXED32
           | TYPE_SFIXED64
           | TYPE_SINT32
-          (** Uses ZigZag encoding. *)
+          (**
+{%html:
+<p>Uses ZigZag encoding.</p>
+%}
+          *)
 
           | TYPE_SINT64
-          (** Uses ZigZag encoding. *)
+          (**
+{%html:
+<p>Uses ZigZag encoding.</p>
+%}
+          *)
 
 
         val name: unit -> string
@@ -1826,7 +2588,11 @@ end = struct
       and Label : sig
         type t =
           | LABEL_OPTIONAL
-          (** 0 is reserved for errors *)
+          (**
+{%html:
+<p>0 is reserved for errors</p>
+%}
+          *)
 
           | LABEL_REQUIRED
           | LABEL_REPEATED
@@ -1847,24 +2613,86 @@ end = struct
         name:string option;
         extendee:string option;
         (**
-          For extensions, this is the name of the type being extended.  It is
-          resolved in the same manner as type_name.
+{%html:
+<p>For extensions, this is the name of the type being extended.  It is
+resolved in the same manner as type_name.</p>
+%}
         *)
 
         number:int option;
         label:Label.t option;
         type':Type.t option;
         (**
-          If type_name is set, this need not be set.  If both this and type_name
-          are set, this must be one of TYPE_ENUM, TYPE_MESSAGE or TYPE_GROUP.
+{%html:
+<p>If type_name is set, this need not be set.  If both this and type_name
+are set, this must be one of TYPE_ENUM, TYPE_MESSAGE or TYPE_GROUP.</p>
+%}
         *)
 
         type_name:string option;
+        (**
+{%html:
+<p>For message and enum types, this is the name of the type.  If the name
+starts with a '.', it is fully-qualified.  Otherwise, C++-like scoping
+rules are used to find the type (i.e. first the nested types within this
+message are searched, then within the parent, on up to the root
+namespace).</p>
+%}
+        *)
+
         default_value:string option;
+        (**
+{%html:
+<p>For numeric types, contains the original text representation of the value.
+For booleans, &quot;true&quot; or &quot;false&quot;.
+For strings, contains the default text contents (not escaped in any way).
+For bytes, contains the C escaped value.  All bytes &gt;= 128 are escaped.</p>
+%}
+        *)
+
         options:FieldOptions.t option;
         oneof_index:int option;
+        (**
+{%html:
+<p>If set, gives the index of a oneof in the containing type's oneof_decl
+list.  This field is a member of that oneof.</p>
+%}
+        *)
+
         json_name:string option;
+        (**
+{%html:
+<p>JSON name of this field. The value is set by protocol compiler. If the
+user has set a &quot;json_name&quot; option on this field, that option's value
+will be used. Otherwise, it's deduced from the field's name by converting
+it to camelCase.</p>
+%}
+        *)
+
         proto3_optional:bool option;
+        (**
+{%html:
+<p>If true, this is a proto3 &quot;optional&quot;. When a proto3 field is optional, it
+tracks presence regardless of field type.</p>
+<p>When proto3_optional is true, this field must be belong to a oneof to
+signal to old proto3 clients that presence is tracked for this field. This
+oneof is known as a &quot;synthetic&quot; oneof, and this field must be its sole
+member (each proto3 optional field gets its own synthetic oneof). Synthetic
+oneofs exist in the descriptor only, and do not generate any API. Synthetic
+oneofs must be ordered after all &quot;real&quot; oneofs.</p>
+<p>For message fields, proto3_optional doesn't create any semantic change,
+since non-repeated message fields always track presence. However it still
+indicates the semantic detail of whether the user wrote &quot;optional&quot; or not.
+This can be useful for round-tripping the .proto file. For consistency we
+give message fields a synthetic oneof also, even though it is not required
+to track presence. This is especially important because the parser can't
+tell if a field is a message or an enum, so it must always create a
+synthetic oneof.</p>
+<p>Proto2 optional fields do not set this flag, because they already indicate
+optional with <code>LABEL_OPTIONAL</code>.</p>
+%}
+        *)
+
       }
       val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -1894,7 +2722,11 @@ end = struct
     end
 
 
-    (** Describes a oneof. *)
+    (**
+{%html:
+<p>Describes a oneof.</p>
+%}
+    *)
     and OneofDescriptorProto : sig
       type t = {
         name:string option;
@@ -1928,27 +2760,36 @@ end = struct
     end
 
 
-    (** Describes an enum type. *)
+    (**
+{%html:
+<p>Describes an enum type.</p>
+%}
+    *)
     and EnumDescriptorProto : sig
 
       (**
-        Range of reserved numeric values. Reserved values may not be used by
-        entries in the same enum. Reserved ranges may not overlap.
-
-        Note that this is distinct from DescriptorProto.ReservedRange in that it
-        is inclusive such that it can appropriately represent the entire int32
-        domain.
+{%html:
+<p>Range of reserved numeric values. Reserved values may not be used by
+entries in the same enum. Reserved ranges may not overlap.</p>
+<p>Note that this is distinct from DescriptorProto.ReservedRange in that it
+is inclusive such that it can appropriately represent the entire int32
+domain.</p>
+%}
       *)
       module rec EnumReservedRange : sig
         type t = {
           start:int option;
           (**
-            Inclusive.
+{%html:
+<p>Inclusive.</p>
+%}
           *)
 
           end':int option;
           (**
-            Inclusive.
+{%html:
+<p>Inclusive.</p>
+%}
           *)
 
         }
@@ -1984,7 +2825,22 @@ end = struct
         value:EnumValueDescriptorProto.t list;
         options:EnumOptions.t option;
         reserved_range:EnumReservedRange.t list;
+        (**
+{%html:
+<p>Range of reserved numeric values. Reserved numeric values may not be used
+by enum values in the same enum declaration. Reserved ranges may not
+overlap.</p>
+%}
+        *)
+
         reserved_name:string list;
+        (**
+{%html:
+<p>Reserved enum value names, which may not be reused. A given name may only
+be reserved once.</p>
+%}
+        *)
+
       }
       val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -2014,7 +2870,11 @@ end = struct
     end
 
 
-    (** Describes a value within an enum. *)
+    (**
+{%html:
+<p>Describes a value within an enum.</p>
+%}
+    *)
     and EnumValueDescriptorProto : sig
       type t = {
         name:string option;
@@ -2049,7 +2909,11 @@ end = struct
     end
 
 
-    (** Describes a service. *)
+    (**
+{%html:
+<p>Describes a service.</p>
+%}
+    *)
     and ServiceDescriptorProto : sig
       type t = {
         name:string option;
@@ -2084,15 +2948,38 @@ end = struct
     end
 
 
-    (** Describes a method of a service. *)
+    (**
+{%html:
+<p>Describes a method of a service.</p>
+%}
+    *)
     and MethodDescriptorProto : sig
       type t = {
         name:string option;
         input_type:string option;
+        (**
+{%html:
+<p>Input and output type names.  These are resolved in the same way as
+FieldDescriptorProto.type_name, but must refer to a message type.</p>
+%}
+        *)
+
         output_type:string option;
         options:MethodOptions.t option;
         client_streaming:bool;
+        (**
+{%html:
+<p>Identifies if client streams multiple client messages</p>
+%}
+        *)
+
         server_streaming:bool;
+        (**
+{%html:
+<p>Identifies if server streams multiple server messages</p>
+%}
+        *)
+
       }
       val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -2121,24 +3008,75 @@ end = struct
       (**/**)
     end
 
+
+    (**
+{%html:
+<p>===================================================================
+Options</p>
+<p>Each of the definitions above may have &quot;options&quot; attached.  These are
+just annotations which may cause code to be generated slightly differently
+or may contain hints for code that manipulates protocol messages.</p>
+<p>Clients may define custom options as extensions of the *Options messages.
+These extensions may not yet be known at parsing time, so the parser cannot
+store the values in them.  Instead it stores them in a field in the *Options
+message called uninterpreted_option. This field must have the same name
+across all *Options messages. We then use this field to populate the
+extensions when we build a descriptor, at which point all protos have been
+parsed and so all extensions are known.</p>
+<p>Extension numbers for custom options may be chosen as follows:</p>
+<ul>
+<li>
+<p>For options which will only be used within a single application or</p>
+<p>organization, or for experimental options, use field numbers 50000
+through 99999.  It is up to you to ensure that you do not use the
+same number for multiple options.</p>
+</li>
+<li>
+<p>For options which will be published and used publicly by multiple</p>
+<p>independent entities, e-mail protobuf-global-extension-registry@google.com
+to reserve extension numbers. Simply provide your project name (e.g.
+Objective-C plugin) and your project website (if available) -- there's no
+need to explain how you intend to use them. Usually you only need one
+extension number. You can declare multiple options with only one extension
+number by putting them in a sub-message. See the Custom Options section of
+the docs for examples:
+https://developers.google.com/protocol-buffers/docs/proto#options
+If this turns out to be popular, a web service will be set up
+to automatically assign option numbers.</p>
+</li>
+</ul>
+%}
+    *)
     and FileOptions : sig
 
-      (** Generated classes can be optimized for speed or code size. *)
+      (**
+{%html:
+<p>Generated classes can be optimized for speed or code size.</p>
+%}
+      *)
       module rec OptimizeMode : sig
         type t =
           | SPEED
-          (** Generate complete code for parsing, serialization, *)
+          (**
+{%html:
+<p>Generate complete code for parsing, serialization,</p>
+%}
+          *)
 
           | CODE_SIZE
           (**
-            etc.
-
-
-            Use ReflectionOps to implement these methods.
+{%html:
+<p>etc.</p>
+<p>Use ReflectionOps to implement these methods.</p>
+%}
           *)
 
           | LITE_RUNTIME
-          (** Generate code using MessageLite and the lite runtime. *)
+          (**
+{%html:
+<p>Generate code using MessageLite and the lite runtime.</p>
+%}
+          *)
 
 
         val name: unit -> string
@@ -2155,33 +3093,185 @@ end = struct
 
       type t = {
         java_package:string option;
+        (**
+{%html:
+<p>Sets the Java package where classes generated from this .proto will be
+placed.  By default, the proto package is used, but this is often
+inappropriate because proto packages do not normally start with backwards
+domain names.</p>
+%}
+        *)
+
         java_outer_classname:string option;
+        (**
+{%html:
+<p>Controls the name of the wrapper Java class generated for the .proto file.
+That class will always contain the .proto file's getDescriptor() method as
+well as any top-level extensions defined in the .proto file.
+If java_multiple_files is disabled, then all the other classes from the
+.proto file will be nested inside the single wrapper outer class.</p>
+%}
+        *)
+
         optimize_for:OptimizeMode.t;
+        (**
+{%html:
+<p>Clients can define custom options in extensions of this message.
+See the documentation for the &quot;Options&quot; section above.</p>
+%}
+        *)
+
         java_multiple_files:bool;
+        (**
+{%html:
+<p>If enabled, then the Java code generator will generate a separate .java
+file for each top-level message, enum, and service defined in the .proto
+file.  Thus, these types will <em>not</em> be nested inside the wrapper class
+named by java_outer_classname.  However, the wrapper class will still be
+generated to contain the file's getDescriptor() method as well as any
+top-level extensions defined in the file.</p>
+%}
+        *)
+
         go_package:string option;
+        (**
+{%html:
+<p>Sets the Go package where structs generated from this .proto will be
+placed. If omitted, the Go package will be derived from the following:</p>
+<ul>
+<li>The basename of the package import path, if provided.
+</li>
+<li>Otherwise, the package statement in the .proto file, if present.
+</li>
+<li>Otherwise, the basename of the .proto file, without extension.
+</li>
+</ul>
+%}
+        *)
+
         cc_generic_services:bool;
+        (**
+{%html:
+<p>Should generic services be generated in each language?  &quot;Generic&quot; services
+are not specific to any particular RPC system.  They are generated by the
+main code generators in each language (without additional plugins).
+Generic services were the only kind of service generation supported by
+early versions of google.protobuf.</p>
+<p>Generic services are now considered deprecated in favor of using plugins
+that generate code specific to your particular RPC system.  Therefore,
+these default to false.  Old code which depends on generic services should
+explicitly set them to true.</p>
+%}
+        *)
+
         java_generic_services:bool;
         py_generic_services:bool;
         java_generate_equals_and_hash:bool option[@ocaml.alert protobuf "Marked as deprecated in the .proto file"];
+        (**
+{%html:
+<p>This option does nothing.</p>
+%}
+        *)
+
         deprecated:bool;
         (**
-          Is this file deprecated?
-          Depending on the target platform, this can emit Deprecated annotations
-          for everything in the file, or it will be completely ignored; in the very
-          least, this is a formalization for deprecating files.
+{%html:
+<p>Is this file deprecated?
+Depending on the target platform, this can emit Deprecated annotations
+for everything in the file, or it will be completely ignored; in the very
+least, this is a formalization for deprecating files.</p>
+%}
         *)
 
         java_string_check_utf8:bool;
+        (**
+{%html:
+<p>If set true, then the Java2 code generator will generate code that
+throws an exception whenever an attempt is made to assign a non-UTF-8
+byte sequence to a string field.
+Message reflection will do the same.
+However, an extension field still accepts non-UTF-8 byte sequences.
+This option has no effect on when used with the lite runtime.</p>
+%}
+        *)
+
         cc_enable_arenas:bool;
+        (**
+{%html:
+<p>Enables the use of arenas for the proto messages in this file. This applies
+only to generated classes for C++.</p>
+%}
+        *)
+
         objc_class_prefix:string option;
+        (**
+{%html:
+<p>Sets the objective c class prefix which is prepended to all objective c
+generated classes from this .proto. There is no default.</p>
+%}
+        *)
+
         csharp_namespace:string option;
+        (**
+{%html:
+<p>Namespace for generated classes; defaults to the package.</p>
+%}
+        *)
+
         swift_prefix:string option;
+        (**
+{%html:
+<p>By default Swift generators will take the proto package and CamelCase it
+replacing '.' with underscore and use that to prefix the types/symbols
+defined. When this options is provided, they will use this value instead
+to prefix the types/symbols defined.</p>
+%}
+        *)
+
         php_class_prefix:string option;
+        (**
+{%html:
+<p>Sets the php class prefix which is prepended to all php generated classes
+from this .proto. Default is empty.</p>
+%}
+        *)
+
         php_namespace:string option;
+        (**
+{%html:
+<p>Use this option to change the namespace of php generated classes. Default
+is empty. When this option is empty, the package name will be used for
+determining the namespace.</p>
+%}
+        *)
+
         php_generic_services:bool;
         php_metadata_namespace:string option;
+        (**
+{%html:
+<p>Use this option to change the namespace of php generated metadata classes.
+Default is empty. When this option is empty, the proto file name will be
+used for determining the namespace.</p>
+%}
+        *)
+
         ruby_package:string option;
+        (**
+{%html:
+<p>Use this option to change the package of ruby generated classes. Default
+is empty. When this option is not set, the package name will be used for
+determining the ruby package.</p>
+%}
+        *)
+
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here.
+See the documentation for the &quot;Options&quot; section above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -2214,17 +3304,79 @@ end = struct
     and MessageOptions : sig
       type t = {
         message_set_wire_format:bool;
+        (**
+{%html:
+<p>Set true to use the old proto1 MessageSet wire format for extensions.
+This is provided for backwards-compatibility with the MessageSet wire
+format.  You should not use this for any other reason:  It's less
+efficient, has fewer features, and is more complicated.</p>
+<p>The message must be defined exactly as follows:</p>
+<pre><code> message Foo {
+   option message_set_wire_format = true;
+   extensions 4 to max;
+ }
+</code></pre>
+<p>Note that the message cannot have any defined fields; MessageSets only
+have extensions.</p>
+<p>All extensions of your type must be singular messages; e.g. they cannot
+be int32s, enums, or repeated messages.</p>
+<p>Because this is an option, the above two restrictions are not enforced by
+the protocol compiler.</p>
+%}
+        *)
+
         no_standard_descriptor_accessor:bool;
+        (**
+{%html:
+<p>Disables the generation of the standard &quot;descriptor()&quot; accessor, which can
+conflict with a field of the same name.  This is meant to make migration
+from proto1 easier; new code should avoid fields named &quot;descriptor&quot;.</p>
+%}
+        *)
+
         deprecated:bool;
         (**
-          Is this message deprecated?
-          Depending on the target platform, this can emit Deprecated annotations
-          for the message, or it will be completely ignored; in the very least,
-          this is a formalization for deprecating messages.
+{%html:
+<p>Is this message deprecated?
+Depending on the target platform, this can emit Deprecated annotations
+for the message, or it will be completely ignored; in the very least,
+this is a formalization for deprecating messages.</p>
+%}
         *)
 
         map_entry:bool option;
+        (**
+{%html:
+<p>Whether the message is an automatically generated map entry type for the
+maps field.</p>
+<p>For maps fields:</p>
+<pre><code> map&lt;KeyType, ValueType&gt; map_field = 1;
+</code></pre>
+<p>The parsed descriptor looks like:</p>
+<pre><code> message MapFieldEntry {
+     option map_entry = true;
+     optional KeyType key = 1;
+     optional ValueType value = 2;
+ }
+ repeated MapFieldEntry map_field = 1;
+</code></pre>
+<p>Implementations may choose not to generate the map_entry=true message, but
+use a native map in the target language to hold the keys and values.
+The reflection APIs in such implementations still need to work as
+if the field is a repeated message field.</p>
+<p>NOTE: Do not set the option in .proto files. Always use the maps syntax
+instead. The option should only be implicitly set by the proto compiler
+parser.</p>
+%}
+        *)
+
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -2258,7 +3410,11 @@ end = struct
       module rec CType : sig
         type t =
           | STRING
-          (** Default mode. *)
+          (**
+{%html:
+<p>Default mode.</p>
+%}
+          *)
 
           | CORD
           | STRING_PIECE
@@ -2278,13 +3434,25 @@ end = struct
       and JSType : sig
         type t =
           | JS_NORMAL
-          (** Use the default type. *)
+          (**
+{%html:
+<p>Use the default type.</p>
+%}
+          *)
 
           | JS_STRING
-          (** Use JavaScript strings. *)
+          (**
+{%html:
+<p>Use JavaScript strings.</p>
+%}
+          *)
 
           | JS_NUMBER
-          (** Use JavaScript numbers. *)
+          (**
+{%html:
+<p>Use JavaScript numbers.</p>
+%}
+          *)
 
 
         val name: unit -> string
@@ -2302,86 +3470,105 @@ end = struct
       type t = {
         ctype:CType.t;
         (**
-          The ctype option instructs the C++ code generator to use a different
-          representation of the field than it normally would.  See the specific
-          options below.  This option is not yet implemented in the open source
-          release -- sorry, we'll try to include it in a future version!
+{%html:
+<p>The ctype option instructs the C++ code generator to use a different
+representation of the field than it normally would.  See the specific
+options below.  This option is not yet implemented in the open source
+release -- sorry, we'll try to include it in a future version!</p>
+%}
         *)
 
         packed:bool option;
         (**
-          The packed option can be enabled for repeated primitive fields to enable
-          a more efficient representation on the wire. Rather than repeatedly
-          writing the tag and type for each element, the entire array is encoded as
-          a single length-delimited blob. In proto3, only explicit setting it to
-          false will avoid using packed encoding.
+{%html:
+<p>The packed option can be enabled for repeated primitive fields to enable
+a more efficient representation on the wire. Rather than repeatedly
+writing the tag and type for each element, the entire array is encoded as
+a single length-delimited blob. In proto3, only explicit setting it to
+false will avoid using packed encoding.</p>
+%}
         *)
 
         deprecated:bool;
         (**
-          Clients can define custom options in extensions of this message. See above.
+{%html:
+<p>Clients can define custom options in extensions of this message. See above.</p>
+%}
         *)
 
         lazy':bool;
         (**
-          Should this field be parsed lazily?  Lazy applies only to message-type
-          fields.  It means that when the outer message is initially parsed, the
-          inner message's contents will not be parsed but instead stored in encoded
-          form.  The inner message will actually be parsed when it is first accessed.
-
-          This is only a hint.  Implementations are free to choose whether to use
-          eager or lazy parsing regardless of the value of this option.  However,
-          setting this option true suggests that the protocol author believes that
-          using lazy parsing on this field is worth the additional bookkeeping
-          overhead typically needed to implement it.
-
-          This option does not affect the public interface of any generated code;
-          all method signatures remain the same.  Furthermore, thread-safety of the
-          interface is not affected by this option; const methods remain safe to
-          call from multiple threads concurrently, while non-const methods continue
-          to require exclusive access.
-
-
-          Note that implementations may choose not to check required fields within
-          a lazy sub-message.  That is, calling IsInitialized() on the outer message
-          may return true even if the inner message has missing required fields.
-          This is necessary because otherwise the inner message would have to be
-          parsed in order to perform the check, defeating the purpose of lazy
-          parsing.  An implementation which chooses not to check required fields
-          must be consistent about it.  That is, for any particular sub-message, the
-          implementation must either *always* check its required fields, or *never*
-          check its required fields, regardless of whether or not the message has
-          been parsed.
-
-          As of 2021, lazy does no correctness checks on the byte stream during
-          parsing.  This may lead to crashes if and when an invalid byte stream is
-          finally parsed upon access.
-
-          TODO(b/211906113):  Enable validation on lazy fields.
+{%html:
+<p>Should this field be parsed lazily?  Lazy applies only to message-type
+fields.  It means that when the outer message is initially parsed, the
+inner message's contents will not be parsed but instead stored in encoded
+form.  The inner message will actually be parsed when it is first accessed.</p>
+<p>This is only a hint.  Implementations are free to choose whether to use
+eager or lazy parsing regardless of the value of this option.  However,
+setting this option true suggests that the protocol author believes that
+using lazy parsing on this field is worth the additional bookkeeping
+overhead typically needed to implement it.</p>
+<p>This option does not affect the public interface of any generated code;
+all method signatures remain the same.  Furthermore, thread-safety of the
+interface is not affected by this option; const methods remain safe to
+call from multiple threads concurrently, while non-const methods continue
+to require exclusive access.</p>
+<p>Note that implementations may choose not to check required fields within
+a lazy sub-message.  That is, calling IsInitialized() on the outer message
+may return true even if the inner message has missing required fields.
+This is necessary because otherwise the inner message would have to be
+parsed in order to perform the check, defeating the purpose of lazy
+parsing.  An implementation which chooses not to check required fields
+must be consistent about it.  That is, for any particular sub-message, the
+implementation must either <em>always</em> check its required fields, or <em>never</em>
+check its required fields, regardless of whether or not the message has
+been parsed.</p>
+<p>As of 2021, lazy does no correctness checks on the byte stream during
+parsing.  This may lead to crashes if and when an invalid byte stream is
+finally parsed upon access.</p>
+<p>TODO(b/211906113):  Enable validation on lazy fields.</p>
+%}
         *)
 
         jstype:JSType.t;
         (**
-          The jstype option determines the JavaScript type used for values of the
-          field.  The option is permitted only for 64 bit integral and fixed types
-          (int64, uint64, sint64, fixed64, sfixed64).  A field with jstype JS_STRING
-          is represented as JavaScript string, which avoids loss of precision that
-          can happen when a large value is converted to a floating point JavaScript.
-          Specifying JS_NUMBER for the jstype causes the generated JavaScript code to
-          use the JavaScript "number" type.  The behavior of the default option
-          JS_NORMAL is implementation dependent.
-
-          This option is an enum to permit additional types to be added, e.g.
-          goog.math.Integer.
+{%html:
+<p>The jstype option determines the JavaScript type used for values of the
+field.  The option is permitted only for 64 bit integral and fixed types
+(int64, uint64, sint64, fixed64, sfixed64).  A field with jstype JS_STRING
+is represented as JavaScript string, which avoids loss of precision that
+can happen when a large value is converted to a floating point JavaScript.
+Specifying JS_NUMBER for the jstype causes the generated JavaScript code to
+use the JavaScript &quot;number&quot; type.  The behavior of the default option
+JS_NORMAL is implementation dependent.</p>
+<p>This option is an enum to permit additional types to be added, e.g.
+goog.math.Integer.</p>
+%}
         *)
 
         weak:bool;
         (**
-          For Google-internal migration only. Do not use.
+{%html:
+<p>For Google-internal migration only. Do not use.</p>
+%}
         *)
 
         unverified_lazy:bool;
+        (**
+{%html:
+<p>unverified_lazy does no correctness checks on the byte stream. This should
+only be used where lazy with verification is prohibitive for performance
+reasons.</p>
+%}
+        *)
+
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -2414,6 +3601,12 @@ end = struct
     and OneofOptions : sig
       type t = {
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -2446,15 +3639,30 @@ end = struct
     and EnumOptions : sig
       type t = {
         allow_alias:bool option;
+        (**
+{%html:
+<p>Set this option to true to allow mapping different tag names to the same
+value.</p>
+%}
+        *)
+
         deprecated:bool;
         (**
-          Is this enum deprecated?
-          Depending on the target platform, this can emit Deprecated annotations
-          for the enum, or it will be completely ignored; in the very least, this
-          is a formalization for deprecating enums.
+{%html:
+<p>Is this enum deprecated?
+Depending on the target platform, this can emit Deprecated annotations
+for the enum, or it will be completely ignored; in the very least, this
+is a formalization for deprecating enums.</p>
+%}
         *)
 
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -2488,13 +3696,21 @@ end = struct
       type t = {
         deprecated:bool;
         (**
-          Is this enum value deprecated?
-          Depending on the target platform, this can emit Deprecated annotations
-          for the enum value, or it will be completely ignored; in the very least,
-          this is a formalization for deprecating enum values.
+{%html:
+<p>Is this enum value deprecated?
+Depending on the target platform, this can emit Deprecated annotations
+for the enum value, or it will be completely ignored; in the very least,
+this is a formalization for deprecating enum values.</p>
+%}
         *)
 
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -2528,13 +3744,26 @@ end = struct
       type t = {
         deprecated:bool;
         (**
-          Is this service deprecated?
-          Depending on the target platform, this can emit Deprecated annotations
-          for the service, or it will be completely ignored; in the very least,
-          this is a formalization for deprecating services.
+{%html:
+<p>Is this service deprecated?
+Depending on the target platform, this can emit Deprecated annotations
+for the service, or it will be completely ignored; in the very least,
+this is a formalization for deprecating services.</p>
+<p>Note:  Field numbers 1 through 32 are reserved for Google's internal RPC</p>
+<pre><code> framework.  We apologize for hoarding these numbers to ourselves, but
+ we were already using them long before we decided to release Protocol
+ Buffers.
+</code></pre>
+%}
         *)
 
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -2567,18 +3796,28 @@ end = struct
     and MethodOptions : sig
 
       (**
-        Is this method side-effect-free (or safe in HTTP parlance), or idempotent,
-        or neither? HTTP based RPC implementation may choose GET verb for safe
-        methods, and PUT verb for idempotent methods instead of the default POST.
+{%html:
+<p>Is this method side-effect-free (or safe in HTTP parlance), or idempotent,
+or neither? HTTP based RPC implementation may choose GET verb for safe
+methods, and PUT verb for idempotent methods instead of the default POST.</p>
+%}
       *)
       module rec IdempotencyLevel : sig
         type t =
           | IDEMPOTENCY_UNKNOWN
           | NO_SIDE_EFFECTS
-          (** implies idempotent *)
+          (**
+{%html:
+<p>implies idempotent</p>
+%}
+          *)
 
           | IDEMPOTENT
-          (** idempotent, but may have side effects *)
+          (**
+{%html:
+<p>idempotent, but may have side effects</p>
+%}
+          *)
 
 
         val name: unit -> string
@@ -2596,14 +3835,27 @@ end = struct
       type t = {
         deprecated:bool;
         (**
-          Is this method deprecated?
-          Depending on the target platform, this can emit Deprecated annotations
-          for the method, or it will be completely ignored; in the very least,
-          this is a formalization for deprecating methods.
+{%html:
+<p>Is this method deprecated?
+Depending on the target platform, this can emit Deprecated annotations
+for the method, or it will be completely ignored; in the very least,
+this is a formalization for deprecating methods.</p>
+<p>Note:  Field numbers 1 through 32 are reserved for Google's internal RPC</p>
+<pre><code> framework.  We apologize for hoarding these numbers to ourselves, but
+ we were already using them long before we decided to release Protocol
+ Buffers.
+</code></pre>
+%}
         *)
 
         idempotency_level:IdempotencyLevel.t;
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -2635,21 +3887,25 @@ end = struct
 
 
     (**
-      A message representing a option the parser does not recognize. This only
-      appears in options protos created by the compiler::Parser class.
-      DescriptorPool resolves these when building Descriptor objects. Therefore,
-      options protos in descriptor objects (e.g. returned by Descriptor::options(),
-      or produced by Descriptor::CopyTo()) will never have UninterpretedOptions
-      in them.
+{%html:
+<p>A message representing a option the parser does not recognize. This only
+appears in options protos created by the compiler::Parser class.
+DescriptorPool resolves these when building Descriptor objects. Therefore,
+options protos in descriptor objects (e.g. returned by Descriptor::options(),
+or produced by Descriptor::CopyTo()) will never have UninterpretedOptions
+in them.</p>
+%}
     *)
     and UninterpretedOption : sig
 
       (**
-        The name of the uninterpreted option.  Each string represents a segment in
-        a dot-separated name.  is_extension is true iff a segment represents an
-        extension (denoted with parentheses in options specs in .proto files).
-        E.g.,\{ \["foo", false\], \["bar.baz", true\], \["moo", false\] \} represents
-        "foo.(bar.baz).moo".
+{%html:
+<p>The name of the uninterpreted option.  Each string represents a segment in
+a dot-separated name.  is_extension is true iff a segment represents an
+extension (denoted with parentheses in options specs in .proto files).
+E.g.,{ [&quot;foo&quot;, false], [&quot;bar.baz&quot;, true], [&quot;moo&quot;, false] } represents
+&quot;foo.(bar.baz).moo&quot;.</p>
+%}
       *)
       module rec NamePart : sig
         type t = {
@@ -2686,6 +3942,13 @@ end = struct
       type t = {
         name:NamePart.t list;
         identifier_value:string option;
+        (**
+{%html:
+<p>The value of the uninterpreted option, in whatever type the tokenizer
+identified it as during parsing. Exactly one of these should be set.</p>
+%}
+        *)
+
         positive_int_value:int option;
         negative_int_value:int option;
         double_value:float option;
@@ -2721,60 +3984,106 @@ end = struct
 
 
     (**
-      Encapsulates information about the original source file from which a
-      FileDescriptorProto was generated.
+{%html:
+<p>Encapsulates information about the original source file from which a
+FileDescriptorProto was generated.</p>
+<p>===================================================================
+Optional source code info</p>
+%}
     *)
     and SourceCodeInfo : sig
       module rec Location : sig
         type t = {
           path:int list;
           (**
-            Identifies which part of the FileDescriptorProto was defined at this
-            location.
-
-            Each element is a field number or an index.  They form a path from
-            the root FileDescriptorProto to the place where the definition occurs.
-            For example, this path:
-            {v
-               [ 4, 3, 2, 7, 1 ]
-            v}
-            refers to:
-            {v
-               file.message_type(3)  // 4, 3
-                   .field(7)         // 2, 7
-                   .name()           // 1
-            v}
-            This is because FileDescriptorProto.message_type has field number 4:
-            {v
-               repeated DescriptorProto message_type = 4;
-            v}
-            and DescriptorProto.field has field number 2:
-            {v
-               repeated FieldDescriptorProto field = 2;
-            v}
-            and FieldDescriptorProto.name has field number 1:
-            {v
-               optional string name = 1;
-            v}
-            Thus, the above path gives the location of a field name.  If we removed
-            the last element:
-            {v
-               [ 4, 3, 2, 7 ]
-            v}
-            this path refers to the whole field declaration (from the beginning
-            of the label to the terminating semicolon).
+{%html:
+<p>Identifies which part of the FileDescriptorProto was defined at this
+location.</p>
+<p>Each element is a field number or an index.  They form a path from
+the root FileDescriptorProto to the place where the definition occurs.
+For example, this path:</p>
+<pre><code> [ 4, 3, 2, 7, 1 ]
+</code></pre>
+<p>refers to:</p>
+<pre><code> file.message_type(3)  // 4, 3
+     .field(7)         // 2, 7
+     .name()           // 1
+</code></pre>
+<p>This is because FileDescriptorProto.message_type has field number 4:</p>
+<pre><code> repeated DescriptorProto message_type = 4;
+</code></pre>
+<p>and DescriptorProto.field has field number 2:</p>
+<pre><code> repeated FieldDescriptorProto field = 2;
+</code></pre>
+<p>and FieldDescriptorProto.name has field number 1:</p>
+<pre><code> optional string name = 1;
+</code></pre>
+<p>Thus, the above path gives the location of a field name.  If we removed
+the last element:</p>
+<pre><code> [ 4, 3, 2, 7 ]
+</code></pre>
+<p>this path refers to the whole field declaration (from the beginning
+of the label to the terminating semicolon).</p>
+%}
           *)
 
           span:int list;
           (**
-            Always has exactly three or four elements: start line, start column,
-            end line (optional, otherwise assumed same as start line), end column.
-            These are packed into a single field for efficiency.  Note that line
-            and column numbers are zero-based -- typically you will want to add
-            1 to each before displaying to a user.
+{%html:
+<p>Always has exactly three or four elements: start line, start column,
+end line (optional, otherwise assumed same as start line), end column.
+These are packed into a single field for efficiency.  Note that line
+and column numbers are zero-based -- typically you will want to add
+1 to each before displaying to a user.</p>
+%}
           *)
 
           leading_comments:string option;
+          (**
+{%html:
+<p>If this SourceCodeInfo represents a complete declaration, these are any
+comments appearing before and after the declaration which appear to be
+attached to the declaration.</p>
+<p>A series of line comments appearing on consecutive lines, with no other
+tokens appearing on those lines, will be treated as a single comment.</p>
+<p>leading_detached_comments will keep paragraphs of comments that appear
+before (but not connected to) the current element. Each paragraph,
+separated by empty lines, will be one comment element in the repeated
+field.</p>
+<p>Only the comment content is provided; comment markers (e.g. //) are
+stripped out.  For block comments, leading whitespace and an asterisk
+will be stripped from the beginning of each line other than the first.
+Newlines are included in the output.</p>
+<p>Examples:</p>
+<pre><code> optional int32 foo = 1;  // Comment attached to foo.
+</code></pre>
+<p>Comment attached to bar.</p>
+<pre><code> optional int32 bar = 2;
+
+ optional string baz = 3;
+</code></pre>
+<p>Comment attached to baz.
+Another line attached to baz.</p>
+<p>Comment attached to moo.</p>
+<p>Another line attached to moo.</p>
+<pre><code> optional double moo = 4;
+</code></pre>
+<p>Detached comment for corge. This is not leading or trailing comments
+to moo or corge because there are blank lines separating it from
+both.</p>
+<p>Detached comment for corge paragraph 2.</p>
+<pre><code> optional string corge = 5;
+ /* Block comment attached
+  * to corge.  Leading asterisks
+  * will be removed. */
+ /* Block comment attached to
+  * grault. */
+ optional int32 grault = 6;
+</code></pre>
+<p>ignored detached comments.</p>
+%}
+          *)
+
           trailing_comments:string option;
           leading_detached_comments:string list;
         }
@@ -2807,54 +4116,59 @@ end = struct
 
       type t = (Location.t list)
       (**
-        A Location identifies a piece of source code in a .proto file which
-        corresponds to a particular definition.  This information is intended
-        to be useful to IDEs, code indexers, documentation generators, and similar
-        tools.
-
-        For example, say we have a file like:
-        {v
-           message Foo {
-             optional string foo = 1;
-           }
-        v}
-        Let's look at just the field definition:
-        {v
-           optional string foo = 1;
-           ^       ^^     ^^  ^  ^^^
-           a       bc     de  f  ghi
-        v}
-        We have the following locations:
-        {v
-           span   path               represents
-           [a,i)  [ 4, 0, 2, 0 ]     The whole field definition.
-           [a,b)  [ 4, 0, 2, 0, 4 ]  The label (optional).
-           [c,d)  [ 4, 0, 2, 0, 5 ]  The type (string).
-           [e,f)  [ 4, 0, 2, 0, 1 ]  The name (foo).
-           [g,h)  [ 4, 0, 2, 0, 3 ]  The number (1).
-        v}
-        Notes:
-        - A location may refer to a repeated field itself (i.e. not to any
-        particular index within it).  This is used whenever a set of elements are
-        logically enclosed in a single code segment.  For example, an entire
-        extend block (possibly containing multiple extension definitions) will
-        have an outer location whose path refers to the "extensions" repeated
-        field without an index.
-        - Multiple locations may have the same path.  This happens when a single
-        logical declaration is spread out across multiple places.  The most
-        obvious example is the "extend" block again -- there may be multiple
-        extend blocks in the same scope, each of which will have the same path.
-        - A location's span is not always a subset of its parent's span.  For
-        example, the "extendee" of an extension declaration appears at the
-        beginning of the "extend" block and is shared by all extensions within
-        the block.
-        - Just because a location's span is a subset of some other location's span
-        does not mean that it is a descendant.  For example, a "group" defines
-        both a type and a field in a single declaration.  Thus, the locations
-        corresponding to the type and field and their components will overlap.
-        - Code which tries to interpret locations should probably be designed to
-        ignore those that it doesn't understand, as more types of locations could
-        be recorded in the future.
+{%html:
+<p>A Location identifies a piece of source code in a .proto file which
+corresponds to a particular definition.  This information is intended
+to be useful to IDEs, code indexers, documentation generators, and similar
+tools.</p>
+<p>For example, say we have a file like:</p>
+<pre><code> message Foo {
+   optional string foo = 1;
+ }
+</code></pre>
+<p>Let's look at just the field definition:</p>
+<pre><code> optional string foo = 1;
+ ^       ^^     ^^  ^  ^^^
+ a       bc     de  f  ghi
+</code></pre>
+<p>We have the following locations:</p>
+<pre><code> span   path               represents
+ [a,i)  [ 4, 0, 2, 0 ]     The whole field definition.
+ [a,b)  [ 4, 0, 2, 0, 4 ]  The label (optional).
+ [c,d)  [ 4, 0, 2, 0, 5 ]  The type (string).
+ [e,f)  [ 4, 0, 2, 0, 1 ]  The name (foo).
+ [g,h)  [ 4, 0, 2, 0, 3 ]  The number (1).
+</code></pre>
+<p>Notes:</p>
+<ul>
+<li>A location may refer to a repeated field itself (i.e. not to any
+particular index within it).  This is used whenever a set of elements are
+logically enclosed in a single code segment.  For example, an entire
+extend block (possibly containing multiple extension definitions) will
+have an outer location whose path refers to the &quot;extensions&quot; repeated
+field without an index.
+</li>
+<li>Multiple locations may have the same path.  This happens when a single
+logical declaration is spread out across multiple places.  The most
+obvious example is the &quot;extend&quot; block again -- there may be multiple
+extend blocks in the same scope, each of which will have the same path.
+</li>
+<li>A location's span is not always a subset of its parent's span.  For
+example, the &quot;extendee&quot; of an extension declaration appears at the
+beginning of the &quot;extend&quot; block and is shared by all extensions within
+the block.
+</li>
+<li>Just because a location's span is a subset of some other location's span
+does not mean that it is a descendant.  For example, a &quot;group&quot; defines
+both a type and a field in a single declaration.  Thus, the locations
+corresponding to the type and field and their components will overlap.
+</li>
+<li>Code which tries to interpret locations should probably be designed to
+ignore those that it doesn't understand, as more types of locations could
+be recorded in the future.
+</li>
+</ul>
+%}
       *)
 
       val make: ?location:Location.t list -> unit -> t
@@ -2886,31 +4200,45 @@ end = struct
 
 
     (**
-      Describes the relationship between generated code and its original source
-      file. A GeneratedCodeInfo message is associated with only one generated
-      source file, but may contain references to different source .proto files.
+{%html:
+<p>Describes the relationship between generated code and its original source
+file. A GeneratedCodeInfo message is associated with only one generated
+source file, but may contain references to different source .proto files.</p>
+%}
     *)
     and GeneratedCodeInfo : sig
       module rec Annotation : sig
         type t = {
           path:int list;
           (**
-            Identifies the element in the original source .proto file. This field
-            is formatted the same as SourceCodeInfo.Location.path.
+{%html:
+<p>Identifies the element in the original source .proto file. This field
+is formatted the same as SourceCodeInfo.Location.path.</p>
+%}
           *)
 
           source_file:string option;
+          (**
+{%html:
+<p>Identifies the filesystem path to the original source .proto.</p>
+%}
+          *)
+
           begin':int option;
           (**
-            Identifies the starting offset in bytes in the generated code
-            that relates to the identified object.
+{%html:
+<p>Identifies the starting offset in bytes in the generated code
+that relates to the identified object.</p>
+%}
           *)
 
           end':int option;
           (**
-            Identifies the ending offset in bytes in the generated code that
-            relates to the identified offset. The end offset should be one past
-            the last relevant byte (so the length of the text = end - begin).
+{%html:
+<p>Identifies the ending offset in bytes in the generated code that
+relates to the identified offset. The end offset should be one past
+the last relevant byte (so the length of the text = end - begin).</p>
+%}
           *)
 
         }
@@ -2943,8 +4271,10 @@ end = struct
 
       type t = (Annotation.t list)
       (**
-        An Annotation connects some span of text in generated code to an element
-        of its generating .proto file.
+{%html:
+<p>An Annotation connects some span of text in generated code to an element
+of its generating .proto file.</p>
+%}
       *)
 
       val make: ?annotation:Annotation.t list -> unit -> t
@@ -3034,31 +4364,67 @@ end = struct
       type t = {
         name:string option;
         (**
-          file name, relative to root of source tree
+{%html:
+<p>file name, relative to root of source tree</p>
+%}
         *)
 
         package:string option;
         (**
-          e.g. "foo", "foo.bar", etc.
+{%html:
+<p>e.g. &quot;foo&quot;, &quot;foo.bar&quot;, etc.</p>
+%}
         *)
 
         dependency:string list;
         (**
-          Names of files imported by this file.
+{%html:
+<p>Names of files imported by this file.</p>
+%}
         *)
 
         message_type:DescriptorProto.t list;
+        (**
+{%html:
+<p>All top-level definitions in this file.</p>
+%}
+        *)
+
         enum_type:EnumDescriptorProto.t list;
         service:ServiceDescriptorProto.t list;
         extension:FieldDescriptorProto.t list;
         options:FileOptions.t option;
         source_code_info:SourceCodeInfo.t option;
+        (**
+{%html:
+<p>This field contains optional information about the original source code.
+You may safely remove this entire field without harming runtime
+functionality of the descriptors -- the information is needed only by
+development tools.</p>
+%}
+        *)
+
         public_dependency:int list;
+        (**
+{%html:
+<p>Indexes of the public imported files in the dependency list above.</p>
+%}
+        *)
+
         weak_dependency:int list;
+        (**
+{%html:
+<p>Indexes of the weak imported files in the dependency list.
+For Google-internal migration only. Do not use.</p>
+%}
+        *)
+
         syntax:string option;
         (**
-          The syntax of the proto file.
-          The supported values are "proto2" and "proto3".
+{%html:
+<p>The syntax of the proto file.
+The supported values are &quot;proto2&quot; and &quot;proto3&quot;.</p>
+%}
         *)
 
       }
@@ -3120,18 +4486,18 @@ end = struct
       let merge_weak_dependency = Runtime'.Merge.merge Runtime'.Spec.( repeated ((11, "weak_dependency", "weakDependency"), int32_int, not_packed) ) in
       let merge_syntax = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((12, "syntax", "syntax"), string) ) in
       fun t1 t2 -> {
-      name = (merge_name t1.name t2.name);
-      package = (merge_package t1.package t2.package);
-      dependency = (merge_dependency t1.dependency t2.dependency);
-      message_type = (merge_message_type t1.message_type t2.message_type);
-      enum_type = (merge_enum_type t1.enum_type t2.enum_type);
-      service = (merge_service t1.service t2.service);
-      extension = (merge_extension t1.extension t2.extension);
-      options = (merge_options t1.options t2.options);
-      source_code_info = (merge_source_code_info t1.source_code_info t2.source_code_info);
-      public_dependency = (merge_public_dependency t1.public_dependency t2.public_dependency);
-      weak_dependency = (merge_weak_dependency t1.weak_dependency t2.weak_dependency);
-      syntax = (merge_syntax t1.syntax t2.syntax);
+      	name = (merge_name t1.name t2.name);
+      	package = (merge_package t1.package t2.package);
+      	dependency = (merge_dependency t1.dependency t2.dependency);
+      	message_type = (merge_message_type t1.message_type t2.message_type);
+      	enum_type = (merge_enum_type t1.enum_type t2.enum_type);
+      	service = (merge_service t1.service t2.service);
+      	extension = (merge_extension t1.extension t2.extension);
+      	options = (merge_options t1.options t2.options);
+      	source_code_info = (merge_source_code_info t1.source_code_info t2.source_code_info);
+      	public_dependency = (merge_public_dependency t1.public_dependency t2.public_dependency);
+      	weak_dependency = (merge_weak_dependency t1.weak_dependency t2.weak_dependency);
+      	syntax = (merge_syntax t1.syntax t2.syntax);
        }
       let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "package", "package"), string) ^:: repeated ((3, "dependency", "dependency"), string, not_packed) ^:: repeated ((4, "message_type", "messageType"), (message (module DescriptorProto)), not_packed) ^:: repeated ((5, "enum_type", "enumType"), (message (module EnumDescriptorProto)), not_packed) ^:: repeated ((6, "service", "service"), (message (module ServiceDescriptorProto)), not_packed) ^:: repeated ((7, "extension", "extension"), (message (module FieldDescriptorProto)), not_packed) ^:: basic_opt ((8, "options", "options"), (message (module FileOptions))) ^:: basic_opt ((9, "source_code_info", "sourceCodeInfo"), (message (module SourceCodeInfo))) ^:: repeated ((10, "public_dependency", "publicDependency"), int32_int, not_packed) ^:: repeated ((11, "weak_dependency", "weakDependency"), int32_int, not_packed) ^:: basic_opt ((12, "syntax", "syntax"), string) ^:: nil )
       let to_proto' =
@@ -3157,12 +4523,16 @@ end = struct
         type t = {
           start:int option;
           (**
-            Inclusive.
+{%html:
+<p>Inclusive.</p>
+%}
           *)
 
           end':int option;
           (**
-            Exclusive.
+{%html:
+<p>Exclusive.</p>
+%}
           *)
 
           options:ExtensionRangeOptions.t option;
@@ -3196,20 +4566,26 @@ end = struct
 
 
       (**
-        Range of reserved tag numbers. Reserved tag numbers may not be used by
-        fields or extension ranges in the same message. Reserved ranges may
-        not overlap.
+{%html:
+<p>Range of reserved tag numbers. Reserved tag numbers may not be used by
+fields or extension ranges in the same message. Reserved ranges may
+not overlap.</p>
+%}
       *)
       and ReservedRange : sig
         type t = {
           start:int option;
           (**
-            Inclusive.
+{%html:
+<p>Inclusive.</p>
+%}
           *)
 
           end':int option;
           (**
-            Exclusive.
+{%html:
+<p>Exclusive.</p>
+%}
           *)
 
         }
@@ -3251,6 +4627,13 @@ end = struct
         oneof_decl:OneofDescriptorProto.t list;
         reserved_range:ReservedRange.t list;
         reserved_name:string list;
+        (**
+{%html:
+<p>Reserved field names, which may not be used by fields in the same message.
+A given name may only be reserved once.</p>
+%}
+        *)
+
       }
       val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -3283,12 +4666,16 @@ end = struct
         type t = {
           start:int option;
           (**
-            Inclusive.
+{%html:
+<p>Inclusive.</p>
+%}
           *)
 
           end':int option;
           (**
-            Exclusive.
+{%html:
+<p>Exclusive.</p>
+%}
           *)
 
           options:ExtensionRangeOptions.t option;
@@ -3333,9 +4720,9 @@ end = struct
         let merge_end' = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "end", "end"), int32_int) ) in
         let merge_options = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "options", "options"), (message (module ExtensionRangeOptions))) ) in
         fun t1 t2 -> {
-        start = (merge_start t1.start t2.start);
-        end' = (merge_end' t1.end' t2.end');
-        options = (merge_options t1.options t2.options);
+        	start = (merge_start t1.start t2.start);
+        	end' = (merge_end' t1.end' t2.end');
+        	options = (merge_options t1.options t2.options);
          }
         let spec () = Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ^:: basic_opt ((2, "end", "end"), int32_int) ^:: basic_opt ((3, "options", "options"), (message (module ExtensionRangeOptions))) ^:: nil )
         let to_proto' =
@@ -3360,12 +4747,16 @@ end = struct
         type t = {
           start:int option;
           (**
-            Inclusive.
+{%html:
+<p>Inclusive.</p>
+%}
           *)
 
           end':int option;
           (**
-            Exclusive.
+{%html:
+<p>Exclusive.</p>
+%}
           *)
 
         }
@@ -3407,8 +4798,8 @@ end = struct
         let merge_start = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ) in
         let merge_end' = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "end", "end"), int32_int) ) in
         fun t1 t2 -> {
-        start = (merge_start t1.start t2.start);
-        end' = (merge_end' t1.end' t2.end');
+        	start = (merge_start t1.start t2.start);
+        	end' = (merge_end' t1.end' t2.end');
          }
         let spec () = Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ^:: basic_opt ((2, "end", "end"), int32_int) ^:: nil )
         let to_proto' =
@@ -3456,16 +4847,16 @@ end = struct
       let merge_reserved_range = Runtime'.Merge.merge Runtime'.Spec.( repeated ((9, "reserved_range", "reservedRange"), (message (module ReservedRange)), not_packed) ) in
       let merge_reserved_name = Runtime'.Merge.merge Runtime'.Spec.( repeated ((10, "reserved_name", "reservedName"), string, not_packed) ) in
       fun t1 t2 -> {
-      name = (merge_name t1.name t2.name);
-      field = (merge_field t1.field t2.field);
-      nested_type = (merge_nested_type t1.nested_type t2.nested_type);
-      enum_type = (merge_enum_type t1.enum_type t2.enum_type);
-      extension_range = (merge_extension_range t1.extension_range t2.extension_range);
-      extension = (merge_extension t1.extension t2.extension);
-      options = (merge_options t1.options t2.options);
-      oneof_decl = (merge_oneof_decl t1.oneof_decl t2.oneof_decl);
-      reserved_range = (merge_reserved_range t1.reserved_range t2.reserved_range);
-      reserved_name = (merge_reserved_name t1.reserved_name t2.reserved_name);
+      	name = (merge_name t1.name t2.name);
+      	field = (merge_field t1.field t2.field);
+      	nested_type = (merge_nested_type t1.nested_type t2.nested_type);
+      	enum_type = (merge_enum_type t1.enum_type t2.enum_type);
+      	extension_range = (merge_extension_range t1.extension_range t2.extension_range);
+      	extension = (merge_extension t1.extension t2.extension);
+      	options = (merge_options t1.options t2.options);
+      	oneof_decl = (merge_oneof_decl t1.oneof_decl t2.oneof_decl);
+      	reserved_range = (merge_reserved_range t1.reserved_range t2.reserved_range);
+      	reserved_name = (merge_reserved_name t1.reserved_name t2.reserved_name);
        }
       let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "field", "field"), (message (module FieldDescriptorProto)), not_packed) ^:: repeated ((3, "nested_type", "nestedType"), (message (module This'_)), not_packed) ^:: repeated ((4, "enum_type", "enumType"), (message (module EnumDescriptorProto)), not_packed) ^:: repeated ((5, "extension_range", "extensionRange"), (message (module ExtensionRange)), not_packed) ^:: repeated ((6, "extension", "extension"), (message (module FieldDescriptorProto)), not_packed) ^:: basic_opt ((7, "options", "options"), (message (module MessageOptions))) ^:: repeated ((8, "oneof_decl", "oneofDecl"), (message (module OneofDescriptorProto)), not_packed) ^:: repeated ((9, "reserved_range", "reservedRange"), (message (module ReservedRange)), not_packed) ^:: repeated ((10, "reserved_name", "reservedName"), string, not_packed) ^:: nil )
       let to_proto' =
@@ -3489,6 +4880,12 @@ end = struct
     and ExtensionRangeOptions : sig
       type t = {
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -3528,8 +4925,8 @@ end = struct
       let merge =
       let merge_uninterpreted_option = Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) in
       fun t1 t2 -> {
-      uninterpreted_option = (merge_uninterpreted_option t1.uninterpreted_option t2.uninterpreted_option);
-      extensions' = (List.append t1.extensions' t2.extensions');
+      	uninterpreted_option = (merge_uninterpreted_option t1.uninterpreted_option t2.uninterpreted_option);
+      	extensions' = (List.append t1.extensions' t2.extensions');
        }
       let spec () = Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
@@ -3555,22 +4952,28 @@ end = struct
         type t =
           | TYPE_DOUBLE
           (**
-            0 is reserved for errors.
-            Order is weird for historical reasons.
+{%html:
+<p>0 is reserved for errors.
+Order is weird for historical reasons.</p>
+%}
           *)
 
           | TYPE_FLOAT
           | TYPE_INT64
           (**
-            Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT64 if
-            negative values are likely.
+{%html:
+<p>Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT64 if
+negative values are likely.</p>
+%}
           *)
 
           | TYPE_UINT64
           | TYPE_INT32
           (**
-            Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT32 if
-            negative values are likely.
+{%html:
+<p>Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT32 if
+negative values are likely.</p>
+%}
           *)
 
           | TYPE_FIXED64
@@ -3579,27 +4982,45 @@ end = struct
           | TYPE_STRING
           | TYPE_GROUP
           (**
-            Tag-delimited aggregate.
-            Group type is deprecated and not supported in proto3. However, Proto3
-            implementations should still be able to parse the group wire format and
-            treat group fields as unknown fields.
+{%html:
+<p>Tag-delimited aggregate.
+Group type is deprecated and not supported in proto3. However, Proto3
+implementations should still be able to parse the group wire format and
+treat group fields as unknown fields.</p>
+%}
           *)
 
           | TYPE_MESSAGE
-          (** Length-delimited aggregate. *)
+          (**
+{%html:
+<p>Length-delimited aggregate.</p>
+%}
+          *)
 
           | TYPE_BYTES
-          (** New in version 2. *)
+          (**
+{%html:
+<p>New in version 2.</p>
+%}
+          *)
 
           | TYPE_UINT32
           | TYPE_ENUM
           | TYPE_SFIXED32
           | TYPE_SFIXED64
           | TYPE_SINT32
-          (** Uses ZigZag encoding. *)
+          (**
+{%html:
+<p>Uses ZigZag encoding.</p>
+%}
+          *)
 
           | TYPE_SINT64
-          (** Uses ZigZag encoding. *)
+          (**
+{%html:
+<p>Uses ZigZag encoding.</p>
+%}
+          *)
 
 
         val name: unit -> string
@@ -3617,7 +5038,11 @@ end = struct
       and Label : sig
         type t =
           | LABEL_OPTIONAL
-          (** 0 is reserved for errors *)
+          (**
+{%html:
+<p>0 is reserved for errors</p>
+%}
+          *)
 
           | LABEL_REQUIRED
           | LABEL_REPEATED
@@ -3638,24 +5063,86 @@ end = struct
         name:string option;
         extendee:string option;
         (**
-          For extensions, this is the name of the type being extended.  It is
-          resolved in the same manner as type_name.
+{%html:
+<p>For extensions, this is the name of the type being extended.  It is
+resolved in the same manner as type_name.</p>
+%}
         *)
 
         number:int option;
         label:Label.t option;
         type':Type.t option;
         (**
-          If type_name is set, this need not be set.  If both this and type_name
-          are set, this must be one of TYPE_ENUM, TYPE_MESSAGE or TYPE_GROUP.
+{%html:
+<p>If type_name is set, this need not be set.  If both this and type_name
+are set, this must be one of TYPE_ENUM, TYPE_MESSAGE or TYPE_GROUP.</p>
+%}
         *)
 
         type_name:string option;
+        (**
+{%html:
+<p>For message and enum types, this is the name of the type.  If the name
+starts with a '.', it is fully-qualified.  Otherwise, C++-like scoping
+rules are used to find the type (i.e. first the nested types within this
+message are searched, then within the parent, on up to the root
+namespace).</p>
+%}
+        *)
+
         default_value:string option;
+        (**
+{%html:
+<p>For numeric types, contains the original text representation of the value.
+For booleans, &quot;true&quot; or &quot;false&quot;.
+For strings, contains the default text contents (not escaped in any way).
+For bytes, contains the C escaped value.  All bytes &gt;= 128 are escaped.</p>
+%}
+        *)
+
         options:FieldOptions.t option;
         oneof_index:int option;
+        (**
+{%html:
+<p>If set, gives the index of a oneof in the containing type's oneof_decl
+list.  This field is a member of that oneof.</p>
+%}
+        *)
+
         json_name:string option;
+        (**
+{%html:
+<p>JSON name of this field. The value is set by protocol compiler. If the
+user has set a &quot;json_name&quot; option on this field, that option's value
+will be used. Otherwise, it's deduced from the field's name by converting
+it to camelCase.</p>
+%}
+        *)
+
         proto3_optional:bool option;
+        (**
+{%html:
+<p>If true, this is a proto3 &quot;optional&quot;. When a proto3 field is optional, it
+tracks presence regardless of field type.</p>
+<p>When proto3_optional is true, this field must be belong to a oneof to
+signal to old proto3 clients that presence is tracked for this field. This
+oneof is known as a &quot;synthetic&quot; oneof, and this field must be its sole
+member (each proto3 optional field gets its own synthetic oneof). Synthetic
+oneofs exist in the descriptor only, and do not generate any API. Synthetic
+oneofs must be ordered after all &quot;real&quot; oneofs.</p>
+<p>For message fields, proto3_optional doesn't create any semantic change,
+since non-repeated message fields always track presence. However it still
+indicates the semantic detail of whether the user wrote &quot;optional&quot; or not.
+This can be useful for round-tripping the .proto file. For consistency we
+give message fields a synthetic oneof also, even though it is not required
+to track presence. This is especially important because the parser can't
+tell if a field is a message or an enum, so it must always create a
+synthetic oneof.</p>
+<p>Proto2 optional fields do not set this flag, because they already indicate
+optional with <code>LABEL_OPTIONAL</code>.</p>
+%}
+        *)
+
       }
       val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -3688,22 +5175,28 @@ end = struct
         type t =
           | TYPE_DOUBLE
           (**
-            0 is reserved for errors.
-            Order is weird for historical reasons.
+{%html:
+<p>0 is reserved for errors.
+Order is weird for historical reasons.</p>
+%}
           *)
 
           | TYPE_FLOAT
           | TYPE_INT64
           (**
-            Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT64 if
-            negative values are likely.
+{%html:
+<p>Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT64 if
+negative values are likely.</p>
+%}
           *)
 
           | TYPE_UINT64
           | TYPE_INT32
           (**
-            Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT32 if
-            negative values are likely.
+{%html:
+<p>Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT32 if
+negative values are likely.</p>
+%}
           *)
 
           | TYPE_FIXED64
@@ -3712,27 +5205,45 @@ end = struct
           | TYPE_STRING
           | TYPE_GROUP
           (**
-            Tag-delimited aggregate.
-            Group type is deprecated and not supported in proto3. However, Proto3
-            implementations should still be able to parse the group wire format and
-            treat group fields as unknown fields.
+{%html:
+<p>Tag-delimited aggregate.
+Group type is deprecated and not supported in proto3. However, Proto3
+implementations should still be able to parse the group wire format and
+treat group fields as unknown fields.</p>
+%}
           *)
 
           | TYPE_MESSAGE
-          (** Length-delimited aggregate. *)
+          (**
+{%html:
+<p>Length-delimited aggregate.</p>
+%}
+          *)
 
           | TYPE_BYTES
-          (** New in version 2. *)
+          (**
+{%html:
+<p>New in version 2.</p>
+%}
+          *)
 
           | TYPE_UINT32
           | TYPE_ENUM
           | TYPE_SFIXED32
           | TYPE_SFIXED64
           | TYPE_SINT32
-          (** Uses ZigZag encoding. *)
+          (**
+{%html:
+<p>Uses ZigZag encoding.</p>
+%}
+          *)
 
           | TYPE_SINT64
-          (** Uses ZigZag encoding. *)
+          (**
+{%html:
+<p>Uses ZigZag encoding.</p>
+%}
+          *)
 
 
         val name: unit -> string
@@ -3750,22 +5261,28 @@ end = struct
         type t =
           | TYPE_DOUBLE
           (**
-            0 is reserved for errors.
-            Order is weird for historical reasons.
+{%html:
+<p>0 is reserved for errors.
+Order is weird for historical reasons.</p>
+%}
           *)
 
           | TYPE_FLOAT
           | TYPE_INT64
           (**
-            Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT64 if
-            negative values are likely.
+{%html:
+<p>Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT64 if
+negative values are likely.</p>
+%}
           *)
 
           | TYPE_UINT64
           | TYPE_INT32
           (**
-            Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT32 if
-            negative values are likely.
+{%html:
+<p>Not ZigZag encoded.  Negative numbers take 10 bytes.  Use TYPE_SINT32 if
+negative values are likely.</p>
+%}
           *)
 
           | TYPE_FIXED64
@@ -3774,27 +5291,45 @@ end = struct
           | TYPE_STRING
           | TYPE_GROUP
           (**
-            Tag-delimited aggregate.
-            Group type is deprecated and not supported in proto3. However, Proto3
-            implementations should still be able to parse the group wire format and
-            treat group fields as unknown fields.
+{%html:
+<p>Tag-delimited aggregate.
+Group type is deprecated and not supported in proto3. However, Proto3
+implementations should still be able to parse the group wire format and
+treat group fields as unknown fields.</p>
+%}
           *)
 
           | TYPE_MESSAGE
-          (** Length-delimited aggregate. *)
+          (**
+{%html:
+<p>Length-delimited aggregate.</p>
+%}
+          *)
 
           | TYPE_BYTES
-          (** New in version 2. *)
+          (**
+{%html:
+<p>New in version 2.</p>
+%}
+          *)
 
           | TYPE_UINT32
           | TYPE_ENUM
           | TYPE_SFIXED32
           | TYPE_SFIXED64
           | TYPE_SINT32
-          (** Uses ZigZag encoding. *)
+          (**
+{%html:
+<p>Uses ZigZag encoding.</p>
+%}
+          *)
 
           | TYPE_SINT64
-          (** Uses ZigZag encoding. *)
+          (**
+{%html:
+<p>Uses ZigZag encoding.</p>
+%}
+          *)
 
 
         let name () = ".google.protobuf.FieldDescriptorProto.Type"
@@ -3883,7 +5418,11 @@ end = struct
       and Label : sig
         type t =
           | LABEL_OPTIONAL
-          (** 0 is reserved for errors *)
+          (**
+{%html:
+<p>0 is reserved for errors</p>
+%}
+          *)
 
           | LABEL_REQUIRED
           | LABEL_REPEATED
@@ -3902,7 +5441,11 @@ end = struct
         module This'_ = Label
         type t =
           | LABEL_OPTIONAL
-          (** 0 is reserved for errors *)
+          (**
+{%html:
+<p>0 is reserved for errors</p>
+%}
+          *)
 
           | LABEL_REQUIRED
           | LABEL_REPEATED
@@ -3959,17 +5502,17 @@ end = struct
       let merge_json_name = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((10, "json_name", "jsonName"), string) ) in
       let merge_proto3_optional = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((17, "proto3_optional", "proto3Optional"), bool) ) in
       fun t1 t2 -> {
-      name = (merge_name t1.name t2.name);
-      extendee = (merge_extendee t1.extendee t2.extendee);
-      number = (merge_number t1.number t2.number);
-      label = (merge_label t1.label t2.label);
-      type' = (merge_type' t1.type' t2.type');
-      type_name = (merge_type_name t1.type_name t2.type_name);
-      default_value = (merge_default_value t1.default_value t2.default_value);
-      options = (merge_options t1.options t2.options);
-      oneof_index = (merge_oneof_index t1.oneof_index t2.oneof_index);
-      json_name = (merge_json_name t1.json_name t2.json_name);
-      proto3_optional = (merge_proto3_optional t1.proto3_optional t2.proto3_optional);
+      	name = (merge_name t1.name t2.name);
+      	extendee = (merge_extendee t1.extendee t2.extendee);
+      	number = (merge_number t1.number t2.number);
+      	label = (merge_label t1.label t2.label);
+      	type' = (merge_type' t1.type' t2.type');
+      	type_name = (merge_type_name t1.type_name t2.type_name);
+      	default_value = (merge_default_value t1.default_value t2.default_value);
+      	options = (merge_options t1.options t2.options);
+      	oneof_index = (merge_oneof_index t1.oneof_index t2.oneof_index);
+      	json_name = (merge_json_name t1.json_name t2.json_name);
+      	proto3_optional = (merge_proto3_optional t1.proto3_optional t2.proto3_optional);
        }
       let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "extendee", "extendee"), string) ^:: basic_opt ((3, "number", "number"), int32_int) ^:: basic_opt ((4, "label", "label"), (enum (module Label))) ^:: basic_opt ((5, "type", "type"), (enum (module Type))) ^:: basic_opt ((6, "type_name", "typeName"), string) ^:: basic_opt ((7, "default_value", "defaultValue"), string) ^:: basic_opt ((8, "options", "options"), (message (module FieldOptions))) ^:: basic_opt ((9, "oneof_index", "oneofIndex"), int32_int) ^:: basic_opt ((10, "json_name", "jsonName"), string) ^:: basic_opt ((17, "proto3_optional", "proto3Optional"), bool) ^:: nil )
       let to_proto' =
@@ -4033,8 +5576,8 @@ end = struct
       let merge_name = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ) in
       let merge_options = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "options", "options"), (message (module OneofOptions))) ) in
       fun t1 t2 -> {
-      name = (merge_name t1.name t2.name);
-      options = (merge_options t1.options t2.options);
+      	name = (merge_name t1.name t2.name);
+      	options = (merge_options t1.options t2.options);
        }
       let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "options", "options"), (message (module OneofOptions))) ^:: nil )
       let to_proto' =
@@ -4058,23 +5601,28 @@ end = struct
     and EnumDescriptorProto : sig
 
       (**
-        Range of reserved numeric values. Reserved values may not be used by
-        entries in the same enum. Reserved ranges may not overlap.
-
-        Note that this is distinct from DescriptorProto.ReservedRange in that it
-        is inclusive such that it can appropriately represent the entire int32
-        domain.
+{%html:
+<p>Range of reserved numeric values. Reserved values may not be used by
+entries in the same enum. Reserved ranges may not overlap.</p>
+<p>Note that this is distinct from DescriptorProto.ReservedRange in that it
+is inclusive such that it can appropriately represent the entire int32
+domain.</p>
+%}
       *)
       module rec EnumReservedRange : sig
         type t = {
           start:int option;
           (**
-            Inclusive.
+{%html:
+<p>Inclusive.</p>
+%}
           *)
 
           end':int option;
           (**
-            Inclusive.
+{%html:
+<p>Inclusive.</p>
+%}
           *)
 
         }
@@ -4110,7 +5658,22 @@ end = struct
         value:EnumValueDescriptorProto.t list;
         options:EnumOptions.t option;
         reserved_range:EnumReservedRange.t list;
+        (**
+{%html:
+<p>Range of reserved numeric values. Reserved numeric values may not be used
+by enum values in the same enum declaration. Reserved ranges may not
+overlap.</p>
+%}
+        *)
+
         reserved_name:string list;
+        (**
+{%html:
+<p>Reserved enum value names, which may not be reused. A given name may only
+be reserved once.</p>
+%}
+        *)
+
       }
       val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -4143,12 +5706,16 @@ end = struct
         type t = {
           start:int option;
           (**
-            Inclusive.
+{%html:
+<p>Inclusive.</p>
+%}
           *)
 
           end':int option;
           (**
-            Inclusive.
+{%html:
+<p>Inclusive.</p>
+%}
           *)
 
         }
@@ -4190,8 +5757,8 @@ end = struct
         let merge_start = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ) in
         let merge_end' = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "end", "end"), int32_int) ) in
         fun t1 t2 -> {
-        start = (merge_start t1.start t2.start);
-        end' = (merge_end' t1.end' t2.end');
+        	start = (merge_start t1.start t2.start);
+        	end' = (merge_end' t1.end' t2.end');
          }
         let spec () = Runtime'.Spec.( basic_opt ((1, "start", "start"), int32_int) ^:: basic_opt ((2, "end", "end"), int32_int) ^:: nil )
         let to_proto' =
@@ -4229,11 +5796,11 @@ end = struct
       let merge_reserved_range = Runtime'.Merge.merge Runtime'.Spec.( repeated ((4, "reserved_range", "reservedRange"), (message (module EnumReservedRange)), not_packed) ) in
       let merge_reserved_name = Runtime'.Merge.merge Runtime'.Spec.( repeated ((5, "reserved_name", "reservedName"), string, not_packed) ) in
       fun t1 t2 -> {
-      name = (merge_name t1.name t2.name);
-      value = (merge_value t1.value t2.value);
-      options = (merge_options t1.options t2.options);
-      reserved_range = (merge_reserved_range t1.reserved_range t2.reserved_range);
-      reserved_name = (merge_reserved_name t1.reserved_name t2.reserved_name);
+      	name = (merge_name t1.name t2.name);
+      	value = (merge_value t1.value t2.value);
+      	options = (merge_options t1.options t2.options);
+      	reserved_range = (merge_reserved_range t1.reserved_range t2.reserved_range);
+      	reserved_name = (merge_reserved_name t1.reserved_name t2.reserved_name);
        }
       let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "value", "value"), (message (module EnumValueDescriptorProto)), not_packed) ^:: basic_opt ((3, "options", "options"), (message (module EnumOptions))) ^:: repeated ((4, "reserved_range", "reservedRange"), (message (module EnumReservedRange)), not_packed) ^:: repeated ((5, "reserved_name", "reservedName"), string, not_packed) ^:: nil )
       let to_proto' =
@@ -4300,9 +5867,9 @@ end = struct
       let merge_number = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((2, "number", "number"), int32_int) ) in
       let merge_options = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "options", "options"), (message (module EnumValueOptions))) ) in
       fun t1 t2 -> {
-      name = (merge_name t1.name t2.name);
-      number = (merge_number t1.number t2.number);
-      options = (merge_options t1.options t2.options);
+      	name = (merge_name t1.name t2.name);
+      	number = (merge_number t1.number t2.number);
+      	options = (merge_options t1.options t2.options);
        }
       let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "number", "number"), int32_int) ^:: basic_opt ((3, "options", "options"), (message (module EnumValueOptions))) ^:: nil )
       let to_proto' =
@@ -4369,9 +5936,9 @@ end = struct
       let merge_method' = Runtime'.Merge.merge Runtime'.Spec.( repeated ((2, "method", "method"), (message (module MethodDescriptorProto)), not_packed) ) in
       let merge_options = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "options", "options"), (message (module ServiceOptions))) ) in
       fun t1 t2 -> {
-      name = (merge_name t1.name t2.name);
-      method' = (merge_method' t1.method' t2.method');
-      options = (merge_options t1.options t2.options);
+      	name = (merge_name t1.name t2.name);
+      	method' = (merge_method' t1.method' t2.method');
+      	options = (merge_options t1.options t2.options);
        }
       let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: repeated ((2, "method", "method"), (message (module MethodDescriptorProto)), not_packed) ^:: basic_opt ((3, "options", "options"), (message (module ServiceOptions))) ^:: nil )
       let to_proto' =
@@ -4396,10 +5963,29 @@ end = struct
       type t = {
         name:string option;
         input_type:string option;
+        (**
+{%html:
+<p>Input and output type names.  These are resolved in the same way as
+FieldDescriptorProto.type_name, but must refer to a message type.</p>
+%}
+        *)
+
         output_type:string option;
         options:MethodOptions.t option;
         client_streaming:bool;
+        (**
+{%html:
+<p>Identifies if client streams multiple client messages</p>
+%}
+        *)
+
         server_streaming:bool;
+        (**
+{%html:
+<p>Identifies if server streams multiple server messages</p>
+%}
+        *)
+
       }
       val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       (** Helper function to generate a message using default values *)
@@ -4447,12 +6033,12 @@ end = struct
       let merge_client_streaming = Runtime'.Merge.merge Runtime'.Spec.( basic ((5, "client_streaming", "clientStreaming"), bool, (false)) ) in
       let merge_server_streaming = Runtime'.Merge.merge Runtime'.Spec.( basic ((6, "server_streaming", "serverStreaming"), bool, (false)) ) in
       fun t1 t2 -> {
-      name = (merge_name t1.name t2.name);
-      input_type = (merge_input_type t1.input_type t2.input_type);
-      output_type = (merge_output_type t1.output_type t2.output_type);
-      options = (merge_options t1.options t2.options);
-      client_streaming = (merge_client_streaming t1.client_streaming t2.client_streaming);
-      server_streaming = (merge_server_streaming t1.server_streaming t2.server_streaming);
+      	name = (merge_name t1.name t2.name);
+      	input_type = (merge_input_type t1.input_type t2.input_type);
+      	output_type = (merge_output_type t1.output_type t2.output_type);
+      	options = (merge_options t1.options t2.options);
+      	client_streaming = (merge_client_streaming t1.client_streaming t2.client_streaming);
+      	server_streaming = (merge_server_streaming t1.server_streaming t2.server_streaming);
        }
       let spec () = Runtime'.Spec.( basic_opt ((1, "name", "name"), string) ^:: basic_opt ((2, "input_type", "inputType"), string) ^:: basic_opt ((3, "output_type", "outputType"), string) ^:: basic_opt ((4, "options", "options"), (message (module MethodOptions))) ^:: basic ((5, "client_streaming", "clientStreaming"), bool, (false)) ^:: basic ((6, "server_streaming", "serverStreaming"), bool, (false)) ^:: nil )
       let to_proto' =
@@ -4475,22 +6061,34 @@ end = struct
 
     and FileOptions : sig
 
-      (** Generated classes can be optimized for speed or code size. *)
+      (**
+{%html:
+<p>Generated classes can be optimized for speed or code size.</p>
+%}
+      *)
       module rec OptimizeMode : sig
         type t =
           | SPEED
-          (** Generate complete code for parsing, serialization, *)
+          (**
+{%html:
+<p>Generate complete code for parsing, serialization,</p>
+%}
+          *)
 
           | CODE_SIZE
           (**
-            etc.
-
-
-            Use ReflectionOps to implement these methods.
+{%html:
+<p>etc.</p>
+<p>Use ReflectionOps to implement these methods.</p>
+%}
           *)
 
           | LITE_RUNTIME
-          (** Generate code using MessageLite and the lite runtime. *)
+          (**
+{%html:
+<p>Generate code using MessageLite and the lite runtime.</p>
+%}
+          *)
 
 
         val name: unit -> string
@@ -4507,33 +6105,185 @@ end = struct
 
       type t = {
         java_package:string option;
+        (**
+{%html:
+<p>Sets the Java package where classes generated from this .proto will be
+placed.  By default, the proto package is used, but this is often
+inappropriate because proto packages do not normally start with backwards
+domain names.</p>
+%}
+        *)
+
         java_outer_classname:string option;
+        (**
+{%html:
+<p>Controls the name of the wrapper Java class generated for the .proto file.
+That class will always contain the .proto file's getDescriptor() method as
+well as any top-level extensions defined in the .proto file.
+If java_multiple_files is disabled, then all the other classes from the
+.proto file will be nested inside the single wrapper outer class.</p>
+%}
+        *)
+
         optimize_for:OptimizeMode.t;
+        (**
+{%html:
+<p>Clients can define custom options in extensions of this message.
+See the documentation for the &quot;Options&quot; section above.</p>
+%}
+        *)
+
         java_multiple_files:bool;
+        (**
+{%html:
+<p>If enabled, then the Java code generator will generate a separate .java
+file for each top-level message, enum, and service defined in the .proto
+file.  Thus, these types will <em>not</em> be nested inside the wrapper class
+named by java_outer_classname.  However, the wrapper class will still be
+generated to contain the file's getDescriptor() method as well as any
+top-level extensions defined in the file.</p>
+%}
+        *)
+
         go_package:string option;
+        (**
+{%html:
+<p>Sets the Go package where structs generated from this .proto will be
+placed. If omitted, the Go package will be derived from the following:</p>
+<ul>
+<li>The basename of the package import path, if provided.
+</li>
+<li>Otherwise, the package statement in the .proto file, if present.
+</li>
+<li>Otherwise, the basename of the .proto file, without extension.
+</li>
+</ul>
+%}
+        *)
+
         cc_generic_services:bool;
+        (**
+{%html:
+<p>Should generic services be generated in each language?  &quot;Generic&quot; services
+are not specific to any particular RPC system.  They are generated by the
+main code generators in each language (without additional plugins).
+Generic services were the only kind of service generation supported by
+early versions of google.protobuf.</p>
+<p>Generic services are now considered deprecated in favor of using plugins
+that generate code specific to your particular RPC system.  Therefore,
+these default to false.  Old code which depends on generic services should
+explicitly set them to true.</p>
+%}
+        *)
+
         java_generic_services:bool;
         py_generic_services:bool;
         java_generate_equals_and_hash:bool option[@ocaml.alert protobuf "Marked as deprecated in the .proto file"];
+        (**
+{%html:
+<p>This option does nothing.</p>
+%}
+        *)
+
         deprecated:bool;
         (**
-          Is this file deprecated?
-          Depending on the target platform, this can emit Deprecated annotations
-          for everything in the file, or it will be completely ignored; in the very
-          least, this is a formalization for deprecating files.
+{%html:
+<p>Is this file deprecated?
+Depending on the target platform, this can emit Deprecated annotations
+for everything in the file, or it will be completely ignored; in the very
+least, this is a formalization for deprecating files.</p>
+%}
         *)
 
         java_string_check_utf8:bool;
+        (**
+{%html:
+<p>If set true, then the Java2 code generator will generate code that
+throws an exception whenever an attempt is made to assign a non-UTF-8
+byte sequence to a string field.
+Message reflection will do the same.
+However, an extension field still accepts non-UTF-8 byte sequences.
+This option has no effect on when used with the lite runtime.</p>
+%}
+        *)
+
         cc_enable_arenas:bool;
+        (**
+{%html:
+<p>Enables the use of arenas for the proto messages in this file. This applies
+only to generated classes for C++.</p>
+%}
+        *)
+
         objc_class_prefix:string option;
+        (**
+{%html:
+<p>Sets the objective c class prefix which is prepended to all objective c
+generated classes from this .proto. There is no default.</p>
+%}
+        *)
+
         csharp_namespace:string option;
+        (**
+{%html:
+<p>Namespace for generated classes; defaults to the package.</p>
+%}
+        *)
+
         swift_prefix:string option;
+        (**
+{%html:
+<p>By default Swift generators will take the proto package and CamelCase it
+replacing '.' with underscore and use that to prefix the types/symbols
+defined. When this options is provided, they will use this value instead
+to prefix the types/symbols defined.</p>
+%}
+        *)
+
         php_class_prefix:string option;
+        (**
+{%html:
+<p>Sets the php class prefix which is prepended to all php generated classes
+from this .proto. Default is empty.</p>
+%}
+        *)
+
         php_namespace:string option;
+        (**
+{%html:
+<p>Use this option to change the namespace of php generated classes. Default
+is empty. When this option is empty, the package name will be used for
+determining the namespace.</p>
+%}
+        *)
+
         php_generic_services:bool;
         php_metadata_namespace:string option;
+        (**
+{%html:
+<p>Use this option to change the namespace of php generated metadata classes.
+Default is empty. When this option is empty, the proto file name will be
+used for determining the namespace.</p>
+%}
+        *)
+
         ruby_package:string option;
+        (**
+{%html:
+<p>Use this option to change the package of ruby generated classes. Default
+is empty. When this option is not set, the package name will be used for
+determining the ruby package.</p>
+%}
+        *)
+
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here.
+See the documentation for the &quot;Options&quot; section above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -4566,18 +6316,26 @@ end = struct
       module rec OptimizeMode : sig
         type t =
           | SPEED
-          (** Generate complete code for parsing, serialization, *)
+          (**
+{%html:
+<p>Generate complete code for parsing, serialization,</p>
+%}
+          *)
 
           | CODE_SIZE
           (**
-            etc.
-
-
-            Use ReflectionOps to implement these methods.
+{%html:
+<p>etc.</p>
+<p>Use ReflectionOps to implement these methods.</p>
+%}
           *)
 
           | LITE_RUNTIME
-          (** Generate code using MessageLite and the lite runtime. *)
+          (**
+{%html:
+<p>Generate code using MessageLite and the lite runtime.</p>
+%}
+          *)
 
 
         val name: unit -> string
@@ -4594,18 +6352,26 @@ end = struct
         module This'_ = OptimizeMode
         type t =
           | SPEED
-          (** Generate complete code for parsing, serialization, *)
+          (**
+{%html:
+<p>Generate complete code for parsing, serialization,</p>
+%}
+          *)
 
           | CODE_SIZE
           (**
-            etc.
-
-
-            Use ReflectionOps to implement these methods.
+{%html:
+<p>etc.</p>
+<p>Use ReflectionOps to implement these methods.</p>
+%}
           *)
 
           | LITE_RUNTIME
-          (** Generate code using MessageLite and the lite runtime. *)
+          (**
+{%html:
+<p>Generate code using MessageLite and the lite runtime.</p>
+%}
+          *)
 
 
         let name () = ".google.protobuf.FileOptions.OptimizeMode"
@@ -4681,28 +6447,28 @@ end = struct
       let merge_ruby_package = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((45, "ruby_package", "rubyPackage"), string) ) in
       let merge_uninterpreted_option = Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) in
       fun t1 t2 -> {
-      java_package = (merge_java_package t1.java_package t2.java_package);
-      java_outer_classname = (merge_java_outer_classname t1.java_outer_classname t2.java_outer_classname);
-      optimize_for = (merge_optimize_for t1.optimize_for t2.optimize_for);
-      java_multiple_files = (merge_java_multiple_files t1.java_multiple_files t2.java_multiple_files);
-      go_package = (merge_go_package t1.go_package t2.go_package);
-      cc_generic_services = (merge_cc_generic_services t1.cc_generic_services t2.cc_generic_services);
-      java_generic_services = (merge_java_generic_services t1.java_generic_services t2.java_generic_services);
-      py_generic_services = (merge_py_generic_services t1.py_generic_services t2.py_generic_services);
-      java_generate_equals_and_hash = (merge_java_generate_equals_and_hash t1.java_generate_equals_and_hash t2.java_generate_equals_and_hash);
-      deprecated = (merge_deprecated t1.deprecated t2.deprecated);
-      java_string_check_utf8 = (merge_java_string_check_utf8 t1.java_string_check_utf8 t2.java_string_check_utf8);
-      cc_enable_arenas = (merge_cc_enable_arenas t1.cc_enable_arenas t2.cc_enable_arenas);
-      objc_class_prefix = (merge_objc_class_prefix t1.objc_class_prefix t2.objc_class_prefix);
-      csharp_namespace = (merge_csharp_namespace t1.csharp_namespace t2.csharp_namespace);
-      swift_prefix = (merge_swift_prefix t1.swift_prefix t2.swift_prefix);
-      php_class_prefix = (merge_php_class_prefix t1.php_class_prefix t2.php_class_prefix);
-      php_namespace = (merge_php_namespace t1.php_namespace t2.php_namespace);
-      php_generic_services = (merge_php_generic_services t1.php_generic_services t2.php_generic_services);
-      php_metadata_namespace = (merge_php_metadata_namespace t1.php_metadata_namespace t2.php_metadata_namespace);
-      ruby_package = (merge_ruby_package t1.ruby_package t2.ruby_package);
-      uninterpreted_option = (merge_uninterpreted_option t1.uninterpreted_option t2.uninterpreted_option);
-      extensions' = (List.append t1.extensions' t2.extensions');
+      	java_package = (merge_java_package t1.java_package t2.java_package);
+      	java_outer_classname = (merge_java_outer_classname t1.java_outer_classname t2.java_outer_classname);
+      	optimize_for = (merge_optimize_for t1.optimize_for t2.optimize_for);
+      	java_multiple_files = (merge_java_multiple_files t1.java_multiple_files t2.java_multiple_files);
+      	go_package = (merge_go_package t1.go_package t2.go_package);
+      	cc_generic_services = (merge_cc_generic_services t1.cc_generic_services t2.cc_generic_services);
+      	java_generic_services = (merge_java_generic_services t1.java_generic_services t2.java_generic_services);
+      	py_generic_services = (merge_py_generic_services t1.py_generic_services t2.py_generic_services);
+      	java_generate_equals_and_hash = (merge_java_generate_equals_and_hash t1.java_generate_equals_and_hash t2.java_generate_equals_and_hash);
+      	deprecated = (merge_deprecated t1.deprecated t2.deprecated);
+      	java_string_check_utf8 = (merge_java_string_check_utf8 t1.java_string_check_utf8 t2.java_string_check_utf8);
+      	cc_enable_arenas = (merge_cc_enable_arenas t1.cc_enable_arenas t2.cc_enable_arenas);
+      	objc_class_prefix = (merge_objc_class_prefix t1.objc_class_prefix t2.objc_class_prefix);
+      	csharp_namespace = (merge_csharp_namespace t1.csharp_namespace t2.csharp_namespace);
+      	swift_prefix = (merge_swift_prefix t1.swift_prefix t2.swift_prefix);
+      	php_class_prefix = (merge_php_class_prefix t1.php_class_prefix t2.php_class_prefix);
+      	php_namespace = (merge_php_namespace t1.php_namespace t2.php_namespace);
+      	php_generic_services = (merge_php_generic_services t1.php_generic_services t2.php_generic_services);
+      	php_metadata_namespace = (merge_php_metadata_namespace t1.php_metadata_namespace t2.php_metadata_namespace);
+      	ruby_package = (merge_ruby_package t1.ruby_package t2.ruby_package);
+      	uninterpreted_option = (merge_uninterpreted_option t1.uninterpreted_option t2.uninterpreted_option);
+      	extensions' = (List.append t1.extensions' t2.extensions');
        }
       let spec () = Runtime'.Spec.( basic_opt ((1, "java_package", "javaPackage"), string) ^:: basic_opt ((8, "java_outer_classname", "javaOuterClassname"), string) ^:: basic ((9, "optimize_for", "optimizeFor"), (enum (module OptimizeMode)), (OptimizeMode.SPEED)) ^:: basic ((10, "java_multiple_files", "javaMultipleFiles"), bool, (false)) ^:: basic_opt ((11, "go_package", "goPackage"), string) ^:: basic ((16, "cc_generic_services", "ccGenericServices"), bool, (false)) ^:: basic ((17, "java_generic_services", "javaGenericServices"), bool, (false)) ^:: basic ((18, "py_generic_services", "pyGenericServices"), bool, (false)) ^:: basic_opt ((20, "java_generate_equals_and_hash", "javaGenerateEqualsAndHash"), bool) ^:: basic ((23, "deprecated", "deprecated"), bool, (false)) ^:: basic ((27, "java_string_check_utf8", "javaStringCheckUtf8"), bool, (false)) ^:: basic ((31, "cc_enable_arenas", "ccEnableArenas"), bool, (true)) ^:: basic_opt ((36, "objc_class_prefix", "objcClassPrefix"), string) ^:: basic_opt ((37, "csharp_namespace", "csharpNamespace"), string) ^:: basic_opt ((39, "swift_prefix", "swiftPrefix"), string) ^:: basic_opt ((40, "php_class_prefix", "phpClassPrefix"), string) ^:: basic_opt ((41, "php_namespace", "phpNamespace"), string) ^:: basic ((42, "php_generic_services", "phpGenericServices"), bool, (false)) ^:: basic_opt ((44, "php_metadata_namespace", "phpMetadataNamespace"), string) ^:: basic_opt ((45, "ruby_package", "rubyPackage"), string) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
@@ -4726,17 +6492,79 @@ end = struct
     and MessageOptions : sig
       type t = {
         message_set_wire_format:bool;
+        (**
+{%html:
+<p>Set true to use the old proto1 MessageSet wire format for extensions.
+This is provided for backwards-compatibility with the MessageSet wire
+format.  You should not use this for any other reason:  It's less
+efficient, has fewer features, and is more complicated.</p>
+<p>The message must be defined exactly as follows:</p>
+<pre><code> message Foo {
+   option message_set_wire_format = true;
+   extensions 4 to max;
+ }
+</code></pre>
+<p>Note that the message cannot have any defined fields; MessageSets only
+have extensions.</p>
+<p>All extensions of your type must be singular messages; e.g. they cannot
+be int32s, enums, or repeated messages.</p>
+<p>Because this is an option, the above two restrictions are not enforced by
+the protocol compiler.</p>
+%}
+        *)
+
         no_standard_descriptor_accessor:bool;
+        (**
+{%html:
+<p>Disables the generation of the standard &quot;descriptor()&quot; accessor, which can
+conflict with a field of the same name.  This is meant to make migration
+from proto1 easier; new code should avoid fields named &quot;descriptor&quot;.</p>
+%}
+        *)
+
         deprecated:bool;
         (**
-          Is this message deprecated?
-          Depending on the target platform, this can emit Deprecated annotations
-          for the message, or it will be completely ignored; in the very least,
-          this is a formalization for deprecating messages.
+{%html:
+<p>Is this message deprecated?
+Depending on the target platform, this can emit Deprecated annotations
+for the message, or it will be completely ignored; in the very least,
+this is a formalization for deprecating messages.</p>
+%}
         *)
 
         map_entry:bool option;
+        (**
+{%html:
+<p>Whether the message is an automatically generated map entry type for the
+maps field.</p>
+<p>For maps fields:</p>
+<pre><code> map&lt;KeyType, ValueType&gt; map_field = 1;
+</code></pre>
+<p>The parsed descriptor looks like:</p>
+<pre><code> message MapFieldEntry {
+     option map_entry = true;
+     optional KeyType key = 1;
+     optional ValueType value = 2;
+ }
+ repeated MapFieldEntry map_field = 1;
+</code></pre>
+<p>Implementations may choose not to generate the map_entry=true message, but
+use a native map in the target language to hold the keys and values.
+The reflection APIs in such implementations still need to work as
+if the field is a repeated message field.</p>
+<p>NOTE: Do not set the option in .proto files. Always use the maps syntax
+instead. The option should only be implicitly set by the proto compiler
+parser.</p>
+%}
+        *)
+
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -4784,12 +6612,12 @@ end = struct
       let merge_map_entry = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((7, "map_entry", "mapEntry"), bool) ) in
       let merge_uninterpreted_option = Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) in
       fun t1 t2 -> {
-      message_set_wire_format = (merge_message_set_wire_format t1.message_set_wire_format t2.message_set_wire_format);
-      no_standard_descriptor_accessor = (merge_no_standard_descriptor_accessor t1.no_standard_descriptor_accessor t2.no_standard_descriptor_accessor);
-      deprecated = (merge_deprecated t1.deprecated t2.deprecated);
-      map_entry = (merge_map_entry t1.map_entry t2.map_entry);
-      uninterpreted_option = (merge_uninterpreted_option t1.uninterpreted_option t2.uninterpreted_option);
-      extensions' = (List.append t1.extensions' t2.extensions');
+      	message_set_wire_format = (merge_message_set_wire_format t1.message_set_wire_format t2.message_set_wire_format);
+      	no_standard_descriptor_accessor = (merge_no_standard_descriptor_accessor t1.no_standard_descriptor_accessor t2.no_standard_descriptor_accessor);
+      	deprecated = (merge_deprecated t1.deprecated t2.deprecated);
+      	map_entry = (merge_map_entry t1.map_entry t2.map_entry);
+      	uninterpreted_option = (merge_uninterpreted_option t1.uninterpreted_option t2.uninterpreted_option);
+      	extensions' = (List.append t1.extensions' t2.extensions');
        }
       let spec () = Runtime'.Spec.( basic ((1, "message_set_wire_format", "messageSetWireFormat"), bool, (false)) ^:: basic ((2, "no_standard_descriptor_accessor", "noStandardDescriptorAccessor"), bool, (false)) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: basic_opt ((7, "map_entry", "mapEntry"), bool) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
@@ -4814,7 +6642,11 @@ end = struct
       module rec CType : sig
         type t =
           | STRING
-          (** Default mode. *)
+          (**
+{%html:
+<p>Default mode.</p>
+%}
+          *)
 
           | CORD
           | STRING_PIECE
@@ -4834,13 +6666,25 @@ end = struct
       and JSType : sig
         type t =
           | JS_NORMAL
-          (** Use the default type. *)
+          (**
+{%html:
+<p>Use the default type.</p>
+%}
+          *)
 
           | JS_STRING
-          (** Use JavaScript strings. *)
+          (**
+{%html:
+<p>Use JavaScript strings.</p>
+%}
+          *)
 
           | JS_NUMBER
-          (** Use JavaScript numbers. *)
+          (**
+{%html:
+<p>Use JavaScript numbers.</p>
+%}
+          *)
 
 
         val name: unit -> string
@@ -4858,86 +6702,105 @@ end = struct
       type t = {
         ctype:CType.t;
         (**
-          The ctype option instructs the C++ code generator to use a different
-          representation of the field than it normally would.  See the specific
-          options below.  This option is not yet implemented in the open source
-          release -- sorry, we'll try to include it in a future version!
+{%html:
+<p>The ctype option instructs the C++ code generator to use a different
+representation of the field than it normally would.  See the specific
+options below.  This option is not yet implemented in the open source
+release -- sorry, we'll try to include it in a future version!</p>
+%}
         *)
 
         packed:bool option;
         (**
-          The packed option can be enabled for repeated primitive fields to enable
-          a more efficient representation on the wire. Rather than repeatedly
-          writing the tag and type for each element, the entire array is encoded as
-          a single length-delimited blob. In proto3, only explicit setting it to
-          false will avoid using packed encoding.
+{%html:
+<p>The packed option can be enabled for repeated primitive fields to enable
+a more efficient representation on the wire. Rather than repeatedly
+writing the tag and type for each element, the entire array is encoded as
+a single length-delimited blob. In proto3, only explicit setting it to
+false will avoid using packed encoding.</p>
+%}
         *)
 
         deprecated:bool;
         (**
-          Clients can define custom options in extensions of this message. See above.
+{%html:
+<p>Clients can define custom options in extensions of this message. See above.</p>
+%}
         *)
 
         lazy':bool;
         (**
-          Should this field be parsed lazily?  Lazy applies only to message-type
-          fields.  It means that when the outer message is initially parsed, the
-          inner message's contents will not be parsed but instead stored in encoded
-          form.  The inner message will actually be parsed when it is first accessed.
-
-          This is only a hint.  Implementations are free to choose whether to use
-          eager or lazy parsing regardless of the value of this option.  However,
-          setting this option true suggests that the protocol author believes that
-          using lazy parsing on this field is worth the additional bookkeeping
-          overhead typically needed to implement it.
-
-          This option does not affect the public interface of any generated code;
-          all method signatures remain the same.  Furthermore, thread-safety of the
-          interface is not affected by this option; const methods remain safe to
-          call from multiple threads concurrently, while non-const methods continue
-          to require exclusive access.
-
-
-          Note that implementations may choose not to check required fields within
-          a lazy sub-message.  That is, calling IsInitialized() on the outer message
-          may return true even if the inner message has missing required fields.
-          This is necessary because otherwise the inner message would have to be
-          parsed in order to perform the check, defeating the purpose of lazy
-          parsing.  An implementation which chooses not to check required fields
-          must be consistent about it.  That is, for any particular sub-message, the
-          implementation must either *always* check its required fields, or *never*
-          check its required fields, regardless of whether or not the message has
-          been parsed.
-
-          As of 2021, lazy does no correctness checks on the byte stream during
-          parsing.  This may lead to crashes if and when an invalid byte stream is
-          finally parsed upon access.
-
-          TODO(b/211906113):  Enable validation on lazy fields.
+{%html:
+<p>Should this field be parsed lazily?  Lazy applies only to message-type
+fields.  It means that when the outer message is initially parsed, the
+inner message's contents will not be parsed but instead stored in encoded
+form.  The inner message will actually be parsed when it is first accessed.</p>
+<p>This is only a hint.  Implementations are free to choose whether to use
+eager or lazy parsing regardless of the value of this option.  However,
+setting this option true suggests that the protocol author believes that
+using lazy parsing on this field is worth the additional bookkeeping
+overhead typically needed to implement it.</p>
+<p>This option does not affect the public interface of any generated code;
+all method signatures remain the same.  Furthermore, thread-safety of the
+interface is not affected by this option; const methods remain safe to
+call from multiple threads concurrently, while non-const methods continue
+to require exclusive access.</p>
+<p>Note that implementations may choose not to check required fields within
+a lazy sub-message.  That is, calling IsInitialized() on the outer message
+may return true even if the inner message has missing required fields.
+This is necessary because otherwise the inner message would have to be
+parsed in order to perform the check, defeating the purpose of lazy
+parsing.  An implementation which chooses not to check required fields
+must be consistent about it.  That is, for any particular sub-message, the
+implementation must either <em>always</em> check its required fields, or <em>never</em>
+check its required fields, regardless of whether or not the message has
+been parsed.</p>
+<p>As of 2021, lazy does no correctness checks on the byte stream during
+parsing.  This may lead to crashes if and when an invalid byte stream is
+finally parsed upon access.</p>
+<p>TODO(b/211906113):  Enable validation on lazy fields.</p>
+%}
         *)
 
         jstype:JSType.t;
         (**
-          The jstype option determines the JavaScript type used for values of the
-          field.  The option is permitted only for 64 bit integral and fixed types
-          (int64, uint64, sint64, fixed64, sfixed64).  A field with jstype JS_STRING
-          is represented as JavaScript string, which avoids loss of precision that
-          can happen when a large value is converted to a floating point JavaScript.
-          Specifying JS_NUMBER for the jstype causes the generated JavaScript code to
-          use the JavaScript "number" type.  The behavior of the default option
-          JS_NORMAL is implementation dependent.
-
-          This option is an enum to permit additional types to be added, e.g.
-          goog.math.Integer.
+{%html:
+<p>The jstype option determines the JavaScript type used for values of the
+field.  The option is permitted only for 64 bit integral and fixed types
+(int64, uint64, sint64, fixed64, sfixed64).  A field with jstype JS_STRING
+is represented as JavaScript string, which avoids loss of precision that
+can happen when a large value is converted to a floating point JavaScript.
+Specifying JS_NUMBER for the jstype causes the generated JavaScript code to
+use the JavaScript &quot;number&quot; type.  The behavior of the default option
+JS_NORMAL is implementation dependent.</p>
+<p>This option is an enum to permit additional types to be added, e.g.
+goog.math.Integer.</p>
+%}
         *)
 
         weak:bool;
         (**
-          For Google-internal migration only. Do not use.
+{%html:
+<p>For Google-internal migration only. Do not use.</p>
+%}
         *)
 
         unverified_lazy:bool;
+        (**
+{%html:
+<p>unverified_lazy does no correctness checks on the byte stream. This should
+only be used where lazy with verification is prohibitive for performance
+reasons.</p>
+%}
+        *)
+
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -4970,7 +6833,11 @@ end = struct
       module rec CType : sig
         type t =
           | STRING
-          (** Default mode. *)
+          (**
+{%html:
+<p>Default mode.</p>
+%}
+          *)
 
           | CORD
           | STRING_PIECE
@@ -4989,7 +6856,11 @@ end = struct
         module This'_ = CType
         type t =
           | STRING
-          (** Default mode. *)
+          (**
+{%html:
+<p>Default mode.</p>
+%}
+          *)
 
           | CORD
           | STRING_PIECE
@@ -5020,13 +6891,25 @@ end = struct
       and JSType : sig
         type t =
           | JS_NORMAL
-          (** Use the default type. *)
+          (**
+{%html:
+<p>Use the default type.</p>
+%}
+          *)
 
           | JS_STRING
-          (** Use JavaScript strings. *)
+          (**
+{%html:
+<p>Use JavaScript strings.</p>
+%}
+          *)
 
           | JS_NUMBER
-          (** Use JavaScript numbers. *)
+          (**
+{%html:
+<p>Use JavaScript numbers.</p>
+%}
+          *)
 
 
         val name: unit -> string
@@ -5043,13 +6926,25 @@ end = struct
         module This'_ = JSType
         type t =
           | JS_NORMAL
-          (** Use the default type. *)
+          (**
+{%html:
+<p>Use the default type.</p>
+%}
+          *)
 
           | JS_STRING
-          (** Use JavaScript strings. *)
+          (**
+{%html:
+<p>Use JavaScript strings.</p>
+%}
+          *)
 
           | JS_NUMBER
-          (** Use JavaScript numbers. *)
+          (**
+{%html:
+<p>Use JavaScript numbers.</p>
+%}
+          *)
 
 
         let name () = ".google.protobuf.FieldOptions.JSType"
@@ -5099,15 +6994,15 @@ end = struct
       let merge_unverified_lazy = Runtime'.Merge.merge Runtime'.Spec.( basic ((15, "unverified_lazy", "unverifiedLazy"), bool, (false)) ) in
       let merge_uninterpreted_option = Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) in
       fun t1 t2 -> {
-      ctype = (merge_ctype t1.ctype t2.ctype);
-      packed = (merge_packed t1.packed t2.packed);
-      deprecated = (merge_deprecated t1.deprecated t2.deprecated);
-      lazy' = (merge_lazy' t1.lazy' t2.lazy');
-      jstype = (merge_jstype t1.jstype t2.jstype);
-      weak = (merge_weak t1.weak t2.weak);
-      unverified_lazy = (merge_unverified_lazy t1.unverified_lazy t2.unverified_lazy);
-      uninterpreted_option = (merge_uninterpreted_option t1.uninterpreted_option t2.uninterpreted_option);
-      extensions' = (List.append t1.extensions' t2.extensions');
+      	ctype = (merge_ctype t1.ctype t2.ctype);
+      	packed = (merge_packed t1.packed t2.packed);
+      	deprecated = (merge_deprecated t1.deprecated t2.deprecated);
+      	lazy' = (merge_lazy' t1.lazy' t2.lazy');
+      	jstype = (merge_jstype t1.jstype t2.jstype);
+      	weak = (merge_weak t1.weak t2.weak);
+      	unverified_lazy = (merge_unverified_lazy t1.unverified_lazy t2.unverified_lazy);
+      	uninterpreted_option = (merge_uninterpreted_option t1.uninterpreted_option t2.uninterpreted_option);
+      	extensions' = (List.append t1.extensions' t2.extensions');
        }
       let spec () = Runtime'.Spec.( basic ((1, "ctype", "ctype"), (enum (module CType)), (CType.STRING)) ^:: basic_opt ((2, "packed", "packed"), bool) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: basic ((5, "lazy", "lazy"), bool, (false)) ^:: basic ((6, "jstype", "jstype"), (enum (module JSType)), (JSType.JS_NORMAL)) ^:: basic ((10, "weak", "weak"), bool, (false)) ^:: basic ((15, "unverified_lazy", "unverifiedLazy"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
@@ -5131,6 +7026,12 @@ end = struct
     and OneofOptions : sig
       type t = {
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -5170,8 +7071,8 @@ end = struct
       let merge =
       let merge_uninterpreted_option = Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) in
       fun t1 t2 -> {
-      uninterpreted_option = (merge_uninterpreted_option t1.uninterpreted_option t2.uninterpreted_option);
-      extensions' = (List.append t1.extensions' t2.extensions');
+      	uninterpreted_option = (merge_uninterpreted_option t1.uninterpreted_option t2.uninterpreted_option);
+      	extensions' = (List.append t1.extensions' t2.extensions');
        }
       let spec () = Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
@@ -5195,15 +7096,30 @@ end = struct
     and EnumOptions : sig
       type t = {
         allow_alias:bool option;
+        (**
+{%html:
+<p>Set this option to true to allow mapping different tag names to the same
+value.</p>
+%}
+        *)
+
         deprecated:bool;
         (**
-          Is this enum deprecated?
-          Depending on the target platform, this can emit Deprecated annotations
-          for the enum, or it will be completely ignored; in the very least, this
-          is a formalization for deprecating enums.
+{%html:
+<p>Is this enum deprecated?
+Depending on the target platform, this can emit Deprecated annotations
+for the enum, or it will be completely ignored; in the very least, this
+is a formalization for deprecating enums.</p>
+%}
         *)
 
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -5247,10 +7163,10 @@ end = struct
       let merge_deprecated = Runtime'.Merge.merge Runtime'.Spec.( basic ((3, "deprecated", "deprecated"), bool, (false)) ) in
       let merge_uninterpreted_option = Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) in
       fun t1 t2 -> {
-      allow_alias = (merge_allow_alias t1.allow_alias t2.allow_alias);
-      deprecated = (merge_deprecated t1.deprecated t2.deprecated);
-      uninterpreted_option = (merge_uninterpreted_option t1.uninterpreted_option t2.uninterpreted_option);
-      extensions' = (List.append t1.extensions' t2.extensions');
+      	allow_alias = (merge_allow_alias t1.allow_alias t2.allow_alias);
+      	deprecated = (merge_deprecated t1.deprecated t2.deprecated);
+      	uninterpreted_option = (merge_uninterpreted_option t1.uninterpreted_option t2.uninterpreted_option);
+      	extensions' = (List.append t1.extensions' t2.extensions');
        }
       let spec () = Runtime'.Spec.( basic_opt ((2, "allow_alias", "allowAlias"), bool) ^:: basic ((3, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
@@ -5275,13 +7191,21 @@ end = struct
       type t = {
         deprecated:bool;
         (**
-          Is this enum value deprecated?
-          Depending on the target platform, this can emit Deprecated annotations
-          for the enum value, or it will be completely ignored; in the very least,
-          this is a formalization for deprecating enum values.
+{%html:
+<p>Is this enum value deprecated?
+Depending on the target platform, this can emit Deprecated annotations
+for the enum value, or it will be completely ignored; in the very least,
+this is a formalization for deprecating enum values.</p>
+%}
         *)
 
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -5323,9 +7247,9 @@ end = struct
       let merge_deprecated = Runtime'.Merge.merge Runtime'.Spec.( basic ((1, "deprecated", "deprecated"), bool, (false)) ) in
       let merge_uninterpreted_option = Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) in
       fun t1 t2 -> {
-      deprecated = (merge_deprecated t1.deprecated t2.deprecated);
-      uninterpreted_option = (merge_uninterpreted_option t1.uninterpreted_option t2.uninterpreted_option);
-      extensions' = (List.append t1.extensions' t2.extensions');
+      	deprecated = (merge_deprecated t1.deprecated t2.deprecated);
+      	uninterpreted_option = (merge_uninterpreted_option t1.uninterpreted_option t2.uninterpreted_option);
+      	extensions' = (List.append t1.extensions' t2.extensions');
        }
       let spec () = Runtime'.Spec.( basic ((1, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
@@ -5350,13 +7274,26 @@ end = struct
       type t = {
         deprecated:bool;
         (**
-          Is this service deprecated?
-          Depending on the target platform, this can emit Deprecated annotations
-          for the service, or it will be completely ignored; in the very least,
-          this is a formalization for deprecating services.
+{%html:
+<p>Is this service deprecated?
+Depending on the target platform, this can emit Deprecated annotations
+for the service, or it will be completely ignored; in the very least,
+this is a formalization for deprecating services.</p>
+<p>Note:  Field numbers 1 through 32 are reserved for Google's internal RPC</p>
+<pre><code> framework.  We apologize for hoarding these numbers to ourselves, but
+ we were already using them long before we decided to release Protocol
+ Buffers.
+</code></pre>
+%}
         *)
 
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -5398,9 +7335,9 @@ end = struct
       let merge_deprecated = Runtime'.Merge.merge Runtime'.Spec.( basic ((33, "deprecated", "deprecated"), bool, (false)) ) in
       let merge_uninterpreted_option = Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) in
       fun t1 t2 -> {
-      deprecated = (merge_deprecated t1.deprecated t2.deprecated);
-      uninterpreted_option = (merge_uninterpreted_option t1.uninterpreted_option t2.uninterpreted_option);
-      extensions' = (List.append t1.extensions' t2.extensions');
+      	deprecated = (merge_deprecated t1.deprecated t2.deprecated);
+      	uninterpreted_option = (merge_uninterpreted_option t1.uninterpreted_option t2.uninterpreted_option);
+      	extensions' = (List.append t1.extensions' t2.extensions');
        }
       let spec () = Runtime'.Spec.( basic ((33, "deprecated", "deprecated"), bool, (false)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
@@ -5424,18 +7361,28 @@ end = struct
     and MethodOptions : sig
 
       (**
-        Is this method side-effect-free (or safe in HTTP parlance), or idempotent,
-        or neither? HTTP based RPC implementation may choose GET verb for safe
-        methods, and PUT verb for idempotent methods instead of the default POST.
+{%html:
+<p>Is this method side-effect-free (or safe in HTTP parlance), or idempotent,
+or neither? HTTP based RPC implementation may choose GET verb for safe
+methods, and PUT verb for idempotent methods instead of the default POST.</p>
+%}
       *)
       module rec IdempotencyLevel : sig
         type t =
           | IDEMPOTENCY_UNKNOWN
           | NO_SIDE_EFFECTS
-          (** implies idempotent *)
+          (**
+{%html:
+<p>implies idempotent</p>
+%}
+          *)
 
           | IDEMPOTENT
-          (** idempotent, but may have side effects *)
+          (**
+{%html:
+<p>idempotent, but may have side effects</p>
+%}
+          *)
 
 
         val name: unit -> string
@@ -5453,14 +7400,27 @@ end = struct
       type t = {
         deprecated:bool;
         (**
-          Is this method deprecated?
-          Depending on the target platform, this can emit Deprecated annotations
-          for the method, or it will be completely ignored; in the very least,
-          this is a formalization for deprecating methods.
+{%html:
+<p>Is this method deprecated?
+Depending on the target platform, this can emit Deprecated annotations
+for the method, or it will be completely ignored; in the very least,
+this is a formalization for deprecating methods.</p>
+<p>Note:  Field numbers 1 through 32 are reserved for Google's internal RPC</p>
+<pre><code> framework.  We apologize for hoarding these numbers to ourselves, but
+ we were already using them long before we decided to release Protocol
+ Buffers.
+</code></pre>
+%}
         *)
 
         idempotency_level:IdempotencyLevel.t;
         uninterpreted_option:UninterpretedOption.t list;
+        (**
+{%html:
+<p>The parser stores options it doesn't recognize here. See above.</p>
+%}
+        *)
+
         extensions':Runtime'.Extensions.t;
       }
       val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
@@ -5494,10 +7454,18 @@ end = struct
         type t =
           | IDEMPOTENCY_UNKNOWN
           | NO_SIDE_EFFECTS
-          (** implies idempotent *)
+          (**
+{%html:
+<p>implies idempotent</p>
+%}
+          *)
 
           | IDEMPOTENT
-          (** idempotent, but may have side effects *)
+          (**
+{%html:
+<p>idempotent, but may have side effects</p>
+%}
+          *)
 
 
         val name: unit -> string
@@ -5515,10 +7483,18 @@ end = struct
         type t =
           | IDEMPOTENCY_UNKNOWN
           | NO_SIDE_EFFECTS
-          (** implies idempotent *)
+          (**
+{%html:
+<p>implies idempotent</p>
+%}
+          *)
 
           | IDEMPOTENT
-          (** idempotent, but may have side effects *)
+          (**
+{%html:
+<p>idempotent, but may have side effects</p>
+%}
+          *)
 
 
         let name () = ".google.protobuf.MethodOptions.IdempotencyLevel"
@@ -5558,10 +7534,10 @@ end = struct
       let merge_idempotency_level = Runtime'.Merge.merge Runtime'.Spec.( basic ((34, "idempotency_level", "idempotencyLevel"), (enum (module IdempotencyLevel)), (IdempotencyLevel.IDEMPOTENCY_UNKNOWN)) ) in
       let merge_uninterpreted_option = Runtime'.Merge.merge Runtime'.Spec.( repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ) in
       fun t1 t2 -> {
-      deprecated = (merge_deprecated t1.deprecated t2.deprecated);
-      idempotency_level = (merge_idempotency_level t1.idempotency_level t2.idempotency_level);
-      uninterpreted_option = (merge_uninterpreted_option t1.uninterpreted_option t2.uninterpreted_option);
-      extensions' = (List.append t1.extensions' t2.extensions');
+      	deprecated = (merge_deprecated t1.deprecated t2.deprecated);
+      	idempotency_level = (merge_idempotency_level t1.idempotency_level t2.idempotency_level);
+      	uninterpreted_option = (merge_uninterpreted_option t1.uninterpreted_option t2.uninterpreted_option);
+      	extensions' = (List.append t1.extensions' t2.extensions');
        }
       let spec () = Runtime'.Spec.( basic ((33, "deprecated", "deprecated"), bool, (false)) ^:: basic ((34, "idempotency_level", "idempotencyLevel"), (enum (module IdempotencyLevel)), (IdempotencyLevel.IDEMPOTENCY_UNKNOWN)) ^:: repeated ((999, "uninterpreted_option", "uninterpretedOption"), (message (module UninterpretedOption)), not_packed) ^:: nil_ext [ (1000, 536870912) ] )
       let to_proto' =
@@ -5585,11 +7561,13 @@ end = struct
     and UninterpretedOption : sig
 
       (**
-        The name of the uninterpreted option.  Each string represents a segment in
-        a dot-separated name.  is_extension is true iff a segment represents an
-        extension (denoted with parentheses in options specs in .proto files).
-        E.g.,\{ \["foo", false\], \["bar.baz", true\], \["moo", false\] \} represents
-        "foo.(bar.baz).moo".
+{%html:
+<p>The name of the uninterpreted option.  Each string represents a segment in
+a dot-separated name.  is_extension is true iff a segment represents an
+extension (denoted with parentheses in options specs in .proto files).
+E.g.,{ [&quot;foo&quot;, false], [&quot;bar.baz&quot;, true], [&quot;moo&quot;, false] } represents
+&quot;foo.(bar.baz).moo&quot;.</p>
+%}
       *)
       module rec NamePart : sig
         type t = {
@@ -5626,6 +7604,13 @@ end = struct
       type t = {
         name:NamePart.t list;
         identifier_value:string option;
+        (**
+{%html:
+<p>The value of the uninterpreted option, in whatever type the tokenizer
+identified it as during parsing. Exactly one of these should be set.</p>
+%}
+        *)
+
         positive_int_value:int option;
         negative_int_value:int option;
         double_value:float option;
@@ -5702,8 +7687,8 @@ end = struct
         let merge_name_part = Runtime'.Merge.merge Runtime'.Spec.( basic_req ((1, "name_part", "namePart"), string) ) in
         let merge_is_extension = Runtime'.Merge.merge Runtime'.Spec.( basic_req ((2, "is_extension", "isExtension"), bool) ) in
         fun t1 t2 -> {
-        name_part = (merge_name_part t1.name_part t2.name_part);
-        is_extension = (merge_is_extension t1.is_extension t2.is_extension);
+        	name_part = (merge_name_part t1.name_part t2.name_part);
+        	is_extension = (merge_is_extension t1.is_extension t2.is_extension);
          }
         let spec () = Runtime'.Spec.( basic_req ((1, "name_part", "namePart"), string) ^:: basic_req ((2, "is_extension", "isExtension"), bool) ^:: nil )
         let to_proto' =
@@ -5745,13 +7730,13 @@ end = struct
       let merge_string_value = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((7, "string_value", "stringValue"), bytes) ) in
       let merge_aggregate_value = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((8, "aggregate_value", "aggregateValue"), string) ) in
       fun t1 t2 -> {
-      name = (merge_name t1.name t2.name);
-      identifier_value = (merge_identifier_value t1.identifier_value t2.identifier_value);
-      positive_int_value = (merge_positive_int_value t1.positive_int_value t2.positive_int_value);
-      negative_int_value = (merge_negative_int_value t1.negative_int_value t2.negative_int_value);
-      double_value = (merge_double_value t1.double_value t2.double_value);
-      string_value = (merge_string_value t1.string_value t2.string_value);
-      aggregate_value = (merge_aggregate_value t1.aggregate_value t2.aggregate_value);
+      	name = (merge_name t1.name t2.name);
+      	identifier_value = (merge_identifier_value t1.identifier_value t2.identifier_value);
+      	positive_int_value = (merge_positive_int_value t1.positive_int_value t2.positive_int_value);
+      	negative_int_value = (merge_negative_int_value t1.negative_int_value t2.negative_int_value);
+      	double_value = (merge_double_value t1.double_value t2.double_value);
+      	string_value = (merge_string_value t1.string_value t2.string_value);
+      	aggregate_value = (merge_aggregate_value t1.aggregate_value t2.aggregate_value);
        }
       let spec () = Runtime'.Spec.( repeated ((2, "name", "name"), (message (module NamePart)), not_packed) ^:: basic_opt ((3, "identifier_value", "identifierValue"), string) ^:: basic_opt ((4, "positive_int_value", "positiveIntValue"), uint64_int) ^:: basic_opt ((5, "negative_int_value", "negativeIntValue"), int64_int) ^:: basic_opt ((6, "double_value", "doubleValue"), double) ^:: basic_opt ((7, "string_value", "stringValue"), bytes) ^:: basic_opt ((8, "aggregate_value", "aggregateValue"), string) ^:: nil )
       let to_proto' =
@@ -5777,52 +7762,94 @@ end = struct
         type t = {
           path:int list;
           (**
-            Identifies which part of the FileDescriptorProto was defined at this
-            location.
-
-            Each element is a field number or an index.  They form a path from
-            the root FileDescriptorProto to the place where the definition occurs.
-            For example, this path:
-            {v
-               [ 4, 3, 2, 7, 1 ]
-            v}
-            refers to:
-            {v
-               file.message_type(3)  // 4, 3
-                   .field(7)         // 2, 7
-                   .name()           // 1
-            v}
-            This is because FileDescriptorProto.message_type has field number 4:
-            {v
-               repeated DescriptorProto message_type = 4;
-            v}
-            and DescriptorProto.field has field number 2:
-            {v
-               repeated FieldDescriptorProto field = 2;
-            v}
-            and FieldDescriptorProto.name has field number 1:
-            {v
-               optional string name = 1;
-            v}
-            Thus, the above path gives the location of a field name.  If we removed
-            the last element:
-            {v
-               [ 4, 3, 2, 7 ]
-            v}
-            this path refers to the whole field declaration (from the beginning
-            of the label to the terminating semicolon).
+{%html:
+<p>Identifies which part of the FileDescriptorProto was defined at this
+location.</p>
+<p>Each element is a field number or an index.  They form a path from
+the root FileDescriptorProto to the place where the definition occurs.
+For example, this path:</p>
+<pre><code> [ 4, 3, 2, 7, 1 ]
+</code></pre>
+<p>refers to:</p>
+<pre><code> file.message_type(3)  // 4, 3
+     .field(7)         // 2, 7
+     .name()           // 1
+</code></pre>
+<p>This is because FileDescriptorProto.message_type has field number 4:</p>
+<pre><code> repeated DescriptorProto message_type = 4;
+</code></pre>
+<p>and DescriptorProto.field has field number 2:</p>
+<pre><code> repeated FieldDescriptorProto field = 2;
+</code></pre>
+<p>and FieldDescriptorProto.name has field number 1:</p>
+<pre><code> optional string name = 1;
+</code></pre>
+<p>Thus, the above path gives the location of a field name.  If we removed
+the last element:</p>
+<pre><code> [ 4, 3, 2, 7 ]
+</code></pre>
+<p>this path refers to the whole field declaration (from the beginning
+of the label to the terminating semicolon).</p>
+%}
           *)
 
           span:int list;
           (**
-            Always has exactly three or four elements: start line, start column,
-            end line (optional, otherwise assumed same as start line), end column.
-            These are packed into a single field for efficiency.  Note that line
-            and column numbers are zero-based -- typically you will want to add
-            1 to each before displaying to a user.
+{%html:
+<p>Always has exactly three or four elements: start line, start column,
+end line (optional, otherwise assumed same as start line), end column.
+These are packed into a single field for efficiency.  Note that line
+and column numbers are zero-based -- typically you will want to add
+1 to each before displaying to a user.</p>
+%}
           *)
 
           leading_comments:string option;
+          (**
+{%html:
+<p>If this SourceCodeInfo represents a complete declaration, these are any
+comments appearing before and after the declaration which appear to be
+attached to the declaration.</p>
+<p>A series of line comments appearing on consecutive lines, with no other
+tokens appearing on those lines, will be treated as a single comment.</p>
+<p>leading_detached_comments will keep paragraphs of comments that appear
+before (but not connected to) the current element. Each paragraph,
+separated by empty lines, will be one comment element in the repeated
+field.</p>
+<p>Only the comment content is provided; comment markers (e.g. //) are
+stripped out.  For block comments, leading whitespace and an asterisk
+will be stripped from the beginning of each line other than the first.
+Newlines are included in the output.</p>
+<p>Examples:</p>
+<pre><code> optional int32 foo = 1;  // Comment attached to foo.
+</code></pre>
+<p>Comment attached to bar.</p>
+<pre><code> optional int32 bar = 2;
+
+ optional string baz = 3;
+</code></pre>
+<p>Comment attached to baz.
+Another line attached to baz.</p>
+<p>Comment attached to moo.</p>
+<p>Another line attached to moo.</p>
+<pre><code> optional double moo = 4;
+</code></pre>
+<p>Detached comment for corge. This is not leading or trailing comments
+to moo or corge because there are blank lines separating it from
+both.</p>
+<p>Detached comment for corge paragraph 2.</p>
+<pre><code> optional string corge = 5;
+ /* Block comment attached
+  * to corge.  Leading asterisks
+  * will be removed. */
+ /* Block comment attached to
+  * grault. */
+ optional int32 grault = 6;
+</code></pre>
+<p>ignored detached comments.</p>
+%}
+          *)
+
           trailing_comments:string option;
           leading_detached_comments:string list;
         }
@@ -5855,54 +7882,59 @@ end = struct
 
       type t = (Location.t list)
       (**
-        A Location identifies a piece of source code in a .proto file which
-        corresponds to a particular definition.  This information is intended
-        to be useful to IDEs, code indexers, documentation generators, and similar
-        tools.
-
-        For example, say we have a file like:
-        {v
-           message Foo {
-             optional string foo = 1;
-           }
-        v}
-        Let's look at just the field definition:
-        {v
-           optional string foo = 1;
-           ^       ^^     ^^  ^  ^^^
-           a       bc     de  f  ghi
-        v}
-        We have the following locations:
-        {v
-           span   path               represents
-           [a,i)  [ 4, 0, 2, 0 ]     The whole field definition.
-           [a,b)  [ 4, 0, 2, 0, 4 ]  The label (optional).
-           [c,d)  [ 4, 0, 2, 0, 5 ]  The type (string).
-           [e,f)  [ 4, 0, 2, 0, 1 ]  The name (foo).
-           [g,h)  [ 4, 0, 2, 0, 3 ]  The number (1).
-        v}
-        Notes:
-        - A location may refer to a repeated field itself (i.e. not to any
-        particular index within it).  This is used whenever a set of elements are
-        logically enclosed in a single code segment.  For example, an entire
-        extend block (possibly containing multiple extension definitions) will
-        have an outer location whose path refers to the "extensions" repeated
-        field without an index.
-        - Multiple locations may have the same path.  This happens when a single
-        logical declaration is spread out across multiple places.  The most
-        obvious example is the "extend" block again -- there may be multiple
-        extend blocks in the same scope, each of which will have the same path.
-        - A location's span is not always a subset of its parent's span.  For
-        example, the "extendee" of an extension declaration appears at the
-        beginning of the "extend" block and is shared by all extensions within
-        the block.
-        - Just because a location's span is a subset of some other location's span
-        does not mean that it is a descendant.  For example, a "group" defines
-        both a type and a field in a single declaration.  Thus, the locations
-        corresponding to the type and field and their components will overlap.
-        - Code which tries to interpret locations should probably be designed to
-        ignore those that it doesn't understand, as more types of locations could
-        be recorded in the future.
+{%html:
+<p>A Location identifies a piece of source code in a .proto file which
+corresponds to a particular definition.  This information is intended
+to be useful to IDEs, code indexers, documentation generators, and similar
+tools.</p>
+<p>For example, say we have a file like:</p>
+<pre><code> message Foo {
+   optional string foo = 1;
+ }
+</code></pre>
+<p>Let's look at just the field definition:</p>
+<pre><code> optional string foo = 1;
+ ^       ^^     ^^  ^  ^^^
+ a       bc     de  f  ghi
+</code></pre>
+<p>We have the following locations:</p>
+<pre><code> span   path               represents
+ [a,i)  [ 4, 0, 2, 0 ]     The whole field definition.
+ [a,b)  [ 4, 0, 2, 0, 4 ]  The label (optional).
+ [c,d)  [ 4, 0, 2, 0, 5 ]  The type (string).
+ [e,f)  [ 4, 0, 2, 0, 1 ]  The name (foo).
+ [g,h)  [ 4, 0, 2, 0, 3 ]  The number (1).
+</code></pre>
+<p>Notes:</p>
+<ul>
+<li>A location may refer to a repeated field itself (i.e. not to any
+particular index within it).  This is used whenever a set of elements are
+logically enclosed in a single code segment.  For example, an entire
+extend block (possibly containing multiple extension definitions) will
+have an outer location whose path refers to the &quot;extensions&quot; repeated
+field without an index.
+</li>
+<li>Multiple locations may have the same path.  This happens when a single
+logical declaration is spread out across multiple places.  The most
+obvious example is the &quot;extend&quot; block again -- there may be multiple
+extend blocks in the same scope, each of which will have the same path.
+</li>
+<li>A location's span is not always a subset of its parent's span.  For
+example, the &quot;extendee&quot; of an extension declaration appears at the
+beginning of the &quot;extend&quot; block and is shared by all extensions within
+the block.
+</li>
+<li>Just because a location's span is a subset of some other location's span
+does not mean that it is a descendant.  For example, a &quot;group&quot; defines
+both a type and a field in a single declaration.  Thus, the locations
+corresponding to the type and field and their components will overlap.
+</li>
+<li>Code which tries to interpret locations should probably be designed to
+ignore those that it doesn't understand, as more types of locations could
+be recorded in the future.
+</li>
+</ul>
+%}
       *)
 
       val make: ?location:Location.t list -> unit -> t
@@ -5936,52 +7968,94 @@ end = struct
         type t = {
           path:int list;
           (**
-            Identifies which part of the FileDescriptorProto was defined at this
-            location.
-
-            Each element is a field number or an index.  They form a path from
-            the root FileDescriptorProto to the place where the definition occurs.
-            For example, this path:
-            {v
-               [ 4, 3, 2, 7, 1 ]
-            v}
-            refers to:
-            {v
-               file.message_type(3)  // 4, 3
-                   .field(7)         // 2, 7
-                   .name()           // 1
-            v}
-            This is because FileDescriptorProto.message_type has field number 4:
-            {v
-               repeated DescriptorProto message_type = 4;
-            v}
-            and DescriptorProto.field has field number 2:
-            {v
-               repeated FieldDescriptorProto field = 2;
-            v}
-            and FieldDescriptorProto.name has field number 1:
-            {v
-               optional string name = 1;
-            v}
-            Thus, the above path gives the location of a field name.  If we removed
-            the last element:
-            {v
-               [ 4, 3, 2, 7 ]
-            v}
-            this path refers to the whole field declaration (from the beginning
-            of the label to the terminating semicolon).
+{%html:
+<p>Identifies which part of the FileDescriptorProto was defined at this
+location.</p>
+<p>Each element is a field number or an index.  They form a path from
+the root FileDescriptorProto to the place where the definition occurs.
+For example, this path:</p>
+<pre><code> [ 4, 3, 2, 7, 1 ]
+</code></pre>
+<p>refers to:</p>
+<pre><code> file.message_type(3)  // 4, 3
+     .field(7)         // 2, 7
+     .name()           // 1
+</code></pre>
+<p>This is because FileDescriptorProto.message_type has field number 4:</p>
+<pre><code> repeated DescriptorProto message_type = 4;
+</code></pre>
+<p>and DescriptorProto.field has field number 2:</p>
+<pre><code> repeated FieldDescriptorProto field = 2;
+</code></pre>
+<p>and FieldDescriptorProto.name has field number 1:</p>
+<pre><code> optional string name = 1;
+</code></pre>
+<p>Thus, the above path gives the location of a field name.  If we removed
+the last element:</p>
+<pre><code> [ 4, 3, 2, 7 ]
+</code></pre>
+<p>this path refers to the whole field declaration (from the beginning
+of the label to the terminating semicolon).</p>
+%}
           *)
 
           span:int list;
           (**
-            Always has exactly three or four elements: start line, start column,
-            end line (optional, otherwise assumed same as start line), end column.
-            These are packed into a single field for efficiency.  Note that line
-            and column numbers are zero-based -- typically you will want to add
-            1 to each before displaying to a user.
+{%html:
+<p>Always has exactly three or four elements: start line, start column,
+end line (optional, otherwise assumed same as start line), end column.
+These are packed into a single field for efficiency.  Note that line
+and column numbers are zero-based -- typically you will want to add
+1 to each before displaying to a user.</p>
+%}
           *)
 
           leading_comments:string option;
+          (**
+{%html:
+<p>If this SourceCodeInfo represents a complete declaration, these are any
+comments appearing before and after the declaration which appear to be
+attached to the declaration.</p>
+<p>A series of line comments appearing on consecutive lines, with no other
+tokens appearing on those lines, will be treated as a single comment.</p>
+<p>leading_detached_comments will keep paragraphs of comments that appear
+before (but not connected to) the current element. Each paragraph,
+separated by empty lines, will be one comment element in the repeated
+field.</p>
+<p>Only the comment content is provided; comment markers (e.g. //) are
+stripped out.  For block comments, leading whitespace and an asterisk
+will be stripped from the beginning of each line other than the first.
+Newlines are included in the output.</p>
+<p>Examples:</p>
+<pre><code> optional int32 foo = 1;  // Comment attached to foo.
+</code></pre>
+<p>Comment attached to bar.</p>
+<pre><code> optional int32 bar = 2;
+
+ optional string baz = 3;
+</code></pre>
+<p>Comment attached to baz.
+Another line attached to baz.</p>
+<p>Comment attached to moo.</p>
+<p>Another line attached to moo.</p>
+<pre><code> optional double moo = 4;
+</code></pre>
+<p>Detached comment for corge. This is not leading or trailing comments
+to moo or corge because there are blank lines separating it from
+both.</p>
+<p>Detached comment for corge paragraph 2.</p>
+<pre><code> optional string corge = 5;
+ /* Block comment attached
+  * to corge.  Leading asterisks
+  * will be removed. */
+ /* Block comment attached to
+  * grault. */
+ optional int32 grault = 6;
+</code></pre>
+<p>ignored detached comments.</p>
+%}
+          *)
+
           trailing_comments:string option;
           leading_detached_comments:string list;
         }
@@ -6029,11 +8103,11 @@ end = struct
         let merge_trailing_comments = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((4, "trailing_comments", "trailingComments"), string) ) in
         let merge_leading_detached_comments = Runtime'.Merge.merge Runtime'.Spec.( repeated ((6, "leading_detached_comments", "leadingDetachedComments"), string, not_packed) ) in
         fun t1 t2 -> {
-        path = (merge_path t1.path t2.path);
-        span = (merge_span t1.span t2.span);
-        leading_comments = (merge_leading_comments t1.leading_comments t2.leading_comments);
-        trailing_comments = (merge_trailing_comments t1.trailing_comments t2.trailing_comments);
-        leading_detached_comments = (merge_leading_detached_comments t1.leading_detached_comments t2.leading_detached_comments);
+        	path = (merge_path t1.path t2.path);
+        	span = (merge_span t1.span t2.span);
+        	leading_comments = (merge_leading_comments t1.leading_comments t2.leading_comments);
+        	trailing_comments = (merge_trailing_comments t1.trailing_comments t2.trailing_comments);
+        	leading_detached_comments = (merge_leading_detached_comments t1.leading_detached_comments t2.leading_detached_comments);
          }
         let spec () = Runtime'.Spec.( repeated ((1, "path", "path"), int32_int, packed) ^:: repeated ((2, "span", "span"), int32_int, packed) ^:: basic_opt ((3, "leading_comments", "leadingComments"), string) ^:: basic_opt ((4, "trailing_comments", "trailingComments"), string) ^:: repeated ((6, "leading_detached_comments", "leadingDetachedComments"), string, not_packed) ^:: nil )
         let to_proto' =
@@ -6085,22 +8159,34 @@ end = struct
         type t = {
           path:int list;
           (**
-            Identifies the element in the original source .proto file. This field
-            is formatted the same as SourceCodeInfo.Location.path.
+{%html:
+<p>Identifies the element in the original source .proto file. This field
+is formatted the same as SourceCodeInfo.Location.path.</p>
+%}
           *)
 
           source_file:string option;
+          (**
+{%html:
+<p>Identifies the filesystem path to the original source .proto.</p>
+%}
+          *)
+
           begin':int option;
           (**
-            Identifies the starting offset in bytes in the generated code
-            that relates to the identified object.
+{%html:
+<p>Identifies the starting offset in bytes in the generated code
+that relates to the identified object.</p>
+%}
           *)
 
           end':int option;
           (**
-            Identifies the ending offset in bytes in the generated code that
-            relates to the identified offset. The end offset should be one past
-            the last relevant byte (so the length of the text = end - begin).
+{%html:
+<p>Identifies the ending offset in bytes in the generated code that
+relates to the identified offset. The end offset should be one past
+the last relevant byte (so the length of the text = end - begin).</p>
+%}
           *)
 
         }
@@ -6133,8 +8219,10 @@ end = struct
 
       type t = (Annotation.t list)
       (**
-        An Annotation connects some span of text in generated code to an element
-        of its generating .proto file.
+{%html:
+<p>An Annotation connects some span of text in generated code to an element
+of its generating .proto file.</p>
+%}
       *)
 
       val make: ?annotation:Annotation.t list -> unit -> t
@@ -6168,22 +8256,34 @@ end = struct
         type t = {
           path:int list;
           (**
-            Identifies the element in the original source .proto file. This field
-            is formatted the same as SourceCodeInfo.Location.path.
+{%html:
+<p>Identifies the element in the original source .proto file. This field
+is formatted the same as SourceCodeInfo.Location.path.</p>
+%}
           *)
 
           source_file:string option;
+          (**
+{%html:
+<p>Identifies the filesystem path to the original source .proto.</p>
+%}
+          *)
+
           begin':int option;
           (**
-            Identifies the starting offset in bytes in the generated code
-            that relates to the identified object.
+{%html:
+<p>Identifies the starting offset in bytes in the generated code
+that relates to the identified object.</p>
+%}
           *)
 
           end':int option;
           (**
-            Identifies the ending offset in bytes in the generated code that
-            relates to the identified offset. The end offset should be one past
-            the last relevant byte (so the length of the text = end - begin).
+{%html:
+<p>Identifies the ending offset in bytes in the generated code that
+relates to the identified offset. The end offset should be one past
+the last relevant byte (so the length of the text = end - begin).</p>
+%}
           *)
 
         }
@@ -6229,10 +8329,10 @@ end = struct
         let merge_begin' = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((3, "begin", "begin"), int32_int) ) in
         let merge_end' = Runtime'.Merge.merge Runtime'.Spec.( basic_opt ((4, "end", "end"), int32_int) ) in
         fun t1 t2 -> {
-        path = (merge_path t1.path t2.path);
-        source_file = (merge_source_file t1.source_file t2.source_file);
-        begin' = (merge_begin' t1.begin' t2.begin');
-        end' = (merge_end' t1.end' t2.end');
+        	path = (merge_path t1.path t2.path);
+        	source_file = (merge_source_file t1.source_file t2.source_file);
+        	begin' = (merge_begin' t1.begin' t2.begin');
+        	end' = (merge_end' t1.end' t2.end');
          }
         let spec () = Runtime'.Spec.( repeated ((1, "path", "path"), int32_int, packed) ^:: basic_opt ((2, "source_file", "sourceFile"), string) ^:: basic_opt ((3, "begin", "begin"), int32_int) ^:: basic_opt ((4, "end", "end"), int32_int) ^:: nil )
         let to_proto' =
@@ -6281,3 +8381,4 @@ end = struct
 
   end
 end
+

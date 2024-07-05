@@ -14,7 +14,7 @@ type module' = {
   signature : Code.t;
   implementation : Code.t;
   deprecated : bool;
-  comments : string list;
+  comments : Comment_db.comment option;
 }
 
 let emit_enum_type ~scope ~params ~type_db ~comment_db
@@ -249,22 +249,21 @@ let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
       if sig_type = `Signature then begin
         match types with
         | [Types.{ comments = (comments, arg_comments); _ }] ->
-          Code.emit_field_doc code ~position:`Trailing ~comments:comments arg_comments;
+          Code.emit_field_doc code ~position:`Trailing ?comments:comments arg_comments;
         | types ->
           let field_comments =
-            List.map ~f:(fun Types.{ name; comments = comments; _ } -> (name, comments)) types
+            List.map ~f:(fun Types.{ name; comments; _ } -> (name, comments)) types
           in
           let header =
             List.map ~f:fst field_comments
             |> String.concat ~sep:", "
             |> sprintf "[(%s)]"
           in
-          let param_comments =
-            List.map ~f:(function
-              | (name, (comments, [])) ->
-                [(name, comments)]
-              | (name, (comments, sub_comments)) ->
-                (name, comments) :: List.filter ~f:(fun (_, cs) -> not (List.is_empty cs)) sub_comments
+          let param_comments : (string * Comment_db.comment) list =
+            List.map ~f:(fun (name, (comments, sub_comments)) ->
+              match comments with
+              | Some comments -> (name, comments) :: sub_comments
+              | None -> sub_comments
             ) field_comments
             |> List.flatten
           in
@@ -277,7 +276,7 @@ let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
         let field = sprintf "%s:%s" (Type_db.get_message_field type_db ~proto_path name) (Types.string_of_type type') in
         Code.emit code `None "%s;" (Code.append_deprecaton_if ~deprecated:(deprecated && sig_type = `Signature) `Attribute field);
         if sig_type = `Signature then begin
-          Code.emit_field_doc code ~position:`Trailing ~comments sub_comments
+          Code.emit_field_doc code ~position:`Trailing ?comments sub_comments
         end
       ) types;
       Code.emit code `End "} %s" annot;

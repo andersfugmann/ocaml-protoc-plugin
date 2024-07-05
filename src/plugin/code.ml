@@ -2,102 +2,67 @@ open !StdLabels
 open !MoreLabels
 open !Utils
 
+type indent = [ `Begin | `End | `EndBegin | `None | `Raw ]
+
 type t = {
-  mutable indent : string;
-  mutable code : string list;
+  mutable indent : int;
+  mutable code : (indent * string) list;
 }
 
-let init () = {indent = ""; code = []}
-let incr t = t.indent <- "  " ^ t.indent
+let init () = {indent = 0; code = []}
+let incr t = t.indent <- t.indent + 1
 let decr t =
-  match String.length t.indent >= 2 with
-  | true ->
-    t.indent <- String.sub ~pos:0 ~len:(String.length t.indent - 2) t.indent
-  | false -> failwith "Cannot decr indentation level at this point"
-
-(** Merge groups when the list groups ends with a line that starts with a '-' *)
-let rec merge_list_groups = function
-  | (false, l1) :: (true, l2) :: xs ->
-    begin match List.rev l1 with
-    | s :: _ when String.starts_with_regex ~regex:"[ ]*- " s ->
-      (false, l1 @ l2) :: merge_list_groups xs
-    | _ -> (false, l1) :: (true, l2) :: merge_list_groups xs
-    end
-  | x :: xs ->
-    x :: merge_list_groups xs
-  | [] -> []
-
-let remove_trailing_empty_lines lines =
-  lines
-  |> List.rev
-  |> List.drop_while ~f:((=) "")
-  |> List.rev
-
-let escape_comment s =
-  String.to_seq s
-  |> Seq.map (function
-    | '{' | '}' | '[' | ']' | '@' | '\\' as ch -> Printf.sprintf "\\%c" ch
-    | ch -> Printf.sprintf "%c" ch
-  )
-  |> List.of_seq
-  |> String.concat ~sep:""
-
-
-let map_comments comments =
-  comments
-  |> String.concat ~sep:"\n\n"
-  |> String.split_on_char ~sep:'\n'
-  |> List.map ~f:(String.trim_end ~chars:" \n\t")
-  |> List.group ~f:(fun s -> String.starts_with ~prefix:"  " s && not (String.starts_with_regex ~regex:"[ ]*- " s))
-  |> merge_list_groups
-  |> List.map ~f:(function
-    | (false, lines) ->
-      lines
-      |> List.map ~f:String.trim
-      |> remove_trailing_empty_lines
-      |> List.map ~f:escape_comment
-    | (true, lines) ->
-      let lines =
-        lines
-        |> List.map ~f:(String.replace ~substring:"v}" ~f:(fun _ -> "v\\}"))
-        |> remove_trailing_empty_lines
-      in
-      "{v" :: lines @ ["v}"]
-  )
-  |> List.flatten
-  |> List.rev
-  |> List.drop_while ~f:(fun x -> x = "")
-  |> List.rev
+  match t.indent = 0 with
+  | true -> failwith "Cannot decr indentation level at this point"
+  | false -> t.indent <- t.indent - 1
 
 let emit t indent fmt =
-  let prepend s =
-    String.split_on_char ~sep:'\n' s
-    |> List.iter ~f:(fun line ->
-      (* Replace tabs with indent *)
-      let line =
-        "" :: String.split_on_char ~sep:'\t' line
-        |> String.concat ~sep:t.indent
-      in
-      t.code <- (String.trim_end ~chars:" " line) :: t.code);
-  in
+  (* Verify indentation level *)
+  (match indent with
+   | `Begin -> incr t
+   | `End -> decr t
+   | `EndBegin -> decr t; incr t
+   | `None -> ()
+   | `Raw -> ()
+  );
+
   let emit s =
-    match indent with
-    | `Begin ->
-      prepend s;
-      incr t
-    | `None ->
-      prepend s
-    | `End ->
-      decr t;
-      prepend s
-    | `EndBegin ->
-      decr t;
-      prepend s;
-      incr t
+    String.split_on_char ~sep:'\n' s
+    |> List.iter ~f:(fun s -> t.code <- (indent, String.trim_end ~chars:" \t" s) :: t.code)
   in
   Printf.ksprintf emit fmt
 
-let append t code = List.iter ~f:(emit t `None "%s") (code.code |> List.rev)
+let contents t =
+  let append buffer indent s =
+    (match String.length s > 0 with
+    | true ->
+      List.iter ~f:(Buffer.add_string buffer) indent;
+      Buffer.add_string buffer s
+    | false -> ()
+    );
+    Buffer.add_string buffer "\n";
+    buffer
+  in
+
+  let rec print buffer indent = function
+    | (`None, s) :: lines -> print (append buffer indent s) indent lines
+    | (`Begin, s) :: lines -> print (append buffer indent s) ("  " :: indent) lines
+    | (`EndBegin, s) :: lines ->
+      let indent' = List.tl indent in
+      print (append buffer indent' s) indent lines
+    | (`End, s) :: lines ->
+      let indent = List.tl indent in
+      print (append buffer indent s) indent lines
+    | (`Raw, s) :: lines ->
+      print (append buffer [] s) indent lines
+    | [] ->
+      Buffer.contents buffer
+  in
+  print (Buffer.create 256) [] (List.rev t.code)
+
+let append t code =
+  (* Same as rev_append no??? *)
+  List.iter ~f:(fun l -> t.code <- l :: t.code) (code.code |> List.rev)
 
 let append_deprecaton_if ~deprecated level str =
   match deprecated with
@@ -110,68 +75,43 @@ let append_deprecaton_if ~deprecated level str =
     in
     Printf.sprintf "%s[%socaml.alert protobuf \"Marked as deprecated in the .proto file\"]" str level
 
-let append_comments ~comments str =
-  let comment_str =
-    map_comments comments
-    |> String.concat ~sep:"\n"
-    |> String.trim
-  in
-  match List.is_empty comments with
-  | true -> str
-  | false ->
-    Printf.sprintf "%s(** %s *)" str comment_str
-
 let emit_deprecation ?(deprecated=true) t level =
   if deprecated then
     emit t `None "%s" (append_deprecaton_if ~deprecated:true level "")
 
 let emit_comment ~(position:[`Leading | `Trailing]) t = function
-  | [] -> ()
-  | comments ->
+  | None -> ()
+  | Some comments ->
     if position = `Leading then emit t `None "";
-    let comments = map_comments comments in
-    let () =
-      match comments with
-      | [ comment ] -> emit t `None "(** %s *)" (String.trim comment)
-      | comments ->
-        emit t `Begin "(**";
-        List.iter ~f:(emit t `None "%s") comments;
-        emit t `End "*)";
-    in
+    let comment_string = Comment_db.to_ocaml_doc comments in
+    emit t `Begin "(**";
+    emit t `Raw "%s" comment_string;
+    emit t `End "*)";
     if position = `Trailing then emit t `None "";
     ()
-
-let contents t =
-  List.map ~f:(Printf.sprintf "%s") (List.rev t.code)
-  |> String.concat ~sep:"\n"
 
 (** Emit comment for muliple fields / constructors *)
 let emit_field_doc t
       ~(position:[`Leading | `Trailing])
       ?(format:('a -> 'b, unit, string, unit) format4="[%s]")
       ?(header="")
-      ?(comments=[])
+      ?(comments)
       param_comments =
 
   (* Remove parameters with no comments *)
-  let param_comments =
-    List.filter ~f:(fun (_, comments) -> not (List.is_empty comments)) param_comments
-  in
+  let has_header = String.length header > 0 in
 
-  let comments = map_comments comments in
-  match List.exists ~f:(fun s -> String.length s > 0) comments, String.length header > 0, not (List.is_empty param_comments) with
-  | false, _, false -> ()
-  | has_comments, has_header, _ ->
+  match comments, List.is_empty param_comments with
+  | None, true -> ()
+  | _  ->
     if position = `Leading then emit t `None "";
     emit t `Begin "(**";
-
-    if has_comments then List.iter ~f:(emit t `None "%s") comments;
+    Option.iter ~f:(fun comments -> emit t `Raw "%s" (Comment_db.to_ocaml_doc comments)) comments;
     if has_header then emit t `None "%s" header;
     List.iter ~f:(fun (param, comments) ->
-      let comments = map_comments comments in
       emit t `None "";
       emit t `Begin format param;
-      List.iter ~f:(emit t `None "%s") comments;
+      emit t `Raw "%s" (Comment_db.to_ocaml_doc comments);
       emit t `End "";
     ) param_comments;
 

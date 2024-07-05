@@ -5,6 +5,8 @@
 - Add flag 'singleton\_oneof\_as\_option' to map single field
   onofs to option type (default on). Set to 'false' to keep old
   behaviour.
+- Improve copying of comments from .proto files into ocaml code using
+  omd to parse markdown
 
 
 ## 6.1.0: 2024-04-25
