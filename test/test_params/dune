@@ -2,7 +2,7 @@
  (name prefix_output_with_package)
  (inline_tests)
  (libraries ocaml_protoc_plugin google_types_prefixed)
- (preprocess (pps ppx_expect))
+ (preprocess (pps ppx_expect_nobase))
 )
 
 (rule

@@ -4,6 +4,6 @@
  (synopsis "Serialization and deserialization of protobuf types")
  (inline_tests)
  (libraries base64 ptime)
- (preprocess (pps ppx_expect))
+ (preprocess (pps ppx_expect_nobase ppx_inline_test_nobase))
  (instrumentation (backend bisect_ppx))
 )

@@ -2,7 +2,7 @@
  (name        google_types_prefixed)
  (libraries   ocaml_protoc_plugin)
  (preprocess
-  (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
+  (pps ppx_expect_nobase ppx_deriving.show ppx_deriving.eq))
  (synopsis "Google well known types with prefix_output_with_package=true")
 )
 
