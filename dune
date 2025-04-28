@@ -2,3 +2,17 @@
  (name default)
  (deps (alias_rec install))
 )
+
+;; Select ppx use based on availability of ppx_expect_nobase or ppx_expect.
+;; This library prefers use of nobase if available.
+;; See https://github.com/andersfugmann/ocaml-protoc-plugin/issues/44
+(library
+ (name ppx_expect_option)
+ (modules)
+ (libraries
+    (select ppx_expect from
+     (ppx_expect_nobase -> ppx_expect.unused)
+     (ppx_expect -> ppx_expect.unused)
+ ))
+ (kind ppx_rewriter)
+)

@@ -31,7 +31,7 @@
     (glob_files *.proto)
   ))
  (modules :standard \ proto3_optional_test_opt)
- (preprocess (pps ppx_expect_nobase ppx_deriving.show ppx_deriving.eq))
+ (preprocess (pps ppx_expect_option ppx_deriving.show ppx_deriving.eq))
  (foreign_stubs
   (language cxx)
   (names protobuf2json)
