@@ -6,10 +6,9 @@
 (rule
  (targets verify.ml)
  (deps
-  (:plugin ../src/plugin/protoc_gen_ocaml.exe)
   (:proto verify.proto))
  (action
-  (run protoc "--plugin=protoc-gen-ocaml=%{plugin}" "--ocaml_out=." %{proto})))
+  (run protoc "--plugin=protoc-gen-ocaml=%{bin:protoc-gen-ocaml}" "--ocaml_out=." %{proto})))
 
 (executable
  (name verify_evaluation)

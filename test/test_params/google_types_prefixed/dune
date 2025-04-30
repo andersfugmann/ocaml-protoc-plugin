@@ -19,22 +19,20 @@
    google_protobuf_timestamp.ml
    google_protobuf_type.ml
    google_protobuf_wrappers.ml)
-  (deps
-  (:plugin ../../../src/plugin/protoc_gen_ocaml.exe))
-  (action
-    (run protoc -I %{read-lines:../../google_include} -I .
-         "--plugin=protoc-gen-ocaml=%{plugin}"
-         "--ocaml_out=singleton_record=true;prefix_output_with_package=true;singleton_oneof_as_option=false:."
+ (action
+  (run protoc -I %{read-lines:../../google_include} -I .
+       "--plugin=protoc-gen-ocaml=%{bin:protoc-gen-ocaml}"
+       "--ocaml_out=singleton_record=true;prefix_output_with_package=true;singleton_oneof_as_option=false:."
 
-    %{read-lines:../../google_include}/google/protobuf/any.proto
-    %{read-lines:../../google_include}/google/protobuf/api.proto
-    %{read-lines:../../google_include}/google/protobuf/descriptor.proto
-    %{read-lines:../../google_include}/google/protobuf/duration.proto
-    %{read-lines:../../google_include}/google/protobuf/empty.proto
-    %{read-lines:../../google_include}/google/protobuf/field_mask.proto
-    %{read-lines:../../google_include}/google/protobuf/source_context.proto
-    %{read-lines:../../google_include}/google/protobuf/struct.proto
-    %{read-lines:../../google_include}/google/protobuf/timestamp.proto
-    %{read-lines:../../google_include}/google/protobuf/type.proto
-    %{read-lines:../../google_include}/google/protobuf/wrappers.proto
+       %{read-lines:../../google_include}/google/protobuf/any.proto
+       %{read-lines:../../google_include}/google/protobuf/api.proto
+       %{read-lines:../../google_include}/google/protobuf/descriptor.proto
+       %{read-lines:../../google_include}/google/protobuf/duration.proto
+       %{read-lines:../../google_include}/google/protobuf/empty.proto
+       %{read-lines:../../google_include}/google/protobuf/field_mask.proto
+       %{read-lines:../../google_include}/google/protobuf/source_context.proto
+       %{read-lines:../../google_include}/google/protobuf/struct.proto
+       %{read-lines:../../google_include}/google/protobuf/timestamp.proto
+       %{read-lines:../../google_include}/google/protobuf/type.proto
+       %{read-lines:../../google_include}/google/protobuf/wrappers.proto
 )))

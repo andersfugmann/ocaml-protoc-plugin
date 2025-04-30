@@ -11,7 +11,8 @@
 (rule
  (targets extensions.ml)
  (deps
-  (:proto extensions.proto) (package ocaml-protoc-plugin))
+  (:proto extensions.proto)
+   %{bin:protoc-gen-ocaml})
  (action
   (run protoc -I %{read-lines:google_include} -I . "--ocaml_out=:." %{proto})))
 

@@ -11,7 +11,8 @@
 (rule
  (targets echo.ml)
  (deps
-  (:proto echo.proto) (package ocaml-protoc-plugin))
+  (:proto echo.proto)
+   %{bin:protoc-gen-ocaml})
  (action
   (run protoc -I %{read-lines:google_include} -I . "--ocaml_out=open=Google_types:." %{proto})))
 (rule

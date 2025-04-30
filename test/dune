@@ -52,7 +52,6 @@
    options.ml name_clash2.ml empty.ml service_rpc_clash.ml service_empty_package.ml
    deprecated.ml json_encoding.ml comments.ml)
  (deps
-  (:plugin ../src/plugin/protoc_gen_ocaml.exe)
   (:proto
     basic.proto primitive_types.proto int_types.proto repeated.proto enum.proto empty_message.proto
     message.proto oneof.proto merge.proto map.proto package.proto large.proto
@@ -64,7 +63,7 @@
  )
  (action
   (run protoc -I %{read-lines:google_include} -I .
-       "--plugin=protoc-gen-ocaml=%{plugin}"
+       "--plugin=protoc-gen-ocaml=%{bin:protoc-gen-ocaml}"
        "--ocaml_out=open=Google_types_pp;open=Test_runtime;annot=[@@deriving show { with_path = false }, eq]:." %{proto})))
 
 (rule
@@ -77,7 +76,6 @@
    include_included3_dash.ml
  )
  (deps
-  (:plugin ../src/plugin/protoc_gen_ocaml.exe)
   (:proto
     basic.proto
     include.proto
@@ -89,7 +87,7 @@
  )
  (action
   (run protoc -I %{read-lines:google_include} -I .
-       "--plugin=protoc-gen-ocaml=%{plugin}"
+       "--plugin=protoc-gen-ocaml=%{bin:protoc-gen-ocaml}"
        "--ocaml_out=open=Google_types_pp;open=Test_runtime;prefix_output_with_package=true;annot=[@@deriving show { with_path = false }, eq]:." %{proto})))
 
 (rule
@@ -98,7 +96,6 @@
    test_include_b_message.ml
  )
  (deps
-  (:plugin ../src/plugin/protoc_gen_ocaml.exe)
   (:proto
     test_include_a/message.proto
     test_include_b/message.proto
@@ -106,38 +103,35 @@
  )
  (action
   (run protoc -I %{read-lines:google_include} -I .
-       "--plugin=protoc-gen-ocaml=%{plugin}"
+       "--plugin=protoc-gen-ocaml=%{bin:protoc-gen-ocaml}"
        "--ocaml_out=open=Google_types_pp;open=Test_runtime;prefix_output_with_package=true;annot=[@@deriving show { with_path = false }, eq]:." %{proto})))
 
 (rule
  (targets int_types_native.ml int_types_native_proto2.ml)
  (deps
-  (:plugin ../src/plugin/protoc_gen_ocaml.exe)
   (:proto int_types_native.proto int_types_native_proto2.proto))
  (action
   (run protoc -I %{read-lines:google_include} -I .
-       "--plugin=protoc-gen-ocaml=%{plugin}"
+       "--plugin=protoc-gen-ocaml=%{bin:protoc-gen-ocaml}"
        "--ocaml_out=open=Google_types_pp;open=Test_runtime;int32_as_int=false;int64_as_int=false;annot=[@@deriving show { with_path = false }, eq]:." %{proto})))
 
 (rule
  (targets singleton_record.ml oneof2.ml)
  (deps
-  (:plugin ../src/plugin/protoc_gen_ocaml.exe)
   (:proto singleton_record.proto oneof2.proto))
  (action
   (run protoc -I %{read-lines:google_include} -I .
-       "--plugin=protoc-gen-ocaml=%{plugin}"
+       "--plugin=protoc-gen-ocaml=%{bin:protoc-gen-ocaml}"
        "--ocaml_out=open=Google_types_pp;open=Test_runtime;annot=[@@deriving show { with_path = false }, eq]:." %{proto})))
 
 (rule
  (enabled_if (<> %{read:config/support_proto3_optional.conf} ""))
  (target proto3_optional.ml)
  (deps
-  (:plugin ../src/plugin/protoc_gen_ocaml.exe)
   (:proto proto3_optional.proto)
  )
  (action
   (run protoc -I %{read-lines:google_include} -I .
        "--experimental_allow_proto3_optional"
-       "--plugin=protoc-gen-ocaml=%{plugin}"
+       "--plugin=protoc-gen-ocaml=%{bin:protoc-gen-ocaml}"
        "--ocaml_out=open=Google_types_pp;open=Test_runtime;annot=[@@deriving show { with_path = false }, eq]:." %{proto})))

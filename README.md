@@ -185,7 +185,7 @@ support the `--ocaml_opt` flag. As an alternative, options can also be
 passed with the `--ocaml_out` flag:
 
 ```
-protoc --plugin=protoc-gen-ocaml=../plugin/ocaml.exe --ocaml_out=annot=debug;[@@deriving show { with_path = false }, eq]:. <file>.proto
+protoc --ocaml_out=annot=debug;[@@deriving show { with_path = false }, eq]:. <file>.proto
 ```
 
 ## Mangle generated names

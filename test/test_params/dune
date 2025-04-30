@@ -44,7 +44,6 @@
    singleton_record_singleton_record.ml
    comments_comments.ml)
  (deps
-  (:plugin ../../src/plugin/protoc_gen_ocaml.exe)
   (:proto
     ../basic.proto
     ../deprecated.proto
@@ -85,7 +84,7 @@
  )
  (action
   (run protoc -I %{read-lines:../google_include} -I ..
-       "--plugin=protoc-gen-ocaml=%{plugin}"
+       "--plugin=protoc-gen-ocaml=%{bin:protoc-gen-ocaml}"
        "--ocaml_out=open=Google_types_prefixed;singleton_record=true;prefix_output_with_package=true;singleton_oneof_as_option=false:."
        %{proto}))
 )
