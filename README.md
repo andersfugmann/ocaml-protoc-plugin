@@ -262,7 +262,7 @@ google protobuf well known types.
 (rule
  (targets google_include)
  (action (with-stdout-to %{targets}
-          (system "pkg-config protobuf --variable=includedir"))))
+          (run pkg-config protobuf --variable=includedir))))
 
 (rule
  (targets test.ml)
