@@ -30,13 +30,13 @@ let error_required_field_missing index spec = Result.raise (`Required_field_miss
 let decode_zigzag v =
   let open Infix.Int64 in
   match v land 0x01L = 0L with
-  | true -> v / 2L
-  | false -> (v / 2L * -1L) - 1L
+  | true -> v lsr 1
+  | false -> (v lsr 1 * -1L) - 1L
 
 let decode_zigzag_unboxed v =
   match v land 0x01 = 0 with
-  | true -> v / 2
-  | false -> (v / 2 * -1) - 1
+  | true -> v lsr 1
+  | false -> (v lsr 1 * -1) - 1
 
 let int_of_uint32 =
   let open Int32 in
