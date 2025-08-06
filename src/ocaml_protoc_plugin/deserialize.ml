@@ -326,3 +326,31 @@ let deserialize_fast: type constr a. (constr, a) compound_list -> constr -> Read
   let extension_ranges = extension_ranges spec in
   let values = make_values spec in
   fun reader -> deserialize_fast extension_ranges values constr reader
+
+let%expect_test "zigzag encoding" =
+  let test vl =
+    let v = Int64.to_int vl in
+    Printf.printf "zigzag_decoding(%LdL) = %LdL\n" vl (decode_zigzag vl);
+    Printf.printf "zigzag_decoding_unboxed(%d) = %d\n" v (decode_zigzag_unboxed v);
+  in
+  List.iter ~f:test [0L; -1L; 1L; -2L; 2L; 2147483647L; -2147483648L; Int64.max_int; Int64.min_int; ];
+  [%expect {|
+    zigzag_decoding(0L) = 0L
+    zigzag_decoding_unboxed(0) = 0
+    zigzag_decoding(-1L) = -9223372036854775808L
+    zigzag_decoding_unboxed(-1) = -4611686018427387904
+    zigzag_decoding(1L) = -1L
+    zigzag_decoding_unboxed(1) = -1
+    zigzag_decoding(-2L) = 9223372036854775807L
+    zigzag_decoding_unboxed(-2) = 4611686018427387903
+    zigzag_decoding(2L) = 1L
+    zigzag_decoding_unboxed(2) = 1
+    zigzag_decoding(2147483647L) = -1073741824L
+    zigzag_decoding_unboxed(2147483647) = -1073741824
+    zigzag_decoding(-2147483648L) = 9223372035781033984L
+    zigzag_decoding_unboxed(-2147483648) = 4611686017353646080
+    zigzag_decoding(9223372036854775807L) = -4611686018427387904L
+    zigzag_decoding_unboxed(-1) = -4611686018427387904
+    zigzag_decoding(-9223372036854775808L) = 4611686018427387904L
+    zigzag_decoding_unboxed(0) = 0
+    |}]

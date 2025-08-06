@@ -201,4 +201,5 @@ let%expect_test "zigzag encoding" =
     zigzag_encoding(9223372036854775807L) = -2L
     zigzag_encoding_unboxed(-1) = 1
     zigzag_encoding(-9223372036854775808L) = -1L
-    zigzag_encoding_unboxed(0) = 0 |}]
+    zigzag_encoding_unboxed(0) = 0
+    |}]
