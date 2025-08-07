@@ -26,7 +26,7 @@ let test_signed32 (type t) ~(create : Int32.t -> t) (module T : Test_lib.T with 
 
 let test_unsigned32 (type t) ~(create : Int32.t -> t) (module T : Test_lib.T with type t = t) =
   Printf.printf "Test %s\n%!" (T.name ());
-  let values = [0l; 1l; 2l; 2147483647l] in
+  let values = [0l; 1l; 2l; 1073741823l; Int32.pred Int32.max_int; Int32.max_int] in
   List.iter
     ~f:(fun v -> Test_lib.test_encode ~proto_file (module T) (create v))
     values
@@ -122,4 +122,7 @@ let%expect_test _ =
     Test .int_types_native.UInt32
     i: 1
     i: 2
-    i: 2147483647 |}]
+    i: 1073741823
+    i: 2147483646
+    i: 2147483647
+    |}]

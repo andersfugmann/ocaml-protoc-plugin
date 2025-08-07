@@ -327,30 +327,57 @@ let deserialize_fast: type constr a. (constr, a) compound_list -> constr -> Read
   let values = make_values spec in
   fun reader -> deserialize_fast extension_ranges values constr reader
 
-let%expect_test "zigzag encoding" =
-  let test vl =
-    let v = Int64.to_int vl in
-    Printf.printf "zigzag_decoding(%LdL) = %LdL\n" vl (decode_zigzag vl);
-    Printf.printf "zigzag_decoding_unboxed(%d) = %d\n" v (decode_zigzag_unboxed v);
+let%expect_test "zigzag decoding" =
+  let n2l = Int64.of_int in
+  let i2l = Int64.of_int32 in
+  let test_values =
+    [Int64.min_int; n2l Int.min_int; i2l Int32.min_int; -2L;
+     0L; 3L; i2l Int32.max_int; n2l Int.max_int; Int64.max_int]
+    |> List.concat_map ~f:(
+      let open Infix.Int64 in
+      function
+      | v when v > 0L -> [pred v; v]
+      | v -> [v; succ v]
+    )
   in
-  List.iter ~f:test [0L; -1L; 1L; -2L; 2L; 2147483647L; -2147483648L; Int64.max_int; Int64.min_int; ];
+  List.iter ~f:(fun vl -> Printf.printf "zigzag_decoding(0x%016Lx) = 0x%016Lx\n" vl (decode_zigzag vl)) test_values;
+  List.iter ~f:(fun v -> Printf.printf "zigzag_decoding_unboxed(0x%016x) = 0x%016x\n" (Int64.to_int v) (Int64.to_int v |> decode_zigzag_unboxed)) test_values;
+  (* The results should display alternation between positive and negative numbers. If the right most bit is set, the number is negative *)
   [%expect {|
-    zigzag_decoding(0L) = 0L
-    zigzag_decoding_unboxed(0) = 0
-    zigzag_decoding(-1L) = -9223372036854775808L
-    zigzag_decoding_unboxed(-1) = -4611686018427387904
-    zigzag_decoding(1L) = -1L
-    zigzag_decoding_unboxed(1) = -1
-    zigzag_decoding(-2L) = 9223372036854775807L
-    zigzag_decoding_unboxed(-2) = 4611686018427387903
-    zigzag_decoding(2L) = 1L
-    zigzag_decoding_unboxed(2) = 1
-    zigzag_decoding(2147483647L) = -1073741824L
-    zigzag_decoding_unboxed(2147483647) = -1073741824
-    zigzag_decoding(-2147483648L) = 9223372035781033984L
-    zigzag_decoding_unboxed(-2147483648) = 4611686017353646080
-    zigzag_decoding(9223372036854775807L) = -4611686018427387904L
-    zigzag_decoding_unboxed(-1) = -4611686018427387904
-    zigzag_decoding(-9223372036854775808L) = 4611686018427387904L
-    zigzag_decoding_unboxed(0) = 0
+    zigzag_decoding(0x8000000000000000) = 0x4000000000000000
+    zigzag_decoding(0x8000000000000001) = 0xbfffffffffffffff
+    zigzag_decoding(0xc000000000000000) = 0x6000000000000000
+    zigzag_decoding(0xc000000000000001) = 0x9fffffffffffffff
+    zigzag_decoding(0xffffffff80000000) = 0x7fffffffc0000000
+    zigzag_decoding(0xffffffff80000001) = 0x800000003fffffff
+    zigzag_decoding(0xfffffffffffffffe) = 0x7fffffffffffffff
+    zigzag_decoding(0xffffffffffffffff) = 0x8000000000000000
+    zigzag_decoding(0x0000000000000000) = 0x0000000000000000
+    zigzag_decoding(0x0000000000000001) = 0xffffffffffffffff
+    zigzag_decoding(0x0000000000000002) = 0x0000000000000001
+    zigzag_decoding(0x0000000000000003) = 0xfffffffffffffffe
+    zigzag_decoding(0x000000007ffffffe) = 0x000000003fffffff
+    zigzag_decoding(0x000000007fffffff) = 0xffffffffc0000000
+    zigzag_decoding(0x3ffffffffffffffe) = 0x1fffffffffffffff
+    zigzag_decoding(0x3fffffffffffffff) = 0xe000000000000000
+    zigzag_decoding(0x7ffffffffffffffe) = 0x3fffffffffffffff
+    zigzag_decoding(0x7fffffffffffffff) = 0xc000000000000000
+    zigzag_decoding_unboxed(0x0000000000000000) = 0x0000000000000000
+    zigzag_decoding_unboxed(0x0000000000000001) = 0x7fffffffffffffff
+    zigzag_decoding_unboxed(0x4000000000000000) = 0x2000000000000000
+    zigzag_decoding_unboxed(0x4000000000000001) = 0x5fffffffffffffff
+    zigzag_decoding_unboxed(0x7fffffff80000000) = 0x3fffffffc0000000
+    zigzag_decoding_unboxed(0x7fffffff80000001) = 0x400000003fffffff
+    zigzag_decoding_unboxed(0x7ffffffffffffffe) = 0x3fffffffffffffff
+    zigzag_decoding_unboxed(0x7fffffffffffffff) = 0x4000000000000000
+    zigzag_decoding_unboxed(0x0000000000000000) = 0x0000000000000000
+    zigzag_decoding_unboxed(0x0000000000000001) = 0x7fffffffffffffff
+    zigzag_decoding_unboxed(0x0000000000000002) = 0x0000000000000001
+    zigzag_decoding_unboxed(0x0000000000000003) = 0x7ffffffffffffffe
+    zigzag_decoding_unboxed(0x000000007ffffffe) = 0x000000003fffffff
+    zigzag_decoding_unboxed(0x000000007fffffff) = 0x7fffffffc0000000
+    zigzag_decoding_unboxed(0x3ffffffffffffffe) = 0x1fffffffffffffff
+    zigzag_decoding_unboxed(0x3fffffffffffffff) = 0x6000000000000000
+    zigzag_decoding_unboxed(0x7ffffffffffffffe) = 0x3fffffffffffffff
+    zigzag_decoding_unboxed(0x7fffffffffffffff) = 0x4000000000000000
     |}]

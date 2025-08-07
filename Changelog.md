@@ -7,7 +7,7 @@
   behaviour.
 - Improve copying of comments from .proto files into ocaml code using
   omd to parse markdown
-
+- Fix problem with deserializing large singed integers (#45)
 
 ## 6.1.0: 2024-04-25
 - Fix name resolution leading to wrongly mapped names

@@ -16,7 +16,7 @@ let write_fixed64 ~f v =
 let write_fixed32 ~f v =
   Writer.write_fixed32_value (f v)
 
-let zigzag_encoding v =
+let encode_zigzag v =
   let open Infix.Int64 in
   let v = match v < 0L with
     | true -> v lsl 1 lxor (-1L)
@@ -24,7 +24,7 @@ let zigzag_encoding v =
   in
   v
 
-let zigzag_encoding_unboxed v =
+let encode_zigzag_unboxed v =
   let v = match v < 0 with
     | true -> v lsl 1 lxor (-1)
     | false -> v lsl 1
@@ -55,16 +55,16 @@ let write_value : type a b. (a, b) spec -> a -> Writer.t -> unit = function
   | SFixed32_int -> write_fixed32 ~f:Int32.of_int
   | Int64 -> Writer.write_varint_value
   | UInt64 -> Writer.write_varint_value
-  | SInt64 -> write_varint ~f:zigzag_encoding
+  | SInt64 -> write_varint ~f:encode_zigzag
   | Int32 -> write_varint_unboxed ~f:Int32.to_int
   | UInt32 -> write_varint_unboxed ~f:Int32.to_int
-  | SInt32 -> write_varint_unboxed ~f:(Int32.to_int @@ zigzag_encoding_unboxed)
+  | SInt32 -> write_varint_unboxed ~f:(Int32.to_int @@ encode_zigzag_unboxed)
   | Int64_int -> Writer.write_varint_unboxed_value
   | UInt64_int -> Writer.write_varint_unboxed_value
   | Int32_int -> Writer.write_varint_unboxed_value
   | UInt32_int -> Writer.write_varint_unboxed_value
-  | SInt64_int -> write_varint_unboxed ~f:zigzag_encoding_unboxed
-  | SInt32_int -> write_varint_unboxed ~f:zigzag_encoding_unboxed
+  | SInt64_int -> write_varint_unboxed ~f:encode_zigzag_unboxed
+  | SInt32_int -> write_varint_unboxed ~f:encode_zigzag_unboxed
 
   | Bool -> write_varint_unboxed ~f:(function true -> 1 | false -> 0)
   | String -> fun v -> Writer.write_length_delimited_value ~data:v ~offset:0 ~len:(String.length v)
@@ -177,29 +177,55 @@ let rec serialize: type a. (a, unit) compound_list -> Writer.t -> a = function
       cont writer
 
 let%expect_test "zigzag encoding" =
-  let test vl =
-    let v = Int64.to_int vl in
-    Printf.printf "zigzag_encoding(%LdL) = %LdL\n" vl (zigzag_encoding vl);
-    Printf.printf "zigzag_encoding_unboxed(%d) = %d\n" v (zigzag_encoding_unboxed v);
+  let n2l = Int64.of_int in
+  let i2l = Int64.of_int32 in
+  let test_values =
+    [Int64.min_int; n2l Int.min_int; i2l Int32.min_int; -2L;
+     0L; 3L; i2l Int32.max_int; n2l Int.max_int; Int64.max_int]
+    |> List.concat_map ~f:(
+      let open Infix.Int64 in
+      function
+      | v when v > 0L -> [pred v; v]
+      | v -> [v; succ v]
+    )
   in
-  List.iter ~f:test [0L; -1L; 1L; -2L; 2L; 2147483647L; -2147483648L; Int64.max_int; Int64.min_int; ];
+  List.iter ~f:(fun vl -> Printf.printf "zigzag_encoding 0x%016Lx = 0x%016Lx\n" vl (encode_zigzag vl)) test_values;
+  List.iter ~f:(fun v -> Printf.printf "zigzag_encoding_unboxed 0x%016x = 0x%016x\n" (Int64.to_int v) (Int64.to_int v |> encode_zigzag_unboxed)) test_values;
   [%expect {|
-    zigzag_encoding(0L) = 0L
-    zigzag_encoding_unboxed(0) = 0
-    zigzag_encoding(-1L) = 1L
-    zigzag_encoding_unboxed(-1) = 1
-    zigzag_encoding(1L) = 2L
-    zigzag_encoding_unboxed(1) = 2
-    zigzag_encoding(-2L) = 3L
-    zigzag_encoding_unboxed(-2) = 3
-    zigzag_encoding(2L) = 4L
-    zigzag_encoding_unboxed(2) = 4
-    zigzag_encoding(2147483647L) = 4294967294L
-    zigzag_encoding_unboxed(2147483647) = 4294967294
-    zigzag_encoding(-2147483648L) = 4294967295L
-    zigzag_encoding_unboxed(-2147483648) = 4294967295
-    zigzag_encoding(9223372036854775807L) = -2L
-    zigzag_encoding_unboxed(-1) = 1
-    zigzag_encoding(-9223372036854775808L) = -1L
-    zigzag_encoding_unboxed(0) = 0
+    zigzag_encoding 0x8000000000000000 = 0xffffffffffffffff
+    zigzag_encoding 0x8000000000000001 = 0xfffffffffffffffd
+    zigzag_encoding 0xc000000000000000 = 0x7fffffffffffffff
+    zigzag_encoding 0xc000000000000001 = 0x7ffffffffffffffd
+    zigzag_encoding 0xffffffff80000000 = 0x00000000ffffffff
+    zigzag_encoding 0xffffffff80000001 = 0x00000000fffffffd
+    zigzag_encoding 0xfffffffffffffffe = 0x0000000000000003
+    zigzag_encoding 0xffffffffffffffff = 0x0000000000000001
+    zigzag_encoding 0x0000000000000000 = 0x0000000000000000
+    zigzag_encoding 0x0000000000000001 = 0x0000000000000002
+    zigzag_encoding 0x0000000000000002 = 0x0000000000000004
+    zigzag_encoding 0x0000000000000003 = 0x0000000000000006
+    zigzag_encoding 0x000000007ffffffe = 0x00000000fffffffc
+    zigzag_encoding 0x000000007fffffff = 0x00000000fffffffe
+    zigzag_encoding 0x3ffffffffffffffe = 0x7ffffffffffffffc
+    zigzag_encoding 0x3fffffffffffffff = 0x7ffffffffffffffe
+    zigzag_encoding 0x7ffffffffffffffe = 0xfffffffffffffffc
+    zigzag_encoding 0x7fffffffffffffff = 0xfffffffffffffffe
+    zigzag_encoding_unboxed 0x0000000000000000 = 0x0000000000000000
+    zigzag_encoding_unboxed 0x0000000000000001 = 0x0000000000000002
+    zigzag_encoding_unboxed 0x4000000000000000 = 0x7fffffffffffffff
+    zigzag_encoding_unboxed 0x4000000000000001 = 0x7ffffffffffffffd
+    zigzag_encoding_unboxed 0x7fffffff80000000 = 0x00000000ffffffff
+    zigzag_encoding_unboxed 0x7fffffff80000001 = 0x00000000fffffffd
+    zigzag_encoding_unboxed 0x7ffffffffffffffe = 0x0000000000000003
+    zigzag_encoding_unboxed 0x7fffffffffffffff = 0x0000000000000001
+    zigzag_encoding_unboxed 0x0000000000000000 = 0x0000000000000000
+    zigzag_encoding_unboxed 0x0000000000000001 = 0x0000000000000002
+    zigzag_encoding_unboxed 0x0000000000000002 = 0x0000000000000004
+    zigzag_encoding_unboxed 0x0000000000000003 = 0x0000000000000006
+    zigzag_encoding_unboxed 0x000000007ffffffe = 0x00000000fffffffc
+    zigzag_encoding_unboxed 0x000000007fffffff = 0x00000000fffffffe
+    zigzag_encoding_unboxed 0x3ffffffffffffffe = 0x7ffffffffffffffc
+    zigzag_encoding_unboxed 0x3fffffffffffffff = 0x7ffffffffffffffe
+    zigzag_encoding_unboxed 0x7ffffffffffffffe = 0x0000000000000003
+    zigzag_encoding_unboxed 0x7fffffffffffffff = 0x0000000000000001
     |}]
