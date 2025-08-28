@@ -1,4 +1,4 @@
-## 6.2.0: Unreleased
+## 6.2.0: 2025-08-28
 - Fix potential nameclash for messages defining extensions
 - Resolve compilation warning on deprecated fields enclosed in a oneof
 - Improve how comments are copied to generated code
