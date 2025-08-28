@@ -9,6 +9,8 @@ module Int64 = struct
   let (/) = div
   let ( * ) = mul
   let (-) = sub
+  let succ = succ
+  let pred = pred
 end
 
 module Int = struct
@@ -22,4 +24,6 @@ module Int = struct
   let (/) = div
   let ( * ) = mul
   let (-) = sub
+  let succ = succ
+  let pred = pred
 end

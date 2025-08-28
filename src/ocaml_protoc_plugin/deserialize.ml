@@ -30,13 +30,13 @@ let error_required_field_missing index spec = Result.raise (`Required_field_miss
 let decode_zigzag v =
   let open Infix.Int64 in
   match v land 0x01L = 0L with
-  | true -> v / 2L
-  | false -> (v / 2L * -1L) - 1L
+  | true -> v lsr 1
+  | false -> (v lsr 1 * -1L) - 1L
 
 let decode_zigzag_unboxed v =
   match v land 0x01 = 0 with
-  | true -> v / 2
-  | false -> (v / 2 * -1) - 1
+  | true -> v lsr 1
+  | false -> (v lsr 1 * -1) - 1
 
 let int_of_uint32 =
   let open Int32 in
@@ -326,3 +326,59 @@ let deserialize_fast: type constr a. (constr, a) compound_list -> constr -> Read
   let extension_ranges = extension_ranges spec in
   let values = make_values spec in
   fun reader -> deserialize_fast extension_ranges values constr reader
+
+let%expect_test "zigzag decoding" =
+  let n2l = Int64.of_int in
+  let i2l = Int64.of_int32 in
+  let test_values =
+    [Int64.min_int; n2l Int.min_int; i2l Int32.min_int; -2L;
+     0L; 3L; i2l Int32.max_int; n2l Int.max_int; Int64.max_int]
+    |> List.map ~f:(
+      let open Infix.Int64 in
+      function
+      | v when v > 0L -> [pred v; v]
+      | v -> [v; succ v]
+    )
+    |> List.concat
+  in
+  List.iter ~f:(fun vl -> Printf.printf "zigzag_decoding(0x%016Lx) = 0x%016Lx\n" vl (decode_zigzag vl)) test_values;
+  List.iter ~f:(fun v -> Printf.printf "zigzag_decoding_unboxed(0x%016x) = 0x%016x\n" (Int64.to_int v) (Int64.to_int v |> decode_zigzag_unboxed)) test_values;
+  (* The results should display alternation between positive and negative numbers. If the right most bit is set, the number is negative *)
+  [%expect {|
+    zigzag_decoding(0x8000000000000000) = 0x4000000000000000
+    zigzag_decoding(0x8000000000000001) = 0xbfffffffffffffff
+    zigzag_decoding(0xc000000000000000) = 0x6000000000000000
+    zigzag_decoding(0xc000000000000001) = 0x9fffffffffffffff
+    zigzag_decoding(0xffffffff80000000) = 0x7fffffffc0000000
+    zigzag_decoding(0xffffffff80000001) = 0x800000003fffffff
+    zigzag_decoding(0xfffffffffffffffe) = 0x7fffffffffffffff
+    zigzag_decoding(0xffffffffffffffff) = 0x8000000000000000
+    zigzag_decoding(0x0000000000000000) = 0x0000000000000000
+    zigzag_decoding(0x0000000000000001) = 0xffffffffffffffff
+    zigzag_decoding(0x0000000000000002) = 0x0000000000000001
+    zigzag_decoding(0x0000000000000003) = 0xfffffffffffffffe
+    zigzag_decoding(0x000000007ffffffe) = 0x000000003fffffff
+    zigzag_decoding(0x000000007fffffff) = 0xffffffffc0000000
+    zigzag_decoding(0x3ffffffffffffffe) = 0x1fffffffffffffff
+    zigzag_decoding(0x3fffffffffffffff) = 0xe000000000000000
+    zigzag_decoding(0x7ffffffffffffffe) = 0x3fffffffffffffff
+    zigzag_decoding(0x7fffffffffffffff) = 0xc000000000000000
+    zigzag_decoding_unboxed(0x0000000000000000) = 0x0000000000000000
+    zigzag_decoding_unboxed(0x0000000000000001) = 0x7fffffffffffffff
+    zigzag_decoding_unboxed(0x4000000000000000) = 0x2000000000000000
+    zigzag_decoding_unboxed(0x4000000000000001) = 0x5fffffffffffffff
+    zigzag_decoding_unboxed(0x7fffffff80000000) = 0x3fffffffc0000000
+    zigzag_decoding_unboxed(0x7fffffff80000001) = 0x400000003fffffff
+    zigzag_decoding_unboxed(0x7ffffffffffffffe) = 0x3fffffffffffffff
+    zigzag_decoding_unboxed(0x7fffffffffffffff) = 0x4000000000000000
+    zigzag_decoding_unboxed(0x0000000000000000) = 0x0000000000000000
+    zigzag_decoding_unboxed(0x0000000000000001) = 0x7fffffffffffffff
+    zigzag_decoding_unboxed(0x0000000000000002) = 0x0000000000000001
+    zigzag_decoding_unboxed(0x0000000000000003) = 0x7ffffffffffffffe
+    zigzag_decoding_unboxed(0x000000007ffffffe) = 0x000000003fffffff
+    zigzag_decoding_unboxed(0x000000007fffffff) = 0x7fffffffc0000000
+    zigzag_decoding_unboxed(0x3ffffffffffffffe) = 0x1fffffffffffffff
+    zigzag_decoding_unboxed(0x3fffffffffffffff) = 0x6000000000000000
+    zigzag_decoding_unboxed(0x7ffffffffffffffe) = 0x3fffffffffffffff
+    zigzag_decoding_unboxed(0x7fffffffffffffff) = 0x4000000000000000
+    |}]
