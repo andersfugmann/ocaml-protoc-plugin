@@ -182,12 +182,13 @@ let%expect_test "zigzag encoding" =
   let test_values =
     [Int64.min_int; n2l Int.min_int; i2l Int32.min_int; -2L;
      0L; 3L; i2l Int32.max_int; n2l Int.max_int; Int64.max_int]
-    |> List.concat_map ~f:(
+    |> List.map ~f:(
       let open Infix.Int64 in
       function
       | v when v > 0L -> [pred v; v]
       | v -> [v; succ v]
     )
+    |> List.concat
   in
   List.iter ~f:(fun vl -> Printf.printf "zigzag_encoding 0x%016Lx = 0x%016Lx\n" vl (encode_zigzag vl)) test_values;
   List.iter ~f:(fun v -> Printf.printf "zigzag_encoding_unboxed 0x%016x = 0x%016x\n" (Int64.to_int v) (Int64.to_int v |> encode_zigzag_unboxed)) test_values;
