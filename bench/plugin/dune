@@ -10,7 +10,7 @@
     ../int64.proto ../string.proto ../float.proto ../enum.proto
     ../int64_list.proto ../string_list.proto ../float_list.proto ../enum_list.proto
     ../map.proto)
-  (:plugin ../../src/plugin/protoc_gen_ocaml.exe)
+  (:plugin %{bin:protoc-gen-ocaml})
  )
  (action
   (bash "for p in %{proto}; do protoc -I .. --plugin=protoc-gen-ocaml=%{plugin} \"--ocaml_out=annot=[@@deriving show { with_path = false },eq]:.\" $p; done")))

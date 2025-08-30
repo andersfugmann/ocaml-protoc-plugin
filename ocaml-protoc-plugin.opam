@@ -9,7 +9,7 @@ doc: "https://andersfugmann.github.io/ocaml-protoc-plugin/"
 build: [
   ["dune" "subst"] {dev}
   ["dune" "build" "-p" name "-j" jobs]
-  ["dune" "runtest" "-p" name "-j" jobs] {with-test & arch != "arm32" & arch != "x86_32"}
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test & arch != "arm32" & arch != "x86_32" & os != "win32"}
 ]
 
 depends: [
@@ -23,7 +23,7 @@ depends: [
   "ppx_deriving" {with-test}
   "bisect_ppx" {with-test}
   "odoc" {with-doc}
-  "omd"
+  "omd" {>= "2.0"}
   "conf-pkg-config" {build}
   "dune-configurator" {with-test}
   "yojson" {with-test}
@@ -35,6 +35,8 @@ x-ci-accept-failures: [
   "opensuse-15.5" #  Error during linking (exit code 1)
   "macos-homebrew" # C++ versions less than C++14 are not supported.
 ]
+
+x-maintenance-intent: ["(latest)"]
 
 synopsis: "Plugin for protoc protobuf compiler to generate ocaml definitions from a .proto file"
 

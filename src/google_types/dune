@@ -14,9 +14,9 @@
  (targets any.ml api.ml descriptor.ml duration.ml empty.ml field_mask.ml
           source_context.ml struct.ml timestamp.ml type.ml wrappers.ml)
  (deps
-  (:plugin ../plugin/protoc_gen_ocaml.exe))
+  (:plugin %{bin:protoc-gen-ocaml}))
  (action
-  (run protoc -I %{read-lines:google_include}
+  (run %{bin:protoc} -I %{read-lines:google_include}
        "--plugin=protoc-gen-ocaml=%{plugin}"
        "--ocaml_out=."
        %{read-lines:google_include}/google/protobuf/any.proto

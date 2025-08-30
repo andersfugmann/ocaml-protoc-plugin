@@ -20,9 +20,9 @@
    google_protobuf_type.ml
    google_protobuf_wrappers.ml)
   (deps
-  (:plugin ../../../src/plugin/protoc_gen_ocaml.exe))
+  (:plugin %{bin:protoc-gen-ocaml}))
   (action
-    (run protoc -I %{read-lines:../../google_include} -I .
+    (run %{bin:protoc} -I %{read-lines:../../google_include} -I .
          "--plugin=protoc-gen-ocaml=%{plugin}"
          "--ocaml_out=singleton_record=true;prefix_output_with_package=true;singleton_oneof_as_option=false:."
 
