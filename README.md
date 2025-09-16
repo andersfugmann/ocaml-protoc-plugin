@@ -3,9 +3,9 @@
 
 The goal of Ocaml protoc plugin is to create plugin for
 the google protobuf compiler (`protoc`) to generate Ocaml types and
-serialization and de-serialization functions from a `.proto`
+serialization and deserialization functions from a `.proto`
 file. Ocaml-protoc-plugin aims to be a fully compliant implementation
-of the google protobuffer standard and guidelines.
+of the Google protobuf standard and guidelines.
 
 The main features include:
 * Messages are mapped to idiomatic OCaml types, using modules
@@ -18,6 +18,8 @@ The main features include:
 * Configurable annotations for all generated types
 * Json serialization and deserialization based on protobuf
   specification
+* Implemented in pure Ocaml. making the library usable with `js-of-ocaml`, `melange`, etc.
+
 
 ## Comparison with other OCaml protobuf handlers.
 
@@ -138,7 +140,7 @@ protoc --plugin=protoc-gen-ocaml=../plugin/ocaml-protocol-plugin.exe --ocaml_out
 ### Json serialization and deserialization
 Ocaml-proto-plugin can serialize and deserialize to/from
 json. Using the function `to_json`, `from_json` and
-`from_json_exn` similar to regular protobuffer serialization and
+`from_json_exn` similar to regular protobuf serialization and
 deserialization.
 
 Json serialization can be controlled using optional arguments:
@@ -153,7 +155,7 @@ to limit number of dependencies.
 
 
 The `options` argument allows finer grained control over json
-serialization. The followin options are supported:
+serialization. The following options are supported:
 
 | argument  | comment  | default  |
 |---|---|---|
@@ -183,7 +185,7 @@ as close as possible:
 | google.protobuf.Any | | Not handled, as the ocaml-protobuf-plugin does not support dynamic protobuf parsing |
 
 
-Json serialization and deserializaiton is not well optimized and
+Json serialization and deserialization is not well optimized and
 should not be used in performance critical applications.
 
 ### Older versions of protoc
@@ -202,7 +204,7 @@ into somewhat more Ocaml idiomatic names. When this option is set (see
 below), names are mangled to snake case as described in the table
 below:
 
-| Protobyf type | Protobuf name            | Ocaml name               |
+| Protobuf type | Protobuf name            | Ocaml name               |
 |:--------------|:-------------------------|:-------------------------|
 | package       | `CapitalizedSnakeCase`   | `Capitalized_snake_case` |
 | message       | `CapitalizedSnakeCase`   | `Capitalized_snake_case` |
@@ -220,14 +222,14 @@ name to make sure names are unique.
 
 The algorithm for converting CamelCased names to snake_case is done by
 injecting an underscore between any lowercase and uppercase character
-and then lowercasing the result.
+and then lowercase the result.
 
 ### Setting mangle option
 Name mangling option can only be controlled from within the protobuf
 specification file. This is needed as protobuf files may reference each
 other and it its important to make sure that included names are
 referenced correctly across compilation units (and invocations of
-protoc).
+`protoc`).
 
 To set the option use:
 ```protobuf
@@ -247,11 +249,11 @@ message MyProtoMessage { }
 ```
 
 ### Deprecation annotations in proto files
-Protobug specification (.proto file) allow for deprecating *files*,
+Protobuf specification (.proto file) allow for deprecating *files*,
 *enums*, *enum values*, *messages*, *message fields*, *services* and
 *methods*.
 
-These deprecations are kept in the ocaml mapping to generate
+Deprecation annotations are preserved in the ocaml mapping to generate
 [alerts](https://ocaml.org/manual/alerts.html) for alert category
 'protobuf'.
 
@@ -346,12 +348,12 @@ serializing and deserializing the embedded message.
 
 ## Proto3 Optional fields
 Proto3 optional fields are handled in the same way as proto2 optional
-fields; The type is an option type, and always transmissted when set.
+fields; The type is an option type, and always transmitted when set.
 
-## Imported protofiles
+## Imported proto-files
 The generated code assumes that imported modules (generated from proto
 files) are available in the compilation scope. If the modules
-generated from imported protofiles resides in different a different
+generated from imported proto-files resides in different a different
 scope (e.g. is compiled with `wrapped true`, they need to be made
 available by adding parameter `open=<module name>` to make the modules
 available for the compilation.
@@ -364,7 +366,7 @@ be used by linking with the package `ocaml-protoc-plugin.google_types`, and addi
 option `open=Google_types` to the list of parameters
 
 The distributed google types are compiled using default parameters,
-i.e. without any ppx annotations.
+i.e. without any `ppx` annotations.
 
 If you want to change this, or add type annotations, you can copy the
 [dune](https://github.com/andersfugmann/ocaml-protoc-plugin/tree/main/src/google_types/dune)
@@ -465,7 +467,9 @@ More examples can be found under
 
 # Benchmarks
 
-ocaml-protoc-plugin has been optimized for speec, and is comparable [ocaml-protoc](https://github.com/mransan/ocaml-protoc)
+ocaml-protoc-plugin has been optimized for speed, and is comparable
+[ocaml-protoc](https://github.com/mransan/ocaml-protoc) in terms of
+performance.
 
 Numbers below shows benchmark comparing encoding and decoding speed to
 `ocaml-protoc`. The benchmark is run with flambda settings: `-O3 -unbox-closures -unboxed-types -remove-unused-arguments -rounds 4 -inline 100.00 -inline-max-depth 5 -inline-max-unroll 5 -unsafe`. Benchmarks are made on a Intel i5, i5-5257U CPU
