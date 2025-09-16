@@ -25,22 +25,22 @@ The main features include:
 | -------           | ------------------- | ------------  | ---------------     |
 | Ocaml types       | Supported           | Supported     | Defined runtime[^1] |
 | Service endpoints | Supported           | Supported     | N/A                 |
-| proto3            | Supported           | Supported[^3] | Supported           |
-| proto2            | Supported           | Supported[^3] | Supported           |
+| proto3            | Supported           | Supported[^2] | Supported           |
+| proto2            | Supported           | Supported[^2] | Supported           |
 | proto2 extends    | Supported           | Ignored       | Supported           |
-| proto2 groups     | Not supported[^2]   | Ignored       | ?                   |
+| proto2 groups     | Not supported[^3]   | Ignored       | ?                   |
 | json mappings     | Supported           | Supported     | ?                   |
 
-[^1] Ocaml-bp has a sister project `Ocaml-bp-plugin` which emit
+[^1]: Ocaml-bp has a sister project `Ocaml-bp-plugin` which emit
 Ocaml-pb definitions from a `.proto`. The plugin parses files are proto2
 Ocaml type definitions (all fields are option types), and repeated
 fields are not packed by default.
 
-[^2] Groups has been deprecated by google and should not be used.
-
-[^3] `ocaml_protoc` will always transmit all fields that are not
+[^2]: `ocaml_protoc` will always transmit all fields that are not
 marked optional, and does not *strictly* comply to the protobuf
 specification.
+
+[^3]: Groups has been deprecated by google and should not be used.
 
 
 ## Types
@@ -50,14 +50,14 @@ Primitive types:
 
 | Protobuf Type                                | Ocaml type       |
 | -------------                                | ----------       |
-| int32, int64, uint32, uint64, sint32, sint64 | int[^5]          |
-| fixed64, sfixed64, fixed32, sfixed32         | int32, int64[^5] |
+| int32, int64, uint32, uint64, sint32, sint64 | int[^4]          |
+| fixed64, sfixed64, fixed32, sfixed32         | int32, int64[^4] |
 | bool                                         | bool             |
 | float, double                                | float            |
 | string                                       | string           |
 | bytes                                        | bytes            |
 
-[^5] The plugin supports changing the type for scalar types to
+[^4]: The plugin supports changing the type for scalar types to
 int/int64/int32. See options section below.
 
 A message <name> declaration is compiled to a module <Name> with a record type
@@ -116,16 +116,15 @@ can generate the Ocaml code by running
 | int32\_as\_int       | Map \*int32 types to int instead of `int32`                     | `int32_as_int=false`         | true    |
 | fixed\_as\_int       | Map \*fixed\* types to `int`                                    | `fixed_as_int=true`          | false   |
 | singleton\_record    | Messages with only one field will be wrapped in a record        | `singleton_record=true`      | false   |
-| prefix\_output\_with\_package | Emit files prefixed with their package name. This allows multiple protofiles of the same name with different package names to be used | `prefix_output_with_package=true`[^6] | false |
+| prefix\_output\_with\_package | Emit files prefixed with their package name. This allows multiple protofiles of the same name with different package names to be used | `prefix_output_with_package=true`[^5] | false |
 | singleton\_oneof\_as\_option | Oneof declarations only containing one field are mapped to a single optional field | singleton\_oneof\_as\_option=false | true |
 
 Parameters are separated by `;`
 
-[^6] When using this option, all dependencies needs to be compiled
+[^5]: When using the `prefix_output_with_package=true` option, all dependencies needs to be compiled
 using this option as well. E.g. if the protobuf file dependes on
-*google well known types*, you will need to rebuild using
-`prefix_output_with_package=true` as
-well. This dune file
+*google well-known types*, you will need to rebuild using
+`prefix_output_with_package=true` as well. This dune file
 [dune](https://github.com/andersfugmann/ocaml-protoc-plugin/blob/main/test/test_params/google_types_prefixed/dune)
 lists how to do that.
 
@@ -372,6 +371,9 @@ If you want to change this, or add type annotations, you can copy the
 from the distribution to your own project, and make alterations
 there. See the [echo\_deriving](https://github.com/andersfugmann/ocaml-protoc-plugin/tree/main/examples/echo_deriving)
 example on how to do this.
+
+Its important that all protobuf files are compiled with the same
+flags, including the *Google Well-Known types*. See [^5]
 
 # Example
 
