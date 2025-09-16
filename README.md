@@ -116,10 +116,18 @@ can generate the Ocaml code by running
 | int32\_as\_int       | Map \*int32 types to int instead of `int32`                     | `int32_as_int=false`         | true    |
 | fixed\_as\_int       | Map \*fixed\* types to `int`                                    | `fixed_as_int=true`          | false   |
 | singleton\_record    | Messages with only one field will be wrapped in a record        | `singleton_record=true`      | false   |
-| prefix\_output\_with\_package | Emit files prefixed with their package name. This allows multiple protofiles of the same name with different package names to be used | `prefix_output_with_package=true` | false |
+| prefix\_output\_with\_package | Emit files prefixed with their package name. This allows multiple protofiles of the same name with different package names to be used | `prefix_output_with_package=true`[^6] | false |
 | singleton\_oneof\_as\_option | Oneof declarations only containing one field are mapped to a single optional field | singleton\_oneof\_as\_option=false | true |
 
 Parameters are separated by `;`
+
+[^6] When using this option, all dependencies needs to be compiled
+using this option as well. E.g. if the protobuf file dependes on
+*google well known types*, you will need to rebuild using
+`prefix_output_with_package=true` as
+well. This dune file
+[dune](https://github.com/andersfugmann/ocaml-protoc-plugin/blob/main/test/test_params/google_types_prefixed/dune)
+lists how to do that.
 
 If `protoc-gen-ocaml` is not located in the path, it is possible to
 specify the exact path to the plugin:
