@@ -53,14 +53,14 @@ util::TypeResolver* make_resolver(const std::string include, const std::string p
 #ifdef USE_FILESYSTEM
         for(const auto& p : std::filesystem::directory_iterator(".")) {
             if(p.path().extension() == ".proto") {
-                auto * fd = importer->Import(p.path().filename());
+                importer->Import(p.path().filename());
             }
         }
 #else
         caml_invalid_argument("No protofile specified");
 #endif
     } else {
-        auto * fd = importer->Import(proto_file);
+        importer->Import(proto_file);
     }
     return util::NewTypeResolverForDescriptorPool("type.googleapis.com", importer->pool());
 }
