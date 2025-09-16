@@ -40,7 +40,7 @@ fields are not packed by default.
 marked optional, and does not *strictly* comply to the protobuf
 specification.
 
-[^3]: Groups has been deprecated by google and should not be used.
+[^3]: Groups has been deprecated by Google and should not be used.
 
 
 ## Types
@@ -508,13 +508,13 @@ This work is based on
 Thanks to [Issuu](https://issuu.com) who initially developed this library/plugin.
 
 Thanks to all contributers:
-* Anders Fugmann <anders@fugmann.net>
-* Andreas Dahl <andreas@hrdahl.dk>
-* Dario Teixeira <dte@issuu.com>
-* Kate <kit.ty.kate@disroot.org>
-* Martin Slota <msl@issuu.com>
-* Nymphium <s1311350@gmail.com>
-* Rauan Mayemir <rauan@mayemir.io>
-* Tim McGilchrist <timmcgil@gmail.com>
-* Virgile Prevosto <virgile.prevosto@m4x.org>
-* Wojtek Czekalski <me@wczekalski.com>
+* [Anders Fugmann](https://github.com/andersfugmann)
+* [Andreas Dahl](https://github.com/andreasdahl)
+* [Dario Teixeira](https://github.com/darioteixeira)
+* [Kate](https://github.com/kit-ty-kate)
+* [Martin Slota](https://github.com/martinslota)
+* [Satoru Kawahara](https://github.com/nymphium)
+* [Rauan Mayemir](https://github.com/rauanmayemir)
+* [Tim McGilchrist](https://github.com/tmcgilchrist)
+* [Virgile Prevosto](https://github.com/vprevosto)
+* [Wojtek Czekalski](https://github.com/wokalski)
