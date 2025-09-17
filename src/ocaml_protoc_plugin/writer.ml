@@ -38,7 +38,7 @@ let write_varint buffer ~offset v =
       Bytes.unsafe_set buffer offset ((v land 0x7fL) lor 0b1000_0000L |> Int64.to_int |> Char.unsafe_chr);
       inner ~offset:next_offset rem
   in
-  (inner[@unrolled 10]) ~offset v
+  inner ~offset v
 
 let write_varint_unboxed buffer ~offset v = write_varint buffer ~offset (Int64.of_int v)
 

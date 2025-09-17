@@ -36,6 +36,8 @@ let[@inline] read_byte t =
     v
   | false -> Result.raise `Premature_end_of_input
 
+(* TODO: Speedup by inlining read_byte by copying out offset and end_offset out of the t structure so the inner loop does not have any side-effects. The copy back the offset to t once done. *)
+
 let read_varint t =
   let open Infix.Int64 in
   let rec inner acc bit =
@@ -46,7 +48,7 @@ let read_varint t =
       inner acc (Int.add bit 7)
     | false -> acc
   in
-  (inner[@unrolled 10]) 0L 0
+  inner 0L 0
 
 let read_varint_unboxed t = read_varint t |> Int64.to_int
 

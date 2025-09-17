@@ -225,7 +225,11 @@ let _ =
       List.init 1000 ~f:(fun i -> i+1, i * i+1) |> make_tests "map<int64,int64>" (module Protoc.Map) (module Plugin.Map);
 
       (* random_list ~len:100 ~f:(fun () -> Plugin.Enum_list.Enum.ED) () |> make_tests (module Protoc.Enum_list) (module Plugin.Enum_list); *)
-    ] @ make_int_tests (0xFFFF_FFFFL) @ make_int_tests (0xFFFF_FFFF_FFFF_FFFFL)
+    ]
+    @ make_int_tests (0x1L)
+    @ make_int_tests (0xFFFFL)
+    @ make_int_tests (0xFFFF_FFFFL)
+    @ make_int_tests (0xFFFF_FFFF_FFFF_FFFFL)
   in
   printf "|          Name               |   plugin   |   protoc   | ratio |\n";
   printf "|           --                |     --     |     --     |  --   |\n";
