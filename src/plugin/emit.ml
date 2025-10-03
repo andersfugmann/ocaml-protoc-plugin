@@ -147,11 +147,19 @@ let emit_service_type ~scope ~comment_db ~type_db ServiceDescriptorProto.{ name;
 
   let proto_path = Scope.get_proto_path scope in
   let ocaml_service_name = Type_db.get_service type_db ~proto_path name in
+  let package_service_name =
+    match String.split_on_char ~sep:'.' proto_path with
+    | [] | "":: [] -> name
+    | "" :: packages | packages ->
+       (String.concat ~sep:"." packages) ^ "." ^ name
+  in
   let signature = Code.init () in
   let implementation = Code.init () in
   Code.emit_comment ~position:`Leading signature (Comment_db.get_service_comments comment_db ~proto_path ~name);
   Code.emit signature `Begin "module %s : sig" ocaml_service_name;
   Code.emit implementation `Begin "module %s = struct" ocaml_service_name;
+  Code.emit signature `None "val package_service_name : string";
+  Code.emit implementation `None {|let package_service_name = "%s"|} package_service_name;
 
   List.iter ~f:(emit_method ~scope:(Scope.push scope name) ~type_db signature implementation name) methods;
   Code.emit signature `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
