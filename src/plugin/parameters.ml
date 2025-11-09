@@ -10,6 +10,7 @@ type t = {
   singleton_record: bool;
   prefix_output_with_package: bool;
   singleton_oneof_as_option: bool;
+  reflection_map: bool;
 }
 
 let default = {
@@ -22,6 +23,7 @@ let default = {
   singleton_record = false;
   prefix_output_with_package = false;
   singleton_oneof_as_option = true;
+  reflection_map = false;
 }
 
 let parse_option str =
@@ -41,9 +43,10 @@ let parse parameters =
       | `Expr ("int64_as_int", (("true"|"false") as v)) -> { param with int64_as_int = (bool_of_string v) };
       | `Expr ("int32_as_int", (("true"|"false") as v)) -> { param with int32_as_int = (bool_of_string v) };
       | `Expr ("singleton_record", (("true"|"false") as v)) -> { param with singleton_record = (bool_of_string v) };
-      | `Stmt "debug" -> { param with debug = true}
-      | `Expr ("prefix_output_with_package", (("true"|"false") as v)) -> { param with prefix_output_with_package = (bool_of_string v)}
-      | `Expr ("singleton_oneof_as_option", (("true"|"false") as v)) -> { param with singleton_oneof_as_option = (bool_of_string v)}
+      | `Stmt "debug" -> { param with debug = true }
+      | `Expr ("prefix_output_with_package", (("true"|"false") as v)) -> { param with prefix_output_with_package = (bool_of_string v) }
+      | `Expr ("singleton_oneof_as_option", (("true"|"false") as v)) -> { param with singleton_oneof_as_option = (bool_of_string v) }
+      | `Stmt "reflection_map" -> { param with reflection_map = true }
       | `Stmt "" -> param
       | _ -> failwith ("Unknown parameter: " ^ option)
     )
