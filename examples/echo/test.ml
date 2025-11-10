@@ -51,4 +51,5 @@ let () =
   let name = Echo.Echo.package_service_name in
   let request = mk_request () in
   let reply = do_request ~handler:handle_request request in
-  Printf.printf "Reply to %s: %s\n" name reply
+  Printf.printf "Reply to %s: %s\n" name reply;
+  assert (List.mem Echo.Echo.package_service_name Metainfo.package_service_names)
