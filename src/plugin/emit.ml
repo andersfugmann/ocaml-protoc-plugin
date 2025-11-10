@@ -457,9 +457,9 @@ let emit_metainfo implementation fd package_service_names =
   Code.emit implementation `None "val package_service_names : string list";
   Code.emit implementation `EndBegin "end = struct";
   Code.emit implementation `None {|let file_descriptor_proto = "%s"|} file_descriptor_bytes;
-  Code.emit implementation `None "let package_service_names = [";
+  Code.emit implementation `Begin "let package_service_names = [";
   List.iter ~f:(fun name -> Code.emit implementation `None "\"%s\";" name) package_service_names;
-  Code.emit implementation `None "]";
+  Code.emit implementation `End "]";
   Code.emit implementation `End "end"
 
 let parse_proto_file ~params ~scope ~type_db filedescriptorproto =
