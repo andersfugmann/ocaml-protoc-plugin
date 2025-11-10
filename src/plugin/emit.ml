@@ -93,7 +93,7 @@ let emit_enum_type ~scope ~params ~type_db ~comment_db
   let comments = Comment_db.get_enum_comments comment_db ~proto_path ~name:enum_name in
   { module_name; signature; implementation; deprecated; comments }
 
-let emit_service_type ~scope ~comment_db ~type_db ~refl_service_db ~file_index ServiceDescriptorProto.{ name; method' = methods; options = service_options; _ } =
+let emit_service_type ~scope ~comment_db ~type_db ServiceDescriptorProto.{ name; method' = methods; options = service_options; _ } =
   let proto_path = Scope.get_proto_path scope in
 
   let emit_method ~type_db ~scope signature implementation service_name MethodDescriptorProto.{ name; input_type; output_type; options = method_options; _} =
@@ -153,7 +153,7 @@ let emit_service_type ~scope ~comment_db ~type_db ~refl_service_db ~file_index S
     | "" :: packages | packages ->
        (String.concat ~sep:"." packages) ^ "." ^ name
   in
-  Hashtbl.add refl_service_db ~key:package_service_name ~data:file_index;
+
   let signature = Code.init () in
   let implementation = Code.init () in
   Code.emit_comment ~position:`Leading signature (Comment_db.get_service_comments comment_db ~proto_path ~name);
@@ -167,7 +167,7 @@ let emit_service_type ~scope ~comment_db ~type_db ~refl_service_db ~file_index S
   Code.emit signature `None "";
   Code.emit implementation `End "end%s" (Code.append_deprecaton_if ~deprecated `Item "");
   Code.emit implementation `None "";
-  signature, implementation
+  signature, implementation, package_service_name
 
 let emit_extension ~scope ~params ~comment_db ~type_db field =
   let FieldDescriptorProto.{ name; extendee; options; _ } = field in
@@ -389,18 +389,19 @@ let rec emit_message ~params ~syntax ~scope ~type_db ~comment_db
   let comments = Comment_db.get_message_comments comment_db ~proto_path:(Scope.get_proto_path scope) in
   { module_name; signature; implementation; deprecated; comments }
 
-let rec wrap_packages ~params ~syntax ~options ~comment_db ~type_db ~refl_service_db ~file_index ~scope message_type services = function
+let rec wrap_packages ~params ~syntax ~options ~comment_db ~type_db ~scope message_type services = function
   | [] ->
     let { module_name = _; implementation; signature; deprecated = _; comments = _ } =
       emit_message ~params ~syntax ~scope ~comment_db ~type_db message_type in
-    List.iter ~f:(fun service ->
-      let signature', implementation' = emit_service_type ~scope ~type_db ~comment_db ~refl_service_db ~file_index service in
-      Code.append implementation implementation';
-      Code.append signature signature';
-      ()
-    ) services;
-    signature, implementation
-
+    let package_service_names =
+      List.map ~f:(fun service ->
+        let signature', implementation', package_service_name = emit_service_type ~scope ~type_db ~comment_db service in
+        Code.append implementation implementation';
+        Code.append signature signature';
+        package_service_name
+      ) services
+    in
+    signature, implementation, package_service_names
   | package :: packages ->
     let signature = Code.init () in
     let implementation = Code.init () in
@@ -408,8 +409,8 @@ let rec wrap_packages ~params ~syntax ~options ~comment_db ~type_db ~refl_servic
     let package_name = Type_db.get_package_name type_db ~proto_path package in
     let scope = Scope.push scope package in
 
-    let signature', implementation' =
-      wrap_packages ~params ~syntax ~options ~scope ~type_db ~comment_db ~refl_service_db ~file_index message_type services packages
+    let signature', implementation', package_service_names =
+      wrap_packages ~params ~syntax ~options ~scope ~type_db ~comment_db message_type services packages
     in
     Code.emit implementation `Begin "module rec %s : sig" package_name;
     Code.append implementation signature';
@@ -419,7 +420,7 @@ let rec wrap_packages ~params ~syntax ~options ~comment_db ~type_db ~refl_servic
     Code.emit signature `Begin "module rec %s : sig" package_name;
     Code.append signature signature';
     Code.emit signature `End "end";
-    signature, implementation
+    signature, implementation, package_service_names
 
 
 let emit_header implementation ~proto_name ~syntax ~params =
@@ -447,7 +448,21 @@ let emit_header implementation ~proto_name ~syntax ~params =
   (* Code.emit implementation `None "%s" (Code.append_deprecaton_if ~deprecated `Floating ""); *)
   ()
 
-let parse_proto_file ~params ~scope ~type_db ~refl_service_db (filedescriptorproto, file_index) =
+let emit_metainfo implementation fd package_service_names =
+  let file_descriptor_bytes = let v = Spec.Descriptor.Google.Protobuf.FileDescriptorProto.to_proto fd in
+    Ocaml_protoc_plugin.Writer.contents v |> String.escaped
+  in
+  Code.emit implementation `Begin "module Metainfo : sig";
+  Code.emit implementation `None "val file_descriptor_proto : string";
+  Code.emit implementation `None "val package_service_names : string list";
+  Code.emit implementation `EndBegin "end = struct";
+  Code.emit implementation `None {|let file_descriptor_proto = "%s"|} file_descriptor_bytes;
+  Code.emit implementation `None "let package_service_names = [";
+  List.iter ~f:(fun name -> Code.emit implementation `None "\"%s\";" name) package_service_names;
+  Code.emit implementation `None "]";
+  Code.emit implementation `End "end"
+
+let parse_proto_file ~params ~scope ~type_db filedescriptorproto =
   let FileDescriptorProto.{ name = proto_name; package; dependency = dependencies;
                             public_dependency = _;
                             weak_dependency = _; message_type = message_types;
@@ -484,12 +499,14 @@ let parse_proto_file ~params ~scope ~type_db ~refl_service_db (filedescriptorpro
   Code.emit implementation `End "end";
   Code.emit implementation `None "(**/**)";
 
-  let _signature', implementation' =
-    wrap_packages ~params ~syntax ~options ~scope ~type_db ~comment_db ~refl_service_db ~file_index message_type services (Option.value_map ~default:[] ~f:(String.split_on_char ~sep:'.') package)
+  let _signature', implementation', package_service_names =
+    wrap_packages ~params ~syntax ~options ~scope ~type_db ~comment_db message_type services (Option.value_map ~default:[] ~f:(String.split_on_char ~sep:'.') package)
   in
 
   Code.append implementation implementation';
   Code.emit implementation `None "";
+
+  emit_metainfo implementation filedescriptorproto package_service_names;
 
   let output_file_name =
     Type_db.get_module_name type_db proto_name
@@ -497,43 +514,3 @@ let parse_proto_file ~params ~scope ~type_db ~refl_service_db (filedescriptorpro
     |> Printf.sprintf "%s.ml"
   in
   output_file_name, implementation
-
-let reflection ~file_descriptors ~refl_file_db ~refl_service_db =
-  let implementation = Code.init () in
-
-  Code.emit implementation `None "(********************************************************)";
-  Code.emit implementation `None "(*           AUTOGENERATED FILE - DO NOT EDIT!          *)";
-  Code.emit implementation `None "(********************************************************)";
-  Code.emit implementation `None "(* Generated by: ocaml-protoc-plugin                    *)";
-  Code.emit implementation `None "(* https://github.com/andersfugmann/ocaml-protoc-plugin *)";
-  Code.emit implementation `None "(********************************************************)";
-  Code.emit implementation `None "[@@@ocaml.alert \"-protobuf\"] (* Disable deprecation warnings for protobuf*)";
-  Code.emit implementation `None "";
-
-  Code.emit implementation `Begin "let file_descriptors = [|";
-  Dynarray.iter (fun fd_bytes ->
-    Code.emit implementation `None {|"%s";|} fd_bytes
-  ) file_descriptors;
-  Code.emit implementation `None "|]";
-  Code.emit implementation `End "";
-
-  Code.emit implementation `Begin "let get_file_descriptor name =";
-  Code.emit implementation `None "match name with";
-  Hashtbl.iter refl_file_db ~f:(fun ~key ~data ->
-    Code.emit implementation `None {s|| "%s" -> Some (file_descriptors.(%d)) |s} key data);
-  Code.emit implementation `None "| _ -> None";
-  Code.emit implementation `End "";
-
-  Code.emit implementation `Begin "let get_service_descriptor name =";
-  Code.emit implementation `None "match name with";
-  Hashtbl.iter refl_service_db ~f:(fun ~key ~data ->
-    Code.emit implementation `None {s|| "%s" -> Some (file_descriptors.(%d)) |s} key data);
-  Code.emit implementation `None "| _ -> None";
-  Code.emit implementation `End "";
-
-  Code.emit implementation `Begin "let services = [";
-  Hashtbl.iter refl_service_db ~f:(fun ~key ~data:_ ->
-    Code.emit implementation `None {|"%s";|} key);
-  Code.emit implementation `End "]";
-
-  implementation
