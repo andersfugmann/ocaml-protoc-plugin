@@ -120,6 +120,7 @@ can generate the Ocaml code by running
 | singleton\_record    | Messages with only one field will be wrapped in a record        | `singleton_record=true`      | false   |
 | prefix\_output\_with\_package | Emit files prefixed with their package name. This allows multiple protofiles of the same name with different package names to be used | `prefix_output_with_package=true`[^5] | false |
 | singleton\_oneof\_as\_option | Oneof declarations only containing one field are mapped to a single optional field | singleton\_oneof\_as\_option=false | true |
+| service\_info        | Include file descriptors, source proto file path and list of its services in generated code | `service_info=true`          | false   |
 
 Parameters are separated by `;`
 

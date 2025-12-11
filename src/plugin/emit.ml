@@ -452,7 +452,7 @@ let emit_metainfo implementation fd file_name package_service_names =
   let file_descriptor_bytes = let v = Spec.Descriptor.Google.Protobuf.FileDescriptorProto.to_proto fd in
     Ocaml_protoc_plugin.Writer.contents v |> String.escaped
   in
-  Code.emit implementation `Begin "module Metainfo : Runtime'.Spec.Metainfo = struct";
+  Code.emit implementation `Begin "module Service_info : Runtime'.Spec.Service_info = struct";
   Code.emit implementation `None {|let file_name = "%s"|} file_name;
   Code.emit implementation `None {|let file_descriptor_proto = "%s"|} file_descriptor_bytes;
   Code.emit implementation `Begin "let package_service_names = [";

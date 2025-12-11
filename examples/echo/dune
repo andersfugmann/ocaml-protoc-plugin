@@ -13,7 +13,7 @@
  (deps
   (:proto echo.proto) (package ocaml-protoc-plugin))
  (action
-  (run protoc -I %{read-lines:google_include} -I . "--ocaml_out=open=Google_types:." %{proto})))
+  (run protoc -I %{read-lines:google_include} -I . "--ocaml_out=open=Google_types;service_info=true:." %{proto})))
 (rule
  (deps test.exe)
  (action (ignore-stdout (run %{deps})))
