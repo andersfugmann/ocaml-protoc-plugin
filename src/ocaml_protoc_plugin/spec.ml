@@ -236,9 +236,3 @@ let default_of_spec: type a. (a, scalar) spec -> a = function
   | String -> ""
   | Bytes -> Bytes.create 0
   | Enum (module Enum) -> Enum.from_int_exn 0
-
-module type Service_info = sig
-  val file_name : string
-  val file_descriptor_proto : string
-  val package_service_names : string list
-end
