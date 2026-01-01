@@ -448,11 +448,9 @@ let emit_header implementation ~proto_name ~syntax ~params =
   (* Code.emit implementation `None "%s" (Code.append_deprecaton_if ~deprecated `Floating ""); *)
   ()
 
-let emit_metainfo implementation fd file_name package_service_names =
-  let file_descriptor_bytes = let v = Spec.Descriptor.Google.Protobuf.FileDescriptorProto.to_proto fd in
-    Ocaml_protoc_plugin.Writer.contents v |> String.escaped
-  in
-  Code.emit implementation `Begin "module Service_info : Runtime'.Spec.Service_info = struct";
+let emit_service_info implementation fd file_name package_service_names =
+  let file_descriptor_bytes = Spec.Descriptor.Google.Protobuf.FileDescriptorProto.to_proto fd |> Ocaml_protoc_plugin.Writer.contents |> String.escaped in
+  Code.emit implementation `Begin "module Service_info : Runtime'.Service.Service_info = struct";
   Code.emit implementation `None {|let file_name = "%s"|} file_name;
   Code.emit implementation `None {|let file_descriptor_proto = "%s"|} file_descriptor_bytes;
   Code.emit implementation `Begin "let package_service_names = [";
@@ -504,7 +502,7 @@ let parse_proto_file ~params ~scope ~type_db filedescriptorproto =
   Code.append implementation implementation';
   Code.emit implementation `None "";
 
-  emit_metainfo implementation filedescriptorproto proto_name package_service_names;
+  emit_service_info implementation filedescriptorproto proto_name package_service_names;
 
   let output_file_name =
     Type_db.get_module_name type_db proto_name
