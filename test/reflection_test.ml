@@ -7,11 +7,13 @@ let%test _ =
   S.Service_info.file_name = "reflection.proto"
 
 let%test _ =
-  P.Service_info.file_name ="reflection_parts.proto" 
-
-let%test "package service path" =
   S.Service_info.package_service_names = [ "test.reflection.EmptyService"; "test.reflection.SomeService" ]
 
+let%test _ =
+  P.Service_info.file_name ="reflection_parts.proto" 
+
+let%test _ =
+  List.is_empty P.Service_info.package_service_names
 
 let%test_module "Construct service_info by itself" = (module
   struct
