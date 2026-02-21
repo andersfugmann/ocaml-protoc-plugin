@@ -20,7 +20,7 @@ depends: [
   "ocaml" {>= "4.08.0"}
   "ppx_expect"
   "ppx_inline_test"
-  "ppx_deriving" {with-test}
+  "ppx_deriving" {build}
   "bisect_ppx" {with-test}
   "odoc" {with-doc}
   "omd" {>= "2.0"}

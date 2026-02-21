@@ -31,7 +31,7 @@ x-ci-accept-failures: [
 ]
 
 available: (os-distribution != "ubuntu" | os-version >= "18.04") & (os-distribution != "centos" | os-version >= "8")
-synopsis: "Virtual package to install protobuf cpp headers"
+synopsis: "Virtual package to install protobuf headers"
 description:
   "This package will install c header files and libaries for google protocol buffers via `opam depext`"
 flags: conf
