@@ -449,13 +449,11 @@ let emit_header implementation ~proto_name ~syntax ~params =
   ()
 
 let emit_service_info implementation fd file_name package_service_names =
-  let file_descriptor_bytes = Spec.Descriptor.Google.Protobuf.FileDescriptorProto.to_proto fd |> Ocaml_protoc_plugin.Writer.contents |> String.escaped in
   let file_descriptor = Spec.Descriptor.Google.Protobuf.FileDescriptorProto.show fd in
-  Code.emit implementation `Begin "module Service_info : Runtime'.Service.Service_info = struct";
+  Code.emit implementation `Begin "module Service_info : Runtime'.Service.Service_info with type t = Descriptor.Google.Protobuf.FileDescriptorProto.t = struct";
+  Code.emit implementation `None "type t = Descriptor.Google.Protobuf.FileDescriptorProto.t";
   Code.emit implementation `None {|let file_name = "%s"|} file_name;
-  Code.emit implementation `None {|let file_descriptor_proto = "%s"|} file_descriptor_bytes;
   Code.emit implementation `None {|let file_descriptor = %s|} file_descriptor;
-
   Code.emit implementation `Begin "let package_service_names = [";
   List.iter ~f:(fun name -> Code.emit implementation `None {|"%s";|} name) package_service_names;
   Code.emit implementation `End "]";
