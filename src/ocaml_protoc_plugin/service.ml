@@ -32,5 +32,6 @@ let make_service_functions (type req) (type rep)
 module type Service_info = sig
   val file_name : string
   val file_descriptor_proto : string
+  val file_descriptor : Descriptor.Google.Protobuf.FileDescriptorProto.t
   val package_service_names : string list
 end

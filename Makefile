@@ -42,18 +42,21 @@ src/spec/descriptor.ml: $(PLUGIN)
 	protoc "--plugin=protoc-gen-ocaml=$(PLUGIN)" \
 	  -I /usr/include \
 	  --ocaml_out=src/spec/. \
+	  "--ocaml_opt=annot=[@@deriving show]" \
 	  $(GOOGLE_INCLUDE)/descriptor.proto
 
 src/spec/plugin.ml: $(PLUGIN)
 	protoc "--plugin=protoc-gen-ocaml=$(PLUGIN)" \
 	  -I /usr/include \
 	  --ocaml_out=src/spec/. \
+	  "--ocaml_opt=annot=[@@deriving show]" \
 	  $(GOOGLE_INCLUDE)/compiler/plugin.proto
 
 src/spec/options.ml: $(PLUGIN)
 	protoc "--plugin=protoc-gen-ocaml=$(PLUGIN)" \
 	  -I src/spec -I /usr/include \
 	  --ocaml_out=src/spec/. \
+	  "--ocaml_opt=annot=[@@deriving show]" \
 	  src/spec/options.proto
 .PHONY: bootstrap
 bootstrap: src/spec/descriptor.ml src/spec/plugin.ml src/spec/options.ml ## Regenerate files used for generation

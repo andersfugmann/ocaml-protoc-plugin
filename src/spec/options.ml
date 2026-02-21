@@ -9,7 +9,7 @@
   Syntax: proto3
   Parameters:
     debug=false
-    annot=''
+    annot='[@@deriving show]'
     opens=[]
     int64_as_int=true
     int32_as_int=true
@@ -25,7 +25,7 @@ module Imported'modules = struct
 end
 (**/**)
 module rec Options : sig
-  type t = (bool)
+  type t = (bool) [@@deriving show]
   val make: ?mangle_names:bool -> unit -> t
   (** Helper function to generate a message using default values *)
 
@@ -54,7 +54,7 @@ module rec Options : sig
 end = struct
   module This'_ = Options
   let name () = ".Options"
-  type t = (bool)
+  type t = (bool) [@@deriving show]
   type make_t = ?mangle_names:bool -> unit -> t
   let make ?(mangle_names = false) () = (mangle_names)
   let merge =
@@ -80,14 +80,14 @@ end = struct
 end
 
 and Ocaml_options : sig
-  type t = Options.t option
+  type t = Options.t option [@@deriving show]
   val get_exn: Imported'modules.Descriptor.Google.Protobuf.FileOptions.t -> Options.t option
   val get: Imported'modules.Descriptor.Google.Protobuf.FileOptions.t -> (Options.t option, [> Runtime'.Result.error]) result
   val set: Imported'modules.Descriptor.Google.Protobuf.FileOptions.t -> Options.t option -> Imported'modules.Descriptor.Google.Protobuf.FileOptions.t
 end = struct
   module This'_ = Ocaml_options
   module This = Ocaml_options
-  type t = Options.t option
+  type t = Options.t option [@@deriving show]
   let get_exn extendee = Runtime'.Extensions.get Runtime'.Spec.(basic_opt ((1074, "ocaml_options", "ocamlOptions"), (message (module Options)))) (extendee.Imported'modules.Descriptor.Google.Protobuf.FileOptions.extensions')
   let get extendee = Runtime'.Result.catch (fun () -> get_exn extendee)
   let set extendee t =
