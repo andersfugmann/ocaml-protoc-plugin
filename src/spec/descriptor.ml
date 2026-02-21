@@ -9,7 +9,7 @@
   Syntax: proto2
   Parameters:
     debug=false
-    annot=''
+    annot='[@@deriving show]'
     opens=[]
     int64_as_int=true
     int32_as_int=true
@@ -33,7 +33,7 @@ files it parses.</p>
 %}
     *)
     module rec FileDescriptorSet : sig
-      type t = (FileDescriptorProto.t list)
+      type t = (FileDescriptorProto.t list) [@@deriving show]
       val make: ?file:FileDescriptorProto.t list -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -134,7 +134,7 @@ The supported values are &quot;proto2&quot; and &quot;proto3&quot;.</p>
 %}
         *)
 
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -186,7 +186,7 @@ The supported values are &quot;proto2&quot; and &quot;proto3&quot;.</p>
           *)
 
           options:ExtensionRangeOptions.t option;
-        }
+        } [@@deriving show]
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -238,7 +238,7 @@ not overlap.</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -284,7 +284,7 @@ A given name may only be reserved once.</p>
 %}
         *)
 
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -322,7 +322,7 @@ A given name may only be reserved once.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -431,7 +431,7 @@ treat group fields as unknown fields.</p>
 %}
           *)
 
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -455,7 +455,7 @@ treat group fields as unknown fields.</p>
 
           | LABEL_REQUIRED
           | LABEL_REPEATED
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -552,7 +552,7 @@ optional with <code>LABEL_OPTIONAL</code>.</p>
 %}
         *)
 
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -590,7 +590,7 @@ optional with <code>LABEL_OPTIONAL</code>.</p>
       type t = {
         name:string option;
         options:OneofOptions.t option;
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?options:OneofOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -651,7 +651,7 @@ domain.</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -700,7 +700,7 @@ be reserved once.</p>
 %}
         *)
 
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -739,7 +739,7 @@ be reserved once.</p>
         name:string option;
         number:int option;
         options:EnumValueOptions.t option;
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -778,7 +778,7 @@ be reserved once.</p>
         name:string option;
         method':MethodDescriptorProto.t list;
         options:ServiceOptions.t option;
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -839,7 +839,7 @@ FieldDescriptorProto.type_name, but must refer to a message type.</p>
 %}
         *)
 
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -937,7 +937,7 @@ to automatically assign option numbers.</p>
 %}
           *)
 
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -1132,7 +1132,7 @@ See the documentation for the &quot;Options&quot; section above.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -1237,7 +1237,7 @@ parser.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -1277,7 +1277,7 @@ parser.</p>
 
           | CORD
           | STRING_PIECE
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -1313,7 +1313,7 @@ parser.</p>
 %}
           *)
 
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -1429,7 +1429,7 @@ reasons.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -1467,7 +1467,7 @@ reasons.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -1523,7 +1523,7 @@ is a formalization for deprecating enums.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -1571,7 +1571,7 @@ this is a formalization for deprecating enum values.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -1624,7 +1624,7 @@ this is a formalization for deprecating services.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -1678,7 +1678,7 @@ methods, and PUT verb for idempotent methods instead of the default POST.</p>
 %}
           *)
 
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -1716,7 +1716,7 @@ this is a formalization for deprecating methods.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -1770,7 +1770,7 @@ E.g.,{ [&quot;foo&quot;, false], [&quot;bar.baz&quot;, true], [&quot;moo&quot;, 
         type t = {
           name_part:string;
           is_extension:bool;
-        }
+        } [@@deriving show]
         val make: name_part:string -> is_extension:bool -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -1813,7 +1813,7 @@ identified it as during parsing. Exactly one of these should be set.</p>
         double_value:float option;
         string_value:bytes option;
         aggregate_value:string option;
-      }
+      } [@@deriving show]
       val make: ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -1945,7 +1945,7 @@ both.</p>
 
           trailing_comments:string option;
           leading_detached_comments:string list;
-        }
+        } [@@deriving show]
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -1973,7 +1973,7 @@ both.</p>
         (**/**)
       end
 
-      type t = (Location.t list)
+      type t = (Location.t list) [@@deriving show]
       (**
 {%html:
 <p>A Location identifies a piece of source code in a .proto file which
@@ -2100,7 +2100,7 @@ the last relevant byte (so the length of the text = end - begin).</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -2128,7 +2128,7 @@ the last relevant byte (so the length of the text = end - begin).</p>
         (**/**)
       end
 
-      type t = (Annotation.t list)
+      type t = (Annotation.t list) [@@deriving show]
       (**
 {%html:
 <p>An Annotation connects some span of text in generated code to an element
@@ -2174,7 +2174,7 @@ files it parses.</p>
 %}
     *)
     module rec FileDescriptorSet : sig
-      type t = (FileDescriptorProto.t list)
+      type t = (FileDescriptorProto.t list) [@@deriving show]
       val make: ?file:FileDescriptorProto.t list -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -2275,7 +2275,7 @@ The supported values are &quot;proto2&quot; and &quot;proto3&quot;.</p>
 %}
         *)
 
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -2327,7 +2327,7 @@ The supported values are &quot;proto2&quot; and &quot;proto3&quot;.</p>
           *)
 
           options:ExtensionRangeOptions.t option;
-        }
+        } [@@deriving show]
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -2379,7 +2379,7 @@ not overlap.</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -2425,7 +2425,7 @@ A given name may only be reserved once.</p>
 %}
         *)
 
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -2463,7 +2463,7 @@ A given name may only be reserved once.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -2572,7 +2572,7 @@ treat group fields as unknown fields.</p>
 %}
           *)
 
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -2596,7 +2596,7 @@ treat group fields as unknown fields.</p>
 
           | LABEL_REQUIRED
           | LABEL_REPEATED
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -2693,7 +2693,7 @@ optional with <code>LABEL_OPTIONAL</code>.</p>
 %}
         *)
 
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -2731,7 +2731,7 @@ optional with <code>LABEL_OPTIONAL</code>.</p>
       type t = {
         name:string option;
         options:OneofOptions.t option;
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?options:OneofOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -2792,7 +2792,7 @@ domain.</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -2841,7 +2841,7 @@ be reserved once.</p>
 %}
         *)
 
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -2880,7 +2880,7 @@ be reserved once.</p>
         name:string option;
         number:int option;
         options:EnumValueOptions.t option;
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -2919,7 +2919,7 @@ be reserved once.</p>
         name:string option;
         method':MethodDescriptorProto.t list;
         options:ServiceOptions.t option;
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -2980,7 +2980,7 @@ FieldDescriptorProto.type_name, but must refer to a message type.</p>
 %}
         *)
 
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -3078,7 +3078,7 @@ to automatically assign option numbers.</p>
 %}
           *)
 
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -3273,7 +3273,7 @@ See the documentation for the &quot;Options&quot; section above.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -3378,7 +3378,7 @@ parser.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -3418,7 +3418,7 @@ parser.</p>
 
           | CORD
           | STRING_PIECE
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -3454,7 +3454,7 @@ parser.</p>
 %}
           *)
 
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -3570,7 +3570,7 @@ reasons.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -3608,7 +3608,7 @@ reasons.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -3664,7 +3664,7 @@ is a formalization for deprecating enums.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -3712,7 +3712,7 @@ this is a formalization for deprecating enum values.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -3765,7 +3765,7 @@ this is a formalization for deprecating services.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -3819,7 +3819,7 @@ methods, and PUT verb for idempotent methods instead of the default POST.</p>
 %}
           *)
 
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -3857,7 +3857,7 @@ this is a formalization for deprecating methods.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -3911,7 +3911,7 @@ E.g.,{ [&quot;foo&quot;, false], [&quot;bar.baz&quot;, true], [&quot;moo&quot;, 
         type t = {
           name_part:string;
           is_extension:bool;
-        }
+        } [@@deriving show]
         val make: name_part:string -> is_extension:bool -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -3954,7 +3954,7 @@ identified it as during parsing. Exactly one of these should be set.</p>
         double_value:float option;
         string_value:bytes option;
         aggregate_value:string option;
-      }
+      } [@@deriving show]
       val make: ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -4086,7 +4086,7 @@ both.</p>
 
           trailing_comments:string option;
           leading_detached_comments:string list;
-        }
+        } [@@deriving show]
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -4114,7 +4114,7 @@ both.</p>
         (**/**)
       end
 
-      type t = (Location.t list)
+      type t = (Location.t list) [@@deriving show]
       (**
 {%html:
 <p>A Location identifies a piece of source code in a .proto file which
@@ -4241,7 +4241,7 @@ the last relevant byte (so the length of the text = end - begin).</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -4269,7 +4269,7 @@ the last relevant byte (so the length of the text = end - begin).</p>
         (**/**)
       end
 
-      type t = (Annotation.t list)
+      type t = (Annotation.t list) [@@deriving show]
       (**
 {%html:
 <p>An Annotation connects some span of text in generated code to an element
@@ -4306,7 +4306,7 @@ of its generating .proto file.</p>
 
   end = struct
     module rec FileDescriptorSet : sig
-      type t = (FileDescriptorProto.t list)
+      type t = (FileDescriptorProto.t list) [@@deriving show]
       val make: ?file:FileDescriptorProto.t list -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -4335,7 +4335,7 @@ of its generating .proto file.</p>
     end = struct
       module This'_ = FileDescriptorSet
       let name () = ".google.protobuf.FileDescriptorSet"
-      type t = (FileDescriptorProto.t list)
+      type t = (FileDescriptorProto.t list) [@@deriving show]
       type make_t = ?file:FileDescriptorProto.t list -> unit -> t
       let make ?(file = []) () = (file)
       let merge =
@@ -4427,7 +4427,7 @@ The supported values are &quot;proto2&quot; and &quot;proto3&quot;.</p>
 %}
         *)
 
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -4469,7 +4469,7 @@ The supported values are &quot;proto2&quot; and &quot;proto3&quot;.</p>
         public_dependency:int list;
         weak_dependency:int list;
         syntax:string option;
-      }
+      } [@@deriving show]
       type make_t = ?name:string -> ?package:string -> ?dependency:string list -> ?message_type:DescriptorProto.t list -> ?enum_type:EnumDescriptorProto.t list -> ?service:ServiceDescriptorProto.t list -> ?extension:FieldDescriptorProto.t list -> ?options:FileOptions.t -> ?source_code_info:SourceCodeInfo.t -> ?public_dependency:int list -> ?weak_dependency:int list -> ?syntax:string -> unit -> t
       let make ?name ?package ?(dependency = []) ?(message_type = []) ?(enum_type = []) ?(service = []) ?(extension = []) ?options ?source_code_info ?(public_dependency = []) ?(weak_dependency = []) ?syntax () = { name; package; dependency; message_type; enum_type; service; extension; options; source_code_info; public_dependency; weak_dependency; syntax }
       let merge =
@@ -4536,7 +4536,7 @@ The supported values are &quot;proto2&quot; and &quot;proto3&quot;.</p>
           *)
 
           options:ExtensionRangeOptions.t option;
-        }
+        } [@@deriving show]
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -4588,7 +4588,7 @@ not overlap.</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -4634,7 +4634,7 @@ A given name may only be reserved once.</p>
 %}
         *)
 
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -4679,7 +4679,7 @@ A given name may only be reserved once.</p>
           *)
 
           options:ExtensionRangeOptions.t option;
-        }
+        } [@@deriving show]
         val make: ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -4712,7 +4712,7 @@ A given name may only be reserved once.</p>
           start:int option;
           end':int option;
           options:ExtensionRangeOptions.t option;
-        }
+        } [@@deriving show]
         type make_t = ?start:int -> ?end':int -> ?options:ExtensionRangeOptions.t -> unit -> t
         let make ?start ?end' ?options () = { start; end'; options }
         let merge =
@@ -4759,7 +4759,7 @@ A given name may only be reserved once.</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -4791,7 +4791,7 @@ A given name may only be reserved once.</p>
         type t = {
           start:int option;
           end':int option;
-        }
+        } [@@deriving show]
         type make_t = ?start:int -> ?end':int -> unit -> t
         let make ?start ?end' () = { start; end' }
         let merge =
@@ -4832,7 +4832,7 @@ A given name may only be reserved once.</p>
         oneof_decl:OneofDescriptorProto.t list;
         reserved_range:ReservedRange.t list;
         reserved_name:string list;
-      }
+      } [@@deriving show]
       type make_t = ?name:string -> ?field:FieldDescriptorProto.t list -> ?nested_type:t list -> ?enum_type:EnumDescriptorProto.t list -> ?extension_range:ExtensionRange.t list -> ?extension:FieldDescriptorProto.t list -> ?options:MessageOptions.t -> ?oneof_decl:OneofDescriptorProto.t list -> ?reserved_range:ReservedRange.t list -> ?reserved_name:string list -> unit -> t
       let make ?name ?(field = []) ?(nested_type = []) ?(enum_type = []) ?(extension_range = []) ?(extension = []) ?options ?(oneof_decl = []) ?(reserved_range = []) ?(reserved_name = []) () = { name; field; nested_type; enum_type; extension_range; extension; options; oneof_decl; reserved_range; reserved_name }
       let merge =
@@ -4887,7 +4887,7 @@ A given name may only be reserved once.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -4919,7 +4919,7 @@ A given name may only be reserved once.</p>
       type t = {
         uninterpreted_option:UninterpretedOption.t list;
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       type make_t = ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       let make ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { uninterpreted_option; extensions' }
       let merge =
@@ -5022,7 +5022,7 @@ treat group fields as unknown fields.</p>
 %}
           *)
 
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -5046,7 +5046,7 @@ treat group fields as unknown fields.</p>
 
           | LABEL_REQUIRED
           | LABEL_REPEATED
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -5143,7 +5143,7 @@ optional with <code>LABEL_OPTIONAL</code>.</p>
 %}
         *)
 
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -5245,7 +5245,7 @@ treat group fields as unknown fields.</p>
 %}
           *)
 
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -5331,7 +5331,7 @@ treat group fields as unknown fields.</p>
 %}
           *)
 
-
+        [@@deriving show]
         let name () = ".google.protobuf.FieldDescriptorProto.Type"
         let to_int = function
           | TYPE_DOUBLE -> 1
@@ -5426,7 +5426,7 @@ treat group fields as unknown fields.</p>
 
           | LABEL_REQUIRED
           | LABEL_REPEATED
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -5449,7 +5449,7 @@ treat group fields as unknown fields.</p>
 
           | LABEL_REQUIRED
           | LABEL_REPEATED
-
+        [@@deriving show]
         let name () = ".google.protobuf.FieldDescriptorProto.Label"
         let to_int = function
           | LABEL_OPTIONAL -> 1
@@ -5486,7 +5486,7 @@ treat group fields as unknown fields.</p>
         oneof_index:int option;
         json_name:string option;
         proto3_optional:bool option;
-      }
+      } [@@deriving show]
       type make_t = ?name:string -> ?extendee:string -> ?number:int -> ?label:Label.t -> ?type':Type.t -> ?type_name:string -> ?default_value:string -> ?options:FieldOptions.t -> ?oneof_index:int -> ?json_name:string -> ?proto3_optional:bool -> unit -> t
       let make ?name ?extendee ?number ?label ?type' ?type_name ?default_value ?options ?oneof_index ?json_name ?proto3_optional () = { name; extendee; number; label; type'; type_name; default_value; options; oneof_index; json_name; proto3_optional }
       let merge =
@@ -5537,7 +5537,7 @@ treat group fields as unknown fields.</p>
       type t = {
         name:string option;
         options:OneofOptions.t option;
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?options:OneofOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -5569,7 +5569,7 @@ treat group fields as unknown fields.</p>
       type t = {
         name:string option;
         options:OneofOptions.t option;
-      }
+      } [@@deriving show]
       type make_t = ?name:string -> ?options:OneofOptions.t -> unit -> t
       let make ?name ?options () = { name; options }
       let merge =
@@ -5625,7 +5625,7 @@ domain.</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -5674,7 +5674,7 @@ be reserved once.</p>
 %}
         *)
 
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -5718,7 +5718,7 @@ be reserved once.</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?start:int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -5750,7 +5750,7 @@ be reserved once.</p>
         type t = {
           start:int option;
           end':int option;
-        }
+        } [@@deriving show]
         type make_t = ?start:int -> ?end':int -> unit -> t
         let make ?start ?end' () = { start; end' }
         let merge =
@@ -5786,7 +5786,7 @@ be reserved once.</p>
         options:EnumOptions.t option;
         reserved_range:EnumReservedRange.t list;
         reserved_name:string list;
-      }
+      } [@@deriving show]
       type make_t = ?name:string -> ?value:EnumValueDescriptorProto.t list -> ?options:EnumOptions.t -> ?reserved_range:EnumReservedRange.t list -> ?reserved_name:string list -> unit -> t
       let make ?name ?(value = []) ?options ?(reserved_range = []) ?(reserved_name = []) () = { name; value; options; reserved_range; reserved_name }
       let merge =
@@ -5826,7 +5826,7 @@ be reserved once.</p>
         name:string option;
         number:int option;
         options:EnumValueOptions.t option;
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -5859,7 +5859,7 @@ be reserved once.</p>
         name:string option;
         number:int option;
         options:EnumValueOptions.t option;
-      }
+      } [@@deriving show]
       type make_t = ?name:string -> ?number:int -> ?options:EnumValueOptions.t -> unit -> t
       let make ?name ?number ?options () = { name; number; options }
       let merge =
@@ -5895,7 +5895,7 @@ be reserved once.</p>
         name:string option;
         method':MethodDescriptorProto.t list;
         options:ServiceOptions.t option;
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -5928,7 +5928,7 @@ be reserved once.</p>
         name:string option;
         method':MethodDescriptorProto.t list;
         options:ServiceOptions.t option;
-      }
+      } [@@deriving show]
       type make_t = ?name:string -> ?method':MethodDescriptorProto.t list -> ?options:ServiceOptions.t -> unit -> t
       let make ?name ?(method' = []) ?options () = { name; method'; options }
       let merge =
@@ -5986,7 +5986,7 @@ FieldDescriptorProto.type_name, but must refer to a message type.</p>
 %}
         *)
 
-      }
+      } [@@deriving show]
       val make: ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -6022,7 +6022,7 @@ FieldDescriptorProto.type_name, but must refer to a message type.</p>
         options:MethodOptions.t option;
         client_streaming:bool;
         server_streaming:bool;
-      }
+      } [@@deriving show]
       type make_t = ?name:string -> ?input_type:string -> ?output_type:string -> ?options:MethodOptions.t -> ?client_streaming:bool -> ?server_streaming:bool -> unit -> t
       let make ?name ?input_type ?output_type ?options ?(client_streaming = false) ?(server_streaming = false) () = { name; input_type; output_type; options; client_streaming; server_streaming }
       let merge =
@@ -6090,7 +6090,7 @@ FieldDescriptorProto.type_name, but must refer to a message type.</p>
 %}
           *)
 
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -6285,7 +6285,7 @@ See the documentation for the &quot;Options&quot; section above.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -6337,7 +6337,7 @@ See the documentation for the &quot;Options&quot; section above.</p>
 %}
           *)
 
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -6373,7 +6373,7 @@ See the documentation for the &quot;Options&quot; section above.</p>
 %}
           *)
 
-
+        [@@deriving show]
         let name () = ".google.protobuf.FileOptions.OptimizeMode"
         let to_int = function
           | SPEED -> 1
@@ -6421,7 +6421,7 @@ See the documentation for the &quot;Options&quot; section above.</p>
         ruby_package:string option;
         uninterpreted_option:UninterpretedOption.t list;
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       type make_t = ?java_package:string -> ?java_outer_classname:string -> ?optimize_for:OptimizeMode.t -> ?java_multiple_files:bool -> ?go_package:string -> ?cc_generic_services:bool -> ?java_generic_services:bool -> ?py_generic_services:bool -> ?java_generate_equals_and_hash:bool -> ?deprecated:bool -> ?java_string_check_utf8:bool -> ?cc_enable_arenas:bool -> ?objc_class_prefix:string -> ?csharp_namespace:string -> ?swift_prefix:string -> ?php_class_prefix:string -> ?php_namespace:string -> ?php_generic_services:bool -> ?php_metadata_namespace:string -> ?ruby_package:string -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       let make ?java_package ?java_outer_classname ?(optimize_for = OptimizeMode.SPEED) ?(java_multiple_files = false) ?go_package ?(cc_generic_services = false) ?(java_generic_services = false) ?(py_generic_services = false) ?java_generate_equals_and_hash ?(deprecated = false) ?(java_string_check_utf8 = false) ?(cc_enable_arenas = true) ?objc_class_prefix ?csharp_namespace ?swift_prefix ?php_class_prefix ?php_namespace ?(php_generic_services = false) ?php_metadata_namespace ?ruby_package ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { java_package; java_outer_classname; optimize_for; java_multiple_files; go_package; cc_generic_services; java_generic_services; py_generic_services; java_generate_equals_and_hash; deprecated; java_string_check_utf8; cc_enable_arenas; objc_class_prefix; csharp_namespace; swift_prefix; php_class_prefix; php_namespace; php_generic_services; php_metadata_namespace; ruby_package; uninterpreted_option; extensions' }
       let merge =
@@ -6566,7 +6566,7 @@ parser.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -6602,7 +6602,7 @@ parser.</p>
         map_entry:bool option;
         uninterpreted_option:UninterpretedOption.t list;
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       type make_t = ?message_set_wire_format:bool -> ?no_standard_descriptor_accessor:bool -> ?deprecated:bool -> ?map_entry:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       let make ?(message_set_wire_format = false) ?(no_standard_descriptor_accessor = false) ?(deprecated = false) ?map_entry ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { message_set_wire_format; no_standard_descriptor_accessor; deprecated; map_entry; uninterpreted_option; extensions' }
       let merge =
@@ -6650,7 +6650,7 @@ parser.</p>
 
           | CORD
           | STRING_PIECE
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -6686,7 +6686,7 @@ parser.</p>
 %}
           *)
 
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -6802,7 +6802,7 @@ reasons.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -6841,7 +6841,7 @@ reasons.</p>
 
           | CORD
           | STRING_PIECE
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -6864,7 +6864,7 @@ reasons.</p>
 
           | CORD
           | STRING_PIECE
-
+        [@@deriving show]
         let name () = ".google.protobuf.FieldOptions.CType"
         let to_int = function
           | STRING -> 0
@@ -6911,7 +6911,7 @@ reasons.</p>
 %}
           *)
 
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -6946,7 +6946,7 @@ reasons.</p>
 %}
           *)
 
-
+        [@@deriving show]
         let name () = ".google.protobuf.FieldOptions.JSType"
         let to_int = function
           | JS_NORMAL -> 0
@@ -6981,7 +6981,7 @@ reasons.</p>
         unverified_lazy:bool;
         uninterpreted_option:UninterpretedOption.t list;
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       type make_t = ?ctype:CType.t -> ?packed:bool -> ?deprecated:bool -> ?lazy':bool -> ?jstype:JSType.t -> ?weak:bool -> ?unverified_lazy:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       let make ?(ctype = CType.STRING) ?packed ?(deprecated = false) ?(lazy' = false) ?(jstype = JSType.JS_NORMAL) ?(weak = false) ?(unverified_lazy = false) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { ctype; packed; deprecated; lazy'; jstype; weak; unverified_lazy; uninterpreted_option; extensions' }
       let merge =
@@ -7033,7 +7033,7 @@ reasons.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -7065,7 +7065,7 @@ reasons.</p>
       type t = {
         uninterpreted_option:UninterpretedOption.t list;
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       type make_t = ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       let make ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { uninterpreted_option; extensions' }
       let merge =
@@ -7121,7 +7121,7 @@ is a formalization for deprecating enums.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -7155,7 +7155,7 @@ is a formalization for deprecating enums.</p>
         deprecated:bool;
         uninterpreted_option:UninterpretedOption.t list;
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       type make_t = ?allow_alias:bool -> ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       let make ?allow_alias ?(deprecated = false) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { allow_alias; deprecated; uninterpreted_option; extensions' }
       let merge =
@@ -7207,7 +7207,7 @@ this is a formalization for deprecating enum values.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -7240,7 +7240,7 @@ this is a formalization for deprecating enum values.</p>
         deprecated:bool;
         uninterpreted_option:UninterpretedOption.t list;
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       type make_t = ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       let make ?(deprecated = false) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { deprecated; uninterpreted_option; extensions' }
       let merge =
@@ -7295,7 +7295,7 @@ this is a formalization for deprecating services.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -7328,7 +7328,7 @@ this is a formalization for deprecating services.</p>
         deprecated:bool;
         uninterpreted_option:UninterpretedOption.t list;
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       type make_t = ?deprecated:bool -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       let make ?(deprecated = false) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { deprecated; uninterpreted_option; extensions' }
       let merge =
@@ -7384,7 +7384,7 @@ methods, and PUT verb for idempotent methods instead of the default POST.</p>
 %}
           *)
 
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -7422,7 +7422,7 @@ this is a formalization for deprecating methods.</p>
         *)
 
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       val make: ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -7467,7 +7467,7 @@ this is a formalization for deprecating methods.</p>
 %}
           *)
 
-
+        [@@deriving show]
         val name: unit -> string
         (** Fully qualified protobuf name of this enum *)
 
@@ -7496,7 +7496,7 @@ this is a formalization for deprecating methods.</p>
 %}
           *)
 
-
+        [@@deriving show]
         let name () = ".google.protobuf.MethodOptions.IdempotencyLevel"
         let to_int = function
           | IDEMPOTENCY_UNKNOWN -> 0
@@ -7526,7 +7526,7 @@ this is a formalization for deprecating methods.</p>
         idempotency_level:IdempotencyLevel.t;
         uninterpreted_option:UninterpretedOption.t list;
         extensions':Runtime'.Extensions.t;
-      }
+      } [@@deriving show]
       type make_t = ?deprecated:bool -> ?idempotency_level:IdempotencyLevel.t -> ?uninterpreted_option:UninterpretedOption.t list -> ?extensions':Runtime'.Extensions.t -> unit -> t
       let make ?(deprecated = false) ?(idempotency_level = IdempotencyLevel.IDEMPOTENCY_UNKNOWN) ?(uninterpreted_option = []) ?(extensions' = Runtime'.Extensions.default) () = { deprecated; idempotency_level; uninterpreted_option; extensions' }
       let merge =
@@ -7573,7 +7573,7 @@ E.g.,{ [&quot;foo&quot;, false], [&quot;bar.baz&quot;, true], [&quot;moo&quot;, 
         type t = {
           name_part:string;
           is_extension:bool;
-        }
+        } [@@deriving show]
         val make: name_part:string -> is_extension:bool -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -7616,7 +7616,7 @@ identified it as during parsing. Exactly one of these should be set.</p>
         double_value:float option;
         string_value:bytes option;
         aggregate_value:string option;
-      }
+      } [@@deriving show]
       val make: ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       (** Helper function to generate a message using default values *)
 
@@ -7648,7 +7648,7 @@ identified it as during parsing. Exactly one of these should be set.</p>
         type t = {
           name_part:string;
           is_extension:bool;
-        }
+        } [@@deriving show]
         val make: name_part:string -> is_extension:bool -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -7680,7 +7680,7 @@ identified it as during parsing. Exactly one of these should be set.</p>
         type t = {
           name_part:string;
           is_extension:bool;
-        }
+        } [@@deriving show]
         type make_t = name_part:string -> is_extension:bool -> unit -> t
         let make ~name_part ~is_extension () = { name_part; is_extension }
         let merge =
@@ -7718,7 +7718,7 @@ identified it as during parsing. Exactly one of these should be set.</p>
         double_value:float option;
         string_value:bytes option;
         aggregate_value:string option;
-      }
+      } [@@deriving show]
       type make_t = ?name:NamePart.t list -> ?identifier_value:string -> ?positive_int_value:int -> ?negative_int_value:int -> ?double_value:float -> ?string_value:bytes -> ?aggregate_value:string -> unit -> t
       let make ?(name = []) ?identifier_value ?positive_int_value ?negative_int_value ?double_value ?string_value ?aggregate_value () = { name; identifier_value; positive_int_value; negative_int_value; double_value; string_value; aggregate_value }
       let merge =
@@ -7852,7 +7852,7 @@ both.</p>
 
           trailing_comments:string option;
           leading_detached_comments:string list;
-        }
+        } [@@deriving show]
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -7880,7 +7880,7 @@ both.</p>
         (**/**)
       end
 
-      type t = (Location.t list)
+      type t = (Location.t list) [@@deriving show]
       (**
 {%html:
 <p>A Location identifies a piece of source code in a .proto file which
@@ -8058,7 +8058,7 @@ both.</p>
 
           trailing_comments:string option;
           leading_detached_comments:string list;
-        }
+        } [@@deriving show]
         val make: ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -8093,7 +8093,7 @@ both.</p>
           leading_comments:string option;
           trailing_comments:string option;
           leading_detached_comments:string list;
-        }
+        } [@@deriving show]
         type make_t = ?path:int list -> ?span:int list -> ?leading_comments:string -> ?trailing_comments:string -> ?leading_detached_comments:string list -> unit -> t
         let make ?(path = []) ?(span = []) ?leading_comments ?trailing_comments ?(leading_detached_comments = []) () = { path; span; leading_comments; trailing_comments; leading_detached_comments }
         let merge =
@@ -8129,7 +8129,7 @@ both.</p>
       end
 
       let name () = ".google.protobuf.SourceCodeInfo"
-      type t = (Location.t list)
+      type t = (Location.t list) [@@deriving show]
       type make_t = ?location:Location.t list -> unit -> t
       let make ?(location = []) () = (location)
       let merge =
@@ -8189,7 +8189,7 @@ the last relevant byte (so the length of the text = end - begin).</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -8217,7 +8217,7 @@ the last relevant byte (so the length of the text = end - begin).</p>
         (**/**)
       end
 
-      type t = (Annotation.t list)
+      type t = (Annotation.t list) [@@deriving show]
       (**
 {%html:
 <p>An Annotation connects some span of text in generated code to an element
@@ -8286,7 +8286,7 @@ the last relevant byte (so the length of the text = end - begin).</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -8320,7 +8320,7 @@ the last relevant byte (so the length of the text = end - begin).</p>
           source_file:string option;
           begin':int option;
           end':int option;
-        }
+        } [@@deriving show]
         type make_t = ?path:int list -> ?source_file:string -> ?begin':int -> ?end':int -> unit -> t
         let make ?(path = []) ?source_file ?begin' ?end' () = { path; source_file; begin'; end' }
         let merge =
@@ -8354,7 +8354,7 @@ the last relevant byte (so the length of the text = end - begin).</p>
       end
 
       let name () = ".google.protobuf.GeneratedCodeInfo"
-      type t = (Annotation.t list)
+      type t = (Annotation.t list) [@@deriving show]
       type make_t = ?annotation:Annotation.t list -> unit -> t
       let make ?(annotation = []) () = (annotation)
       let merge =
@@ -8381,4 +8381,3 @@ the last relevant byte (so the length of the text = end - begin).</p>
 
   end
 end
-

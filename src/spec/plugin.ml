@@ -9,7 +9,7 @@
   Syntax: proto2
   Parameters:
     debug=false
-    annot=''
+    annot='[@@deriving show]'
     opens=[]
     int64_as_int=true
     int32_as_int=true
@@ -46,7 +46,7 @@ be empty for mainline stable releases.</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -123,7 +123,7 @@ fully qualified.</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -168,7 +168,7 @@ fully qualified.</p>
           type t =
             | FEATURE_NONE
             | FEATURE_PROTO3_OPTIONAL
-
+          [@@deriving show]
           val name: unit -> string
           (** Fully qualified protobuf name of this enum *)
 
@@ -261,7 +261,7 @@ into the code generation metadata for the generated files.</p>
 %}
             *)
 
-          }
+          } [@@deriving show]
           val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           (** Helper function to generate a message using default values *)
 
@@ -312,7 +312,7 @@ This is a bitwise &quot;or&quot; of values from the Feature enum.</p>
           *)
 
           file:File.t list;
-        }
+        } [@@deriving show]
         val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -364,7 +364,7 @@ be empty for mainline stable releases.</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -441,7 +441,7 @@ fully qualified.</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -486,7 +486,7 @@ fully qualified.</p>
           type t =
             | FEATURE_NONE
             | FEATURE_PROTO3_OPTIONAL
-
+          [@@deriving show]
           val name: unit -> string
           (** Fully qualified protobuf name of this enum *)
 
@@ -579,7 +579,7 @@ into the code generation metadata for the generated files.</p>
 %}
             *)
 
-          }
+          } [@@deriving show]
           val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           (** Helper function to generate a message using default values *)
 
@@ -630,7 +630,7 @@ This is a bitwise &quot;or&quot; of values from the Feature enum.</p>
           *)
 
           file:File.t list;
-        }
+        } [@@deriving show]
         val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -680,7 +680,7 @@ be empty for mainline stable releases.</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -757,7 +757,7 @@ fully qualified.</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -802,7 +802,7 @@ fully qualified.</p>
           type t =
             | FEATURE_NONE
             | FEATURE_PROTO3_OPTIONAL
-
+          [@@deriving show]
           val name: unit -> string
           (** Fully qualified protobuf name of this enum *)
 
@@ -895,7 +895,7 @@ into the code generation metadata for the generated files.</p>
 %}
             *)
 
-          }
+          } [@@deriving show]
           val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           (** Helper function to generate a message using default values *)
 
@@ -946,7 +946,7 @@ This is a bitwise &quot;or&quot; of values from the Feature enum.</p>
           *)
 
           file:File.t list;
-        }
+        } [@@deriving show]
         val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -988,7 +988,7 @@ be empty for mainline stable releases.</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -1022,7 +1022,7 @@ be empty for mainline stable releases.</p>
           minor:int option;
           patch:int option;
           suffix:string option;
-        }
+        } [@@deriving show]
         type make_t = ?major:int -> ?minor:int -> ?patch:int -> ?suffix:string -> unit -> t
         let make ?major ?minor ?patch ?suffix () = { major; minor; patch; suffix }
         let merge =
@@ -1098,7 +1098,7 @@ fully qualified.</p>
 %}
           *)
 
-        }
+        } [@@deriving show]
         val make: ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -1132,7 +1132,7 @@ fully qualified.</p>
           parameter:string option;
           compiler_version:Version.t option;
           proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list;
-        }
+        } [@@deriving show]
         type make_t = ?file_to_generate:string list -> ?parameter:string -> ?compiler_version:Version.t -> ?proto_file:Imported'modules.Descriptor.Google.Protobuf.FileDescriptorProto.t list -> unit -> t
         let make ?(file_to_generate = []) ?parameter ?compiler_version ?(proto_file = []) () = { file_to_generate; parameter; compiler_version; proto_file }
         let merge =
@@ -1176,7 +1176,7 @@ fully qualified.</p>
           type t =
             | FEATURE_NONE
             | FEATURE_PROTO3_OPTIONAL
-
+          [@@deriving show]
           val name: unit -> string
           (** Fully qualified protobuf name of this enum *)
 
@@ -1269,7 +1269,7 @@ into the code generation metadata for the generated files.</p>
 %}
             *)
 
-          }
+          } [@@deriving show]
           val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           (** Helper function to generate a message using default values *)
 
@@ -1320,7 +1320,7 @@ This is a bitwise &quot;or&quot; of values from the Feature enum.</p>
           *)
 
           file:File.t list;
-        }
+        } [@@deriving show]
         val make: ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
         (** Helper function to generate a message using default values *)
 
@@ -1352,7 +1352,7 @@ This is a bitwise &quot;or&quot; of values from the Feature enum.</p>
           type t =
             | FEATURE_NONE
             | FEATURE_PROTO3_OPTIONAL
-
+          [@@deriving show]
           val name: unit -> string
           (** Fully qualified protobuf name of this enum *)
 
@@ -1368,7 +1368,7 @@ This is a bitwise &quot;or&quot; of values from the Feature enum.</p>
           type t =
             | FEATURE_NONE
             | FEATURE_PROTO3_OPTIONAL
-
+          [@@deriving show]
           let name () = ".google.protobuf.compiler.CodeGeneratorResponse.Feature"
           let to_int = function
             | FEATURE_NONE -> 0
@@ -1462,7 +1462,7 @@ into the code generation metadata for the generated files.</p>
 %}
             *)
 
-          }
+          } [@@deriving show]
           val make: ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           (** Helper function to generate a message using default values *)
 
@@ -1496,7 +1496,7 @@ into the code generation metadata for the generated files.</p>
             insertion_point:string option;
             content:string option;
             generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t option;
-          }
+          } [@@deriving show]
           type make_t = ?name:string -> ?insertion_point:string -> ?content:string -> ?generated_code_info:Imported'modules.Descriptor.Google.Protobuf.GeneratedCodeInfo.t -> unit -> t
           let make ?name ?insertion_point ?content ?generated_code_info () = { name; insertion_point; content; generated_code_info }
           let merge =
@@ -1534,7 +1534,7 @@ into the code generation metadata for the generated files.</p>
           error:string option;
           supported_features:int option;
           file:File.t list;
-        }
+        } [@@deriving show]
         type make_t = ?error:string -> ?supported_features:int -> ?file:File.t list -> unit -> t
         let make ?error ?supported_features ?(file = []) () = { error; supported_features; file }
         let merge =
