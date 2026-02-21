@@ -502,7 +502,8 @@ let parse_proto_file ~params ~scope ~type_db filedescriptorproto =
   Code.append implementation implementation';
   Code.emit implementation `None "";
 
-  emit_service_info implementation filedescriptorproto proto_name package_service_names;
+  if params.service_info then
+    emit_service_info implementation filedescriptorproto proto_name package_service_names;
 
   let output_file_name =
     Type_db.get_module_name type_db proto_name
