@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package test.reflection;
+import "reflection_parts.proto";
+
+service EmptyService { }
+
+service SomeService {
+  rpc Call (test.reflection_parts.Request) returns (test.reflection_parts.Response);
+}

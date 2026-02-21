@@ -28,3 +28,9 @@ let make_service_functions (type req) (type rep)
     ((module Request : Spec.Message with type t = req),
     (module Response : Spec.Message with type t = rep)) =
   Request.from_proto, Response.to_proto
+
+module type Service_info = sig
+  val file_name : string
+  val file_descriptor_proto : string
+  val package_service_names : string list
+end
