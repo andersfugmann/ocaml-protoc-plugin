@@ -17,12 +17,14 @@ let read_all in_channel =
 
 (* Read from stdin *)
 let read () =
+  set_binary_mode_in stdin true;
   read_all stdin
   |> Ocaml_protoc_plugin.Reader.create
   |> Plugin.CodeGeneratorRequest.from_proto_exn
 
 (* Write to stdout *)
 let write response =
+  set_binary_mode_out stdout true;
   Plugin.CodeGeneratorResponse.to_proto response
   |> Ocaml_protoc_plugin.Writer.contents
   |> output_string stdout
