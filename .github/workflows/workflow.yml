@@ -1,20 +1,25 @@
 name: Main workflow
 
 on:
-  - push
-  - workflow_dispatch
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     strategy:
-      fail-fast: false
       matrix:
         os:
           - ubuntu-latest
         ocaml-compiler:
           - 5
           - 4
-          - 4.08.0
+          - 4.11.0
 
     runs-on: ${{ matrix.os }}
 
@@ -27,8 +32,14 @@ jobs:
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
 
-      - run: opam pin . --no-action
-      - run: opam depext conf-protoc --yes --with-doc --with-test
-      - run: opam install . --deps-only --with-doc --with-test
-      - run: opam exec -- dune build
-      - run: opam exec -- dune runtest
+      - name: Install system dependencies
+        run: opam install conf-protoc --yes
+
+      - name: Install opam dependencies
+        run: opam install . --deps-only --with-doc --with-test --yes
+
+      - name: Build
+        run: opam exec -- dune build
+
+      - name: Run tests
+        run: opam exec -- dune runtest
