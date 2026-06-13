@@ -142,3 +142,13 @@
        "--experimental_allow_proto3_optional"
        "--plugin=protoc-gen-ocaml=%{plugin}"
        "--ocaml_out=open=Google_types_pp;open=Test_runtime;annot=[@@deriving show { with_path = false }, eq]:." %{proto})))
+
+(rule
+ (targets reflection.ml reflection_parts.ml)
+ (deps
+  (:plugin %{bin:protoc-gen-ocaml})
+  (:proto reflection.proto reflection_parts.proto))
+ (action
+  (run %{bin:protoc} -I %{read-lines:google_include} -I .
+       "--plugin=protoc-gen-ocaml=%{plugin}"
+       "--ocaml_out=open=Google_types_pp;service_info=true:." %{proto})))

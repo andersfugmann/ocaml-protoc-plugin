@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package test.reflection_parts;
+
+message Request {
+  uint64 i = 1;
+}
+
+message Response { }
