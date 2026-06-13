@@ -21,7 +21,6 @@ depends: [
   "ppx_expect"
   "ppx_inline_test"
   "ppx_deriving" {with-test}
-  "bisect_ppx" {with-test}
   "odoc" {with-doc}
   "omd" {>= "2.0"}
   "conf-pkg-config" {build}
