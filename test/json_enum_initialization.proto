@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+message A {
+  optional B.Kind kind = 1;
+}
+
+message B {
+  enum Kind {
+    ZERO = 0;
+  }
+}
