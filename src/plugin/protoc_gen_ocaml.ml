@@ -2,18 +2,21 @@ open StdLabels
 module Descriptor = Spec.Descriptor.Google.Protobuf
 module Plugin = Spec.Plugin.Google.Protobuf.Compiler
 
+(* [input] may return fewer bytes than requested before the end of input;
+   only 0 means end of file. A pipe can hand over a short first chunk
+   (512 bytes on macOS), so stopping at the first short read would cut
+   the request that protoc sends. *)
 let read_all in_channel =
-  let rec inner buffer =
-    let b = Bytes.create 1024 in
-    match input in_channel b 0 1024 with
-    | 1024 ->
-      Buffer.add_bytes buffer b;
-      inner buffer
+  let buffer = Buffer.create 1024 in
+  let chunk = Bytes.create 1024 in
+  let rec inner () =
+    match input in_channel chunk 0 (Bytes.length chunk) with
+    | 0 -> Buffer.contents buffer
     | read ->
-      Buffer.add_subbytes buffer b 0 read;
-      Buffer.contents buffer
+      Buffer.add_subbytes buffer chunk 0 read;
+      inner ()
   in
-  inner (Buffer.create 1024)
+  inner ()
 
 (* Read from stdin *)
 let read () =
