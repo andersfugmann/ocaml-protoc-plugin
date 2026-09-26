@@ -38,7 +38,7 @@ jobs:
           dune-cache: true
 
       - name: Install system dependencies
-        run: opam install conf-protoc --yes
+        run: opam install . --depext-only --with-doc --with-test --yes
 
       - name: Install opam dependencies
         run: opam install . --deps-only --with-doc --with-test --yes
