@@ -309,8 +309,8 @@ let read_value: type a b. (a, b) spec -> Json.t -> a = function
    | String -> to_string
    | Bytes -> to_bytes
    | Enum (module Enum) ->
-     let map_enum_json = map_enum_json (module Enum) in
-     fun json -> map_enum_json json |> to_enum (module Enum)
+     let map_enum_json = Lazy.from_fun (fun () -> map_enum_json (module Enum)) in
+     fun json -> Lazy.force map_enum_json json |> to_enum (module Enum)
    | Message (module Message) ->
      Message.from_json_exn
 
