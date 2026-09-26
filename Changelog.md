@@ -1,3 +1,13 @@
+## 6.3.0: 2026-09-26
+- Add `package_service_name` to generated service modules, providing the
+  complete protobuf service path directly (#49, thanks @Nymphium)
+- Use binary mode for the plugin's standard input and output on Windows
+  (#51, thanks @linsyking)
+- Fix JSON decoder initialization when a message references an enum
+  nested in another message (#59, thanks @mbickers)
+- Read the complete protoc plugin request instead of treating a short
+  input read as end-of-file (#60, thanks @jeong-sik)
+
 ## 6.2.0: 2025-08-28
 - Fix potential nameclash for messages defining extensions
 - Resolve compilation warning on deprecated fields enclosed in a oneof
